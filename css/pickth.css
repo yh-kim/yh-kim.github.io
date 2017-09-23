@@ -5,7 +5,29 @@ a.jcm-top {
   right: 30px;
   bottom: 20px;
   z-index: 999;
-  background: url(/img/icon/icon_uarrow.png) no-repeat;
+  background: url(/img/icon/pc/icon_uarrow.png) no-repeat;
   background-size: 29px 29px;
   display: none; 
+}
+
+@media only screen and (max-width: 720px) {
+  a.jcm-top {
+        width: 36px;
+        height: 36px;
+        right: 20px;
+        background-image: url(/img/icon/mo/icon_uarrow.png);
+        background-size: 36px 36px;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2) {
+  a.jcm-top {
+        background-image: url(/img/icon/mo/icon_uarrow@2x.png);
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 3) {
+  a.jcm-top {
+        background-image: url(/img/icon/mo/icon_uarrow@3x.png);
+    }
 }
