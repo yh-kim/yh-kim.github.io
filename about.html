@@ -1,19 +1,19 @@
 ---
 layout: page
 title: "About"
-description: "Hey, this is Hux."
+description: "김용훈입니다."
 header-img: "img/about-bg.jpg"
 ---
 
 <!-- Language Selector -->
 <select class="sel-lang" onchange= "onLanChange(this.options[this.options.selectedIndex].value)">
-    <option value="0" selected> 中文 Chinese </option>
-    <option value="1"> 英文 English </option>
+    <option value="0" selected> 한국어 Korean </option>
+    <option value="1"> 영어 English </option>
 </select>
 
 <!-- Chinese Version -->
 <div class="zh post-container">
-    {% capture about_zh %}{% include about/zh.md %}{% endcapture %}
+    {% capture about_zh %}{% include about/ko.md %}{% endcapture %}
     {{ about_zh | markdownify }}
 </div>
 
