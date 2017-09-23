@@ -281,13 +281,11 @@ header img{
 	background: rgba(0,0,0,0.05);
 	border-radius: 50%;
 }
-.cbp_tmlabel ul li.skill span{
-	vertical-align: middle;
-}
 .cbp_tmlabel ul li.skill>span:nth-child(1){
 	margin-left: -7px;
 }
 .cbp_tmlabel ul li.skill span:before{
+	vertical-align: middle;
     line-height: 40px;
 }
 .cbp_tmlabel ul li.skill span.link{
