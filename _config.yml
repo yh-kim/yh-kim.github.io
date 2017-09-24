@@ -1,6 +1,6 @@
 # Site settings
-title: 피미의 블로그
-SEOTitle: 피미의 블로그
+title: Pimi Blog
+SEOTitle: Pimi Blog
 header-img: img/home-bg.jpg
 email: yonghoon.kim@pickth.com
 description: "피미의 블로그입니다. 개발하며 있었던 것들을 기록하는 용도로 사용합니다."
@@ -93,5 +93,13 @@ friends: [
     {
         title: "개발같은 소리하네",
         href: "http://blog.naver.com/w____j"
+    },
+    {
+        title: "슈크림의 식탁",
+        href: "http://blog.naver.com/qls0147"
+    },
+    {
+        title: "하늘을 난 모기",
+        href: "http://flymogi.tistory.com/"
     }
 ]
