@@ -86,8 +86,12 @@ service-worker: true
 
 # Friends
 friends: [
-    # {
-    #     title: "前端神盾局",
-    #     href: "http://wepiaofei.github.io/blog/"
-    # }
+    {
+        title: "ninehundred's Blog",
+        href: "https://nine-hundred.github.io/Blog/"
+    },
+    {
+        title: "개발같은 소리하네",
+        href: "http://blog.naver.com/w____j"
+    }
 ]
