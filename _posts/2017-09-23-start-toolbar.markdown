@@ -20,6 +20,9 @@ tags:
 
 Toolbar API 문서 : <https://developer.android.com/reference/android/support/v7/widget/Toolbar.html>{:target="_blank"}
 
+
+
+
 <br>
 ## 시작
 
@@ -64,17 +67,15 @@ layout에 Toolbar를 추가시켜준다.
 
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <android.support.v7.widget.Toolbar
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/toolbar"
         android:background="@color/colorPrimary"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:titleTextColor="#fff">
-    </android.support.v7.widget.Toolbar>
+        android:layout_height="?attr/actionBarSize" />
 </LinearLayout>
 ```
 > **android:layout_height="?attr/actionBarSize"**<br>
@@ -102,10 +103,16 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+
+
+
 <br>
 ## 활용
 
-#### 메뉴 추가
+#### 우측 버튼 추가(메뉴 추가)
+버튼을 추가하는 방법은 두가지가 있다. 메뉴를 추가하는 방법과 Toolbar에 위젯을 넣는 방법이다.
+(***Toolbar에 위젯을 넣는 방법***은 [여기](#toolbar-custom)를 참조)<br>
+
 메뉴를 추가하려면 menu 파일을 만들어서 적용해야한다.
 app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래의 menu.xml 파일을 만든다.
 ```
@@ -143,6 +150,7 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+
 #### 메뉴 이벤트
 
 activity에 등록된 menu들의 이벤트를 등록할 수 있다.
@@ -173,6 +181,7 @@ class MainActivity : AppCompatActivity() {
 #### 좌측에 버튼, 텍스트 추가
 actionbar의 기능을 사용하여 button, text를 추가할 수 있다.
 
+
 **텍스트(Title) 추가**
 <br>
 Title이 보이도록 설정하고 텍스트를 입력하면 된다.
@@ -192,9 +201,10 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+
 **버튼 추가**
 <br>
-Navigation button 이나 뒤로가기 등의 버튼을 추가하는 방법이다.
+네비게이션(햄버거 버튼) 이나 뒤로가기 등의 버튼을 추가하는 방법이다.
 사용할 아이콘을 등록하고 보이도록 설정한다.
 ```
 파일 : app/src/main/kotlin/com/test/MainActivity.kt
@@ -214,6 +224,7 @@ class MainActivity : AppCompatActivity() {
 > icon을 vector 파일로 사용할 때는 코드에서 색을 바꿀 수 있다. ([아이콘 색 변경](#아이콘-색-변경) 참조)
 
 
+
 #### Toolbar Custom
 layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원하는 형태의 Toolbar를 사용할 수 있다.
 ```
@@ -221,6 +232,7 @@ layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원�
 	android:id="@+id/toolbar"
 	android:layout_width="match_parent"
 	android:layout_height="?attr/actionBarSize">
+	<!-- 가운데 텍스트 넣기 -->
 	<TextView
 		android:id="@+id/tv_toolbar"
 		android:layout_width="wrap_content"
@@ -229,13 +241,21 @@ layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원�
 		android:clickable="false"
 		android:focusable="false"
 		android:longClickable="false" />
+
+	<!-- 오른쪽 버튼 넣기 -->
+	<ImageView
+		android:id="@+id/iv_setting"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="right|center"
+		android:src="@drawable/ic_setting"/>
 </android.support.v7.widget.Toolbar>
 ```
 
 
 #### 아이콘 색 변경
 
-좌측의 아이콘 색은 Tint로 변경할 수 있다.
+Home에 들어가는 아이콘이 vector 파일 이라면 색을 코드에서 변경할 수 있다.
 ```
 val icon = AppCompatResources.getDrawable(this, R.drawable.ic_back)!!
 DrawableCompat.setTint(icon, ContextCompat.getColor(this, R.color.colorWhite))
