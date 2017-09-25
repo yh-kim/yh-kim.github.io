@@ -9,14 +9,13 @@ header-mask: 0.3
 catalog:    true
 tags:
     - Android
-    - Toolbar
 ---
 
 >아래의 나오는 코드들은 Support Library-v7과 Kotlin 언어를 사용했습니다.
 
 ## 개요
 
-기존에는 Actionbar를 이용했지만 시간이 지날수록 더 많은 기능을 요구했다. 결국 제한적이던 Actionibar는 deprecated 되고 Toolbar가 등장했다. Toolbar는 위치 변경이 유연하며 애니메이션을 추가하는 등 커스텀하기 좋다.
+기존에는 Actionbar를 이용했지만 시간이 지날수록 더 많은 기능을 요구했다. 결국 제한적이던 Actionibar는 deprecated 되고 Toolbar가 등장했다. Toolbar는 위치 변경이 유연하며 애니메이션을 추가하는 등 커스텀할 수 있다.
 
 Toolbar API 문서 : <https://developer.android.com/reference/android/support/v7/widget/Toolbar.html>{:target="_blank"}
 
@@ -68,14 +67,16 @@ layout에 Toolbar를 추가시켜준다.
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:background="@color/colorPrimary"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize" />
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<android.support.v7.widget.Toolbar
+		android:id="@+id/toolbar"
+		android:background="@color/colorPrimary"
+		android:layout_width="match_parent"
+		android:layout_height="?attr/actionBarSize" />
+
 </LinearLayout>
 ```
 > **android:layout_height="?attr/actionBarSize"**<br>
@@ -111,7 +112,7 @@ class MainActivity : AppCompatActivity() {
 
 #### 우측 버튼 추가(메뉴 추가)
 버튼을 추가하는 방법은 두가지가 있다. 메뉴를 추가하는 방법과 Toolbar에 위젯을 넣는 방법이다.
-(***Toolbar에 위젯을 넣는 방법***은 [여기](#toolbar-custom)를 참조)<br>
+(Toolbar에 위젯을 넣는 방법은 [여기](#toolbar-custom)를 참조)<br>
 
 메뉴를 추가하려면 menu 파일을 만들어서 적용해야한다.
 app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래의 menu.xml 파일을 만든다.
@@ -121,6 +122,7 @@ app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래�
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto">
+
 	<item
 		android:id="@+id/menu_add_person"
 		android:title="@string/add_person"
@@ -129,6 +131,7 @@ app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래�
 
 		<!-- if use icon -->
 		android:icon="@drawable/ic_add_person" />
+
 </menu>
 ```
 
@@ -143,10 +146,12 @@ app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래�
 파일 : app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
+
 	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 		menuInflater.inflate(R.menu.menu, menu)
 		return super.onCreateOptionsMenu(menu)
 	}
+
 }
 ```
 
@@ -158,6 +163,7 @@ activity에 등록된 menu들의 이벤트를 등록할 수 있다.
 파일 : app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
+
 	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 		when(item?.itemId) {
 			R.id.menu_add_person -> {
@@ -171,6 +177,7 @@ class MainActivity : AppCompatActivity() {
 
 		return super.onOptionsItemSelected(item)
 	}
+
 }
 ```
 
@@ -189,6 +196,7 @@ Title이 보이도록 설정하고 텍스트를 입력하면 된다.
 파일 : app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
@@ -197,7 +205,8 @@ class MainActivity : AppCompatActivity() {
 		setSupportActionBar(toolbar)
 		supportActionBar?.setDisplayShowTitleEnabled(true)
 		title = "타이틀"
-	}	
+	}
+
 }
 ```
 
@@ -210,6 +219,7 @@ class MainActivity : AppCompatActivity() {
 파일 : app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
@@ -218,7 +228,8 @@ class MainActivity : AppCompatActivity() {
 		setSupportActionBar(toolbar)
 		supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back)
 		supportActionBar?.setDisplayHomeAsUpEnabled(true)
-	}	
+	}
+
 }
 ```
 > icon을 vector 파일로 사용할 때는 코드에서 색을 바꿀 수 있다. ([아이콘 색 변경](#아이콘-색-변경) 참조)
@@ -232,6 +243,7 @@ layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원�
 	android:id="@+id/toolbar"
 	android:layout_width="match_parent"
 	android:layout_height="?attr/actionBarSize">
+
 	<!-- 가운데 텍스트 넣기 -->
 	<TextView
 		android:id="@+id/tv_toolbar"
@@ -249,6 +261,7 @@ layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원�
 		android:layout_height="wrap_content"
 		android:layout_gravity="right|center"
 		android:src="@drawable/ic_setting"/>
+
 </android.support.v7.widget.Toolbar>
 ```
 
@@ -272,11 +285,13 @@ supportActionBar?.run {
 메뉴의 아이콘 색을 변경하려면 Theme에 아래와 같이 입력하면 된다.
 ```
 <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+
 	<item name="colorPrimary">@color/colorPrimary</item>
 	<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 	<item name="colorAccent">@color/colorAccent</item>
 
 	<!-- Customize color of menu icon in toolbar. -->
 	<item name="android:textColorSecondary">@color/colorWhite</item>
+	
 </style>
 ```
