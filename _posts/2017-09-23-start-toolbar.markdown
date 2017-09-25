@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 <br>
 ## 활용
 
-#### 우측 버튼 추가(메뉴 추가)
+#### 메뉴 추가(오른쪽 버튼)
 버튼을 추가하는 방법은 두가지가 있다. 메뉴를 추가하는 방법과 Toolbar에 위젯을 넣는 방법이다.
 (Toolbar에 위젯을 넣는 방법은 [여기](#toolbar-custom)를 참조)<br>
 
@@ -182,16 +182,16 @@ class MainActivity : AppCompatActivity() {
 ```
 
 > **android.R.id.home**<br>
-> Toolbar 좌측에 있는 버튼을 가리킴 ([좌측 버튼 만드는 방법](#좌측에-버튼-텍스트-추가) 참조)
+> Toolbar 좌측에 있는 버튼을 가리킴 ([좌측 버튼 만드는 방법](#왼쪽에-버튼-타이틀-추가) 참조)
 
 
-#### 좌측에 버튼, 텍스트 추가
+#### 왼쪽에 버튼, 타이틀 추가
 actionbar의 기능을 사용하여 button, text를 추가할 수 있다.
 
 
-**텍스트(Title) 추가**
+**타이틀 추가**
 <br>
-Title이 보이도록 설정하고 텍스트를 입력하면 된다.
+title이 보이도록 설정하고 텍스트를 입력하면 된다.
 ```
 파일 : app/src/main/kotlin/com/test/MainActivity.kt
 
@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-#### Toolbar Custom
+#### Custom Toolbar
 layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원하는 형태의 Toolbar를 사용할 수 있다.
 ```
 <android.support.v7.widget.Toolbar
@@ -263,6 +263,26 @@ layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원�
 		android:src="@drawable/ic_setting"/>
 
 </android.support.v7.widget.Toolbar>
+```
+
+#### 타이틀 스타일 변경
+styles.xml 에 아래 코드의 형태로 스타일을 추가한다.
+```
+<style name="TitleText">
+	<item name="android:textColor">@color/colorPrimary</item>
+	<item name="android:textSize">15sp</item>
+	<item name="android:fontFamily">@font/noto_bold</item>
+</style>
+```
+
+layout에 *app:titleTextAppearance*로 스타일을 적용하면 된다.
+```
+<android.support.v7.widget.Toolbar
+	android:id="@+id/main_toolbar"
+	android:layout_width="match_parent"
+	android:layout_height="?attr/actionBarSize"
+
+	app:titleTextAppearance="@style/TitleText" />
 ```
 
 
