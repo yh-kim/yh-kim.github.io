@@ -31,3 +31,7 @@ a.jcm-top {
         background-image: url(/img/icon/mo/icon_uarrow@3x.png);
     }
 }
+
+th {
+  text-align: center;
+}
