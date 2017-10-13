@@ -4,7 +4,7 @@ title:      "Toolbar 시작하기"
 subtitle:   "Toolbar에 대해 다뤄봅니다"
 date:       2017-09-23 00:00:00
 author:     "Yonghoon"
-header-img: "img/in-post/post-eleme-pwa/eleme-at-io.jpg"
+header-img: "img/in-post/start-toolbar/header.jpg"
 header-mask: 0.3
 catalog:    true
 tags:
