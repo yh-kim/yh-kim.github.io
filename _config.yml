@@ -20,6 +20,15 @@ facebook_username:  pickth
 # linkedin_username:  firstname-lastname-idxxxx
 
 
+# permalink에서 주소 표현을 바꿀 수 있음
+# date
+# /:categories/:year/:month/:day/:title.html
+# pretty
+# /:categories/:year/:month/:day/:title/
+# ordinal
+# /:categories/:year/:y_dat/:title.html
+# none
+# /:categories/:title.html
 
 # Build settings
 # from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
@@ -33,9 +42,23 @@ anchorjs: true                          # if you want to customize anchor. check
 
 # Gems
 # from PR#40, to support local preview for Jekyll 3.0
-gems: [jekyll-paginate]
+# gems: [jekyll-paginate]
+plugins:
+    - jekyll-gist
+    - jekyll-paginate   # 페이지 나누는 플러그인 (목록 보여줄 때 사용. 파일과 폴더 자동 생성)
+    # - jekyll-paginate-v2  # collection에서도 사용하기 위해 높은 버전 사용
+    # https://github.com/sverrirs/jekyll-paginate-v2
 
+# Explicitly turn off the old code
+# paginate: nil
+# paginate_path: nil
 
+# Pagination Settings
+# pagination:
+#   enabled: true
+#   per_page: 3
+#   limit: 0
+#   permalink: '/:num/'
 
 # Markdown settings
 # replace redcarpet to kramdown,
@@ -79,6 +102,11 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 chrome-tab-theme-color: "#000000"
 service-worker: true
 
+# collections
+collections:
+    daily:
+        output: true
+        permalink: /:collection/:year/:month/:day/:title/
 
 
 # Friends
