@@ -10,58 +10,54 @@ tags:
     - IntelliJ
 ---
 
-## 단축키
-
 > 인텔리제이에서 개발할 때 자주 사용하는 단축키를 정리합니다
 
-#### Code
-Show name,type of parameter
+## Code
+
+* Show name,type of parameter
 > Ctrl P
 
-Move to up/down by class, attribute
+* Move to up/down by class, attribute
 > Alt up/down
 
-Move to left/right by unit
+* Move to left/right by unit
 > Ctrl left/right
 
-#### Search
 
-Search Everywhere
+
+## Search
+
+* Search Everywhere
 > Shift Shift
 
-Search action, option
+* Search action, option
 > Ctrl Shift A
 
-Search file name
+* Search file name
 > Ctrl Shift N
 
-Search class name
+* Search class name
 > Ctrl N
 
 
-#### Window
 
-Hide/Restore All windows
+
+## Window
+
+* Hide/Restore All windows
 > Ctrl Shift F12
 
-Recent File
+* Recent File
 > Ctrl E
 
-Switcher
+* Switcher
 > Ctrl Tab
 
-Show Windows
+* Show Windows
 > Alt Alt
 
-tab
-> Project Alt 1<br>
-> Structure Alt 7
+* tab
+> Project - Alt 1<br>
+> Structure - Alt 7
 >
 > ESC 누르면 코드창으로 이동
-
-
-
-
-
-테스트입니다
-{% gist yh-kim/686056f70ef497560c929cae57b7fcb9 %}
