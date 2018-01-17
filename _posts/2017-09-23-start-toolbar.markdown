@@ -1,7 +1,7 @@
 ---
 layout:     post
-title:      "Toolbar 시작하기"
-subtitle:   "Toolbar에 대해 다뤄봅니다"
+title:      "Toolbar 사용하기"
+subtitle:   "안드로이드에서 Toolbar를 다루어봅니다"
 date:       2017-09-23 00:00:00
 author:     "Yonghoon"
 header-img: "img/in-post/start-toolbar/header.jpg"
@@ -29,7 +29,7 @@ Toolbar API 문서 : <https://developer.android.com/reference/android/support/v7
 
 다음의 코드가 없는 사람은 추가해야 한다. 최신 버전은 <a href="https://developer.android.com/topic/libraries/support-library/revisions.html" target="_blank">여기</a>에서 확인할 수 있다.
 ``` gradle
-// 파일 : app/build.gradle
+// app/build.gradle
 
 dependencies {
     compile 'com.android.support:appcompat-v7:25.4.0'
@@ -40,7 +40,7 @@ dependencies {
 Toolbar를 사용하려면 Actionbar를 사용하지 않는 테마를 써야한다. 다음의 코드를 추가하자.
 
 ``` xml
-<!-- 파일 : app/src/main/res/values/styles.xml -->
+<!-- app/src/main/res/values/styles.xml -->
 
 <style name="AppTheme.NoTitle">
 	<item name="windowActionBar">false</item>
@@ -49,7 +49,7 @@ Toolbar를 사용하려면 Actionbar를 사용하지 않는 테마를 써야한�
 
 만든 테마의 이름으로 적용시켜준다.
 ``` xml
-<!-- 파일 : app/src/main/AndroidManifest.xml -->
+<!-- app/src/main/AndroidManifest.xml -->
 
 <application
         android:allowBackup="true"
@@ -62,7 +62,7 @@ Toolbar를 사용하려면 Actionbar를 사용하지 않는 테마를 써야한�
 
 layout에 Toolbar를 추가시켜준다.
 ``` xml
-<!-- 파일 : app/src/main/res/layout/activity_main.xml -->
+<!-- app/src/main/res/layout/activity_main.xml -->
 
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -91,7 +91,7 @@ layout에 Toolbar를 추가시켜준다.
 
 Activity에서 toolbar를 actionbar로 설정해준다.
 ``` java
-// 파일 : app/src/main/kotlin/com/test/MainActivity.kt
+// app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
 메뉴를 추가하려면 menu 파일을 만들어서 적용해야한다.
 app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래의 menu.xml 파일을 만든다.
 ``` xml
-<!-- 파일 : app/src/main/res/menu/menu.xml -->
+<!-- app/src/main/res/menu/menu.xml -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -141,7 +141,7 @@ app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래�
 
 생성한 menu 파일을 Activity에 적용한다.
 ``` java
-// 파일 : app/src/main/kotlin/com/test/MainActivity.kt
+// app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
 
@@ -158,7 +158,7 @@ class MainActivity : AppCompatActivity() {
 
 activity에 등록된 menu들의 이벤트를 등록할 수 있다.
 ``` java
-// 파일 : app/src/main/kotlin/com/test/MainActivity.kt
+// app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
 
@@ -191,7 +191,7 @@ actionbar의 기능을 사용하여 button, text를 추가할 수 있다.
 <br>
 title이 보이도록 설정하고 텍스트를 입력하면 된다.
 ``` java
-// 파일 : app/src/main/kotlin/com/test/MainActivity.kt
+// app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
 
@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity() {
 네비게이션(햄버거 버튼) 이나 뒤로가기 등의 버튼을 추가하는 방법이다.
 사용할 아이콘을 등록하고 보이도록 설정한다.
 ``` java
-// 파일 : app/src/main/kotlin/com/test/MainActivity.kt
+// MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
 
@@ -232,6 +232,32 @@ class MainActivity : AppCompatActivity() {
 ```
 > icon을 vector 파일로 사용할 때는 코드에서 색을 바꿀 수 있다. ([아이콘 색 변경](#아이콘-색-변경) 참조)
 
+애니메이션이 있는 햄버거 버튼을 사용하려면 따로 아이콘을 만들 필요가 없다.<br>
+<a target="_blank" href="https://stackoverflow.com/a/26447144">출처</a>
+``` java
+// MainActivity.kt
+
+val mDrawerToggle = ActionBarDrawerToggle(this,
+				drawerLayout,
+				mToolbar,
+ 				R.string.nav_open,
+				R.string.nav_close)
+drawerLayout.addDrawerListener(mDrawerToggle)
+mDrawerToggle.syncState()
+```
+``` xml
+<!-- styles.xml -->
+
+<style name="AppTheme" parent="Theme.AppCompat.Light">
+    <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+</style>
+
+<style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+    <item name="spinBars">true</item>
+    <item name="color">@android:color/white</item>
+</style>
+```
+> spinBars 의 true/false 값에 따라 애니메이션이 켜지거나 꺼진다.
 
 
 #### Custom Toolbar
