@@ -9,7 +9,7 @@ pagination:
 order: 1
 ---
 
-{% for post in site.daily %}
+{% for post in site.daily reversed %}
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
         <h2 class="post-title">
@@ -32,7 +32,7 @@ order: 1
 {% endfor %}
 
 <!-- Pager -->
-{% if site.total_pages > 1 %}
+<!-- {% if site.total_pages > 1 %}
 <ul class="pager">
     {% if site.previous_page %}
     <li class="previous">
@@ -46,4 +46,4 @@ order: 1
     {% endif %}
 </ul>
 {% endif %}
-<a href="#" class="jcm-top"></a>
+<a href="#" class="jcm-top"></a> -->

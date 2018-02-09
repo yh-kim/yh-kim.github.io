@@ -23,7 +23,7 @@ Java 설치 : <http://www.oracle.com/technetwork/java/javase/downloads/index.htm
 
 ------------------------
 
-[차이점](https://www.java.com/ko/download/faq/techinfo.xml){:tartget="_blank"}
+[차이점](https://www.java.com/ko/download/faq/techinfo.xml){:target="_blank"}
 
 Java SE는 일반적인 개발을 도와준다.
 

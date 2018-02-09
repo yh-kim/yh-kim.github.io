@@ -14,6 +14,9 @@ tags:
 
 ## Code
 
+* Delete unused code.
+> Ctrl Alt O
+
 * Show name,type of parameter
 > Ctrl P
 
