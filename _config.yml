@@ -1,6 +1,6 @@
 # Site settings
-title: Pimi Blog
-SEOTitle: Pimi Blog
+title: Pimi's Blog
+SEOTitle: Pimi's Blog
 header-img: img/home-bg.jpg
 email: yonghoon.kim@pickth.com
 description: "피미의 블로그입니다. 개발하며 있었던 것들을 기록하는 용도로 사용합니다."
@@ -67,8 +67,7 @@ plugins:
 markdown: kramdown
 kramdown:
   input: GFM                            # use Github Flavored Markdown !important
-  syntax_highlighter: rouge
-
+  
   syntax_highlighter_opts:
     # Rouge Options › https://github.com/jneen/rouge#full-options
     css_class: 'highlight'
@@ -111,7 +110,7 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 
 
 # Progressive Web Apps
-chrome-tab-theme-color: "#000000"
+chrome-tab-theme-color: "#FF5F81"
 service-worker: true
 
 # collections

@@ -2,7 +2,7 @@
 layout:     post
 title:      "인텔리제이 단축키"
 date:       2017-12-17 00:00:00
-author:     "Yonghoon"
+author:     "Pimi"
 header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true

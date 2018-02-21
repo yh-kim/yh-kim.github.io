@@ -3,7 +3,7 @@ layout:     post
 title:      "Java와 IntelliJ 시작하기"
 subtitle:   "Java 설치, IntelliJ 설치 방법에 대해 알아봅니다"
 date:       2017-09-26 00:00:00
-author:     "Yonghoon"
+author:     "Pimi"
 header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true

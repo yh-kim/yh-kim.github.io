@@ -3,7 +3,7 @@ layout:     post
 title:      "Toolbar 사용하기"
 subtitle:   "안드로이드에서 Toolbar를 다루어봅니다"
 date:       2017-09-23 00:00:00
-author:     "Yonghoon"
+author:     "Pimi"
 header-img: "img/in-post/start-toolbar/header.jpg"
 header-mask: 0.3
 catalog:    true
@@ -90,7 +90,7 @@ layout에 Toolbar를 추가시켜준다.
 >```
 
 Activity에서 toolbar를 actionbar로 설정해준다.
-``` kotlin
+``` java
 // app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
@@ -140,7 +140,7 @@ app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래�
 > - withText : icon과 text 둘다 표시
 
 생성한 menu 파일을 Activity에 적용한다.
-``` kotlin
+``` java
 // app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity() {
 #### 메뉴 이벤트
 
 activity에 등록된 menu들의 이벤트를 등록할 수 있다.
-``` kotlin
+``` java
 // app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
@@ -190,7 +190,7 @@ actionbar의 기능을 사용하여 button, text를 추가할 수 있다.
 **타이틀 추가**
 <br>
 title이 보이도록 설정하고 텍스트를 입력하면 된다.
-``` kotlin
+``` java
 // app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
 <br>
 네비게이션(햄버거 버튼) 이나 뒤로가기 등의 버튼을 추가하는 방법이다.
 사용할 아이콘을 등록하고 보이도록 설정한다.
-``` kotlin
+``` java
 // MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity() {
 
 애니메이션이 있는 햄버거 버튼을 사용하려면 따로 아이콘을 만들 필요가 없다.<br>
 <a target="_blank" href="https://stackoverflow.com/a/26447144">출처</a>
-``` kotlin
+``` java
 // MainActivity.kt
 
 val mDrawerToggle = ActionBarDrawerToggle(this,
@@ -313,7 +313,7 @@ layout에 *app:titleTextAppearance*로 스타일을 적용하면 된다.
 #### 아이콘 색 변경
 
 Home에 들어가는 아이콘이 vector 파일 이라면 색을 코드에서 변경할 수 있다.
-``` kotlin
+``` java
 val icon = AppCompatResources.getDrawable(this, R.drawable.ic_back)!!
 DrawableCompat.setTint(icon, ContextCompat.getColor(this, R.color.colorWhite))
 

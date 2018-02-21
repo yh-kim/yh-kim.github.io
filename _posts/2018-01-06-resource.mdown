@@ -3,7 +3,7 @@ layout:     post
 title:      "resource 다루기"
 subtitle:   "Toolbar에 대해 다뤄봅니다"
 date:       2018-01-06 00:00:00
-author:     "Yonghoon"
+author:     "Pimi"
 header-img: "img/in-post/start-toolbar/header.jpg"
 header-mask: 0.3
 catalog:    true
@@ -12,3 +12,18 @@ tags:
 ---
 
 https://code.tutsplus.com/tutorials/android-from-scratch-how-to-use-resources-in-an-application--cms-26041
+
+
+TextView에서 html 태그 사용하기
+flag에 들어가는 유형 https://stackoverflow.com/a/40241338
+
+
+// android manifest
+https://developer.android.com/training/permissions/requesting.html#perm-check
+
+https://developer.android.com/guide/topics/security/permissions.html#normal-dangerous
+
+
+// recycler view
+// left, right button
+https://www.google.co.kr/search?newwindow=1&ei=EL5pWsWNBsi80ATatqfgDw&q=recyclerview+right+button&oq=recyclerview+right+button&gs_l=psy-ab.3...16585.28251.0.28497.19.16.3.0.0.0.216.1682.1j12j1.14.0....0...1c.1j4.64.psy-ab..2.15.1484...0j0i67k1j0i20i263k1j0i203k1j33i160k1j0i8i30k1j0i5i30k1.0.-HUa-0xzogo
