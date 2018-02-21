@@ -21,6 +21,9 @@
   margin: 0;
 }
 .highlight td pre { background-color: #ffffff; }*/
+.highlight div {
+	border:0; margin: 0;
+}
 
 /* line number width */
 .highlight .gl {

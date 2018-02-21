@@ -374,7 +374,7 @@ select.sel-lang {
 }
 .table th,
 .table td {
-  border: 1px solid #eee !important;
+  border: 0 solid #eee !important;
 }
 hr.small {
   max-width: 100px;
