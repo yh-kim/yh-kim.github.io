@@ -43,7 +43,7 @@ Toolbar를 사용하려면 Actionbar를 사용하지 않는 테마를 써야한�
 <!-- app/src/main/res/values/styles.xml -->
 
 <style name="AppTheme.NoTitle">
-	<item name="windowActionBar">false</item>
+  <item name="windowActionBar">false</item>
 </style>
 ```
 
@@ -52,10 +52,10 @@ Toolbar를 사용하려면 Actionbar를 사용하지 않는 테마를 써야한�
 <!-- app/src/main/AndroidManifest.xml -->
 
 <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_gachi_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme.NoTitle">
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_gachi_launcher"
+    android:label="@string/app_name"
+    android:theme="@style/AppTheme.NoTitle">
 ```
 
 #### Toolbar 추가
@@ -66,16 +66,16 @@ layout에 Toolbar를 추가시켜준다.
 
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:orientation="vertical"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-	<android.support.v7.widget.Toolbar
-		android:id="@+id/toolbar"
-		android:background="@color/colorPrimary"
-		android:layout_width="match_parent"
-		android:layout_height="?attr/actionBarSize" />
+  <android.support.v7.widget.Toolbar
+    android:id="@+id/toolbar"
+    android:background="@color/colorPrimary"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize" />
 
 </LinearLayout>
 ```
@@ -84,8 +84,8 @@ layout에 Toolbar를 추가시켜준다.
 > ?attr/actionBarSize 값을 바꾸려면 사용하는 Theme에 item을 추가한다.
 > ``` xml
 ><style name="AppTheme.NoTitle">
->	<item name="android:actionBarSize">49dp</item>
->	<item name="actionBarSize">49dp</item>
+>    <item name="android:actionBarSize">49dp</item>
+>    <item name="actionBarSize">49dp</item>
 ></style>
 >```
 
@@ -94,16 +94,15 @@ Activity에서 toolbar를 actionbar로 설정해준다.
 // app/src/main/kotlin/com/test/MainActivity.kt
 
 class MainActivity : AppCompatActivity() {
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_main)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-		// actionbar
-		setSupportActionBar(toolbar)
-	}	
+    // actionbar
+    setSupportActionBar(toolbar)
+  }
 }
 ```
-
 
 
 
@@ -122,11 +121,11 @@ app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래�
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto">
 
-	<item
-		android:id="@+id/menu_add_person"
-		android:title="@string/add_person"
-		app:showAsAction="always"
-		android:icon="@drawable/ic_add_person" />
+  <item
+      android:id="@+id/menu_add_person"
+      android:title="@string/add_person"
+      app:showAsAction="always"
+      android:icon="@drawable/ic_add_person" />
 
 </menu>
 ```
@@ -145,10 +144,10 @@ app/src/main/res/ 경로에 menu 폴더가 없다면 폴더를 만들고 아래�
 
 class MainActivity : AppCompatActivity() {
 
-	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-		menuInflater.inflate(R.menu.menu, menu)
-		return super.onCreateOptionsMenu(menu)
-	}
+  override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    menuInflater.inflate(R.menu.menu, menu)
+    return super.onCreateOptionsMenu(menu)
+  }
 
 }
 ```
@@ -162,19 +161,19 @@ activity에 등록된 menu들의 이벤트를 등록할 수 있다.
 
 class MainActivity : AppCompatActivity() {
 
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		when(item?.itemId) {
-			R.id.menu_add_person -> {
-				// do something
-			}
+  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+    when(item?.itemId) {
+      R.id.menu_add_person -> {
+        // do something
+      }
 
-			android.R.id.home -> {
-				// do something
-			}
-		}
+      android.R.id.home -> {
+        // do something
+      }
+    }
 
-		return super.onOptionsItemSelected(item)
-	}
+    return super.onOptionsItemSelected(item)
+  }
 
 }
 ```
@@ -195,15 +194,15 @@ title이 보이도록 설정하고 텍스트를 입력하면 된다.
 
 class MainActivity : AppCompatActivity() {
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_main)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-		// actionbar
-		setSupportActionBar(toolbar)
-		supportActionBar?.setDisplayShowTitleEnabled(true)
-		title = "타이틀"
-	}
+    // actionbar
+    setSupportActionBar(toolbar)
+    supportActionBar?.setDisplayShowTitleEnabled(true)
+    title = "타이틀"
+  }
 
 }
 ```
@@ -218,15 +217,15 @@ class MainActivity : AppCompatActivity() {
 
 class MainActivity : AppCompatActivity() {
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_main)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
 
-		// actionbar
-		setSupportActionBar(toolbar)
-		supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back)
-		supportActionBar?.setDisplayHomeAsUpEnabled(true)
-	}
+    // actionbar
+    setSupportActionBar(toolbar)
+    supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back)
+    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+  }
 
 }
 ```
@@ -238,13 +237,14 @@ class MainActivity : AppCompatActivity() {
 // MainActivity.kt
 
 val mDrawerToggle = ActionBarDrawerToggle(this,
-				drawerLayout,
-				mToolbar,
- 				R.string.nav_open,
-				R.string.nav_close)
+  drawerLayout,
+  mToolbar,
+  R.string.nav_open,
+  R.string.nav_close)
 drawerLayout.addDrawerListener(mDrawerToggle)
 mDrawerToggle.syncState()
 ```
+
 ``` xml
 <!-- styles.xml -->
 
@@ -264,27 +264,27 @@ mDrawerToggle.syncState()
 layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원하는 형태의 Toolbar를 사용할 수 있다.
 ``` xml
 <android.support.v7.widget.Toolbar
-	android:id="@+id/toolbar"
-	android:layout_width="match_parent"
-	android:layout_height="?attr/actionBarSize">
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize">
 
-	<!-- 가운데 텍스트 넣기 -->
-	<TextView
-		android:id="@+id/tv_toolbar"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="center"
-		android:clickable="false"
-		android:focusable="false"
-		android:longClickable="false" />
+  <!-- 가운데 텍스트 넣기 -->
+  <TextView
+      android:id="@+id/tv_toolbar"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:clickable="false"
+      android:focusable="false"
+      android:longClickable="false" />
 
-	<!-- 오른쪽 버튼 넣기 -->
-	<ImageView
-		android:id="@+id/iv_setting"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="right|center"
-		android:src="@drawable/ic_setting"/>
+  <!-- 오른쪽 버튼 넣기 -->
+  <ImageView
+      android:id="@+id/iv_setting"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="right|center"
+      android:src="@drawable/ic_setting"/>
 
 </android.support.v7.widget.Toolbar>
 ```
@@ -293,20 +293,20 @@ layout에서 Toolbar안에 LinearLayout, Buttom 등의 위젯을 넣어서 원�
 styles.xml 에 아래 코드의 형태로 스타일을 추가한다.
 ``` xml
 <style name="TitleText">
-	<item name="android:textColor">@color/colorPrimary</item>
-	<item name="android:textSize">15sp</item>
-	<item name="android:fontFamily">@font/noto_bold</item>
+    <item name="android:textColor">@color/colorPrimary</item>
+    <item name="android:textSize">15sp</item>
+    <item name="android:fontFamily">@font/noto_bold</item>
 </style>
 ```
 
 layout에 *app:titleTextAppearance*로 스타일을 적용하면 된다.
 ``` xml
 <android.support.v7.widget.Toolbar
-	android:id="@+id/main_toolbar"
-	android:layout_width="match_parent"
-	android:layout_height="?attr/actionBarSize"
+    android:id="@+id/main_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
 
-	app:titleTextAppearance="@style/TitleText" />
+    app:titleTextAppearance="@style/TitleText" />
 ```
 
 
@@ -320,9 +320,9 @@ DrawableCompat.setTint(icon, ContextCompat.getColor(this, R.color.colorWhite))
 // actionbar
 setSupportActionBar(toolbar)
 supportActionBar?.run {
-	setHomeAsUpIndicator(icon)
-	setDisplayShowTitleEnabled(false)
-	setDisplayHomeAsUpEnabled(true)
+  setHomeAsUpIndicator(icon)
+  setDisplayShowTitleEnabled(false)
+  setDisplayHomeAsUpEnabled(true)
 }
 ```
 
@@ -330,12 +330,12 @@ supportActionBar?.run {
 ``` xml
 <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
 
-	<item name="colorPrimary">@color/colorPrimary</item>
-	<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-	<item name="colorAccent">@color/colorAccent</item>
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
 
-	<!-- Customize color of menu icon in toolbar. -->
-	<item name="android:textColorSecondary">@color/colorWhite</item>
+    <!-- Customize color of menu icon in toolbar. -->
+    <item name="android:textColorSecondary">@color/colorWhite</item>
 	
 </style>
 ```

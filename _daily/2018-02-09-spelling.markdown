@@ -10,7 +10,7 @@ tags:
     - spelling
 ---
 
-품사와 문장 성분:[수재모 블로그](http://snustudy.com/220843584472){:target="_blank"}
+품사와 문장 성분 : [수재모 블로그](http://snustudy.com/220843584472){:target="_blank"}
 
 ## 올바른 사용법
 
@@ -19,7 +19,7 @@ tags:
 
 > 조금 이따가 갈게
 
-출처:[네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=6371){:target="_blank"}
+출처 : [네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=6371){:target="_blank"}
 
 
 --------------------------------------
@@ -32,7 +32,7 @@ tags:
 > 고향은 하나도 변하지 않았데.
 
 
-출처:[네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=4318){:target="_blank"}
+출처 : [네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=4318){:target="_blank"}
 
 
 --------------------------------------
@@ -53,7 +53,7 @@ tags:
 > 뭐예요.(뭐 + 이에요)
 
 
-출처:[네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=1657){:target="_blank"}
+출처 : [네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=1657){:target="_blank"}
 
 
 --------------------------------------
@@ -65,7 +65,7 @@ tags:
 > 집에 도착하는 대로 편지를 쓰다.<br>
 > 그들이 마치 나를 악의로 따돌리고 저희끼리만 좋은 데로 가고 잇는 것처럼 막막하고 외로웠다.
 
-출처:[네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=7442){:target="_blank"}
+출처 : [네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=7442){:target="_blank"}
 
 
 --------------------------------------
@@ -78,7 +78,7 @@ tags:
 > 집에 가든지 학교에 가든지 해라.<br>
 > 노래를 부르든지 춤을 추든지 네 맘대로 해라.
 
-출처:[네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=6820){:target="_blank"}
+출처 : [네이버 사전](http://krdic.naver.com/rescript_detail.nhn?seq=6820){:target="_blank"}
 
 
 --------------------------------------
@@ -95,7 +95,7 @@ tags:
 5. 둘 이상의 낱말이 합쳐서 한 뜻의 낱말이 된말(복합어)은 붙여 쓴다.
 6. 문장에서 앞뒤의 관계가 특별한 경우에는 적당히 붙여 쓸 수 있다.
 
-출처:[네이버 지식인](http://kin.naver.com/qna/detail.nhn?d1id=11&dirId=110801&docId=54358380&qb=7ZWc6rWt7Ja0IOudhOyWtOyTsOq4sCDrspXsuZk=&enc=utf8&section=kin&rank=1&search_sort=0&spq=0&pid=TozQOwpySEsssZB2QBlssssss/d-111888&sid=FRSzzgBUH4n3iRyc6G5rvA%3D%3D){:target="_blank"}
+출처 : [네이버 지식인](http://kin.naver.com/qna/detail.nhn?d1id=11&dirId=110801&docId=54358380&qb=7ZWc6rWt7Ja0IOudhOyWtOyTsOq4sCDrspXsuZk=&enc=utf8&section=kin&rank=1&search_sort=0&spq=0&pid=TozQOwpySEsssZB2QBlssssss/d-111888&sid=FRSzzgBUH4n3iRyc6G5rvA%3D%3D){:target="_blank"}
 
 --------------------------------------
 
@@ -120,7 +120,7 @@ tags:
 
 그러나 본 철자 검사/교정기에서는 이 두 가지에 대한 구분을 부분적으로만 할 수 있으므로 본인의 의도와는 다를 수 있습니다.
 
-출처:[네이버 지식백과 - 글쓰기의 전략](http://terms.naver.com/entry.nhn?docId=1711843&cid=42001&categoryId=42001#TABLE_OF_CONTENT2){:target="_blank"}, [한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
+출처 : [네이버 지식백과 - 글쓰기의 전략](http://terms.naver.com/entry.nhn?docId=1711843&cid=42001&categoryId=42001#TABLE_OF_CONTENT2){:target="_blank"}, [한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
 
 --------------------------------------
 
@@ -129,7 +129,7 @@ tags:
 
 >문제가 있을 것이라고 생각합니다.
 
-출처:[한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
+출처 : [한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
 
 
 --------------------------------------
@@ -139,7 +139,7 @@ tags:
 
 > 생각했던 것보다 좋았다.
 
-출처:[한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
+출처 : [한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
 
 
 --------------------------------------
@@ -149,4 +149,4 @@ tags:
 
 > 앞말과 띄어 써야 한다.
 
-출처:[한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
+출처 : [한국어 맞춤법/문법 검사기](http://speller.cs.pusan.ac.kr/PnuWebSpeller/){:target="_blank"}
