@@ -3,7 +3,7 @@ layout:     post
 title:      "PuTTY 설치와 폰트, 배경, 기본 설정하기"
 date:       2017-10-17 00:00:00
 author:     "Pimi"
-header-img: "img/in-post/start-putty/download.png"
+header-img: "img/in-post/start-putty/header.png"
 header-mask: 0.3
 catalog:    true
 tags:

@@ -71,11 +71,16 @@ layout에 Toolbar를 추가시켜준다.
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-  <android.support.v7.widget.Toolbar
-    android:id="@+id/toolbar"
-    android:background="@color/colorPrimary"
+  <android.support.design.widget.AppBarLayout
     android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize" />
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar"
+      android:background="@color/colorPrimary"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize" />
+  </android.support.design.widget.AppBarLayout>
 
 </LinearLayout>
 ```
@@ -231,7 +236,7 @@ class MainActivity : AppCompatActivity() {
 ```
 > icon을 vector 파일로 사용할 때는 코드에서 색을 바꿀 수 있다. ([아이콘 색 변경](#아이콘-색-변경) 참조)
 
-애니메이션이 있는 햄버거 버튼을 사용하려면 따로 아이콘을 만들 필요가 없다.<br>
+DrawerLayout을 사용할 때, 애니메이션이 있는 햄버거 버튼을 사용하려면 따로 아이콘을 만들 필요가 없다.<br>
 <a target="_blank" href="https://stackoverflow.com/a/26447144">출처</a>
 ``` java
 // MainActivity.kt
@@ -338,4 +343,15 @@ supportActionBar?.run {
     <item name="android:textColorSecondary">@color/colorWhite</item>
 	
 </style>
+```
+
+
+#### 하단 그림자 제거
+Appbar에 elevation="0dp"
+
+``` xml
+<android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp">
 ```

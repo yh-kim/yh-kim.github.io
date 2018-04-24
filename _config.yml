@@ -124,7 +124,7 @@ collections:
 friends: [
     {
         title: "ninehundred's Blog",
-        href: "https://nine-hundred.github.io/Blog/"
+        href: "https://nine-hundred.github.io/Blog"
     },
     {
         title: "개발같은 소리하네",
@@ -136,10 +136,14 @@ friends: [
     },
     {
         title: "하늘을 난 모기",
-        href: "http://flymogi.tistory.com/"
+        href: "http://flymogi.tistory.com"
     },
     {
         title: "Jangwon's 디자인&개발로그",
-        href: "https://wkddnjset.github.io/"
+        href: "https://wkddnjset.github.io"
+    },
+    {
+        title: "A MEAN Blog",
+        href: "https://www.a-mean-blog.com"
     }
 ]
