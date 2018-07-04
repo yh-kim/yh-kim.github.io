@@ -23,7 +23,7 @@ tags:
 3. Push할 때 깃허브 아이디와 비밀번호를 치면 해결.
 
 참고로
-![](/img/in-post/github-permission-error/capture1.jpg)
+![](/img/in-post/github-permission-error/capture1.JPG)
 이 부분의 이메일이 깃허브의 이메일과 다르면
-![](/img/in-post/github-permission-error/capture2.jpg)
+![](/img/in-post/github-permission-error/capture2.JPG)
 깃허브에 이렇게 표시된다. 그뿐만 아니라 daily commit 수에도 집계되지 않는다.
