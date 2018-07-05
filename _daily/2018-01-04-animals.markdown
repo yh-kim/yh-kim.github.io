@@ -7,7 +7,7 @@ header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true
 tags:
-    - animals
+    - Animals
 ---
 
 목록은 [여기](http://animal.memozee.com/animal/Dic/){:target="_blank"}에서 가져왔다.

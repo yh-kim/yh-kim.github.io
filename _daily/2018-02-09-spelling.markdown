@@ -7,7 +7,7 @@ header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true
 tags:
-    - spelling
+    - Spelling
 ---
 
 품사와 문장 성분 : [수재모 블로그](http://snustudy.com/220843584472){:target="_blank"}

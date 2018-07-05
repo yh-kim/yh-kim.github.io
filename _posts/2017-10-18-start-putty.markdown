@@ -7,8 +7,8 @@ header-img: "img/in-post/start-putty/header.png"
 header-mask: 0.3
 catalog:    true
 tags:
-    - linux
-    - putty
+    - Linux
+    - Putty
 ---
 
 ## 설치
