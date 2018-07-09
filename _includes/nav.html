@@ -19,12 +19,30 @@
                     <li>
                         <a href="{{ site.baseurl }}/">Home</a>
                     </li>
+
+                    <li>
+                        <a href="{{ site.baseurl }}/category">category</a>
+                    </li>
+
+                    <li>
+                        <a href="{{ site.baseurl }}/daily">daily</a>
+                    </li>
+
+                    <li>
+                        <a href="{{ site.baseurl }}/about">about</a>
+                    </li>
+
+                    <li>
+                        <a href="{{ site.baseurl }}/portfolio">portfolio</a>
+                    </li>
+                    <!-- 
                     {% assign sorted_pages = site.pages | sort:"order" %}
                     {% for page in sorted_pages %}{% if page.title %}
                     <li>
                         <a href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
                     </li>
                     {% endif %}{% endfor %}
+                -->
                 </ul>
             </div>
         </div>

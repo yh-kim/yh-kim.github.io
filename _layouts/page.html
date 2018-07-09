@@ -36,13 +36,19 @@ layout: default
                 {% if site.featured-tags %}
                 <section>
                     <!-- no hr -->
-                    <h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
+                    <h5><a href="{{'/category/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
+                                <!--****tag->category****-->
+                    <!--<h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>-->
                     <div class="tags">
         				{% for tag in site.tags %}
                             {% if tag[1].size > site.featured-condition-size %}
-                				<a href="{{ site.baseurl }}/tags/#{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
+                            <a href="{{ site.baseurl }}/category/{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
                                     {{ tag[0] }}
                                 </a>
+                                <!--****tag->category****-->
+                				<!--<a href="{{ site.baseurl }}/tags/#{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
+                                    {{ tag[0] }}
+                                </a>-->
                             {% endif %}
         				{% endfor %}
         			</div>
@@ -85,12 +91,18 @@ layout: default
                 {% if site.featured-tags %}
                 <section>
                     <hr class="hidden-sm hidden-xs">
-                    <h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
+                    <h5><a href="{{'/category/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
+                    <!--****tag->category****-->
+                    <!--<h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>-->
                     <div class="tags">
                         {% for tag in site.tags %}
                             {% if tag[1].size > site.featured-condition-size %}
-                                <a href="{{ site.baseurl }}/tags/#{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
+                            <a href="{{ site.baseurl }}/category/{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
                                     {{ tag[0] }}
+                                    <!--****tag->category****-->
+                                <!--<a href="{{ site.baseurl }}/tags/#{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
+                                    {{ tag[0] }}
+                                -->
                                 </a>
                             {% endif %}
                         {% endfor %}

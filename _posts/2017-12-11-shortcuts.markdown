@@ -7,10 +7,7 @@ header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true
 tags:
-    - Window
-    - Mac
-    - IntelliJ
-    - Shortcut
+    - [Shortcut, Window, Mac, IntelliJ]
 ---
 
 > 인텔리제이에서 개발할 때 자주 사용하는 단축키를 정리합니다

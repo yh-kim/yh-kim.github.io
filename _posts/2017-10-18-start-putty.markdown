@@ -8,7 +8,6 @@ header-mask: 0.3
 catalog:    true
 tags:
     - Linux
-    - Putty
 ---
 
 ## 설치
