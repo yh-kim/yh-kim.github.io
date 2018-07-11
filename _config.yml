@@ -147,5 +147,9 @@ friends: [
     {
         title: "A MEAN Blog",
         href: "https://www.a-mean-blog.com"
+    },
+    {
+        title: "재윤 블로그",
+        href: "https://blog.jaeyoon.io/"
     }
 ]

@@ -6,6 +6,8 @@ layout: page
   <p>No posts found.</p>
 {% endunless %}
 
+<p>{{ page.tag }}({{ site.tags[page.tag] | size }})<p>
+
 {% for post in site.tags[page.tag] %}
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
