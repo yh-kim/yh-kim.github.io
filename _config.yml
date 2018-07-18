@@ -150,6 +150,15 @@ friends: [
     },
     {
         title: "재윤 블로그",
-        href: "https://blog.jaeyoon.io/"
+        href: "https://blog.jaeyoon.io"
+    },
+    {
+        title: "브랜디 기술 블로그",
+        href: "http://labs.brandi.co.kr"
+    },
+    {
+        title: "이 세상에 하나는 남기고 가자",
+        href: "https://blog.asamaru.net"
     }
+​
 ]
