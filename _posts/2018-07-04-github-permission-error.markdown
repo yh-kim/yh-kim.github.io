@@ -10,7 +10,7 @@ tags:
     - [Github, SourceTree]
 ---
 
-다른 사람 노트북으로 Push하려고 했는데 에러가 났다!!
+소스트리를 사용하던 다른 사람 노트북으로 Push하려고 했는데 에러가 났다!!
 
 <http://recoveryman.tistory.com/392>{:target="_blank"}
 <br>이 블로그에 SSH키 추가하는 방법, 자격증명 변경 방법이 나온다.
@@ -27,3 +27,9 @@ tags:
 이 부분의 이메일이 깃허브의 이메일과 다르면
 ![](/img/in-post/github-permission-error/capture2.JPG)
 깃허브에 이렇게 표시된다. 그뿐만 아니라 daily commit 수에도 집계되지 않는다.
+
+터미널을 이용하는 사람은 다음과 같이 설정해준다.
+```bash
+$ git config --global user.name 'yh-kim'
+$ git config --global user.email btc_yh@naver.com
+```
