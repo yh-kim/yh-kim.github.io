@@ -29,10 +29,9 @@ tags:
 깃허브에 이렇게 표시된다. 그뿐만 아니라 daily commit 수에도 집계되지 않는다.
 
 터미널을 이용하는 사람은 다음과 같이 설정해준다.
-```bash
+
+{% highlight bash %}
 $ git config --global user.name 'yh-kim'
 $ git config --global user.email btc_yh@naver.com
-```
-
-\n
+{% endhighlight %}
 현재 프로젝트만 설정하고 싶다면 위의 코드에서 '--global'을 빼주면 된다.
