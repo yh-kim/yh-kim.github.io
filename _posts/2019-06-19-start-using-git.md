@@ -30,7 +30,7 @@ $ git config --global user.email 'EMAIL'
 $ git config --global -list
 ```
 > - 해당 저장소에만 작성자 정보를 입력하기 위해선 --global을 빼고 입력  
-> - 이미 커밋한 작성자 정보를 변경하기 위해선 [여기](#작성자(Author)-변경) 참조
+> - 이미 커밋한 작성자 정보를 변경하기 위해선 [여기](#작성자Author-변경) 참조
 
 ###### 변경사항 관리
 ``` bash
