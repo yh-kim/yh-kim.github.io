@@ -37,6 +37,7 @@ tags:
 
 #### 간단한 API 개발
 1. Object 생성
+
 ``` java
 package com.example.test.demo;
 
@@ -61,6 +62,7 @@ public class Greeting {
 ```
 
 2. Controller 생성
+
 ``` java
 package com.example.test.demo;
 
@@ -85,13 +87,13 @@ public class GreetingController {
       return "Greetings from Spring Boot!";
     }
 }
-
 ```
 
 
 #### 도커 이미지 생성 스크립트 작성
-1. build.gradle 열기
-	* 최상단에 docker 라이브러리 의존성 설정
+1. build.gradle 열기  
+최상단에 docker 라이브러리 의존성 설정
+
 ``` groovy
 buildscript {
   dependencies {
@@ -99,8 +101,9 @@ buildscript {
   }
 }
 ```
-	
-	* 최하단에 docker 플러그인 적용 및 태스크 입력
+
+최하단에 docker 플러그인 적용 및 태스크 입력
+
 ``` groovy
 apply plugin: 'docker'
 
@@ -115,7 +118,6 @@ task buildDocker(type: Docker, dependsOn: build) {
     }
   }
 }
-
 ```
 
 전체 소스
@@ -160,12 +162,12 @@ task buildDocker(type: Docker, dependsOn: build) {
     }
   }
 }
-
 ```
 
 2. Dockerfile 생성
 
 * src/main/docker/ 경로에 Dockerfile 생성
+
 ``` dockerfile
 FROM openjdk:8-jdk
 # 어떤 이미지로부터 새로운 이미지를 생성할 지 지정. 플랫폼 : 버전 형태로 작성
@@ -181,7 +183,6 @@ EXPOSE 8080
 # 외부에 노출할 포트 지정
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 # docker image가 실행될 때 기본으로 실행될 command
-
 ``` 
 
 #### 도커 이미지 생성 & 컨테이너 실행
@@ -206,5 +207,4 @@ $ docker ps -a
 # 컨테이너 정지 및 삭제
 $ docker stop 컨테이너아이디
 $ docker rm 컨테이너아이디
-
 ```
