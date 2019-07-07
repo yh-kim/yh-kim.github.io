@@ -37,7 +37,7 @@ tags:
 
 #### 간단한 API 개발
 1. Object 생성
-```java
+``` java
 package com.example.test.demo;
 
 public class Greeting {
@@ -61,7 +61,7 @@ public class Greeting {
 ```
 
 2. Controller 생성
-```java
+``` java
 package com.example.test.demo;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -92,7 +92,7 @@ public class GreetingController {
 #### 도커 이미지 생성 스크립트 작성
 1. build.gradle 열기
 	* 최상단에 docker 라이브러리 의존성 설정
-```groovy
+``` groovy
 buildscript {
   dependencies {
     classpath('se.transmode.gradle:gradle-docker:1.2')
@@ -101,7 +101,7 @@ buildscript {
 ```
 	
 	* 최하단에 docker 플러그인 적용 및 태스크 입력
-```groovy
+``` groovy
 apply plugin: 'docker'
 
 task buildDocker(type: Docker, dependsOn: build) {
@@ -119,7 +119,7 @@ task buildDocker(type: Docker, dependsOn: build) {
 ```
 
 전체 소스
-```groovy
+``` groovy
 buildscript {
   dependencies {
     classpath('se.transmode.gradle:gradle-docker:1.2')
@@ -166,7 +166,7 @@ task buildDocker(type: Docker, dependsOn: build) {
 2. Dockerfile 생성
 
 * src/main/docker/ 경로에 Dockerfile 생성
-```dockerfile
+``` dockerfile
 FROM openjdk:8-jdk
 # 어떤 이미지로부터 새로운 이미지를 생성할 지 지정. 플랫폼 : 버전 형태로 작성
 MAINTAINER yonghoon <btc_yh@naver.com>
@@ -186,7 +186,7 @@ ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 #### 도커 이미지 생성 & 컨테이너 실행
 
-```bash
+``` bash
 $ ./gradlew clean
 $ ./gradlew build buildDocker
 
