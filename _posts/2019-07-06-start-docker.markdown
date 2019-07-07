@@ -37,15 +37,15 @@ tags:
 
 #### 간단한 API 개발
 1. Object 생성
+
 ``` java
 package com.example.test.demo;
 
 public class Greeting {
-
     private final long id;
     private final String content;
 
-    public Greeting(long *id*, String *content*) {
+    public Greeting(long id, String content) {
         this.id = id;
         this.content = content;
     }
@@ -61,6 +61,7 @@ public class Greeting {
 ```
 
 2. Controller 생성
+
 ``` java
 package com.example.test.demo;
 
@@ -75,7 +76,7 @@ public class GreetingController {
     private final AtomicLong counter = new AtomicLong();
 
     @RequestMapping("/greeting")
-    public Greeting greeting(@RequestParam(value="name", defaultValue="World") String *name*) {
+    public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
         return new Greeting(counter.incrementAndGet(), String.format(template, name));
     }
 
