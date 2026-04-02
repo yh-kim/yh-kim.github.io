@@ -110,6 +110,15 @@
 <script src="{{ "/js/sw-registration.js " | prepend: site.baseurl }}"></script>
 {% endif %}
 
+<!-- lunr.js — client-side full-text search -->
+<script src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js"></script>
+
+<!-- AOS — Animate On Scroll -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+<!-- Interactive features (dark mode, progress, copy, search, reactions, typed, AOS) -->
+<script src="{{ "/js/interactive.js" | prepend: site.baseurl }}"></script>
+
 <!-- async load function -->
 <script>
     function async(u, c) {

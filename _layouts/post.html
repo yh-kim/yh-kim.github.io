@@ -2,6 +2,9 @@
 layout: default
 ---
 
+<!-- Reading Progress Bar (only for posts) -->
+<div id="reading-progress-bar"></div>
+
 <!-- Image to hack wechat -->
 <!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
 <!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
@@ -43,7 +46,11 @@ layout: default
                     {% comment %} if page.subtitle {% endcomment %}
                     <h2 class="subheading">{{ page.subtitle }}</h2>
                     {% comment %} endif {% endcomment %}
-                    <span class="meta">Posted by {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}</span>
+                    <span class="meta">Posted by {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}
+                        {% assign char_count = content | strip_html | size %}
+                        {% assign read_time = char_count | divided_by: 500 | plus: 1 %}
+                        <span class="reading-time"><i class="fa fa-clock-o"></i>약 {{ read_time }}분</span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -88,6 +95,32 @@ layout: default
                 {% if site.disqus_username %}
                 <!-- disqus 评论框 start -->
                 <div class="comment">
+                    <!-- Post Reactions -->
+                    <div id="post-reactions" data-post-id="{{ page.id }}">
+                        <p class="reactions-label">이 글이 도움이 되었나요?</p>
+                        <div class="reactions-group">
+                            <button class="reaction-btn" data-emoji="👍">
+                                <span class="reaction-emoji">👍</span>
+                                <span class="reaction-count">0</span>
+                            </button>
+                            <button class="reaction-btn" data-emoji="❤️">
+                                <span class="reaction-emoji">❤️</span>
+                                <span class="reaction-count">0</span>
+                            </button>
+                            <button class="reaction-btn" data-emoji="🔥">
+                                <span class="reaction-emoji">🔥</span>
+                                <span class="reaction-count">0</span>
+                            </button>
+                            <button class="reaction-btn" data-emoji="😮">
+                                <span class="reaction-emoji">😮</span>
+                                <span class="reaction-count">0</span>
+                            </button>
+                            <button class="reaction-btn" data-emoji="🤔">
+                                <span class="reaction-emoji">🤔</span>
+                                <span class="reaction-count">0</span>
+                            </button>
+                        </div>
+                    </div>
                     <div id="disqus_thread" class="disqus-thread"></div>
                 </div>
                 <!-- disqus 评论框 end -->
