@@ -7,7 +7,16 @@ a.jcm-top {
   z-index: 999;
   background: url(/img/icon/pc/icon_uarrow.png) no-repeat;
   background-size: 29px 29px;
-  display: none; 
+  display: none;
+  opacity: 0.7;
+  will-change: transform;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  border-radius: 50%;
+}
+
+a.jcm-top:hover {
+  opacity: 1;
+  transform: translateY(-3px);
 }
 
 @media only screen and (max-width: 720px) {
@@ -35,4 +44,182 @@ a.jcm-top {
 th {
   text-align: center;
   background: #e6e6e6;
+}
+
+/* ===== Post Preview Cards ===== */
+.post-preview {
+  padding: 20px 24px;
+  border-radius: 8px;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  margin-bottom: 4px;
+}
+
+.post-preview:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.post-preview > a > .post-title {
+  transition: color 0.2s ease;
+}
+
+.post-preview .post-content-preview {
+  margin-top: 6px;
+  line-height: 1.65;
+}
+
+.post-preview > .post-meta {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+/* Slightly soften the separators */
+.postlist-container hr {
+  margin: 4px 0;
+  border-color: #f2f2f2;
+}
+
+/* ===== Sidebar Avatar: Circular ===== */
+.sidebar-container .short-about img {
+  border-radius: 50% !important;
+  width: 72px !important;
+  height: 72px;
+  object-fit: cover;
+  border: 3px solid #e8e8e8;
+  margin-bottom: 14px;
+}
+
+/* ===== Sidebar Tag Pills: Filled style ===== */
+.sidebar-container .tags a {
+  background-color: #f5f5f5;
+  border-color: #e8e8e8 !important;
+  color: #666 !important;
+  border-radius: 999em;
+  padding: 2px 12px;
+  font-size: 12px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.sidebar-container .tags a:hover,
+.sidebar-container .tags a:active {
+  background-color: #0085a1 !important;
+  border-color: #0085a1 !important;
+  color: #fff !important;
+}
+
+/* ===== Blockquote: Left accent border ===== */
+blockquote {
+  border-left: 4px solid #0085a1;
+  padding: 6px 18px;
+  background: #f8fbfc;
+  border-radius: 0 6px 6px 0;
+  color: #555;
+  font-style: normal;
+  margin: 24px 0;
+}
+
+blockquote p {
+  margin: 6px 0;
+}
+
+/* ===== Code blocks: Subtle top-bar ===== */
+.highlight {
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.highlight pre {
+  border-radius: 0 0 6px 6px;
+  border-top: 3px solid #0085a1;
+  margin: 0;
+}
+
+/* Inline code styling */
+code.highlighter-rouge,
+p code,
+li code {
+  background: #f0f4f7;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.875em;
+  color: #c7254e;
+}
+
+/* ===== Smooth link transitions ===== */
+a {
+  transition: color 0.15s ease;
+}
+
+/* ===== Pager buttons: Rounded corners ===== */
+.pager li > a,
+.pager li > span {
+  border-radius: 4px !important;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ===== Table: Softer styling ===== */
+.post-container table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+
+.post-container table th {
+  background-color: #0085a1;
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.post-container table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.post-container table tr:last-child td {
+  border-bottom: none;
+}
+
+.post-container table tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+/* ===== Post heading tags: Nicer pill style ===== */
+.intro-header .post-heading .tags .tag {
+  border-color: rgba(255,255,255,0.65);
+  background-color: rgba(255,255,255,0.15);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.intro-header .post-heading .tags .tag:hover {
+  background-color: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.9);
+}
+
+/* ===== Sidebar section headings ===== */
+.sidebar-container h5 {
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* ===== Footer: Subtle top divider ===== */
+footer {
+  border-top: 1px solid #f0f0f0;
+}
+
+/* ===== Selection color ===== */
+::selection {
+  background: rgba(0, 133, 161, 0.18);
+  color: inherit;
+}
+::-moz-selection {
+  background: rgba(0, 133, 161, 0.18);
+  color: inherit;
 }
