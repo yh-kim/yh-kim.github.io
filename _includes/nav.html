@@ -35,6 +35,14 @@
                     <li>
                         <a href="{{ site.baseurl }}/portfolio">portfolio</a>
                     </li>
+
+                    <li>
+                        <button id="search-btn" title="검색 (/)"><i class="fa fa-search"></i></button>
+                    </li>
+
+                    <li>
+                        <button id="dark-mode-toggle" title="다크 모드 전환"><i class="fa fa-moon-o"></i></button>
+                    </li>
                     <!-- 
                     {% assign sorted_pages = site.pages | sort:"order" %}
                     {% for page in sorted_pages %}{% if page.title %}
@@ -102,3 +110,16 @@
         __HuxNav__.close();
     })
 </script>
+
+<!-- Search Overlay -->
+<div id="search-overlay" role="dialog" aria-label="검색">
+    <div class="search-box">
+        <div class="search-header">
+            <i class="fa fa-search"></i>
+            <input id="search-input" type="text" placeholder="검색어를 입력하세요…" autocomplete="off" />
+            <button id="search-close" aria-label="닫기">&times;</button>
+        </div>
+        <div class="search-hint">/ 키로 검색창을 열 수 있습니다 &nbsp;·&nbsp; ESC 로 닫기</div>
+        <div id="search-results"></div>
+    </div>
+</div>
