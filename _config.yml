@@ -107,6 +107,9 @@ sidebar-avatar: /img/side-avatar-yonghoon.jpg      # use absolute URL, seeing it
 featured-tags: true                     # whether or not using Feature-Tags
 featured-condition-size: 1              # A tag will be featured if the size of it is more than this condition value
 
+# Reading time (characters per minute; Korean reading speed ≈ 500 chars/min)
+reading_speed: 500
+
 
 
 # Progressive Web Apps

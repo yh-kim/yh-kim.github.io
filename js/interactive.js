@@ -54,7 +54,7 @@
 
         // Listen for OS-level changes (only when no stored preference)
         if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addListener(function (mq) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (mq) {
                 if (localStorage.getItem(DARK_KEY) === null) {
                     applyTheme(mq.matches);
                 }
@@ -284,7 +284,15 @@
     function initTyped() {
         var $el = $('#typed-subheading');
         if ($el.length === 0) return;
-        var strings = $el.data('strings');
+        // jQuery's .data() auto-parses JSON from data attributes once HTML entities are decoded;
+        // fall back to explicit JSON.parse for robustness.
+        var strings;
+        try {
+            var raw = $el.attr('data-strings') || '[]';
+            strings = (typeof raw === 'string') ? JSON.parse(raw) : raw;
+        } catch (e) {
+            strings = [];
+        }
         if (!strings || !strings.length) return;
 
         loadScript(

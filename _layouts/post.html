@@ -48,7 +48,7 @@ layout: default
                     {% comment %} endif {% endcomment %}
                     <span class="meta">Posted by {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}
                         {% assign char_count = content | strip_html | size %}
-                        {% assign read_time = char_count | divided_by: 500 | plus: 1 %}
+                        {% assign read_time = char_count | divided_by: site.reading_speed | plus: 1 %}
                         <span class="reading-time"><i class="fa fa-clock-o"></i>약 {{ read_time }}분</span>
                     </span>
                 </div>

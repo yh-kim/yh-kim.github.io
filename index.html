@@ -22,7 +22,7 @@ typed-strings: ["개발 블로그입니다", "Android 개발 기록", "Docker & 
     <p class="post-meta">
         Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
         {% assign char_count = post.content | strip_html | size %}
-        {% assign read_time = char_count | divided_by: 500 | plus: 1 %}
+        {% assign read_time = char_count | divided_by: site.reading_speed | plus: 1 %}
         <span class="reading-time"><i class="fa fa-clock-o"></i>약 {{ read_time }}분</span>
     </p>
 </div>
