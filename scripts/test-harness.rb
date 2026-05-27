@@ -60,6 +60,45 @@ with_temp_repo do |repo|
 end
 
 with_temp_repo do |repo|
+  source = repo.join("tmp-html-source.html")
+  source.write("<!doctype html><html><head><title>Temp</title></head><body>Temp</body></html>\n")
+  repo.join("html-documents/folder-added.html").write("<!doctype html><html><head><title>Folder Added</title></head><body>Folder</body></html>\n")
+
+  expect_success(
+    repo,
+    ["ruby", "scripts/add-html-document.rb"],
+    "sync HTML documents script"
+  )
+  expect_success(repo, ["ruby", "scripts/verify-html-documents.rb"], "HTML documents check after sync script")
+
+  fail_with("sync HTML documents script should register files already in html-documents") unless repo.join("_data/html_documents.yml").read.include?("/html-documents/folder-added.html")
+
+  expect_success(
+    repo,
+    [
+      "ruby",
+      "scripts/add-html-document.rb",
+      "tmp-html-source.html",
+      "--title",
+      "Temp HTML",
+      "--description",
+      "Harness generated HTML",
+      "--slug",
+      "temp-html",
+      "--date",
+      "2026-05-27",
+      "--tags",
+      "Test,HTML"
+    ],
+    "add HTML document script"
+  )
+  expect_success(repo, ["ruby", "scripts/verify-html-documents.rb"], "HTML documents check after script")
+
+  fail_with("add HTML document script should copy the source file") unless repo.join("html-documents/temp-html.html").file?
+  fail_with("add HTML document script should register the new file") unless repo.join("_data/html_documents.yml").read.include?("/html-documents/temp-html.html")
+end
+
+with_temp_repo do |repo|
   post = repo.join("_daily/2026-05-27-psp-problems.markdown")
   text = post.read.sub(/^date:.*$/, "date:       2999-01-01 00:00:00")
   post.write(text)

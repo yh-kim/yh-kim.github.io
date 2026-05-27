@@ -113,20 +113,24 @@ ruby scripts/verify-privacy.rb
 Add a standalone HTML document:
 
 1. Put the file under `html-documents/`, for example `html-documents/example.html`.
-2. Add a matching entry to `_data/html_documents.yml`.
-3. Run `scripts/verify-all.sh`.
-4. Open `/daily/html-documents/` and use the generated link to reach the HTML page.
+2. Run `ruby scripts/add-html-document.rb` to sync `_data/html_documents.yml` from the folder.
+3. Review the generated entry in `_data/html_documents.yml`.
+4. Run `scripts/verify-all.sh`.
+5. Open `/daily/html-documents/` and use the generated link to reach the HTML page.
+
+자세한 HTML 추가 가이드: `docs/html-documents-guide.md`.
 
 When the user says they are adding an HTML file or asks to publish an HTML document:
 
 1. Treat it as a standalone HTML document unless they explicitly ask for a normal blog post.
 2. Copy or create the HTML under `html-documents/` with a stable, lowercase, hyphenated filename.
-3. Register it in `_data/html_documents.yml` with `title`, `description`, `path`, `date`, and optional `tags`.
-4. Do not embed it with an iframe in a Daily post by default.
-5. Use `/daily/html-documents/` as the visible Daily entry point.
-6. Preserve or create a direct Daily compatibility page only when there is already a shared URL or the user asks for one.
-7. Run `scripts/verify-all.sh` and `ruby scripts/test-harness.rb`.
-8. Stop before commit and report the changed files and verification output.
+3. Run `ruby scripts/add-html-document.rb` to sync `_data/html_documents.yml`.
+4. Review the generated `title`, `description`, `date`, and optional `tags`.
+5. Do not embed it with an iframe in a Daily post by default.
+6. Use `/daily/html-documents/` as the visible Daily entry point.
+7. Preserve or create a direct Daily compatibility page only when there is already a shared URL or the user asks for one.
+8. Run `scripts/verify-all.sh` and `ruby scripts/test-harness.rb`.
+9. Stop before commit and report the changed files and verification output.
 
 Harness self-tests:
 
