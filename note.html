@@ -1,0 +1,31 @@
+---
+layout: page
+title: Note
+description: ""
+header-img: "img/about-bg.jpg"
+sidebar: false
+---
+
+{% for post in site.daily reversed %}
+{% unless post.hidden %}
+<div class="post-preview">
+    <a href="{{ post.url | prepend: site.baseurl }}">
+        <h2 class="post-title">
+            {{ post.title }}
+        </h2>
+        {% if post.subtitle %}
+        <h3 class="post-subtitle">
+            {{ post.subtitle }}
+        </h3>
+        {% endif %}
+        <div class="post-content-preview">
+            {{ post.content | strip_html | truncate:200 }}
+        </div>
+    </a>
+    <p class="post-meta">
+        {{ post.date | date: "%B %-d, %Y" }}
+    </p>
+</div>
+<hr>
+{% endunless %}
+{% endfor %}

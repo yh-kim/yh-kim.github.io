@@ -47,11 +47,33 @@ end
 fail_with("_site is missing. Run jekyll build first.") unless SITE.directory?
 
 daily_index = SITE.join("daily/index.html")
+note_index = SITE.join("note/index.html")
+dev_index = SITE.join("dev/index.html")
 html_documents = SITE.join("daily/html-documents/index.html")
+home_html = SITE.join("index.html").read
 fail_with("_site/daily/index.html is missing") unless daily_index.file?
+fail_with("_site/note/index.html is missing") unless note_index.file?
+fail_with("_site/dev/index.html is missing") unless dev_index.file?
 fail_with("_site/daily/html-documents/index.html is missing") unless html_documents.file?
+fail_with("home should keep the welcome copy") unless home_html.include?("hello.")
+fail_with("home should not list dev posts") if home_html.include?("post-preview")
+fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
+
+nav_expected = [
+  'href="/">home</a>',
+  'href="/note">note</a>',
+  'href="/dev">dev</a>'
+]
+nav_expected.each do |snippet|
+  fail_with("home navigation missing #{snippet}") unless home_html.include?(snippet)
+end
 
 daily_index_html = daily_index.read
+note_index_html = note_index.read
+dev_index_html = dev_index.read
+fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
+fail_with("note page should list daily posts") unless note_index_html.include?("post-preview")
+fail_with("dev page should list dev posts") unless dev_index_html.include?("post-preview")
 
 ROOT.join("_daily").glob("*.{md,markdown}").each do |path|
   front_matter, = read_front_matter(path)
@@ -60,8 +82,8 @@ ROOT.join("_daily").glob("*.{md,markdown}").each do |path|
 
   fail_with("daily page was not written: #{url}") unless built_path.file?
 
-  if front_matter["hidden"] == true && daily_index_html.include?("href=\"#{url}\"")
-    fail_with("hidden daily page is linked from daily index: #{url}")
+  if front_matter["hidden"] == true && note_index_html.include?("href=\"#{url}\"")
+    fail_with("hidden daily page is linked from note index: #{url}")
   end
 end
 

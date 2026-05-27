@@ -21,6 +21,7 @@ VISIBLE_FORBIDDEN = [
   "href=\"/portfolio",
   "href=\"/feed.xml",
   ">category</a>",
+  "href=\"/category\">",
   "FRIENDS",
   "Copyright &copy;",
   "facebook.com",

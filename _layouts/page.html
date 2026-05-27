@@ -26,6 +26,7 @@ layout: default
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 postlist-container">
                 {{ content }}
             </div>
+    {% unless page.hide-sidebar %}
     <!-- Sidebar Container -->
             <div class="
                 col-lg-8 col-lg-offset-2
@@ -56,6 +57,7 @@ layout: default
                 {% endif %}
 
             </div>
+    {% endunless %}
         {% else %}
 
 <!-- USE SIDEBAR -->
@@ -69,6 +71,7 @@ layout: default
             ">
     			{{ content }}
     		</div>
+    {% unless page.hide-sidebar %}
     <!-- Sidebar Container -->
             <div class="
                 col-lg-3 col-lg-offset-0
@@ -101,6 +104,7 @@ layout: default
                 {% endif %}
 
     		</div>
+    {% endunless %}
         {% endif %}
 	</div>
 </div>

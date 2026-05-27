@@ -1,51 +1,10 @@
 ---
 layout: page
-title: Daily
-description: "일상 포스팅."
+title: Note
+description: ""
 header-img: "img/about-bg.jpg"
-pagination: 
-  enabled: true
-  permalink: '/:num/'
-order: 1
+sidebar: false
+permalink: /daily/
 ---
 
-{% for post in site.daily reversed %}
-{% unless post.hidden %}
-<div class="post-preview">
-    <a href="{{ post.url | prepend: site.baseurl }}">
-        <h2 class="post-title">
-            {{ post.title }}
-        </h2>
-        {% if post.subtitle %}
-        <h3 class="post-subtitle">
-            {{ post.subtitle }}
-        </h3>
-        {% endif %}
-        <div class="post-content-preview">
-            {{ post.content | strip_html | truncate:200 }}
-        </div>
-    </a>
-    <p class="post-meta">
-        {{ post.date | date: "%B %-d, %Y" }}
-    </p>
-</div>
-<hr>
-{% endunless %}
-{% endfor %}
-
-<!-- Pager -->
-<!-- {% if site.total_pages > 1 %}
-<ul class="pager">
-    {% if site.previous_page %}
-    <li class="previous">
-        <a href="{{ site.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
-    </li>
-    {% endif %}
-    {% if site.next_page %}
-    <li class="next">
-        <a href="{{ site.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
-    </li>
-    {% endif %}
-</ul>
-{% endif %}
-<a href="#" class="jcm-top"></a> -->
+<p>Notes have moved to <a href="{{ '/note/' | relative_url }}">note</a>.</p>
