@@ -1,947 +1,1810 @@
 <!doctype html>
 <html lang="ko">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PSP 시험 힌트 총정리</title>
-<style>
-:root {
-  --bg:#f6f3ed;
-  --paper:#fffaf2;
-  --ink:#211a16;
-  --muted:#756a60;
-  --line:#e8dccb;
-  --brand:#7b3f00;
-  --brand2:#c46a2b;
-  --brand3:#f2b35d;
-  --green:#276653;
-  --red:#b8442d;
-  --blue:#315f8d;
-  --shadow:0 22px 60px rgba(74, 48, 20, .15);
-  --radius:26px;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(242,179,93,.34), transparent 34rem),
-    radial-gradient(circle at 80% 0%, rgba(123,63,0,.14), transparent 28rem),
-    linear-gradient(180deg,#fff7ea 0%, var(--bg) 34%, #f8efe2 100%);
-  color:var(--ink);
-  line-height:1.65;
-}
-a{color:inherit}
-button,input{font:inherit}
-.hero{
-  max-width:1180px;
-  margin:0 auto;
-  padding:54px 24px 28px;
-}
-.hero-card{
-  position:relative;
-  overflow:hidden;
-  border:1px solid rgba(123,63,0,.16);
-  border-radius:36px;
-  padding:42px;
-  background:linear-gradient(135deg, rgba(255,250,242,.96), rgba(255,243,221,.88));
-  box-shadow:var(--shadow);
-}
-.hero-card:before{
-  content:"";
-  position:absolute;
-  inset:-160px -110px auto auto;
-  width:360px;height:360px;
-  border-radius:999px;
-  background:radial-gradient(circle, rgba(196,106,43,.20), transparent 66%);
-}
-.badge-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px}
-.badge{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:8px 12px;
-  border:1px solid rgba(123,63,0,.16);
-  border-radius:999px;
-  background:rgba(255,255,255,.58);
-  color:#5b3920;
-  font-weight:800;
-  font-size:13px;
-}
-h1{
-  position:relative;
-  margin:0;
-  font-size:clamp(36px,6vw,76px);
-  line-height:1.03;
-  letter-spacing:-.065em;
-}
-.hero-sub{
-  position:relative;
-  max-width:760px;
-  margin:18px 0 0;
-  font-size:18px;
-  color:var(--muted);
-}
-.hero-actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:28px}
-.btn{
-  border:0;
-  border-radius:16px;
-  padding:13px 18px;
-  cursor:pointer;
-  font-weight:900;
-  box-shadow:0 10px 26px rgba(123,63,0,.12);
-}
-.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:white}
-.btn.ghost{background:#fffaf2; border:1px solid var(--line); color:#5a3b23}
-.nav{
-  position:sticky; top:0; z-index:50;
-  backdrop-filter:blur(16px);
-  background:rgba(246,243,237,.80);
-  border-top:1px solid rgba(123,63,0,.08);
-  border-bottom:1px solid rgba(123,63,0,.12);
-}
-.nav-inner{max-width:1180px; margin:0 auto; padding:10px 24px; display:flex; gap:8px; overflow:auto}
-.nav a{
-  flex:0 0 auto;
-  text-decoration:none;
-  padding:10px 13px;
-  border-radius:999px;
-  color:#6e5140;
-  font-weight:800;
-  font-size:14px;
-}
-.nav a:hover{background:#fffaf2}
-main{max-width:1180px; margin:0 auto; padding:28px 24px 80px}
-section{margin-top:34px}
-.section-title{display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:18px}
-.section-title h2{margin:0; font-size:clamp(25px,3vw,40px); letter-spacing:-.045em; line-height:1.15}
-.section-title p{margin:6px 0 0; color:var(--muted)}
-.grid{display:grid; gap:16px}
-.exam-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-.mini-card{
-  border:1px solid var(--line);
-  background:rgba(255,250,242,.82);
-  border-radius:22px;
-  padding:18px;
-  box-shadow:0 12px 34px rgba(74,48,20,.07);
-}
-.mini-card span{display:block; color:var(--muted); font-weight:800; font-size:13px}
-.mini-card strong{display:block; margin-top:6px; font-size:23px; letter-spacing:-.035em}
-.mini-card small{display:block; margin-top:6px; color:var(--muted)}
-.alert{
-  border:1px solid rgba(184,68,45,.22);
-  background:linear-gradient(135deg,rgba(255,244,235,.96),rgba(255,250,242,.90));
-  border-radius:var(--radius);
-  padding:22px;
-  box-shadow:0 12px 32px rgba(184,68,45,.08);
-}
-.alert h3{margin:0 0 10px; font-size:22px}
-.alert p{margin:0; color:#65483a}
-.table-wrap{
-  overflow:auto;
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  background:rgba(255,250,242,.9);
-  box-shadow:0 14px 40px rgba(74,48,20,.08);
-}
-table{width:100%; border-collapse:collapse; min-width:760px}
-th,td{padding:14px 16px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
-th{background:#fff0da; color:#5d3a1f; font-size:13px; letter-spacing:.02em}
-tr:last-child td{border-bottom:0}
-td:first-child{font-weight:900; color:var(--brand)}
-.memo-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
-.memo-card{
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  background:rgba(255,250,242,.88);
-  padding:22px;
-  box-shadow:0 14px 40px rgba(74,48,20,.08);
-}
-.memo-card h3{margin:0 0 12px; font-size:22px}
-.verse{
-  margin:0;
-  padding:20px;
-  border-radius:20px;
-  background:linear-gradient(135deg,#fff3dd,#ffffff);
-  border:1px dashed rgba(123,63,0,.34);
-  font-size:21px;
-  font-weight:900;
-  letter-spacing:-.035em;
-}
-.star-list{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; padding:0; margin:0; list-style:none}
-.star-list li{
-  display:flex; gap:10px;
-  align-items:flex-start;
-  padding:13px 14px;
-  border-radius:16px;
-  background:rgba(255,250,242,.86);
-  border:1px solid var(--line);
-}
-.star-list span{
-  flex:0 0 auto;
-  width:30px; height:30px;
-  display:grid; place-items:center;
-  border-radius:10px;
-  background:#fff0da;
-  color:var(--brand);
-  font-weight:900;
-  font-size:12px;
-}
-.toolbar{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:12px;
-  align-items:center;
-  margin:14px 0 20px;
-}
-.search{
-  width:100%;
-  border:1px solid var(--line);
-  border-radius:18px;
-  padding:14px 16px;
-  background:rgba(255,250,242,.95);
-  outline:0;
-}
-.filter-row{display:flex; gap:8px; flex-wrap:wrap}
-.filter{
-  border:1px solid var(--line);
-  background:#fffaf2;
-  color:#68472d;
-  padding:11px 13px;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:900;
-}
-.filter.active{background:#6d3c17; color:white; border-color:#6d3c17}
-.lesson-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px}
-.lesson-card{
-  border:1px solid var(--line);
-  border-radius:28px;
-  background:rgba(255,250,242,.92);
-  padding:22px;
-  box-shadow:0 18px 46px rgba(74,48,20,.10);
-}
-.lesson-top{display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:start}
-.lesson-num{
-  width:48px;height:48px;
-  display:grid; place-items:center;
-  border-radius:17px;
-  background:linear-gradient(135deg,var(--brand),var(--brand2));
-  color:white;
-  font-weight:1000;
-  font-size:22px;
-}
-.eyebrow{margin:0; color:var(--muted); font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.04em}
-.lesson-card h3{margin:1px 0 0; font-size:23px; letter-spacing:-.045em; line-height:1.25}
-.priority{font-size:14px; color:#c88422; white-space:nowrap}
-.keyword-pill{
-  display:inline-flex; gap:8px; align-items:center;
-  margin-top:14px;
-  padding:8px 12px;
-  border-radius:999px;
-  background:#fff0da;
-  color:#6b3d1e;
-  font-weight:900;
-}
-.one-line{
-  margin:14px 0;
-  padding:16px;
-  border-radius:18px;
-  background:linear-gradient(135deg,rgba(255,243,221,.8),rgba(255,255,255,.66));
-  color:#4c382a;
-  font-weight:700;
-}
-.lesson-card h4{margin:18px 0 8px; font-size:16px; color:#40281a}
-.lesson-card ul{margin:0; padding-left:20px}
-.lesson-card li{margin:6px 0}
-.qna{display:grid; gap:8px}
-details{border:1px solid var(--line); border-radius:14px; background:#fffdf8; overflow:hidden}
-summary{cursor:pointer; padding:11px 12px; font-weight:900; color:#56321c}
-details p{margin:0; padding:0 12px 12px; color:#665343}
-.tags{display:flex; gap:7px; flex-wrap:wrap; margin-top:16px}
-.tag{font-size:12px; padding:6px 9px; border-radius:999px; background:#f7ead8; color:#744520; font-weight:900}
-.checklist{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
-.check{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
-  padding:15px;
-  border-radius:18px;
-  background:#fffaf2;
-  border:1px solid var(--line);
-  cursor:pointer;
-  font-weight:800;
-}
-.check input{width:20px;height:20px; accent-color:var(--brand)}
-.check input:checked + span{text-decoration:line-through; color:#9b8876}
-.note{
-  border:1px solid rgba(39,102,83,.22);
-  background:rgba(236,249,242,.72);
-  border-radius:var(--radius);
-  padding:20px 22px;
-  color:#244d42;
-}
-.footer{margin-top:40px; color:var(--muted); font-size:14px; text-align:center}
-.mark{background:linear-gradient(transparent 58%, rgba(242,179,93,.42) 0); font-weight:900}
-@media (max-width:900px){
-  .hero-card{padding:28px}
-  .exam-grid,.memo-grid,.lesson-grid,.checklist{grid-template-columns:1fr}
-  .star-list{grid-template-columns:1fr}
-  .toolbar{grid-template-columns:1fr}
-}
-@media print{
-  body{background:white}
-  .nav,.hero-actions,.toolbar,.btn{display:none!important}
-  .hero{padding:0 0 10px}
-  main{padding:0}
-  .hero-card,.mini-card,.memo-card,.lesson-card,.table-wrap,.alert,.note{box-shadow:none; break-inside:avoid; background:white}
-  .lesson-grid,.exam-grid,.memo-grid,.checklist{grid-template-columns:1fr}
-  .lesson-card{page-break-inside:avoid}
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PSP 1–12과 핵심 정리본</title>
+  <style>
+    :root {
+      --bg: #f7f0e6;
+      --paper: #fffaf3;
+      --paper2: #fff2de;
+      --ink: #201713;
+      --muted: #78695d;
+      --line: #e6d8c4;
+      --brand: #713a10;
+      --brand2: #b45f2a;
+      --gold: #edae55;
+      --green: #276653;
+      --blue: #315f8d;
+      --red: #b8442d;
+      --shadow: 0 18px 48px rgba(83, 49, 20, .12);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+      line-height: 1.58;
+      background:
+        radial-gradient(circle at 12% -8%, rgba(237, 174, 85, .40), transparent 32rem),
+        radial-gradient(circle at 90% 4%, rgba(113, 58, 16, .14), transparent 26rem),
+        linear-gradient(180deg, #fff8ec 0%, var(--bg) 42%, #f7ead9 100%);
+    }
+
+    a {
+      color: inherit
+    }
+
+    button,
+    input {
+      font: inherit
+    }
+
+    .hero {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 42px 22px 20px
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(113, 58, 16, .16);
+      border-radius: 34px;
+      padding: 36px;
+      background: linear-gradient(135deg, rgba(255, 250, 243, .98), rgba(255, 238, 211, .90));
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card:before {
+      content: "";
+      position: absolute;
+      inset: -150px -110px auto auto;
+      width: 330px;
+      height: 330px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(180, 95, 42, .22), transparent 68%);
+    }
+
+    .badge-row {
+      position: relative;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 11px;
+      border: 1px solid rgba(113, 58, 16, .15);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .62);
+      color: #57361d;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    h1 {
+      position: relative;
+      margin: 0;
+      font-size: clamp(34px, 5.8vw, 70px);
+      line-height: 1.02;
+      letter-spacing: -.065em
+    }
+
+    .hero-sub {
+      position: relative;
+      max-width: 780px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 17px
+    }
+
+    .hero-actions {
+      position: relative;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 22px
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      text-decoration: none;
+      border: 0;
+      border-radius: 15px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 950;
+      box-shadow: 0 9px 24px rgba(113, 58, 16, .12);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      color: white
+    }
+
+    .btn.ghost {
+      background: #fffaf3;
+      border: 1px solid var(--line);
+      color: #56361f
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(247, 240, 230, .82);
+      border-top: 1px solid rgba(113, 58, 16, .08);
+      border-bottom: 1px solid rgba(113, 58, 16, .12)
+    }
+
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 9px 22px;
+      display: flex;
+      gap: 7px;
+      overflow: auto;
+      scrollbar-width: none
+    }
+
+    .nav-inner::-webkit-scrollbar {
+      display: none
+    }
+
+    .nav a {
+      flex: 0 0 auto;
+      text-decoration: none;
+      padding: 9px 12px;
+      border-radius: 999px;
+      color: #684b38;
+      font-weight: 900;
+      font-size: 13px;
+      white-space: nowrap
+    }
+
+    .nav a:hover {
+      background: #fffaf3
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 22px 58px
+    }
+
+    section {
+      margin-top: 30px
+    }
+
+    .section-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 36px);
+      letter-spacing: -.045em;
+      line-height: 1.16
+    }
+
+    .section-title p {
+      margin: 5px 0 0;
+      color: var(--muted)
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px
+    }
+
+    .exam-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr))
+    }
+
+    .mini-card {
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 243, .88);
+      border-radius: 20px;
+      padding: 15px;
+      box-shadow: 0 10px 28px rgba(83, 49, 20, .06);
+    }
+
+    .mini-card span {
+      display: block;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 12px
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 21px;
+      letter-spacing: -.035em;
+      line-height: 1.2
+    }
+
+    .mini-card small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      line-height: 1.35
+    }
+
+    .alert {
+      border: 1px solid rgba(184, 68, 45, .20);
+      background: linear-gradient(135deg, rgba(255, 242, 229, .96), rgba(255, 250, 243, .92));
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 12px 32px rgba(184, 68, 45, .07);
+    }
+
+    .alert h3 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      letter-spacing: -.025em
+    }
+
+    .alert p {
+      margin: 0;
+      color: #624638
+    }
+
+    .mark {
+      background: linear-gradient(transparent 58%, rgba(237, 174, 85, .42) 0);
+      font-weight: 950
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 17px;
+      background: rgba(255, 250, 243, .90);
+      box-shadow: 0 12px 34px rgba(83, 49, 20, .07);
+    }
+
+    .summary-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: -.025em;
+      color: #4d2f1c
+    }
+
+    .summary-card ul {
+      margin: 0;
+      padding-left: 18px
+    }
+
+    .summary-card li {
+      margin: 5px 0
+    }
+
+    .keyword-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px
+    }
+
+    .keyword-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 250, 243, .92);
+      padding: 13px;
+      box-shadow: 0 8px 22px rgba(83, 49, 20, .055);
+    }
+
+    .keyword-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900
+    }
+
+    .keyword-card strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 18px;
+      color: var(--brand);
+      letter-spacing: -.035em
+    }
+
+    .keyword-card small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      line-height: 1.35
+    }
+
+    .memo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px
+    }
+
+    .memo-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 250, 243, .9);
+      padding: 19px;
+      box-shadow: 0 13px 36px rgba(83, 49, 20, .08);
+    }
+
+    .memo-card h3 {
+      margin: 0 0 10px;
+      font-size: 21px;
+      letter-spacing: -.03em
+    }
+
+    .memo-card p {
+      margin: 8px 0;
+      color: #5f4b3f
+    }
+
+    .verse {
+      margin: 0 !important;
+      padding: 17px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fff0d6, #ffffff);
+      border: 1px dashed rgba(113, 58, 16, .32);
+      color: #2d2019 !important;
+      font-size: 20px;
+      font-weight: 950;
+      letter-spacing: -.035em;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 250, 243, .92);
+      box-shadow: 0 13px 36px rgba(83, 49, 20, .07)
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top
+    }
+
+    th {
+      background: #fff0d9;
+      color: #5a371e;
+      font-size: 12px;
+      letter-spacing: .02em
+    }
+
+    tr:last-child td {
+      border-bottom: 0
+    }
+
+    td:first-child {
+      font-weight: 950;
+      color: var(--brand);
+      white-space: nowrap
+    }
+
+    .star-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      padding: 0;
+      margin: 0;
+      list-style: none
+    }
+
+    .star-list li {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      padding: 11px 12px;
+      border-radius: 15px;
+      background: rgba(255, 250, 243, .88);
+      border: 1px solid var(--line)
+    }
+
+    .star-list span {
+      flex: 0 0 auto;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: #fff0d9;
+      color: var(--brand);
+      font-weight: 950;
+      font-size: 11px
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0 16px
+    }
+
+    .search {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: rgba(255, 250, 243, .96);
+      outline: 0
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap
+    }
+
+    .filter {
+      border: 1px solid var(--line);
+      background: #fffaf3;
+      color: #68472d;
+      padding: 9px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 950
+    }
+
+    .filter.active {
+      background: #6d3c17;
+      color: white;
+      border-color: #6d3c17
+    }
+
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px
+    }
+
+    .lesson-card {
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: rgba(255, 250, 243, .94);
+      padding: 20px;
+      box-shadow: 0 16px 42px rgba(83, 49, 20, .09)
+    }
+
+    .lesson-top {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: start
+    }
+
+    .lesson-num {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      color: white;
+      font-weight: 1000;
+      font-size: 20px;
+      letter-spacing: -.05em
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .04em
+    }
+
+    .lesson-card h3 {
+      margin: 2px 0 0;
+      font-size: 22px;
+      letter-spacing: -.045em;
+      line-height: 1.24
+    }
+
+    .priority {
+      font-size: 13px;
+      color: #c88422;
+      white-space: nowrap
+    }
+
+    .keyword-pill {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      margin-top: 12px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #fff0d9;
+      color: #6a3d1e;
+      font-weight: 950
+    }
+
+    .one-line {
+      margin: 12px 0;
+      padding: 13px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255, 240, 217, .82), rgba(255, 255, 255, .66));
+      color: #493427;
+      font-weight: 800
+    }
+
+    .lesson-card h4 {
+      margin: 15px 0 7px;
+      font-size: 15px;
+      color: #40281a
+    }
+
+    .lesson-card ul {
+      margin: 0;
+      padding-left: 19px
+    }
+
+    .lesson-card li {
+      margin: 5px 0
+    }
+
+    .qna {
+      display: grid;
+      gap: 7px
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fffdf8;
+      overflow: hidden
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 10px 11px;
+      font-weight: 950;
+      color: #56321c
+    }
+
+    details p {
+      margin: 0;
+      padding: 0 11px 11px;
+      color: #665343
+    }
+
+    .tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 13px
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #f7ead8;
+      color: #744520;
+      font-weight: 950
+    }
+
+    .scale-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .scale-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 250, 243, .92);
+      padding: 15px;
+      box-shadow: 0 10px 28px rgba(83, 49, 20, .06)
+    }
+
+    .scale-card h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      letter-spacing: -.025em
+    }
+
+    .scale-card p {
+      margin: 6px 0;
+      color: #604b3c
+    }
+
+    .scale-card b {
+      color: var(--brand)
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px
+    }
+
+    .check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 13px;
+      border-radius: 17px;
+      background: #fffaf3;
+      border: 1px solid var(--line);
+      cursor: pointer;
+      font-weight: 850
+    }
+
+    .check input {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--brand);
+      flex: 0 0 auto
+    }
+
+    .check input:checked+span {
+      text-decoration: line-through;
+      color: #9b8876
+    }
+
+    .mobile-note {
+      display: none
+    }
+
+    @media (max-width:940px) {
+      .exam-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .keyword-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+      }
+
+      .lesson-grid,
+      .memo-grid,
+      .scale-grid,
+      .checklist {
+        grid-template-columns: 1fr
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr
+      }
+    }
+
+    @media (max-width:640px) {
+      :root {
+        --radius: 18px
+      }
+
+      body {
+        font-size: 14px;
+        line-height: 1.43
+      }
+
+      .hero {
+        padding: 13px 10px 7px
+      }
+
+      .hero-card {
+        padding: 15px;
+        border-radius: 22px
+      }
+
+      .hero-card:before {
+        display: none
+      }
+
+      .badge-row {
+        gap: 5px;
+        margin-bottom: 9px
+      }
+
+      .badge {
+        font-size: 10.8px;
+        padding: 5px 7px
+      }
+
+      h1 {
+        font-size: 30px;
+        line-height: 1.04;
+        letter-spacing: -.065em
+      }
+
+      .hero-sub {
+        font-size: 12.5px;
+        margin-top: 7px;
+        line-height: 1.4
+      }
+
+      .hero-actions {
+        margin-top: 11px;
+        gap: 6px
+      }
+
+      .btn {
+        font-size: 12px;
+        padding: 8px 10px;
+        border-radius: 11px;
+        box-shadow: none
+      }
+
+      .nav-inner {
+        padding: 5px 10px;
+        gap: 5px
+      }
+
+      .nav a {
+        font-size: 11.5px;
+        padding: 6px 8px
+      }
+
+      main {
+        padding: 10px 10px 34px
+      }
+
+      section {
+        margin-top: 17px
+      }
+
+      .section-title {
+        margin-bottom: 8px;
+        display: block
+      }
+
+      .section-title h2 {
+        font-size: 19px;
+        line-height: 1.14
+      }
+
+      .section-title p {
+        font-size: 12px;
+        line-height: 1.35;
+        margin-top: 3px
+      }
+
+      .exam-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px
+      }
+
+      .mini-card {
+        padding: 9px;
+        border-radius: 14px
+      }
+
+      .mini-card span {
+        font-size: 10.5px
+      }
+
+      .mini-card strong {
+        font-size: 15.5px;
+        margin-top: 2px
+      }
+
+      .mini-card small {
+        font-size: 10.5px;
+        margin-top: 2px
+      }
+
+      .alert {
+        padding: 12px 13px;
+        border-radius: 16px
+      }
+
+      .alert h3 {
+        font-size: 17px;
+        margin-bottom: 5px
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px
+      }
+
+      .summary-card {
+        padding: 10px;
+        border-radius: 15px
+      }
+
+      .summary-card h3 {
+        font-size: 14px;
+        margin-bottom: 5px
+      }
+
+      .summary-card ul {
+        padding-left: 15px
+      }
+
+      .summary-card li {
+        margin: 2px 0;
+        font-size: 12.2px
+      }
+
+      .keyword-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px
+      }
+
+      .keyword-card {
+        padding: 8px;
+        border-radius: 13px
+      }
+
+      .keyword-card span {
+        font-size: 10px
+      }
+
+      .keyword-card strong {
+        font-size: 14px;
+        margin-top: 2px
+      }
+
+      .keyword-card small {
+        font-size: 10px;
+        line-height: 1.25
+      }
+
+      .memo-card {
+        padding: 12px;
+        border-radius: 16px
+      }
+
+      .memo-card h3 {
+        font-size: 17px;
+        margin-bottom: 6px
+      }
+
+      .memo-card p {
+        font-size: 12.5px;
+        margin: 5px 0
+      }
+
+      .verse {
+        font-size: 15px;
+        padding: 12px;
+        border-radius: 14px;
+        line-height: 1.38
+      }
+
+      table {
+        min-width: 610px
+      }
+
+      th,
+      td {
+        padding: 9px 10px;
+        font-size: 12px
+      }
+
+      .star-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px
+      }
+
+      .star-list li {
+        padding: 8px 8px;
+        gap: 7px;
+        font-size: 12px;
+        border-radius: 12px
+      }
+
+      .star-list span {
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        font-size: 9.5px
+      }
+
+      .search {
+        padding: 9px 11px;
+        border-radius: 13px;
+        font-size: 13px
+      }
+
+      .filter-row {
+        gap: 5px
+      }
+
+      .filter {
+        font-size: 11.5px;
+        padding: 7px 9px
+      }
+
+      .lesson-grid {
+        gap: 9px
+      }
+
+      .lesson-card {
+        padding: 12px;
+        border-radius: 17px;
+        box-shadow: 0 9px 24px rgba(83, 49, 20, .075)
+      }
+
+      .lesson-top {
+        grid-template-columns: auto 1fr;
+        gap: 8px
+      }
+
+      .lesson-num {
+        width: 35px;
+        height: 35px;
+        border-radius: 11px;
+        font-size: 14px
+      }
+
+      .eyebrow {
+        font-size: 10px;
+        line-height: 1.1
+      }
+
+      .lesson-card h3 {
+        font-size: 16px;
+        line-height: 1.2;
+        margin-top: 1px
+      }
+
+      .priority {
+        grid-column: 2;
+        font-size: 11px;
+        margin-top: -3px
+      }
+
+      .keyword-pill {
+        font-size: 12px;
+        margin-top: 8px;
+        padding: 6px 8px
+      }
+
+      .one-line {
+        font-size: 12.5px;
+        margin: 8px 0;
+        padding: 9px;
+        border-radius: 13px
+      }
+
+      .lesson-card h4 {
+        font-size: 13px;
+        margin: 10px 0 5px
+      }
+
+      .lesson-card ul {
+        padding-left: 16px
+      }
+
+      .lesson-card li {
+        margin: 2px 0;
+        font-size: 12.6px
+      }
+
+      summary {
+        font-size: 12px;
+        padding: 8px 9px
+      }
+
+      details p {
+        font-size: 12px;
+        padding: 0 9px 9px
+      }
+
+      .tags {
+        gap: 4px;
+        margin-top: 9px
+      }
+
+      .tag {
+        font-size: 10px;
+        padding: 4px 6px
+      }
+
+      .scale-card {
+        padding: 11px;
+        border-radius: 15px
+      }
+
+      .scale-card h3 {
+        font-size: 15px;
+        margin-bottom: 5px
+      }
+
+      .scale-card p {
+        font-size: 12.5px;
+        margin: 4px 0
+      }
+
+      .checklist {
+        gap: 7px
+      }
+
+      .check {
+        padding: 10px;
+        border-radius: 14px;
+        font-size: 12.5px;
+        gap: 8px
+      }
+
+      .check input {
+        width: 17px;
+        height: 17px
+      }
+
+      .mobile-note {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 11.5px
+      }
+    }
+
+    @media (max-width:360px) {
+
+      .summary-grid,
+      .star-list {
+        grid-template-columns: 1fr
+      }
+
+      .keyword-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
+
+    @media print {
+      body {
+        background: white
+      }
+
+      .nav,
+      .hero-actions,
+      .toolbar,
+      .btn {
+        display: none !important
+      }
+
+      .hero {
+        padding: 0 0 10px
+      }
+
+      main {
+        padding: 0
+      }
+
+      .hero-card,
+      .mini-card,
+      .summary-card,
+      .keyword-card,
+      .memo-card,
+      .lesson-card,
+      .table-wrap,
+      .alert,
+      .scale-card {
+        box-shadow: none;
+        break-inside: avoid;
+        background: white
+      }
+
+      .lesson-grid,
+      .exam-grid,
+      .summary-grid,
+      .memo-grid,
+      .keyword-grid,
+      .scale-grid,
+      .checklist {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
 </head>
+
 <body>
-<header class="hero" id="top">
-  <div class="hero-card">
-    <div class="badge-row">
-      <span class="badge">🎯 시험 범위 1–12과</span>
-      <span class="badge">📖 오픈북</span>
-      <span class="badge">⭐ 별표 포인트 중심</span>
-      <span class="badge">🧠 보너스: 핵심 단어</span>
-    </div>
-    <h1>PSP 시험 힌트<br>총정리</h1>
-    <p class="hero-sub">녹음 전사본을 시험 직전용으로 재구성했습니다. 핵심 단어, 교수님이 “중요”라고 반복한 포인트, 암송 구절, 서술형 예상 답안을 한눈에 볼 수 있게 정리했습니다.</p>
-    <div class="hero-actions">
-      <button class="btn primary" onclick="window.print()">인쇄 / PDF 저장</button>
-      <button class="btn ghost" onclick="copyKeywords()">핵심 단어 복사</button>
-      <a class="btn ghost" href="#lessons" style="text-decoration:none">과별 카드 보기</a>
-    </div>
-  </div>
-</header>
-<nav class="nav" aria-label="빠른 이동">
-  <div class="nav-inner">
-    <a href="#exam">시험 정보</a>
-    <a href="#keywords">핵심 단어</a>
-    <a href="#tenmin">10분 암기</a>
-    <a href="#lessons">과별 정리</a>
-    <a href="#checklist">오픈북 전략</a>
-    <a href="#assignments">과제/공지</a>
-  </div>
-</nav>
-<main>
-  <section id="exam">
-    <div class="section-title">
-      <div>
-        <h2>시험 운영 정보</h2>
-        <p>헷갈리기 쉬운 규칙만 먼저 모았습니다.</p>
+  <header class="hero" id="top">
+    <div class="hero-card">
+      <div class="badge-row">
+        <span class="badge">📌 1–12과 정리본</span>
+        <span class="badge">📖 오픈북 대비</span>
+      </div>
+      <h1>PSP 1–12과<br>핵심 정리본</h1>
+      <div class="hero-actions">
+        <button class="btn primary" onclick="window.print()">인쇄 / PDF 저장</button>
+        <button class="btn ghost" onclick="copyKeywords()">핵심 단어 복사</button>
+        <a class="btn ghost" href="#lessons">과별 카드 보기</a>
       </div>
     </div>
-    <div class="grid exam-grid">
-  <article class="mini-card">
-    <span>시험 범위</span>
-    <strong>1과–12과</strong>
-    <small>오늘 배운 내용까지 포함</small>
-  </article>
-
-  <article class="mini-card">
-    <span>진행 방식</span>
-    <strong>오픈북</strong>
-    <small>오픈 자료 아님 · 책 중심</small>
-  </article>
-
-  <article class="mini-card">
-    <span>시험 시간</span>
-    <strong>40분</strong>
-    <small>강의 시작 전 진행</small>
-  </article>
-
-  <article class="mini-card">
-    <span>문항 구성</span>
-    <strong>총 20문제</strong>
-    <small>객관식 12 · 주관식 8</small>
-  </article>
-
-  <article class="mini-card">
-    <span>주관식 구성</span>
-    <strong>단답 5 · 서술 3</strong>
-    <small>서술형은 중요 표시한 내용에서 출제</small>
-  </article>
-
-  <article class="mini-card">
-    <span>합격 기준</span>
-    <strong>60점 이상</strong>
-    <small>결과는 당일 확인</small>
-  </article>
-
-  <article class="mini-card">
-    <span>허용/금지</span>
-    <strong>책 OK · 태블릿 X</strong>
-    <small>참가자 가이드북 X · 책에 인덱스 권장</small>
-  </article>
-
-  <article class="mini-card">
-    <span>보너스</span>
-    <strong>핵심 단어 빈칸</strong>
-    <small>순서대로 암기</small>
-  </article></div>
-  </section>
-
-  <section>
-    <div class="alert">
-      <h3>가장 먼저 볼 것</h3>
-      <p><span class="mark">핵심 단어 순서</span>, <span class="mark">마태복음 24장 14절</span>, <span class="mark">표로 나온 내용</span>—초림/재림, E/P 척도—그리고 “차이”를 묻는 개념—명령 vs 약속, 벽 vs 협곡, 대계명 vs 대위임령, 복음 전도 vs 사회적 행동—을 우선 암기하세요.</p>
+  </header>
+  <nav class="nav" aria-label="빠른 이동">
+    <div class="nav-inner">
+      <a href="#exam">시험 정보</a>
+      <a href="#points">포인트 정리</a>
+      <a href="#keywords">핵심 단어</a>
+      <a href="#tenmin">10분 암기</a>
+      <a href="#lessons">과별 정리</a>
+      <a href="#checklist">오픈북 전략</a>
     </div>
-  </section>
-
-  <section id="keywords">
-    <div class="section-title">
-      <div>
-        <h2>보너스 빈칸 대비: 핵심 단어</h2>
-        <p>전사본에서 명시된 단어는 그대로 두고, 전사 오류로 보이는 부분만 문맥상 보정했습니다.</p>
+  </nav>
+  <main>
+    <section id="exam">
+      <div class="section-title">
+        <div>
+          <h2>시험 운영 정보</h2>
+          <p>헷갈리기 쉬운 규칙만 압축했습니다.</p>
+        </div>
       </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>과</th><th>제목</th><th>핵심 단어</th><th>메모</th></tr></thead>
-        <tbody>
-<tr>
-  <td>1과</td>
-  <td>살아계신 하나님은 선교하는 하나님이시다</td>
-  <td><b>목적</b></td>
-  <td>전사본 명시</td>
-</tr>
-
-<tr>
-  <td>2과</td>
-  <td>하나님의 영광에 대한 이야기</td>
-  <td><b>열정</b></td>
-  <td>전사본 명시</td>
-</tr>
-
-<tr>
-  <td>3과</td>
-  <td>나라가 임하시오며</td>
-  <td><b>소망</b></td>
-  <td>전사본 명시</td>
-</tr>
-
-<tr>
-  <td>4과</td>
-  <td>열방을 위한 위임령</td>
-  <td><b>위임령</b></td>
-  <td>전사 “위임면” → 문맥상 보정</td>
-</tr>
-
-<tr>
-  <td>5과</td>
-  <td>복음을 자유롭게 함</td>
-  <td><b>증인</b></td>
-  <td>전사본 명시</td>
-</tr>
-
-<tr>
-  <td>6과</td>
-  <td>세계 기독교 운동의 확장</td>
-  <td><b>추진력</b></td>
-  <td>전사본 명시</td>
-</tr>
-
-<tr>
-  <td>7과</td>
-  <td>선교 역사의 여러 시대</td>
-  <td><b>과업완수</b></td>
-  <td>전사 흐름 + 커리큘럼 보정</td>
-</tr>
-
-<tr>
-  <td>8과</td>
-  <td>세계 기독교 운동의 개척자들</td>
-  <td><b>PPT/책 확인</b></td>
-  <td>전사에서 별도 핵심어 미언급</td>
-</tr>
-
-<tr>
-  <td>9과</td>
-  <td>남은 과업</td>
-  <td><b>전략적</b></td>
-  <td>전사 “구과/남은 과업” 문맥 보정</td>
-</tr>
-
-<tr>
-  <td>10과</td>
-  <td>그들은 어떻게 들을 것인가</td>
-  <td><b>듣기</b></td>
-  <td>전사 “1과” → 10과 문맥 보정</td>
-</tr>
-
-<tr>
-  <td>11과</td>
-  <td>사랑의 다리 놓기</td>
-  <td><b>받아들임</b></td>
-  <td>전사본 명시</td>
-</tr>
-
-<tr>
-  <td>12과</td>
-  <td>기독교 지역사회 개발 / 빈곤</td>
-  <td><b>변혁</b></td>
-  <td>전사 “변역” → 문맥상 보정</td>
-</tr></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="tenmin">
-    <div class="section-title">
-      <div>
-        <h2>시험 직전 10분 암기</h2>
-        <p>짧게 보고 바로 답안에 쓸 수 있는 형태입니다.</p>
+      <div class="grid exam-grid">
+        <article class="mini-card"><span>시험 범위</span><strong>1–12과</strong><small>오늘 배운 내용까지 포함</small></article>
+        <article class="mini-card"><span>진행 방식</span><strong>오픈북</strong><small>오픈 자료 아님 · 책 중심</small></article>
+        <article class="mini-card"><span>시험 시간</span><strong>40분</strong><small>강의 시작 전 진행</small></article>
+        <article class="mini-card"><span>문항 구성</span><strong>20문제</strong><small>객관식 12 · 주관식 8</small></article>
+        <article class="mini-card"><span>주관식</span><strong>단답 5 · 서술 3</strong><small>중요 표시 내용 중심</small></article>
+        <article class="mini-card"><span>합격 기준</span><strong>60점+</strong><small>결과는 당일 확인</small></article>
+        <article class="mini-card"><span>허용/금지</span><strong>책 OK</strong><small>태블릿 X · 가이드북 X</small></article>
+        <article class="mini-card"><span>보너스</span><strong>핵심 단어</strong><small>대괄호 단어 순서대로</small></article>
       </div>
-    </div>
-    <div class="memo-grid">
-      <article class="memo-card">
-        <h3>마태복음 24장 14절</h3>
-        <p class="verse">“이 천국 복음이 모든 민족에게 증언되기 위하여 온 세상에 전파되리니 그제야 끝이 오리라.”</p>
-        <p>전사에서 “외우면 한 문제 OK”라고 언급된 구절입니다. 정확한 문장 순서를 책 기준으로 확인하고 표시해 두세요.</p>
-      </article>
-      <article class="memo-card">
-        <h3>서술형 답안 공식</h3>
-        <p><b>정의 → 차이/이유 → 예시 → 결론</b> 순서로 쓰면 안정적입니다.</p>
-        <p>예: “상황화란 복음의 본래 의미에 충실하면서도 그 문화가 들을 수 있는 적절한 옷을 입히는 것이다. 그러나 세계관은 변하지 않고 겉모양만 섞이면 혼합주의가 되므로 경계해야 한다.”</p>
-      </article>
-    </div>
-  </section>
+    </section>
 
-  <section>
-    <div class="section-title">
-      <div>
-        <h2>출제 암시 포인트 모음</h2>
-        <p>전사에서 “시험”, “중요”, “별표”, “표 등장”으로 강조된 내용입니다.</p>
+    <section>
+      <div class="alert">
+        <h3>가장 먼저 볼 것</h3>
+        <p><span class="mark">핵심 단어 순서</span>, <span class="mark">마태복음 24장 14절</span>, <span class="mark">E/P 척도</span>,
+          <span class="mark">로이드 콰스트 4층 이론</span>, 그리고 “차이”를 묻는 개념—명령 vs 약속, 대계명 vs 대위임령, 상황화 vs 혼합주의, 복음 전도 vs 사회적 행동—을
+          먼저 잡으면 좋습니다.
+        </p>
       </div>
-    </div>
-    <ol class="star-list"><li><span>01</span>아브라함 언약: 명령이 아니라 약속</li>
-<li><span>02</span>명령과 약속의 차이</li>
-<li><span>03</span>선교가 존재하는 이유: 예배가 없기 때문</li>
-<li><span>04</span>영광의 이중적 방향</li>
-<li><span>05</span>초림과 재림 사이 표 / 세계 복음화 시대</li>
-<li><span>06</span>마태복음 24장 14절 암송</li>
-<li><span>07</span>요한복음 20장 21절과 보내심의 원리</li>
-<li><span>08</span>대계명과 대위임령의 관계</li>
-<li><span>09</span>벽과 협곡의 차이</li>
-<li><span>10</span>예루살렘 공의회와 문화적 다양성</li>
-<li><span>11</span>사도적 열정: 포기 · 초점 · 기도 · 의사결정</li>
-<li><span>12</span>소달리티와 모달리티</li>
-<li><span>13</span>선교의 네 가지 유형</li>
-<li><span>14</span>지리적 개념에서 문화적 개념으로의 전환</li>
-<li><span>15</span>E-척도 / P-척도</li>
-<li><span>16</span>도시 선교의 세 이유</li>
-<li><span>17</span>로이드 콰스트 4층 이론: 행동 → 가치 → 신념 → 세계관</li>
-<li><span>18</span>상황화와 혼합주의</li>
-<li><span>19</span>성육신 모델의 세 가지 포기</li>
-<li><span>20</span>빈곤 해결 네 방법</li>
-<li><span>21</span>복음 전도와 사회적 행동의 역동적 균형</li></ol>
-  </section>
+    </section>
 
-  <section id="lessons">
-    <div class="section-title">
-      <div>
-        <h2>과별 출제 포인트 카드</h2>
-        <p>검색창에 “상황화”, “도시”, “예루살렘”, “마24”처럼 입력하면 해당 카드만 볼 수 있습니다.</p>
+    <section id="points">
+      <div class="section-title">
+        <div>
+          <h2>관점별 포인트 정리</h2>
+        </div>
       </div>
-    </div>
-    <div class="toolbar">
-      <input class="search" id="search" placeholder="검색어 입력: 예) 약속, 영광, 마태복음, 소달리티, 빈곤">
-      <div class="filter-row">
-        <button class="filter active" data-filter="all">전체</button>
-        <button class="filter" data-filter="성경적 관점">성경</button>
-        <button class="filter" data-filter="역사적 관점">역사</button>
-        <button class="filter" data-filter="문화적 관점">문화</button>
-        <button class="filter" data-filter="전략적 관점">전략</button>
+      <div class="summary-grid">
+        <article class="summary-card">
+          <h3>✅ 성경적 관점</h3>
+          <ul>
+            <li>1과 약속: 명령이 아니라 약속</li>
+            <li>2과 열정: 선교는 예배가 없기 때문에 존재</li>
+            <li>3과 소망: 초림과 재림 사이는 긍휼의 때</li>
+            <li>4과 위임령: 요 20:21의 보내심</li>
+            <li>5과 증인: 복음을 자유롭게 함</li>
+          </ul>
+        </article>
+        <article class="summary-card">
+          <h3>✅ 역사적 관점</h3>
+          <ul>
+            <li>6과 추진력: 하나님이 역사 속에서 계속 선교하심</li>
+            <li>7–8과 과업완수: 지리에서 문화 개념으로 확장</li>
+            <li>9과 전략적: 도시·종족·남은 과업</li>
+            <li>E/P 척도: 문화적 거리와 접근 거리</li>
+          </ul>
+        </article>
+        <article class="summary-card">
+          <h3>✅ 문화적 관점</h3>
+          <ul>
+            <li>10과 듣기: 행동 → 가치 → 신념 → 세계관</li>
+            <li>상황화: 복음의 의미는 지키고 문화에 맞게 전달</li>
+            <li>혼합주의: 세계관 변화 없이 껍데기만 섞이는 것</li>
+            <li>11과 받아들임: 성육신 모델의 세 가지 포기</li>
+          </ul>
+        </article>
+        <article class="summary-card">
+          <h3>✅ 전략적 관점</h3>
+          <ul>
+            <li>12과 변혁: 총체적 선교</li>
+            <li>복음 전도와 사회활동은 역동적 균형</li>
+            <li>영혼·육체·정신을 함께 돌보는 접근</li>
+            <li>지역사회 개발은 자생성을 세우는 방향</li>
+          </ul>
+        </article>
       </div>
-    </div>
-    <div class="lesson-grid" id="lessonGrid">
-<article class="lesson-card" data-keywords="1 살아계신 하나님은 선교하는 하나님이시다 목적 성경적 관점 약속 시험에 나온다 세 방향" data-group="성경적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">1</div>
-    <div>
-      <p class="eyebrow">성경적 관점</p>
-      <h3>살아계신 하나님은 선교하는 하나님이시다</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>목적</b></div>
-  <p class="one-line">하나님의 목적은 “우리의 목적”이 아니라 전 세계를 향한 하나님의 목적이다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>아브라함에게 주신 것은 명령이 아니라 약속이다.</li>
-<li>명령은 명령을 받은 사람이 중요하지만, 약속은 약속한 분이 중요하다.</li>
-<li>약속은 하나님이 직접 책임지고 이루시겠다는 뜻이다.</li>
-<li>약속의 내용: “땅의 모든 족속에게 복” · 우리는 복이 되기 위해 복을 받는다.</li>
-<li>세 방향: 하나님 · 사람 · 악.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>아브라함에게 주신 하나님의 목적은 어떤 형태인가?</summary><p>명령이 아니라 약속의 형태.</p></details>
-<details><summary>약속과 명령의 차이는?</summary><p>명령은 받은 사람의 순종 책임이 강조되고, 약속은 약속한 하나님이 책임지고 이루심이 강조된다.</p></details></div>
-  <div class="tags"><span class="tag">#약속</span><span class="tag">#시험에 나온다</span><span class="tag">#세 방향</span></div>
-</article>
+    </section>
 
-<article class="lesson-card" data-keywords="2 하나님의 영광에 대한 이야기 열정 성경적 관점 매우 중요 예배 영광의 이중적 방향" data-group="성경적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">2</div>
-    <div>
-      <p class="eyebrow">성경적 관점</p>
-      <h3>하나님의 영광에 대한 이야기</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>열정</b></div>
-  <p class="one-line">열정은 가장 값진 것을 추구하는 마음이고, 가장 값진 것은 하나님의 영광이다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>하나님의 영광을 가장 많이 추구하시는 분은 하나님 자신이다.</li>
-<li>선교가 존재하는 이유: 그곳에 예배가 없기 때문이다.</li>
-<li>하나님은 열방에 자신의 영광을 보이시고, 열방은 그 영광을 보고 예배로 반응한다.</li>
-<li>이것이 영광의 이중적 방향이다.</li>
-<li>모든 민족 가운데 예배가 드려지게 하기 위해 선교가 필요하다.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>선교는 왜 존재하는가?</summary><p>그곳에 예배가 없기 때문에 존재한다.</p></details>
-<details><summary>영광의 이중적 방향은?</summary><p>하나님이 영광을 보이심 → 열방이 예배로 반응함.</p></details></div>
-  <div class="tags"><span class="tag">#매우 중요</span><span class="tag">#예배</span><span class="tag">#영광의 이중적 방향</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="3 나라가 임하시오며 소망 성경적 관점 표 등장 마24:14 기도" data-group="성경적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">3</div>
-    <div>
-      <p class="eyebrow">성경적 관점</p>
-      <h3>나라가 임하시오며</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>소망</b></div>
-  <p class="one-line">하나님 나라는 하나님이 다스리시는 것이고, 하나님 나라의 복음은 “하나님이 다스리신다”는 복음이다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>초림과 재림 사이의 표가 시험에 등장한다고 언급됨.</li>
-<li>초림과 재림 사이: 세계 복음화 시대 · 승리를 선포하는 시간.</li>
-<li>선교는 신약 시대에만 있었던 것이 아니라 구약 시대에도 계속 있었다.</li>
-<li>마태복음 24장 14절 암송: 한 문제 가능성이 큼.</li>
-<li>소망을 가진 사람은 현실의 악을 체념하지 않고 기도한다. “현상에 대한 반역 = 기도”.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>하나님 나라는 무엇인가?</summary><p>하나님이 다스리시는 것.</p></details>
-<details><summary>마태복음 24:14의 핵심 흐름은?</summary><p>천국 복음이 모든 민족에게 증언되기 위해 온 세상에 전파되고, 그제야 끝이 옴.</p></details></div>
-  <div class="tags"><span class="tag">#표 등장</span><span class="tag">#마24:14</span><span class="tag">#기도</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="4 열방을 위한 위임령 위임령 성경적 관점 요20:21 대계명 대위임령" data-group="성경적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">4</div>
-    <div>
-      <p class="eyebrow">성경적 관점</p>
-      <h3>열방을 위한 위임령</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>위임령</b></div>
-  <p class="one-line">예수님은 모든 민족을 구원하시려는 목적을 가지셨고, 전략적으로 소수 제자에게 집중하셨다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>요한복음 20장 21절: “아버지께서 나를 보내신 것 같이 나도 너희를 보내노라.”</li>
-<li>예수님이 우리를 보내시는 방식 안에는 사랑 · 권능 · 목적 · 관계가 담겨 있다.</li>
-<li>대위임령과 대계명은 경쟁 관계가 아니라 같은 소명 안에 있다.</li>
-<li>대계명은 계속 지속되는 것, 대위임령은 성취 가능한 과업이다.</li>
-<li>어느 하나가 빠지면 안 된다.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>대계명과 대위임령의 관계는?</summary><p>경쟁이 아니라 같은 소명 안에 있으며 둘 다 필요하다.</p></details>
-<details><summary>대계명과 대위임령의 차이는?</summary><p>대계명은 지속되고, 대위임령은 성취 가능한 과업이다.</p></details></div>
-  <div class="tags"><span class="tag">#요20:21</span><span class="tag">#대계명</span><span class="tag">#대위임령</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="5 복음을 자유롭게 함 증인 성경적 관점 예루살렘 공의회 벽과 협곡 소달리티" data-group="성경적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">5</div>
-    <div>
-      <p class="eyebrow">성경적 관점</p>
-      <h3>복음을 자유롭게 함</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>증인</b></div>
-  <p class="one-line">증인은 모든 민족에게 보내심을 받은 사람들이다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>사도행전 1장 8절: 성령 · 권능 · 예루살렘 · 온 유대 · 사마리아 · 땅끝 · 증인.</li>
-<li>벽은 복음을 전하는 우리가 넘어야 할 장애물이다.</li>
-<li>협곡은 복음을 받아들이는 현지인이 넘어야 할 장애물이다.</li>
-<li>예루살렘 공의회는 복음이 유대인을 넘어 전 세계로 뻗어나갈 수 있었던 결정적 사건이다.</li>
-<li>이방인에게 율법과 할례를 강요하지 않기로 한 것은 문화적 다양성을 인정한 사건이다.</li>
-<li>결론: 우리는 그들처럼 되고, 그들은 그대로 지낼 수 있도록 해야 한다.</li>
-<li>복음이 문화의 옷을 벗고 자유로워졌다.</li>
-<li>사도적 열정: 사도적 포기 · 초점 · 기도 · 의사결정.</li>
-<li>소달리티 = 선교 단체/파송 구조, 모달리티 = 교회/양육 구조. 안디옥 교회는 모달리티, 바울 선교단은 소달리티.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>벽과 협곡의 차이는?</summary><p>벽은 전하는 사람이 넘을 장애물, 협곡은 현지인이 넘을 장애물.</p></details>
-<details><summary>예루살렘 공의회의 의미는?</summary><p>이방인에게 유대 문화의 옷을 강요하지 않고 복음을 자유롭게 한 사건.</p></details></div>
-  <div class="tags"><span class="tag">#예루살렘 공의회</span><span class="tag">#벽과 협곡</span><span class="tag">#소달리티</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="6 세계 기독교 운동의 확장 추진력 역사적 관점 4가지 유형 역사 하나님이 하심" data-group="역사적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">6</div>
-    <div>
-      <p class="eyebrow">역사적 관점</p>
-      <h3>세계 기독교 운동의 확장</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★☆</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>추진력</b></div>
-  <p class="one-line">역사 속에서 선교를 하신 분은 하나님이시며, 하나님은 모든 민족에게 복 주시는 일을 계속하고 계신다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>선교의 4가지 유형: 자발적으로 나아감 · 비자발적으로 나아감 · 자발적으로 찾아옴 · 비자발적으로 찾아옴.</li>
-<li>자발적으로 나아감 예: 바울, 베드로가 고넬료에게 감, 선교사들.</li>
-<li>비자발적으로 나아감 예: 요셉처럼 끌려감/원치 않았으나 보내심을 받음.</li>
-<li>자발적으로 찾아옴 예: 시바 여왕, 나아만.</li>
-<li>비자발적으로 찾아옴 예: 침략 등.</li>
-<li>핵심 포인트: 정복자들이 복음으로 정복되었다. 사로잡은 자들이 사로잡힌 자에 의해 사로잡히는 역사.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>역사 속 선교의 주체는?</summary><p>하나님.</p></details>
-<details><summary>선교의 네 유형은?</summary><p>자발적 나아감, 비자발적 나아감, 자발적 찾아옴, 비자발적 찾아옴.</p></details></div>
-  <div class="tags"><span class="tag">#4가지 유형</span><span class="tag">#역사</span><span class="tag">#하나님이 하심</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="7 선교 역사의 여러 시대 과업완수 역사적 관점 E/P 척도 문화적 거리 과업완수" data-group="역사적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">7</div>
-    <div>
-      <p class="eyebrow">역사적 관점</p>
-      <h3>선교 역사의 여러 시대</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★☆</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>과업완수</b></div>
-  <p class="one-line">최근 선교 개념의 큰 전환은 지리적 개념에서 문화적 개념으로 바뀐 것이다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>해안선 · 내지는 땅/지리의 개념이었다.</li>
-<li>이후 시대는 미전도 종족, 즉 사람/종족의 개념으로 바뀌었다.</li>
-<li>선교는 단순히 멀리 가는 것이 아니라 문화를 넘어가는 것이다.</li>
-<li>문화적 거리를 재는 척도로 E-척도와 P-척도를 기억한다.</li>
-<li>E-척도: 내가 복음을 전할 때 상대와 나 사이의 문화적 거리.</li>
-<li>P-척도: 그쪽 사람들에게 교회가 얼마나 먼가를 보는 척도.</li>
-<li>E2 · E3는 필수적, E0 · E1은 효과적 사역으로 정리.</li>
-<li>선교적 돌파: 복음을 듣고 그 안에 교회가 생겨 효과적인 가까운 거리의 사역이 가능해지는 것.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>오늘날 선교를 이해하는 핵심 전환은?</summary><p>지리적 개념에서 문화적 개념으로 전환.</p></details>
-<details><summary>E-척도와 P-척도의 차이는?</summary><p>E는 전하는 사람과 대상의 문화적 거리, P는 그 대상에게 교회가 얼마나 먼지의 거리.</p></details></div>
-  <div class="tags"><span class="tag">#E/P 척도</span><span class="tag">#문화적 거리</span><span class="tag">#과업완수</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="8 세계 기독교 운동의 개척자들 PPT/책 확인 역사적 관점 확인 필요 오픈북 대비 인덱스" data-group="역사적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">8</div>
-    <div>
-      <p class="eyebrow">역사적 관점</p>
-      <h3>세계 기독교 운동의 개척자들</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★☆☆</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>PPT/책 확인</b></div>
-  <p class="one-line">전사본에서 8과 핵심 단어는 별도로 뚜렷하게 언급되지 않았다. 책/PPT의 키워드 빈칸을 반드시 확인하자.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>전사 흐름상 7과와 9과 사이에 별도 세부 설명은 거의 없다.</li>
-<li>시험 직전에는 책 목차와 키워드 맵에서 8과 제목/핵심 단어 위치를 체크하자.</li>
-<li>오픈북이므로 8과 시작 페이지에 인덱스를 붙이는 것이 안전하다.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>8과 핵심 단어는 전사본만으로 확정 가능한가?</summary><p>전사본에서는 별도 언급이 없으므로 PPT/책 확인 필요.</p></details>
-<details><summary>오픈북 대비는?</summary><p>8과 페이지에 인덱스를 붙이고 제목·대표 인물·흐름을 확인.</p></details></div>
-  <div class="tags"><span class="tag">#확인 필요</span><span class="tag">#오픈북 대비</span><span class="tag">#인덱스</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="9 남은 과업 전략적 역사적/문화적 관점 연결 미전도 종족 도시 선교 표" data-group="역사적/문화적 관점 연결">
-  <div class="lesson-top">
-    <div class="lesson-num">9</div>
-    <div>
-      <p class="eyebrow">역사적/문화적 관점 연결</p>
-      <h3>남은 과업</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>전략적</b></div>
-  <p class="one-line">남은 과업은 미전도 종족이며, 열정만이 아니라 전략적으로 접근해야 한다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>복음을 듣지 못한 사람이 여전히 있다는 현실이 비극이다.</li>
-<li>도전의 세 가지: 지리적 도전 · 종족적 도전 · 도시적 도전.</li>
-<li>도시 선교가 중요한 이유 세 가지: 인구 집중 · 복음에 대한 개방성 · 인종적 다양성.</li>
-<li>선교적 돌파: 자생적이고 토착적이며 스스로 배가할 수 있는 교회가 생기는 것.</li>
-<li>E-척도/P-척도 표도 잘 기억하라고 강조됨.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>도시 선교가 중요한 세 가지 이유는?</summary><p>인구 집중, 복음에 대한 개방성, 인종적 다양성.</p></details>
-<details><summary>선교적 돌파란?</summary><p>그들 가운데 자생적·토착적·스스로 배가 가능한 교회가 생기는 것.</p></details></div>
-  <div class="tags"><span class="tag">#미전도 종족</span><span class="tag">#도시 선교</span><span class="tag">#표</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="10 그들은 어떻게 들을 것인가 듣기 문화적 관점 행동-가치-신념-세계관 상황화 혼합주의" data-group="문화적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">10</div>
-    <div>
-      <p class="eyebrow">문화적 관점</p>
-      <h3>그들은 어떻게 들을 것인가</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>듣기</b></div>
-  <p class="one-line">중심은 “우리가 어떻게 말할까”가 아니라 “그들이 어떻게 들을 것인가”이다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>로이드 콰스트의 4층 이론 순서가 매우 중요하다.</li>
-<li>암기법: 여·행·가·신·세 = 여행 가신세.</li>
-<li>순서: 행동 → 가치 → 신념 → 세계관.</li>
-<li>문화가 다르기 때문에 오해하지 말고, 그들이 들을 수 있도록 전달해야 한다.</li>
-<li>그것을 상황화라고 한다.</li>
-<li>가장 깊은 세계관이 변해야 진짜 변혁이 일어난다.</li>
-<li>복음의 본래 의미에는 충실하면서 그 문화에 적절한 옷을 입혀야 한다.</li>
-<li>세계관은 변하지 않고 껍데기만 섞이면 혼합주의가 되므로 경계해야 한다.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>로이드 콰스트 4층 이론 순서는?</summary><p>행동 → 가치 → 신념 → 세계관.</p></details>
-<details><summary>상황화란?</summary><p>복음의 본래 의미에 충실하면서 그 문화가 들을 수 있는 적절한 옷을 입히는 것.</p></details></div>
-  <div class="tags"><span class="tag">#행동-가치-신념-세계관</span><span class="tag">#상황화</span><span class="tag">#혼합주의</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="11 사랑의 다리 놓기 받아들임 문화적 관점 세 가지 포기 성육신 이중문화적 다리" data-group="문화적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">11</div>
-    <div>
-      <p class="eyebrow">문화적 관점</p>
-      <h3>사랑의 다리 놓기</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>받아들임</b></div>
-  <p class="one-line">10과가 메시지라면 11과는 메신저, 즉 선교사가 어떤 태도로 가야 하는가의 문제다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>복음을 전하려면 먼저 그들에게 받아들여져야 한다.</li>
-<li>예수님의 성육신 모델에 따라 세 가지를 포기해야 한다.</li>
-<li>첫째, 신분의 포기: 하나님의 아들로서의 특권과 권리를 포기하심.</li>
-<li>둘째, 독립의 포기: 물을 얻어 마시고, 집·배·무덤까지 빌려 쓰심. 선교사도 의존하며 함께 살아야 함.</li>
-<li>셋째, 면제받는 특권의 포기: 시험·슬픔·인간의 한계를 함께 경험하심.</li>
-<li>문화적 차이를 극복하기 위해 제3의 문화, 이중 문화적 다리를 놓아야 한다.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>성육신 모델에서 포기해야 할 세 가지는?</summary><p>신분, 독립, 면제받는 특권.</p></details>
-<details><summary>왜 포기해야 하는가?</summary><p>그들과 동일화되어 받아들여져야 복음을 전할 수 있기 때문.</p></details></div>
-  <div class="tags"><span class="tag">#세 가지 포기</span><span class="tag">#성육신</span><span class="tag">#이중문화적 다리</span></div>
-</article>
-
-<article class="lesson-card" data-keywords="12 기독교 지역사회 개발 / 빈곤 변혁 전략적 관점 빈곤 총체적 선교 역동적 균형" data-group="전략적 관점">
-  <div class="lesson-top">
-    <div class="lesson-num">12</div>
-    <div>
-      <p class="eyebrow">전략적 관점</p>
-      <h3>기독교 지역사회 개발 / 빈곤</h3>
-    </div>
-    <div class="priority" aria-label="중요도">★★★★★</div>
-  </div>
-  <div class="keyword-pill">핵심 단어 <b>변혁</b></div>
-  <p class="one-line">여기서 빈곤은 상대적 빈곤이 아니라 생존을 위협하는 절대적 빈곤이다.</p>
-  <h4>별표 포인트</h4>
-  <ul><li>빈곤 해결의 네 가지 방법: 구제 · 정치 해방 · 경제 성장 · 지역사회 개발.</li>
-<li>지역사회 개발은 단순히 물건을 주는 것이 아니라, 그 안에서 자생적으로 유지·운영할 수 있도록 돕는 것이다.</li>
-<li>지역사회 개발은 총체적 · 통합적 · 변혁적 · 기독교적이어야 한다.</li>
-<li>굶주림과 빈곤의 근본 원인은 식량 부족이 아니라 분배의 불균형이다.</li>
-<li>영혼만이 아니라 육체와 정신을 모두 돌보는 총체적 선교가 필요하다.</li>
-<li>복음 전도와 사회적 행동 사이에 항상 일정한 우선순위가 있는 것은 아니다.</li>
-<li>상황에 따라 복음을 먼저 전하기도 하고, 병자를 먼저 치유하기도 한다. 핵심은 역동적 균형이다.</li></ul>
-  <h4>예상 문답</h4>
-  <div class="qna"><details><summary>빈곤 해결의 네 가지 방법은?</summary><p>구제, 정치 해방, 경제 성장, 지역사회 개발.</p></details>
-<details><summary>복음 전도와 사회적 행동 사이에 고정된 우선순위가 있는가?</summary><p>없다. 상황에 따라 역동적 균형을 이룬다.</p></details></div>
-  <div class="tags"><span class="tag">#빈곤</span><span class="tag">#총체적 선교</span><span class="tag">#역동적 균형</span></div>
-</article></div>
-  </section>
-
-  <section id="checklist">
-    <div class="section-title">
-      <div>
-        <h2>오픈북 시험 전략 체크리스트</h2>
-        <p>체크 상태는 이 브라우저에 저장됩니다.</p>
+    <section id="keywords">
+      <div class="section-title">
+        <div>
+          <h2>핵심 단어</h2>
+        </div>
       </div>
-    </div>
-    <div class="checklist"><label class="check"><input type="checkbox" data-check="1"><span>책에 1–12과 시작 페이지 인덱스 붙이기</span></label>
-<label class="check"><input type="checkbox" data-check="2"><span>핵심 단어 표를 책 앞장/해당 과 첫 페이지에 정리하기</span></label>
-<label class="check"><input type="checkbox" data-check="3"><span>마태복음 24장 14절을 책에 크게 표시하고 암송하기</span></label>
-<label class="check"><input type="checkbox" data-check="4"><span>초림–재림 사이 표, E/P 척도 표 위치 표시하기</span></label>
-<label class="check"><input type="checkbox" data-check="5"><span>예루살렘 공의회, 소달리티/모달리티, 네 가지 선교 유형 페이지 표시하기</span></label>
-<label class="check"><input type="checkbox" data-check="6"><span>서술형 대비: “왜 그런가?”를 한두 문장으로 설명할 수 있게 정리하기</span></label>
-<label class="check"><input type="checkbox" data-check="7"><span>태블릿·참가자 가이드북이 아니라 책을 준비하기</span></label>
-<label class="check"><input type="checkbox" data-check="8"><span>13·14과 질문지/밀린 질문지 제출 일정 확인하기</span></label></div>
-  </section>
-
-  <section id="assignments">
-    <div class="section-title">
-      <div>
-        <h2>과제 및 공지</h2>
-        <p>시험 외에 수료 기준과 관련된 안내입니다.</p>
+      <div class="keyword-grid">
+        <article class="keyword-card"><span>1과</span><strong>약속</strong><small>명령이 아니라 약속</small></article>
+        <article class="keyword-card"><span>2과</span><strong>열정</strong><small>하나님의 영광</small></article>
+        <article class="keyword-card"><span>3과</span><strong>소망</strong><small>초림–재림 사이</small></article>
+        <article class="keyword-card"><span>4과</span><strong>위임령</strong><small>보내심</small></article>
+        <article class="keyword-card"><span>5과</span><strong>증인</strong><small>복음의 자유</small></article>
+        <article class="keyword-card"><span>6과</span><strong>추진력</strong><small>역사 속 선교</small></article>
+        <article class="keyword-card"><span>7–8과</span><strong>과업완수</strong><small>문화적 거리</small></article>
+        <article class="keyword-card"><span>9과</span><strong>전략적</strong><small>도시 선교</small></article>
+        <article class="keyword-card"><span>10과</span><strong>듣기</strong><small>상황화</small></article>
+        <article class="keyword-card"><span>11과</span><strong>받아들임</strong><small>성육신 모델</small></article>
+        <article class="keyword-card"><span>12과</span><strong>변혁</strong><small>총체적 선교</small></article>
       </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>항목</th><th>내용</th></tr></thead>
-        <tbody><tr><td>6월 1일</td><td>13·14과 질문지 함께 제출</td></tr>
-<tr><td>예습</td><td>13·14과 학습 안내문 예습</td></tr>
-<tr><td>읽기</td><td>13·14과 필수 읽기 자료 읽어오기</td></tr>
-<tr><td>밀린 것</td><td>밀린 질문지는 다음 주까지 제출</td></tr>
-<tr><td>질문</td><td>모르는 내용은 조장님께 문의</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+    </section>
 
-  <section>
-    <div class="note">
-      <b>정리 기준</b><br>
-      이 문서는 업로드한 전사본을 바탕으로 만들었습니다. “위임면→위임령”, “변역→변혁”, “1과→10과”처럼 전사 오류로 보이는 부분은 문맥상 자연스럽게 보정했습니다. 단, 8과 핵심 단어는 전사본에서 별도로 확인되지 않아 책/PPT 확인 항목으로 표시했습니다.
-    </div>
-  </section>
+    <section id="tenmin">
+      <div class="section-title">
+        <div>
+          <h2>시험 직전 10분 암기</h2>
+          <p>바로 답안에 쓸 수 있게 짧은 문장으로 정리했습니다.</p>
+        </div>
+      </div>
+      <div class="memo-grid">
+        <article class="memo-card">
+          <h3>마태복음 24장 14절</h3>
+          <p class="verse">“이 천국 복음이 모든 민족에게 증언되기 위하여 온 세상에 전파되리니 그제야 끝이 오리라.”</p>
+          <p>3과 소망과 연결됩니다. 초림과 재림 사이의 선교는 모든 민족에게 복음이 증언되는 흐름으로 이해하면 됩니다.</p>
+        </article>
+        <article class="memo-card">
+          <h3>서술형 답안 공식</h3>
+          <p><b>정의 → 차이/이유 → 예시 → 결론</b> 순서로 쓰면 안정적입니다.</p>
+          <p>예: “상황화란 복음의 본래 의미에 충실하면서도 그 문화가 들을 수 있게 전달하는 것이다. 그러나 세계관은 변하지 않고 겉모양만 섞이면 혼합주의가 되므로 경계해야 한다.”</p>
+        </article>
+      </div>
+    </section>
 
-  <p class="footer">PSP 시험 힌트 총정리 · 모바일/인쇄 최적화 HTML</p>
-</main>
-<script>
-const keywordText = `1과 목적
+    <section>
+      <div class="section-title">
+        <div>
+          <h2>출제 가능 포인트 모음</h2>
+          <p>핵심 단어와 함께 외우면 좋은 비교·정의형 포인트입니다.</p>
+        </div>
+      </div>
+      <ol class="star-list">
+        <li><span>01</span>아브라함 언약: 명령이 아니라 약속</li>
+        <li><span>02</span>하나님 영광의 세 방향: 하나님 · 사람 · 악</li>
+        <li><span>03</span>선교가 존재하는 이유: 예배가 없기 때문</li>
+        <li><span>04</span>종말에는 선교는 사라지고 예배는 영원함</li>
+        <li><span>05</span>영광의 이중적 방향: 하나님이 드러내심 → 우리가 예배로 답함</li>
+        <li><span>06</span>초림과 재림 사이: 긍휼의 때</li>
+        <li><span>07</span>마태복음 24장 14절 암송</li>
+        <li><span>08</span>요한복음 20장 21절: 보내심의 방식</li>
+        <li><span>09</span>대계명은 지속, 대위임령은 성취 가능한 과업</li>
+        <li><span>10</span>예루살렘 공의회: 복음을 자유하게 함</li>
+        <li><span>11</span>사도적 열정: 포기 · 초점 · 기도 · 의사결정</li>
+        <li><span>12</span>소달리티와 모달리티</li>
+        <li><span>13</span>선교의 네 가지 유형</li>
+        <li><span>14</span>선교 개념: 지리적 개념에서 문화적 개념으로 확장</li>
+        <li><span>15</span>E-척도/P-척도: E는 전하는 사람, P는 받는 사람 입장</li>
+        <li><span>16</span>E2·E3는 필수적, E0·E1은 효과적</li>
+        <li><span>17</span>도시 선교: 인구 집중 · 복음 개방성 · 다양한 종족</li>
+        <li><span>18</span>로이드 콰스트 4층 이론: 행동 → 가치 → 신념 → 세계관</li>
+        <li><span>19</span>상황화와 혼합주의 구분</li>
+        <li><span>20</span>성육신 모델의 세 가지 포기: 신분 · 독립 · 면제받을 특권</li>
+        <li><span>21</span>총체적 선교: 복음 전도와 사회활동의 균형</li>
+      </ol>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <div>
+          <h2>표로 외우기: E/P 척도</h2>
+          <p>7–8과 과업완수와 9과 전략적 접근에 같이 연결됩니다.</p>
+        </div>
+      </div>
+      <div class="scale-grid">
+        <article class="scale-card">
+          <h3>E-척도</h3>
+          <p><b>전하는 사람 입장</b>에서 복음을 전할 때 상대와 나 사이의 문화적 거리를 봅니다.</p>
+          <p><b>E0·E1</b>: 가까운 문화권, 효과적 사역</p>
+          <p><b>E2·E3</b>: 먼 문화권, 반드시 필요한 선교적 돌파</p>
+        </article>
+        <article class="scale-card">
+          <h3>P-척도</h3>
+          <p><b>받는 사람 입장</b>에서 그들에게 교회와 복음 공동체가 얼마나 먼지를 봅니다.</p>
+          <p>가까운 교회가 있으면 접근 장벽이 낮고, 없을수록 문화적·관계적 장벽이 커집니다.</p>
+          <p>핵심은 “어디까지 갔는가”보다 “그들이 들을 수 있는가”입니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="lessons">
+      <div class="section-title">
+        <div>
+          <h2>과별 출제 포인트 카드</h2>
+          <p>검색창에 “상황화”, “도시”, “공의회”, “마24”, “E척도”처럼 입력하면 해당 카드만 볼 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input class="search" id="search" placeholder="검색어 입력: 예) 약속, 영광, 마태복음, 소달리티, 빈곤">
+        <div class="filter-row">
+          <button class="filter active" data-filter="all">전체</button>
+          <button class="filter" data-filter="성경적 관점">성경</button>
+          <button class="filter" data-filter="역사적 관점">역사</button>
+          <button class="filter" data-filter="문화적 관점">문화</button>
+          <button class="filter" data-filter="전략적 관점">전략</button>
+        </div>
+      </div>
+      <div class="lesson-grid" id="lessonGrid">
+        <article class="lesson-card" data-keywords="1 약속 성경적 관점 명령 약속 하나님 영광 세 방향 하나님 사람 악 아브라함" data-group="성경적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">1</div>
+            <div>
+              <p class="eyebrow">성경적 관점</p>
+              <h3>약속</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>약속</b></div>
+          <p class="one-line">하나님은 아브라함에게 단순한 명령이 아니라 하나님이 직접 이루실 약속을 주셨다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>명령은 받은 사람의 수행이 강조되고, 약속은 약속하신 하나님이 책임지심이 강조된다.</li>
+            <li>아브라함 언약의 핵심은 “땅의 모든 족속이 복을 받는 것”이다.</li>
+            <li>하나님 영광의 세 방향: 하나님께 대한 영광, 사람을 향한 복, 악에 대한 승리/심판의 방향으로 정리한다.</li>
+            <li>우리는 복을 소유하기 위해서만이 아니라 복이 되기 위해 부름받았다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>아브라함에게 주신 것은 명령인가, 약속인가?</summary>
+              <p>명령이 아니라 약속이다. 핵심은 하나님이 그 약속을 책임지고 이루신다는 점이다.</p>
+            </details>
+            <details>
+              <summary>하나님 영광의 세 방향은?</summary>
+              <p>하나님, 사람, 악에 대한 방향으로 정리한다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#약속</span><span class="tag">#아브라함</span><span class="tag">#영광의 세 방향</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="2 열정 성경적 관점 영광 예배 선교 존재 이유 위대한 과시 이중적 방향" data-group="성경적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">2</div>
+            <div>
+              <p class="eyebrow">성경적 관점</p>
+              <h3>열정</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>열정</b></div>
+          <p class="one-line">하나님이 가장 열정적이신 대상은 하나님의 영광이며, 선교는 예배가 없는 곳 때문에 존재한다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>하나님은 자신이 영광 받으시는 일에 가장 열정적이시다.</li>
+            <li>선교의 존재 이유: 그곳에 예배가 없기 때문이다.</li>
+            <li>종말의 때가 오면 선교는 사라지지만 예배는 영원하다.</li>
+            <li>영광의 이중적 방향: 하나님이 먼저 자신의 영광을 드러내심, 우리는 그 영광을 보고 예배로 응답함.</li>
+            <li>“위대한 과시”는 하나님이 영광받기 위해 하나님을 먼저 드러내신다는 흐름으로 기억한다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>선교는 왜 존재하는가?</summary>
+              <p>그곳에 예배가 없기 때문에 존재한다.</p>
+            </details>
+            <details>
+              <summary>영광의 이중적 방향은?</summary>
+              <p>하나님이 자신의 영광을 드러내심 → 사람이 그 영광을 보고 예배로 응답함.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#열정</span><span class="tag">#예배</span><span class="tag">#영광의 이중적 방향</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="3 소망 성경적 관점 초림 재림 긍휼의 때 마태복음 24장 14절 마24" data-group="성경적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">3</div>
+            <div>
+              <p class="eyebrow">성경적 관점</p>
+              <h3>소망</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>소망</b></div>
+          <p class="one-line">초림과 재림 사이의 시간은 모든 민족에게 복음이 증언되는 긍휼의 때다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>초림과 재림 사이: 긍휼의 때, 세계 복음화의 때.</li>
+            <li>선교는 초림 전부터 있었고, 재림 때까지 이어지는 하나님의 큰 흐름 안에 있다.</li>
+            <li>하나님 나라는 하나님이 다스리시는 것이며, 하나님 나라의 복음은 하나님의 통치를 선포한다.</li>
+            <li>마태복음 24장 14절은 반드시 정확히 표시해 둔다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>초림과 재림 사이를 어떻게 기억할까?</summary>
+              <p>긍휼의 때, 세계 복음화의 때로 기억한다.</p>
+            </details>
+            <details>
+              <summary>마태복음 24장 14절의 핵심 흐름은?</summary>
+              <p>천국 복음이 모든 민족에게 증언되기 위해 온 세상에 전파되고, 그제야 끝이 온다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#소망</span><span class="tag">#긍휼의 때</span><span class="tag">#마24:14</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="4 위임령 성경적 관점 요한복음 20장 21절 요20 사랑 권능 목적 대계명 대위임령"
+          data-group="성경적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">4</div>
+            <div>
+              <p class="eyebrow">성경적 관점</p>
+              <h3>위임령</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>위임령</b></div>
+          <p class="one-line">아버지께서 예수님을 보내신 것 같이, 예수님은 우리를 사랑·권능·목적 안에서 보내신다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>요한복음 20장 21절: “아버지께서 나를 보내신 것 같이 나도 너희를 보내노라.”</li>
+            <li>하나님이 예수님을 보내신 방식처럼 예수님이 우리를 보내신다.</li>
+            <li>보내심의 방식: 사랑, 권능, 목적.</li>
+            <li>대계명은 지속적인 사랑의 명령이고, 대위임령은 성취 가능한 과업이다.</li>
+            <li>대계명과 대위임령은 경쟁이 아니라 함께 붙어 있는 소명이다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>요한복음 20장 21절의 의미는?</summary>
+              <p>아버지가 예수님을 보내신 방식처럼 예수님이 우리를 세상으로 보내신다는 뜻이다.</p>
+            </details>
+            <details>
+              <summary>대계명과 대위임령의 차이는?</summary>
+              <p>대계명은 지속되고, 대위임령은 성취 가능한 과업이다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#위임령</span><span class="tag">#요20:21</span><span class="tag">#대계명</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="5 증인 성경적 관점 예루살렘 공의회 복음을 자유하게함 사도적 열정 소달리티 모달리티 벽 협곡"
+          data-group="성경적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">5</div>
+            <div>
+              <p class="eyebrow">성경적 관점</p>
+              <h3>증인</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>증인</b></div>
+          <p class="one-line">증인은 복음을 문화의 불필요한 짐에서 자유롭게 하여 모든 민족에게 전하는 사람이다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>사도행전 1장 8절: 성령, 권능, 예루살렘, 온 유대, 사마리아, 땅끝, 증인.</li>
+            <li>예루살렘 공의회는 이방인에게 유대 문화의 짐을 강요하지 않음으로 복음을 자유하게 한 사건이다.</li>
+            <li>벽은 전하는 사람이 넘어야 할 장애물, 협곡은 받는 사람이 넘어야 할 장애물이다.</li>
+            <li>사도적 열정: 사도적 포기, 사도적 초점, 사도적 기도, 사도적 의사결정.</li>
+            <li>소달리티는 선교/파송 구조, 모달리티는 교회/양육 구조로 정리한다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>예루살렘 공의회의 선교적 의미는?</summary>
+              <p>복음이 특정 문화의 옷에 묶이지 않고 모든 민족에게 자유롭게 전해질 수 있게 한 사건이다.</p>
+            </details>
+            <details>
+              <summary>소달리티와 모달리티는?</summary>
+              <p>소달리티는 선교/파송 구조, 모달리티는 교회/양육 구조다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#증인</span><span class="tag">#예루살렘 공의회</span><span class="tag">#소달리티</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="6 추진력 역사적 관점 하나님 역사 선교 네 가지 유형 자발적 비자발적 옴 감" data-group="역사적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">6</div>
+            <div>
+              <p class="eyebrow">역사적 관점</p>
+              <h3>추진력</h3>
+            </div>
+            <div class="priority">★★★★☆</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>추진력</b></div>
+          <p class="one-line">선교의 추진력은 사람이 아니라 하나님께 있으며, 하나님은 역사 속에서 지금도 선교를 계속하신다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>역사 속에서 선교는 하나님이 끊임없이 하신 일이다.</li>
+            <li>선교의 네 가지 유형: 자발적으로 감, 비자발적으로 감, 자발적으로 옴, 비자발적으로 옴.</li>
+            <li>자발적으로 감: 바울, 베드로가 고넬료에게 감, 선교사들의 파송.</li>
+            <li>비자발적으로 감: 요셉처럼 원치 않았지만 보내진 상황.</li>
+            <li>자발적으로 옴: 시바 여왕, 나아만처럼 스스로 찾아옴.</li>
+            <li>비자발적으로 옴: 침략·이주 등 원치 않은 이동 속에서 복음이 전해지는 흐름.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>선교의 네 가지 유형은?</summary>
+              <p>자발적으로 감, 비자발적으로 감, 자발적으로 옴, 비자발적으로 옴.</p>
+            </details>
+            <details>
+              <summary>역사 속 선교의 주체는?</summary>
+              <p>하나님이다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#추진력</span><span class="tag">#네 가지 유형</span><span class="tag">#하나님이
+              하심</span></div>
+        </article>
+
+        <article class="lesson-card" data-keywords="7 8 과업완수 역사적 관점 지리적 개념 문화적 개념 E척도 P척도 문화적 거리 E2 E3 필수 E0 E1 효과"
+          data-group="역사적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">7–8</div>
+            <div>
+              <p class="eyebrow">역사적 관점</p>
+              <h3>과업완수</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>과업완수</b></div>
+          <p class="one-line">선교의 과업은 지리적으로 멀리 가는 것을 넘어, 복음이 닿지 않은 문화와 종족에게까지 가는 것이다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>선교의 개념은 지리적 개념에서 문화적 개념으로 확장되었다.</li>
+            <li>해안선·내지 중심은 “땅/지역” 중심이었고, 미전도 종족 개념은 “사람/문화” 중심이다.</li>
+            <li>E-척도와 P-척도는 문화적 거리를 이해하는 표로 기억한다.</li>
+            <li>E-척도는 선교자/전하는 사람 입장, P-척도는 선교받는 사람 입장이다.</li>
+            <li>E2·E3는 필수적 사역, E0·E1은 효과적 사역으로 정리한다.</li>
+            <li>선교적 돌파는 그들 안에 자생적이고 토착적이며 배가 가능한 교회가 생기는 것이다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>선교 개념의 큰 변화는?</summary>
+              <p>지리적 개념에서 문화적 개념으로 확장된 것이다.</p>
+            </details>
+            <details>
+              <summary>E-척도와 P-척도의 차이는?</summary>
+              <p>E는 전하는 사람 입장의 문화적 거리, P는 받는 사람 입장에서 교회/복음 공동체가 얼마나 먼지를 보는 척도다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#과업완수</span><span class="tag">#E/P 척도</span><span class="tag">#문화적
+              거리</span></div>
+        </article>
+
+        <article class="lesson-card" data-keywords="9 전략적 역사적 관점 도시 선교 인구집중 복음 개방성 다양한 종족 E척도 P척도 남은 과업 미전도 종족"
+          data-group="역사적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">9</div>
+            <div>
+              <p class="eyebrow">역사적 관점</p>
+              <h3>전략적</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>전략적</b></div>
+          <p class="one-line">남은 과업은 열정만으로가 아니라 도시와 종족, 문화적 거리를 함께 보는 전략적 접근이 필요하다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>남은 과업은 복음을 충분히 듣지 못한 미전도 종족과 연결된다.</li>
+            <li>도시 선교가 중요한 이유: 인구 집중, 복음에 대한 개방성, 다양한 종족.</li>
+            <li>도시에는 여러 문화와 종족이 모이므로 복음 확산의 전략적 접점이 된다.</li>
+            <li>E-척도/P-척도 표를 다시 연결해서 볼 것.</li>
+            <li>선교적 돌파 이후에는 가까운 거리의 효과적 사역이 가능해진다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>도시 선교가 중요한 세 가지 이유는?</summary>
+              <p>인구 집중, 복음에 대한 개방성, 다양한 종족 때문이다.</p>
+            </details>
+            <details>
+              <summary>전략적 접근이 필요한 이유는?</summary>
+              <p>남은 과업은 단순한 지리 문제가 아니라 문화·종족·도시의 문제이기 때문이다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#전략적</span><span class="tag">#도시 선교</span><span class="tag">#남은 과업</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="10 듣기 문화적 관점 콰스트 4층이론 행동 가치 신념 세계관 상황화 혼합주의" data-group="문화적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">10</div>
+            <div>
+              <p class="eyebrow">문화적 관점</p>
+              <h3>듣기</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>듣기</b></div>
+          <p class="one-line">핵심은 “우리가 어떻게 말할까”가 아니라 “그들이 어떻게 들을 것인가”이다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>로이드 콰스트의 4층 이론: 행동 → 가치 → 신념 → 세계관.</li>
+            <li>겉으로 보이는 행동보다 깊은 세계관의 변화가 중요하다.</li>
+            <li>상황화는 복음의 본래 의미를 지키면서 그 문화가 들을 수 있게 전달하는 것이다.</li>
+            <li>혼합주의는 세계관의 변화 없이 복음과 기존 신앙/관습이 섞이는 것을 경계하는 개념이다.</li>
+            <li>듣기는 문화적 오해를 줄이고 복음이 실제로 전달되게 하는 태도다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>콰스트의 4층 이론 순서는?</summary>
+              <p>행동 → 가치 → 신념 → 세계관.</p>
+            </details>
+            <details>
+              <summary>상황화와 혼합주의의 차이는?</summary>
+              <p>상황화는 복음의 의미를 지키며 문화에 맞게 전달하는 것이고, 혼합주의는 세계관 변화 없이 섞여 복음의 본질이 흐려지는 것이다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#듣기</span><span class="tag">#상황화</span><span class="tag">#혼합주의</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="11 받아들임 문화적 관점 성육신 모델 세 가지 포기 신분 독립 면제받을 특권" data-group="문화적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">11</div>
+            <div>
+              <p class="eyebrow">문화적 관점</p>
+              <h3>받아들임</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>받아들임</b></div>
+          <p class="one-line">복음을 전하려면 먼저 그들에게 받아들여져야 하며, 예수님의 성육신 모델이 그 길을 보여준다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>10과가 메시지를 어떻게 들리게 할 것인가라면, 11과는 메신저가 어떻게 받아들여질 것인가의 문제다.</li>
+            <li>예수님의 성육신 모델은 낮아짐과 동일화의 태도를 보여준다.</li>
+            <li>세 가지 포기: 신분, 독립, 면제받을 특권.</li>
+            <li>신분의 포기: 권리와 특권을 내려놓음.</li>
+            <li>독립의 포기: 혼자 완결된 존재처럼 서지 않고 의존하며 함께 살아감.</li>
+            <li>면제받을 특권의 포기: 고난과 한계를 피하지 않고 함께 경험함.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>성육신 모델의 세 가지 포기는?</summary>
+              <p>신분, 독립, 면제받을 특권.</p>
+            </details>
+            <details>
+              <summary>왜 받아들여짐이 중요한가?</summary>
+              <p>복음의 메시지만이 아니라 메신저의 태도와 삶이 복음 전달에 영향을 주기 때문이다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#받아들임</span><span class="tag">#성육신</span><span class="tag">#세 가지 포기</span>
+          </div>
+        </article>
+
+        <article class="lesson-card" data-keywords="12 변혁 전략적 관점 총체적 선교 복음전도 사회활동 균형 빈곤 지역사회 개발" data-group="전략적 관점">
+          <div class="lesson-top">
+            <div class="lesson-num">12</div>
+            <div>
+              <p class="eyebrow">전략적 관점</p>
+              <h3>변혁</h3>
+            </div>
+            <div class="priority">★★★★★</div>
+          </div>
+          <div class="keyword-pill">핵심 단어 <b>변혁</b></div>
+          <p class="one-line">총체적 선교는 복음 전도와 사회활동을 분리하지 않고, 상황 속에서 균형 있게 감당하는 것이다.</p>
+          <h4>암기 포인트</h4>
+          <ul>
+            <li>빈곤은 단순히 물질 부족만이 아니라 삶 전체를 무너뜨리는 문제로 본다.</li>
+            <li>빈곤 해결의 네 가지 접근: 구제, 정치 해방, 경제 성장, 지역사회 개발.</li>
+            <li>지역사회 개발은 외부 지원에만 의존하게 하는 것이 아니라 자생성을 세우는 방향이어야 한다.</li>
+            <li>총체적 선교는 영혼, 육체, 정신, 공동체의 변화를 함께 본다.</li>
+            <li>복음 전도와 사회활동 사이에는 고정된 순서보다 역동적 균형이 중요하다.</li>
+          </ul>
+          <h4>예상 문답</h4>
+          <div class="qna">
+            <details>
+              <summary>총체적 선교란?</summary>
+              <p>복음 전도와 사회활동을 함께 보며, 사람과 공동체의 전인적 변화를 추구하는 선교다.</p>
+            </details>
+            <details>
+              <summary>복음 전도와 사회활동의 관계는?</summary>
+              <p>상황에 따라 역동적 균형을 이루어야 하며, 둘을 단순히 분리하지 않는다.</p>
+            </details>
+          </div>
+          <div class="tags"><span class="tag">#변혁</span><span class="tag">#총체적 선교</span><span class="tag">#균형</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="checklist">
+      <div class="section-title">
+        <div>
+          <h2>오픈북 시험 전략 체크리스트</h2>
+          <p>체크 상태는 이 브라우저에 저장됩니다.</p>
+        </div>
+      </div>
+      <div class="checklist">
+        <label class="check"><input type="checkbox" data-check="1"><span>책에 1–12과 시작 페이지 인덱스 붙이기</span></label>
+        <label class="check"><input type="checkbox" data-check="2"><span>핵심 단어를 각 과 첫 페이지에 크게 표시하기</span></label>
+        <label class="check"><input type="checkbox" data-check="3"><span>마태복음 24장 14절 표시하고 암송하기</span></label>
+        <label class="check"><input type="checkbox" data-check="4"><span>초림–재림 사이 표, E/P 척도 표 위치 표시하기</span></label>
+        <label class="check"><input type="checkbox" data-check="5"><span>예루살렘 공의회, 소달리티/모달리티, 네 가지 선교 유형 페이지
+            표시하기</span></label>
+        <label class="check"><input type="checkbox" data-check="6"><span>서술형은 “정의 → 차이/이유 → 예시 → 결론” 순서로
+            연습하기</span></label>
+        <label class="check"><input type="checkbox" data-check="7"><span>대괄호 핵심 단어 11개를 순서대로 말할 수 있게 하기</span></label>
+        <label class="check"><input type="checkbox" data-check="8"><span>상황화/혼합주의, 대계명/대위임령처럼 비교형 개념 다시
+            보기</span></label>
+      </div>
+    </section>
+  </main>
+  <script>
+    const keywordText = `1과 약속
 2과 열정
 3과 소망
 4과 위임령
 5과 증인
 6과 추진력
-7과 과업완수
-8과 PPT/책 확인
+7–8과 과업완수
 9과 전략적
 10과 듣기
 11과 받아들임
 12과 변혁`;
-function copyKeywords() {
-  navigator.clipboard?.writeText(keywordText).then(() => {
-    alert('핵심 단어를 복사했습니다.');
-  }).catch(() => {
-    const t = document.createElement('textarea');
-    t.value = keywordText; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
-    alert('핵심 단어를 복사했습니다.');
-  });
-}
-const search = document.getElementById('search');
-const cards = [...document.querySelectorAll('.lesson-card')];
-let activeFilter = 'all';
-function applyFilter() {
-  const q = (search.value || '').trim().toLowerCase();
-  cards.forEach(card => {
-    const text = card.innerText.toLowerCase() + ' ' + (card.dataset.keywords || '').toLowerCase();
-    const group = card.dataset.group || '';
-    const groupMatch = activeFilter === 'all' || group.includes(activeFilter) || (activeFilter === '역사적 관점' && group.includes('역사적')) || (activeFilter === '전략적 관점' && group.includes('전략적'));
-    const searchMatch = !q || text.includes(q);
-    card.style.display = groupMatch && searchMatch ? '' : 'none';
-  });
-}
-search.addEventListener('input', applyFilter);
-document.querySelectorAll('.filter').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeFilter = btn.dataset.filter;
-    applyFilter();
-  });
-});
-document.querySelectorAll('[data-check]').forEach(input => {
-  const key = 'psp-check-' + input.dataset.check;
-  input.checked = localStorage.getItem(key) === '1';
-  input.addEventListener('change', () => localStorage.setItem(key, input.checked ? '1' : '0'));
-});
-</script>
+    function copyKeywords() {
+      navigator.clipboard?.writeText(keywordText).then(() => {
+        alert('핵심 단어를 복사했습니다.');
+      }).catch(() => {
+        const t = document.createElement('textarea');
+        t.value = keywordText; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+        alert('핵심 단어를 복사했습니다.');
+      });
+    }
+    const search = document.getElementById('search');
+    const cards = [...document.querySelectorAll('.lesson-card')];
+    let activeFilter = 'all';
+    function applyFilter() {
+      const q = (search.value || '').trim().toLowerCase();
+      cards.forEach(card => {
+        const text = (card.innerText + ' ' + (card.dataset.keywords || '')).toLowerCase();
+        const group = card.dataset.group || '';
+        const groupMatch = activeFilter === 'all' || group.includes(activeFilter);
+        const searchMatch = !q || text.includes(q);
+        card.style.display = groupMatch && searchMatch ? '' : 'none';
+      });
+    }
+    search.addEventListener('input', applyFilter);
+    document.querySelectorAll('.filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        applyFilter();
+      });
+    });
+    document.querySelectorAll('[data-check]').forEach(input => {
+      const key = 'psp-core-check-' + input.dataset.check;
+      input.checked = localStorage.getItem(key) === '1';
+      input.addEventListener('change', () => localStorage.setItem(key, input.checked ? '1' : '0'));
+    });
+  </script>
 </body>
+
 </html>

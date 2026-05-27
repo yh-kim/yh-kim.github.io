@@ -36,3 +36,23 @@ th {
   text-align: center;
   background: #e6e6e6;
 }
+
+.post-preview > a,
+.post-preview > a:hover,
+.post-preview > a:focus,
+.post-preview > a:active {
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.post-preview > a * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.post-preview > a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
