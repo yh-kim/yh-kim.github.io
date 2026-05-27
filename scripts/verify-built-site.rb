@@ -60,7 +60,7 @@ fail_with("home should include ripple canvas") unless home_html.include?("data-r
 fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
 fail_with("home should prevent page scroll") unless home_html.include?("overflow: hidden")
 fail_with("home should prevent mobile text selection") unless home_html.include?("-webkit-user-select: none") && home_html.include?("-webkit-touch-callout: none") && home_html.include?("::selection")
-fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#15181d")
+fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#18212b")
 fail_with("home should use the dark background") unless home_html.include?("#15181d")
 fail_with("home should draw a flowing cursor trail") unless home_html.include?("quadraticCurveTo")
 fail_with("home cursor trail should use a stable tail") unless home_html.include?("tailLength")
@@ -87,12 +87,17 @@ end
 daily_index_html = daily_index.read
 note_index_html = note_index.read
 dev_index_html = dev_index.read
-theme_color = '<meta name="theme-color" content="#15181d">'
+theme_color = '<meta name="theme-color" content="#18212b">'
 safe_area_snippets = [
   "ios-safe-area-bg",
   "env(safe-area-inset-top)",
-  "background: #15181d",
+  "background: #18212b",
   "z-index: 2"
+]
+fixed_nav_snippets = [
+  ".navbar-custom.is-fixed",
+  "rgba(24, 33, 43, .96)",
+  "border-bottom-color: rgba(255, 255, 255, .08)"
 ]
 content_background_snippets = [
   'class="layout-',
@@ -117,6 +122,9 @@ horizontal_overflow_snippets = [
   content_background_snippets.each do |snippet|
     fail_with("#{label} page should keep page content separate from the notch background") unless html.include?(snippet)
   end
+  fixed_nav_snippets.each do |snippet|
+    fail_with("#{label} page should keep the fixed top navigation in the space theme") unless html.include?(snippet)
+  end
   horizontal_overflow_snippets.each do |snippet|
     fail_with("#{label} page should prevent horizontal swipe whitespace") unless html.include?(snippet)
   end
@@ -131,6 +139,23 @@ fail_with("note page should use the space header") unless note_index_html.includ
 fail_with("dev page should use the space header") unless dev_index_html.include?("space-header")
 fail_with("note page should not include cursor canvas") if note_index_html.include?("data-ripple-canvas")
 fail_with("dev page should not include cursor canvas") if dev_index_html.include?("data-ripple-canvas")
+
+space_header_snippets = [
+  "linear-gradient(180deg, #161b27 0%, #070a10 100%) !important",
+  "background-size: 110px 110px, 170px 170px",
+  ".intro-header:after"
+]
+
+(ROOT.join("_posts").glob("*.{md,markdown}") + ROOT.join("_daily").glob("*.{md,markdown}")).each do |path|
+  front_matter, = read_front_matter(path)
+  built_path = built_path_for(page_url(path, front_matter))
+  next unless built_path.file?
+
+  html = built_path.read
+  space_header_snippets.each do |snippet|
+    fail_with("post page should use the global space header: #{built_path}") unless html.include?(snippet)
+  end
+end
 
 ROOT.join("_daily").glob("*.{md,markdown}").each do |path|
   front_matter, = read_front_matter(path)

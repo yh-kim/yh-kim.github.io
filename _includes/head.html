@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" content="{{ site.description }}">
     <meta name="keywords"  content="{{ site.keyword }}">
-    <meta name="theme-color" content="#15181d">
+    <meta name="theme-color" content="#18212b">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <title>{% if page.title %}{{ page.title }} - {{ site.SEOTitle }}{% else %}{{ site.SEOTitle }}{% endif %}</title>
@@ -48,14 +48,14 @@
 
     <style>
         html {
-            background: #15181d;
+            background: #18212b;
             width: 100%;
             max-width: 100%;
             overflow-x: hidden;
         }
 
         body {
-            background: #15181d;
+            background: #18212b;
             width: 100%;
             max-width: 100%;
             overflow-x: hidden;
@@ -76,6 +76,27 @@
             z-index: 20;
         }
 
+        .navbar-custom.is-fixed {
+            background-color: rgba(24, 33, 43, .96);
+            border-bottom-color: rgba(255, 255, 255, .08);
+        }
+
+        .navbar-custom.is-fixed .navbar-brand,
+        .navbar-custom.is-fixed .nav li a {
+            color: #ffffff;
+        }
+
+        .navbar-custom.is-fixed .navbar-brand:hover,
+        .navbar-custom.is-fixed .navbar-brand:focus,
+        .navbar-custom.is-fixed .nav li a:hover,
+        .navbar-custom.is-fixed .nav li a:focus {
+            color: rgba(255, 255, 255, .78);
+        }
+
+        .navbar-custom.is-fixed .navbar-toggle .icon-bar {
+            background-color: #ffffff;
+        }
+
         .navbar .container-fluid,
         #huxblog_navbar {
             max-width: 100%;
@@ -83,9 +104,33 @@
         }
 
         .intro-header {
+            position: relative;
             width: 100%;
             max-width: 100vw;
             overflow-x: hidden;
+            background:
+                radial-gradient(circle at 18% 26%, rgba(44, 111, 255, .18), transparent 24rem),
+                radial-gradient(circle at 82% 18%, rgba(31, 196, 142, .16), transparent 22rem),
+                radial-gradient(circle at 54% 100%, rgba(158, 178, 255, .14), transparent 28rem),
+                linear-gradient(180deg, #161b27 0%, #070a10 100%) !important;
+        }
+
+        .intro-header:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle, rgba(255, 255, 255, .42) 0 1px, transparent 1.4px),
+                radial-gradient(circle, rgba(136, 180, 255, .22) 0 1px, transparent 1.7px);
+            background-position: 0 0, 38px 54px;
+            background-size: 110px 110px, 170px 170px;
+            opacity: .34;
+            pointer-events: none;
+        }
+
+        .intro-header .container {
+            position: relative;
+            z-index: 1;
         }
 
         .postlist-container,
@@ -106,7 +151,7 @@
             left: 0;
             height: constant(safe-area-inset-top);
             height: env(safe-area-inset-top);
-            background: #15181d;
+            background: #18212b;
             z-index: 2;
             pointer-events: none;
         }
