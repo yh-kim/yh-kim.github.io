@@ -102,6 +102,8 @@ fixed_nav_snippets = [
 content_background_snippets = [
   'class="layout-',
   'class="site-main"',
+  "background: #ffffff",
+  "linear-gradient(180deg, #18212b 0, #18212b 120px, #ffffff 120px, #ffffff 100%)",
   "body.layout-home .site-main",
   "body.layout-home",
   "min-height: 100vh"
