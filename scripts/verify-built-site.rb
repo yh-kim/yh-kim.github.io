@@ -59,7 +59,7 @@ fail_with("home should keep the welcome copy") unless home_html.include?("hello.
 fail_with("home should include ripple canvas") unless home_html.include?("data-ripple-canvas")
 fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
 fail_with("home should prevent page scroll") unless home_html.include?("overflow: hidden")
-fail_with("home should prevent mobile text selection") unless home_html.include?("user-select: none") && home_html.include?("-webkit-touch-callout: none")
+fail_with("home should prevent mobile text selection") unless home_html.include?("-webkit-user-select: none") && home_html.include?("-webkit-touch-callout: none") && home_html.include?("::selection")
 fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#161b27")
 fail_with("home should use the dark background") unless home_html.include?("#15181d")
 fail_with("home should draw a flowing cursor trail") unless home_html.include?("quadraticCurveTo")
@@ -86,6 +86,10 @@ end
 daily_index_html = daily_index.read
 note_index_html = note_index.read
 dev_index_html = dev_index.read
+theme_color = '<meta name="theme-color" content="#161b27">'
+fail_with("daily page should use the space mobile theme color") unless daily_index_html.include?(theme_color)
+fail_with("note page should use the space mobile theme color") unless note_index_html.include?(theme_color)
+fail_with("dev page should use the space mobile theme color") unless dev_index_html.include?(theme_color)
 fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
 fail_with("note page should list daily posts") unless note_index_html.include?("post-preview")
 fail_with("dev page should list dev posts") unless dev_index_html.include?("post-preview")

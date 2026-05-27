@@ -15,7 +15,20 @@ layout: home
     background: #15181d;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
+    -webkit-user-select: none;
     user-select: none;
+  }
+
+  .home-ripple,
+  .home-ripple * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .home-ripple::selection,
+  .home-ripple *::selection {
+    background: transparent;
   }
 
   .home-ripple:before {
@@ -70,6 +83,8 @@ layout: home
     overflow: hidden;
     background: #161b27;
     overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   body {
