@@ -61,6 +61,14 @@
             overflow-x: hidden;
         }
 
+        body:not(.layout-home) {
+            background: #ffffff;
+        }
+
+        body.layout-home {
+            background: #18212b;
+        }
+
         .site-main {
             background: #ffffff;
         }
@@ -95,6 +103,24 @@
 
         .navbar-custom.is-fixed .navbar-toggle .icon-bar {
             background-color: #ffffff;
+        }
+
+        @media only screen and (max-width: 768px) {
+            #huxblog_navbar .navbar-collapse {
+                background: rgba(24, 33, 43, .96);
+                border: 1px solid rgba(255, 255, 255, .08);
+                box-shadow: 0 10px 26px rgba(0, 0, 0, .24);
+            }
+
+            #huxblog_navbar .navbar-collapse a,
+            .navbar-custom.is-fixed #huxblog_navbar .navbar-collapse a {
+                color: #ffffff;
+            }
+
+            #huxblog_navbar .navbar-collapse a:hover,
+            #huxblog_navbar .navbar-collapse a:focus {
+                color: rgba(255, 255, 255, .78);
+            }
         }
 
         .navbar .container-fluid,

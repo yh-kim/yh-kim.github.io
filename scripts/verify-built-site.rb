@@ -102,7 +102,14 @@ fixed_nav_snippets = [
 content_background_snippets = [
   'class="layout-',
   'class="site-main"',
-  "body.layout-home .site-main"
+  "body.layout-home .site-main",
+  "body:not(.layout-home)",
+  "body.layout-home"
+]
+mobile_menu_snippets = [
+  "#huxblog_navbar .navbar-collapse",
+  ".navbar-custom.is-fixed #huxblog_navbar .navbar-collapse a",
+  "box-shadow: 0 10px 26px rgba(0, 0, 0, .24)"
 ]
 horizontal_overflow_snippets = [
   "overflow-x: hidden",
@@ -124,6 +131,9 @@ horizontal_overflow_snippets = [
   end
   fixed_nav_snippets.each do |snippet|
     fail_with("#{label} page should keep the fixed top navigation in the space theme") unless html.include?(snippet)
+  end
+  mobile_menu_snippets.each do |snippet|
+    fail_with("#{label} page should keep scrolled mobile menu labels visible") unless html.include?(snippet)
   end
   horizontal_overflow_snippets.each do |snippet|
     fail_with("#{label} page should prevent horizontal swipe whitespace") unless html.include?(snippet)
