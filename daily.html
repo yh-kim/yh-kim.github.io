@@ -10,6 +10,7 @@ order: 1
 ---
 
 {% for post in site.daily reversed %}
+{% unless post.hidden %}
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
         <h2 class="post-title">
@@ -29,6 +30,7 @@ order: 1
     </p>
 </div>
 <hr>
+{% endunless %}
 {% endfor %}
 
 <!-- Pager -->

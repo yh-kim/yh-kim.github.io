@@ -87,7 +87,7 @@ psp = ROOT.join("_daily/2026-05-27-psp-problems.markdown")
 if psp.exist?
   front_matter, body = read_front_matter(psp)
   fail_with("PSP daily post must keep a stable permalink") unless front_matter["permalink"] == "/daily/psp-problems/"
-  fail_with("PSP daily post must embed the source HTML") unless body.include?("daily-assets/psp-problems.html")
+  fail_with("PSP daily post must link to the source HTML") unless body.include?("daily-assets/psp-problems.html")
   fail_with("PSP source HTML is missing") unless ROOT.join("daily-assets/psp-problems.html").exist?
 end
 

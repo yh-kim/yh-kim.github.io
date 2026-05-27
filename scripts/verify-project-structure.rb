@@ -50,6 +50,7 @@ required_dirs = %w[
   _daily
   _layouts
   _includes
+  _data
   category
   css
   js

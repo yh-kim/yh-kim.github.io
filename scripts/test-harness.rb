@@ -54,6 +54,7 @@ end
 with_temp_repo do |repo|
   expect_success(repo, ["ruby", "scripts/verify-project-structure.rb"], "project structure check")
   expect_success(repo, ["ruby", "scripts/verify-daily-links.rb"], "daily link check")
+  expect_success(repo, ["ruby", "scripts/verify-html-documents.rb"], "HTML documents check")
   expect_success(repo, ["ruby", "scripts/verify-content-links.rb"], "content link check")
 end
 
@@ -75,9 +76,9 @@ with_temp_repo do |repo|
 
   expect_failure(
     repo,
-    ["ruby", "scripts/verify-daily-links.rb"],
+    ["ruby", "scripts/verify-html-documents.rb"],
     "missing PSP asset check",
-    "PSP source HTML is missing"
+    "points to missing HTML asset"
   )
 end
 
@@ -89,6 +90,19 @@ with_temp_repo do |repo|
     ["ruby", "scripts/verify-project-structure.rb"],
     "missing category check",
     "missing category page for post tag: Git"
+  )
+end
+
+with_temp_repo do |repo|
+  data = repo.join("_data/html_documents.yml")
+  text = data.read.sub("/daily-assets/psp-problems.html", "/psp-problems.html")
+  data.write(text)
+
+  expect_failure(
+    repo,
+    ["ruby", "scripts/verify-html-documents.rb"],
+    "HTML document path scope check",
+    "path must start with /daily-assets/"
   )
 end
 
