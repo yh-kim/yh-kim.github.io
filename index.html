@@ -5,14 +5,14 @@ layout: home
 <style>
   .home-ripple {
     position: relative;
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     isolation: isolate;
     padding: 96px 24px 40px;
-    background: #ffffff;
+    background: #eef0f2;
   }
 
   .home-ripple:before {
@@ -20,8 +20,9 @@ layout: home
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 20% 20%, rgba(44, 111, 255, .10), transparent 26rem),
-      radial-gradient(circle at 80% 40%, rgba(0, 180, 130, .08), transparent 24rem);
+      radial-gradient(circle at 20% 20%, rgba(44, 111, 255, .12), transparent 26rem),
+      radial-gradient(circle at 80% 40%, rgba(0, 180, 130, .08), transparent 24rem),
+      linear-gradient(180deg, #f5f6f7 0%, #e7eaed 100%);
     z-index: 0;
   }
 
@@ -39,6 +40,13 @@ layout: home
     margin: 0;
     font-size: 22px;
     color: #404040;
+  }
+</style>
+
+<style>
+  html,
+  body {
+    overflow: hidden;
   }
 </style>
 

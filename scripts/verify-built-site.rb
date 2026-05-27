@@ -58,6 +58,8 @@ fail_with("_site/daily/html-documents/index.html is missing") unless html_docume
 fail_with("home should keep the welcome copy") unless home_html.include?("hello.")
 fail_with("home should include ripple canvas") unless home_html.include?("data-ripple-canvas")
 fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
+fail_with("home should prevent page scroll") unless home_html.include?("overflow: hidden")
+fail_with("home should use the soft gray background") unless home_html.include?("#eef0f2")
 fail_with("home should not list dev posts") if home_html.include?("post-preview")
 fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
 fail_with("home should not use the generic page header") if home_html.include?("site-heading")
