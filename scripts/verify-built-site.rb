@@ -103,8 +103,8 @@ content_background_snippets = [
   'class="layout-',
   'class="site-main"',
   "body.layout-home .site-main",
-  "body:not(.layout-home)",
-  "body.layout-home"
+  "body.layout-home",
+  "min-height: 100vh"
 ]
 mobile_menu_snippets = [
   "#huxblog_navbar .navbar-collapse",
