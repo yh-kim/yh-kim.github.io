@@ -12,7 +12,7 @@ layout: home
     overflow: hidden;
     isolation: isolate;
     padding: 96px 24px 40px;
-    background: #eef0f2;
+    background: #d9dde1;
   }
 
   .home-ripple:before {
@@ -21,8 +21,8 @@ layout: home
     inset: 0;
     background:
       radial-gradient(circle at 20% 20%, rgba(44, 111, 255, .12), transparent 26rem),
-      radial-gradient(circle at 80% 40%, rgba(0, 180, 130, .08), transparent 24rem),
-      linear-gradient(180deg, #f5f6f7 0%, #e7eaed 100%);
+      radial-gradient(circle at 80% 40%, rgba(0, 180, 130, .09), transparent 24rem),
+      linear-gradient(180deg, #e4e7ea 0%, #cfd5db 100%);
     z-index: 0;
   }
 
@@ -65,6 +65,7 @@ layout: home
   var points = [];
   var raf = null;
   var bounds = null;
+  var lastPoint = null;
 
   function resize() {
     bounds = canvas.getBoundingClientRect();
@@ -74,41 +75,71 @@ layout: home
   }
 
   function addPoint(x, y) {
-    points.push({ x: x, y: y, age: 0, life: 90 });
-    if (points.length > 42) points.shift();
+    var now = performance.now();
+    if (lastPoint) {
+      var dx = x - lastPoint.x;
+      var dy = y - lastPoint.y;
+      if (Math.sqrt(dx * dx + dy * dy) < 5) return;
+    }
+    lastPoint = { x: x, y: y };
+    points.push({ x: x, y: y, born: now, vx: 0, vy: 0 });
+    if (points.length > 72) points.shift();
     if (!raf) raf = requestAnimationFrame(draw);
+  }
+
+  function smoothPoint(a, b, c, t) {
+    var t2 = t * t;
+    return {
+      x: a.x * (1 - 2 * t + t2) + b.x * (2 * t - 2 * t2) + c.x * t2,
+      y: a.y * (1 - 2 * t + t2) + b.y * (2 * t - 2 * t2) + c.y * t2
+    };
   }
 
   function draw() {
     raf = null;
     ctx.clearRect(0, 0, bounds.width, bounds.height);
+    ctx.globalCompositeOperation = 'source-over';
 
+    var now = performance.now();
     for (var i = points.length - 1; i >= 0; i -= 1) {
-      var p = points[i];
-      p.age += 1;
-      var t = p.age / p.life;
-      if (t >= 1) {
+      if (now - points[i].born > 1300) {
         points.splice(i, 1);
-        continue;
       }
+    }
 
-      var radius = 16 + t * 92;
-      var alpha = Math.pow(1 - t, 1.7) * 0.35;
-      var gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
-      gradient.addColorStop(0, 'rgba(42, 118, 255,' + alpha + ')');
-      gradient.addColorStop(0.42, 'rgba(52, 196, 150,' + (alpha * 0.42) + ')');
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    if (points.length > 2) {
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.filter = 'blur(14px)';
 
-      ctx.beginPath();
-      ctx.fillStyle = gradient;
-      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-      ctx.fill();
+      for (var pass = 0; pass < 3; pass += 1) {
+        ctx.beginPath();
+        var first = points[0];
+        ctx.moveTo(first.x, first.y);
 
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(42, 118, 255,' + (alpha * 0.28) + ')';
-      ctx.lineWidth = 1;
-      ctx.arc(p.x, p.y, radius * 0.58, 0, Math.PI * 2);
-      ctx.stroke();
+        for (var j = 1; j < points.length - 1; j += 1) {
+          var prev = points[j - 1];
+          var curr = points[j];
+          var next = points[j + 1];
+          var mid = smoothPoint(prev, curr, next, 0.5);
+          ctx.quadraticCurveTo(curr.x, curr.y, mid.x, mid.y);
+        }
+
+        var age = Math.min(1, (now - points[0].born) / 1300);
+        var fade = Math.pow(1 - age, 0.75);
+        var width = [34, 18, 7][pass];
+        var alpha = [0.18, 0.22, 0.28][pass] * fade;
+        var gradient = ctx.createLinearGradient(0, 0, bounds.width, bounds.height);
+        gradient.addColorStop(0, 'rgba(40, 105, 255,' + alpha + ')');
+        gradient.addColorStop(0.45, 'rgba(70, 210, 170,' + (alpha * 0.7) + ')');
+        gradient.addColorStop(1, 'rgba(255, 255, 255,' + (alpha * 0.35) + ')');
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = width;
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     if (points.length) raf = requestAnimationFrame(draw);
