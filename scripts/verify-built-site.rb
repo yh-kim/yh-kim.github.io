@@ -56,6 +56,8 @@ fail_with("_site/note/index.html is missing") unless note_index.file?
 fail_with("_site/dev/index.html is missing") unless dev_index.file?
 fail_with("_site/daily/html-documents/index.html is missing") unless html_documents.file?
 fail_with("home should keep the welcome copy") unless home_html.include?("hello.")
+fail_with("home should include ripple canvas") unless home_html.include?("data-ripple-canvas")
+fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
 fail_with("home should not list dev posts") if home_html.include?("post-preview")
 fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
 
