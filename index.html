@@ -21,9 +21,23 @@ layout: home
     inset: 0;
     background:
       radial-gradient(circle at 20% 20%, rgba(44, 111, 255, .12), transparent 26rem),
-      radial-gradient(circle at 80% 30%, rgba(31, 196, 142, .14), transparent 24rem),
-      radial-gradient(circle at 50% 100%, rgba(255, 255, 255, .08), transparent 30rem),
-      linear-gradient(180deg, #232831 0%, #12151a 100%);
+      radial-gradient(circle at 80% 30%, rgba(31, 196, 142, .13), transparent 24rem),
+      radial-gradient(circle at 50% 100%, rgba(158, 178, 255, .12), transparent 30rem),
+      radial-gradient(circle at 52% 48%, rgba(255, 255, 255, .06), transparent 16rem),
+      linear-gradient(180deg, #161b27 0%, #070a10 100%);
+    z-index: 0;
+  }
+
+  .home-ripple:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(255, 255, 255, .42) 0 1px, transparent 1.4px),
+      radial-gradient(circle, rgba(136, 180, 255, .22) 0 1px, transparent 1.7px);
+    background-position: 0 0, 38px 54px;
+    background-size: 110px 110px, 170px 170px;
+    opacity: .34;
     z-index: 0;
   }
 
@@ -40,7 +54,8 @@ layout: home
     z-index: 2;
     margin: 0;
     font-size: 22px;
-    color: rgba(255, 255, 255, .86);
+    color: rgba(255, 255, 255, .88);
+    text-shadow: 0 0 24px rgba(180, 205, 255, .25);
   }
 </style>
 
@@ -80,11 +95,16 @@ layout: home
     if (lastPoint) {
       var dx = x - lastPoint.x;
       var dy = y - lastPoint.y;
-      if (Math.sqrt(dx * dx + dy * dy) < 2) return;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+      var elapsed = Math.max(16, now - lastPoint.time);
+      if (distance < 4) return;
+      var speed = Math.min(1, distance / elapsed / 1.15);
+    } else {
+      var speed = 0.4;
     }
-    lastPoint = { x: x, y: y };
-    points.push({ x: x, y: y, born: now, vx: 0, vy: 0 });
-    if (points.length > 34) points.shift();
+    lastPoint = { x: x, y: y, time: now };
+    points.push({ x: x, y: y, born: now, speed: Math.max(0.18, speed) });
+    if (points.length > 28) points.shift();
     if (!raf) raf = requestAnimationFrame(draw);
   }
 
@@ -103,7 +123,7 @@ layout: home
 
     var now = performance.now();
     for (var i = points.length - 1; i >= 0; i -= 1) {
-      if (now - points[i].born > 620) {
+      if (now - points[i].born > 520) {
         points.splice(i, 1);
       }
     }
@@ -112,7 +132,7 @@ layout: home
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.filter = 'blur(7px)';
+      ctx.filter = 'blur(5px)';
 
       for (var pass = 0; pass < 2; pass += 1) {
         ctx.beginPath();
@@ -127,14 +147,16 @@ layout: home
           ctx.quadraticCurveTo(curr.x, curr.y, mid.x, mid.y);
         }
 
-        var age = Math.min(1, (now - points[0].born) / 620);
-        var fade = Math.pow(1 - age, 0.55);
-        var width = [26, 9][pass];
-        var alpha = [0.42, 0.52][pass] * fade;
+        var age = Math.min(1, (now - points[0].born) / 520);
+        var fade = Math.pow(1 - age, 0.7);
+        var recent = points[points.length - 1];
+        var speedAlpha = 0.18 + recent.speed * 0.72;
+        var width = [22, 7][pass];
+        var alpha = [0.26, 0.36][pass] * fade * speedAlpha;
         var gradient = ctx.createLinearGradient(0, 0, bounds.width, bounds.height);
-        gradient.addColorStop(0, 'rgba(68, 124, 255,' + alpha + ')');
-        gradient.addColorStop(0.46, 'rgba(72, 230, 178,' + (alpha * 0.78) + ')');
-        gradient.addColorStop(1, 'rgba(255, 255, 255,' + (alpha * 0.52) + ')');
+        gradient.addColorStop(0, 'rgba(98, 132, 255,' + alpha + ')');
+        gradient.addColorStop(0.48, 'rgba(80, 225, 190,' + (alpha * 0.72) + ')');
+        gradient.addColorStop(1, 'rgba(218, 228, 255,' + (alpha * 0.42) + ')');
 
         ctx.strokeStyle = gradient;
         ctx.lineWidth = width;
