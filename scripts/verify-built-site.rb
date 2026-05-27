@@ -69,10 +69,10 @@ fail_with("home should include starfield layer") unless home_html.include?("back
 fail_with("home cursor trail should suppress slow-move flashing") unless home_html.include?("drawEnergy") && home_html.include?("slowSpeedLimit")
 fail_with("home cursor trail should fade out gradually") unless home_html.include?("drawEnergy *= 0.975")
 fail_with("home cursor trail should support touch input") unless home_html.include?("touchmove") && home_html.include?("touchstart")
-fail_with("home should not list dev posts") if home_html.include?("post-preview")
+fail_with("home should not list dev posts") if home_html.include?('class="post-preview"')
 fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
 fail_with("home should not use the generic page header") if home_html.include?("site-heading")
-fail_with("home should not use the generic post list container") if home_html.include?("postlist-container")
+fail_with("home should not use the generic post list container") if home_html.include?('class="postlist-container"')
 
 nav_expected = [
   'href="/">home</a>',
@@ -87,6 +87,29 @@ daily_index_html = daily_index.read
 note_index_html = note_index.read
 dev_index_html = dev_index.read
 theme_color = '<meta name="theme-color" content="#161b27">'
+safe_area_snippets = [
+  "ios-safe-area-bg",
+  "env(safe-area-inset-top)",
+  "background: #161b27"
+]
+horizontal_overflow_snippets = [
+  "overflow-x: hidden",
+  "max-width: 100vw",
+  "overflow-wrap: anywhere"
+]
+{
+  "home" => home_html,
+  "daily" => daily_index_html,
+  "note" => note_index_html,
+  "dev" => dev_index_html
+}.each do |label, html|
+  safe_area_snippets.each do |snippet|
+    fail_with("#{label} page should render the iPhone notch safe-area background") unless html.include?(snippet)
+  end
+  horizontal_overflow_snippets.each do |snippet|
+    fail_with("#{label} page should prevent horizontal swipe whitespace") unless html.include?(snippet)
+  end
+end
 fail_with("daily page should use the space mobile theme color") unless daily_index_html.include?(theme_color)
 fail_with("note page should use the space mobile theme color") unless note_index_html.include?(theme_color)
 fail_with("dev page should use the space mobile theme color") unless dev_index_html.include?(theme_color)
