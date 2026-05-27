@@ -62,7 +62,15 @@ layout: home
 <style>
   html,
   body {
+    min-height: 100%;
     overflow: hidden;
+    background: #070a10;
+    overscroll-behavior: none;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 </style>
 
@@ -97,7 +105,7 @@ layout: home
     var now = performance.now();
     target = { x: x, y: y };
     lastMove = now;
-    velocity = 0.32;
+    velocity = 0;
     tail = [];
 
     for (var i = 0; i < tailLength; i += 1) {
@@ -137,6 +145,7 @@ layout: home
     var now = performance.now();
     var inactive = Math.min(1, Math.max(0, (now - lastMove - 90) / 420));
     var activeAlpha = Math.max(0, 1 - inactive);
+    var visibleMotion = Math.max(0, (velocity - 0.18) / 0.82);
 
     if (target && tail.length) {
       tail[0].x = lerp(tail[0].x, target.x, 0.46);
@@ -148,7 +157,7 @@ layout: home
       }
     }
 
-    if (tail.length > 2 && activeAlpha > 0.01) {
+    if (tail.length > 2 && activeAlpha > 0.01 && visibleMotion > 0.01) {
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -169,7 +178,7 @@ layout: home
           ctx.quadraticCurveTo(curr.x, curr.y, mid.x, mid.y);
         }
 
-        var motionAlpha = 0.2 + velocity * 0.62;
+        var motionAlpha = Math.pow(visibleMotion, 1.4);
         var width = [22, 7][pass];
         var alpha = [0.2, 0.28][pass] * activeAlpha * motionAlpha;
         var gradient = ctx.createLinearGradient(0, 0, bounds.width, bounds.height);
@@ -190,6 +199,7 @@ layout: home
   }
 
   function handleMove(event) {
+    if (event.pointerType && event.pointerType !== 'mouse') return;
     if (!bounds) resize();
     var point = event.touches ? event.touches[0] : event;
     moveTarget(point.clientX - bounds.left, point.clientY - bounds.top);
@@ -199,6 +209,5 @@ layout: home
   window.addEventListener('resize', resize);
   canvas.addEventListener('pointermove', handleMove);
   canvas.addEventListener('pointerdown', handleMove);
-  canvas.addEventListener('touchmove', handleMove, { passive: true });
 }());
 </script>
