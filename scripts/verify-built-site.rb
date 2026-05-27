@@ -60,6 +60,8 @@ fail_with("home should include ripple canvas") unless home_html.include?("data-r
 fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
 fail_with("home should not list dev posts") if home_html.include?("post-preview")
 fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
+fail_with("home should not use the generic page header") if home_html.include?("site-heading")
+fail_with("home should not use the generic post list container") if home_html.include?("postlist-container")
 
 nav_expected = [
   'href="/">home</a>',

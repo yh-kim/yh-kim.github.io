@@ -39,6 +39,7 @@ required_files = %w[
   category/index.html
   _layouts/default.html
   _layouts/page.html
+  _layouts/home.html
   _layouts/post.html
   _layouts/tag.html
   _includes/head.html
