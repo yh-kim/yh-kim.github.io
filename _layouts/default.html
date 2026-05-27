@@ -4,12 +4,14 @@
 {% include head.html %}
 
 <!-- hack iOS CSS :active style -->
-<body ontouchstart="">
+<body class="layout-{{ page.layout | default: 'default' }}" ontouchstart="">
     <div class="ios-safe-area-bg" aria-hidden="true"></div>
 
     {% include nav.html %}
 
-    {{ content }}
+    <main class="site-main">
+        {{ content }}
+    </main>
 
     {% include footer.html %}
 
