@@ -43,7 +43,7 @@ layout: default
                     {% comment %} if page.subtitle {% endcomment %}
                     <h2 class="subheading">{{ page.subtitle }}</h2>
                     {% comment %} endif {% endcomment %}
-                    <span class="meta">Posted by {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}</span>
+                    <span class="meta">{{ page.date | date: "%B %-d, %Y" }}</span>
                 </div>
             </div>
         </div>
@@ -83,15 +83,6 @@ layout: default
                     </li>
                     {% endif %}
                 </ul>
-
-
-                {% if site.disqus_username %}
-                <!-- disqus 评论框 start -->
-                <div class="comment">
-                    <div id="disqus_thread" class="disqus-thread"></div>
-                </div>
-                <!-- disqus 评论框 end -->
-                {% endif %}
 
                 {% if site.netease_comment %}
                 <!-- 网易云跟帖 评论框 start -->
@@ -145,16 +136,6 @@ layout: default
                 </section>
                 {% endif %}
 
-                <!-- Friends Blog -->
-                {% if site.friends %}
-                <hr>
-                <h5>FRIENDS</h5>
-                <ul class="list-inline">
-                    {% for friend in site.friends %}
-                        <li><a href="{{friend.href}}" target="_blank">{{friend.title}}</a></li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -176,38 +157,6 @@ layout: default
 </script>
 <!-- 网易云跟帖JS代码 end -->
 {% endif %}
-
-
-{% if site.disqus_username %}
-<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-    var disqus_loaded = false;
-
-    /* * * CONFIGURATION VARIABLES * * */
-    var disqus_shortname = "{{site.disqus_username}}";
-    var disqus_identifier = "{{page.id}}";
-    var disqus_url = "{{site.url}}{{page.url}}";
-
-    window.onscroll = function(e) {
-        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight/3) {
-            //hit bottom of page
-            if (disqus_loaded==false){
-                disqus_loaded = true;
-                (function() {
-                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                })();
-            };
-        }
-    };
-
-    
-</script>
-<!-- disqus 公共JS代码 end -->
-{% endif %}
-
-
 {% if site.anchorjs %}
 <!-- async load function -->
 <script>

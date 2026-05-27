@@ -20,6 +20,9 @@ VISIBLE_FORBIDDEN = [
   "href=\"/about",
   "href=\"/portfolio",
   "href=\"/feed.xml",
+  ">category</a>",
+  "FRIENDS",
+  "Copyright &copy;",
   "facebook.com",
   "github.com/yh-kim",
   "fa-rss",
@@ -29,6 +32,12 @@ VISIBLE_FORBIDDEN = [
   "Yonghoon",
   "yonghoon",
   "김용훈"
+].freeze
+
+VISIBLE_ONLY_FORBIDDEN = [
+  "Posted by",
+  "disqus",
+  "disqus_thread"
 ].freeze
 
 SOURCE_SKIP_DIRS = %w[.git _site .jekyll-cache node_modules scripts docs].freeze
@@ -69,7 +78,7 @@ if SITE.directory?
 
   SITE.glob("**/*.html").each do |path|
     text = path.read
-    VISIBLE_FORBIDDEN.each do |pattern|
+    (VISIBLE_FORBIDDEN + VISIBLE_ONLY_FORBIDDEN).each do |pattern|
       fail_with("#{path.relative_path_from(ROOT)} exposes hidden personal/social link: #{pattern}") if text.include?(pattern)
     end
   end
