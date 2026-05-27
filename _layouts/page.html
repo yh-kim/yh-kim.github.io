@@ -3,7 +3,38 @@ layout: default
 ---
 
 <!-- Page Header -->
-<header class="intro-header" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
+{% if page.space-header %}
+<style>
+    .intro-header.space-header {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 18% 26%, rgba(44, 111, 255, .18), transparent 24rem),
+            radial-gradient(circle at 82% 18%, rgba(31, 196, 142, .16), transparent 22rem),
+            radial-gradient(circle at 54% 100%, rgba(158, 178, 255, .14), transparent 28rem),
+            linear-gradient(180deg, #161b27 0%, #070a10 100%);
+    }
+
+    .intro-header.space-header:after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle, rgba(255, 255, 255, .42) 0 1px, transparent 1.4px),
+            radial-gradient(circle, rgba(136, 180, 255, .22) 0 1px, transparent 1.7px);
+        background-position: 0 0, 38px 54px;
+        background-size: 110px 110px, 170px 170px;
+        opacity: .34;
+        pointer-events: none;
+    }
+
+    .intro-header.space-header .container {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+{% endif %}
+<header class="intro-header{% if page.space-header %} space-header{% endif %}"{% unless page.space-header %} style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')"{% endunless %}>
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">

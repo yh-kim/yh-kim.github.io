@@ -61,9 +61,10 @@ fail_with("home should include pointer ripple behavior") unless home_html.includ
 fail_with("home should prevent page scroll") unless home_html.include?("overflow: hidden")
 fail_with("home should use the dark background") unless home_html.include?("#15181d")
 fail_with("home should draw a flowing cursor trail") unless home_html.include?("quadraticCurveTo")
-fail_with("home cursor trail should stay responsive") unless home_html.include?("520")
+fail_with("home cursor trail should use a stable tail") unless home_html.include?("tailLength")
+fail_with("home cursor trail should stay responsive") unless home_html.include?("lerp")
 fail_with("home should include starfield layer") unless home_html.include?("background-size: 110px 110px")
-fail_with("home cursor trail should reduce slow-move flashing") unless home_html.include?("speedAlpha")
+fail_with("home cursor trail should reduce slow-move flashing") unless home_html.include?("motionAlpha")
 fail_with("home should not list dev posts") if home_html.include?("post-preview")
 fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
 fail_with("home should not use the generic page header") if home_html.include?("site-heading")
@@ -84,6 +85,10 @@ dev_index_html = dev_index.read
 fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
 fail_with("note page should list daily posts") unless note_index_html.include?("post-preview")
 fail_with("dev page should list dev posts") unless dev_index_html.include?("post-preview")
+fail_with("note page should use the space header") unless note_index_html.include?("space-header")
+fail_with("dev page should use the space header") unless dev_index_html.include?("space-header")
+fail_with("note page should not include cursor canvas") if note_index_html.include?("data-ripple-canvas")
+fail_with("dev page should not include cursor canvas") if dev_index_html.include?("data-ripple-canvas")
 
 ROOT.join("_daily").glob("*.{md,markdown}").each do |path|
   front_matter, = read_front_matter(path)
