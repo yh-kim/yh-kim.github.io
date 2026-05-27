@@ -2,7 +2,7 @@
 layout:     post
 title:      "PSP 시험 힌트 총정리"
 subtitle:   "시험 직전용 핵심 단어, 예상 문답, 오픈북 전략 정리"
-date:       2026-05-27 14:06:00
+date:       2026-05-27 00:00:00
 permalink:  /daily/psp-problems/
 author:     "Yonghoon"
 header-img: "img/home-bg.jpg"

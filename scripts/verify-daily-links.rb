@@ -5,6 +5,7 @@ require "date"
 require "pathname"
 require "psych"
 require "uri"
+require "time"
 
 ROOT = Pathname.new(__dir__).join("..").expand_path
 
@@ -66,6 +67,9 @@ daily_files.each do |path|
 
   fail_with("#{path.relative_path_from(ROOT)} is missing layout") unless front_matter["layout"]
   fail_with("#{path.relative_path_from(ROOT)} is missing title") unless front_matter["title"]
+  if front_matter["date"].respond_to?(:to_time) && front_matter["date"].to_time > Time.now
+    fail_with("#{path.relative_path_from(ROOT)} has a future date and will be listed but not written by Jekyll: #{front_matter["date"]}")
+  end
   fail_with("#{path.relative_path_from(ROOT)} url must start with /daily/: #{url}") unless url.start_with?("/daily/")
   fail_with("#{path.relative_path_from(ROOT)} url must end with /: #{url}") unless url.end_with?("/")
 
