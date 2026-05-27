@@ -54,11 +54,34 @@ Use this sequence for any prompt or change request:
    - `scripts/verify-all.sh`
    - If Jekyll is available, the harness also runs `jekyll build`.
    - If Jekyll is not available, install project dependencies before doing release-level verification.
+   - Run `ruby scripts/test-harness.rb` after changing the harness itself.
 
 6. Summarize the change.
    - Mention changed files.
    - Mention the expected URL if a page was added.
    - Include the verification output and any skipped checks.
+   - Stop before committing unless the user explicitly asks for a commit or push.
+
+## Commit Boundary
+
+Default stopping point:
+
+1. Apply the requested file changes.
+2. Run the relevant verification commands.
+3. Report changed files, test results, and any remaining risks.
+4. Leave the working tree uncommitted.
+
+Only stage, commit, or push when the user explicitly asks for that action.
+
+## Known Jekyll Pitfalls
+
+| Case | Symptom | Harness Coverage |
+| --- | --- | --- |
+| Future-dated daily post | The post appears in `/daily/`, but Jekyll does not write the detail page, so the list link returns 404. | `verify-daily-links.rb` fails when a daily post date is later than the current build time. |
+| Missing stable daily permalink | A user-facing Daily URL can change if the filename or collection rules change. | `verify-daily-links.rb` checks Daily URL shape and PSP's stable permalink. |
+| Missing category page | A post tag can render to a category link that has no corresponding `category/<tag>.html`. | `verify-project-structure.rb` checks tags against category pages. |
+| Missing local asset | A post or layout can link to a file that does not exist in the repository. | `verify-content-links.rb` scans local `href` and `src` targets. |
+| Links inside examples | Code snippets can contain strings that look like links but are not site links. | `verify-content-links.rb` ignores comments, fenced code blocks, inline code, and Android resource refs. |
 
 ## Test Harness
 
@@ -75,5 +98,13 @@ ruby scripts/verify-project-structure.rb
 ruby scripts/verify-daily-links.rb
 ruby scripts/verify-content-links.rb
 ```
+
+Harness self-tests:
+
+```bash
+ruby scripts/test-harness.rb
+```
+
+The self-test copies the repository to a temporary directory and verifies that known-bad cases fail without modifying the real working tree.
 
 The harness is intentionally local and dependency-light. It catches the common mistakes that caused 404s here: missing front matter, unstable daily permalinks, missing category pages, missing local assets, and local links that point nowhere.
