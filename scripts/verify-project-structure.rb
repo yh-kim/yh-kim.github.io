@@ -34,7 +34,6 @@ required_files = %w[
   _config.yml
   index.html
   daily.html
-  about.html
   category/index.html
   _layouts/default.html
   _layouts/page.html
@@ -74,7 +73,7 @@ fail_with("_config.yml must define collections.daily") unless daily_config.is_a?
 fail_with("collections.daily.output must be true") unless daily_config["output"] == true
 fail_with("collections.daily.permalink must start with /:collection") unless daily_config["permalink"].to_s.start_with?("/:collection")
 
-top_pages = %w[index.html daily.html about.html category/index.html]
+top_pages = %w[index.html daily.html category/index.html]
 top_pages.each do |path|
   front_matter = read_front_matter(ROOT.join(path))
   fail_with("#{path} must have front matter") if front_matter.empty?

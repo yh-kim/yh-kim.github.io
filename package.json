@@ -1,14 +1,14 @@
 {
     "name": "[pimi-blog]",
     "title": "Pimi's Blog",
-    "author": "Pimi <yonghoon.kim@pickth.com>",
+    "author": "Pimi",
     "version": "1.7.0",
-    "homepage": "http://yh-kim.github.io",
+    "homepage": "https://blog.pickth.com",
     "repository": {
         "type": "git",
-        "url": "https://github.com/yh-kim/yh-kim.github.io"
+        "url": ""
     },
-    "bugs": "https://github.com/yh-kim/yh-kim.github.io/issues",
+    "bugs": "",
     "devDependencies": {
         "grunt": "~0.4.5",
         "grunt-contrib-less": "~0.11.4",

@@ -2,7 +2,7 @@
 layout:     post
 title:      "동물 이름 모음"
 date:       2018-01-04 00:00:00
-author:     "Yonghoon"
+author:     "Pimi"
 header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true

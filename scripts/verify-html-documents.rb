@@ -45,7 +45,7 @@ documents.each_with_index do |document, index|
   path = document["path"].to_s.strip
   fail_with("#{label} missing title") if title.empty?
   fail_with("#{label} missing path") if path.empty?
-  fail_with("#{label} path must start with /daily-assets/: #{path}") unless path.start_with?("/daily-assets/")
+  fail_with("#{label} path must start with /html-documents/: #{path}") unless path.start_with?("/html-documents/")
   fail_with("#{label} path must end with .html: #{path}") unless path.end_with?(".html")
 
   if seen_paths[path]

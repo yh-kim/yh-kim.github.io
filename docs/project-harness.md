@@ -11,14 +11,14 @@ This repository is a Jekyll-based personal blog with a few standalone static are
 | `_daily/` | Daily collection posts. These are listed by `daily.html` and generated under `/daily/.../`. |
 | `_layouts/` | Page templates. `default.html` wraps the common shell, `page.html` renders top-level pages, `post.html` renders posts and daily entries, `tag.html` renders category pages. |
 | `_includes/` | Shared partials such as `<head>`, navigation, footer, and About page snippets. |
-| `_data/html_documents.yml` | Registry for standalone HTML documents published from `daily-assets/`. |
+| `_data/html_documents.yml` | Registry for standalone HTML documents published from `html-documents/`. |
 | `index.html` | Home page. Lists `_posts` via `paginator.posts`. |
 | `daily.html` | Daily landing page. Lists `site.daily` entries. |
 | `about.html`, `tags.html`, `404.html`, `offline.html` | Static Jekyll pages. |
 | `category/` | One page per blog tag. Each page uses `layout: tag` and points at a matching tag name. |
 | `css/`, `less/`, `js/`, `fonts/`, `img/` | Theme styles, source Less files, scripts, fonts, and shared images. |
 | `img/in-post/` | Images used inside blog posts. |
-| `daily-assets/` | Standalone assets embedded by daily posts, such as full HTML study notes. |
+| `html-documents/` | Standalone HTML documents served directly, such as full study notes or generated pages. |
 | `portfolio/` | Standalone portfolio page and its own assets. |
 | `pwa/`, `sw.js`, `offline.html` | PWA manifest, icons, service worker, and offline fallback. |
 | `scripts/` | Local verification harness. Run `scripts/verify-all.sh` after changes. |
@@ -36,16 +36,16 @@ Use this sequence for any prompt or change request:
 2. Read the relevant files before editing.
    - For posts: read a nearby existing post, the target layout, and `_config.yml`.
    - For daily: read `daily.html`, `_config.yml` collection settings, and one existing `_daily` file.
-   - For standalone HTML documents: read `_data/html_documents.yml`, `_daily/2026-05-27-html-documents.markdown`, and the target file in `daily-assets/`.
+   - For standalone HTML documents: read `_data/html_documents.yml`, `_daily/2026-05-27-html-documents.markdown`, and the target file in `html-documents/`.
    - For navigation or layout: read `_includes/nav.html`, `_layouts/default.html`, and the specific layout.
-   - For assets: inspect how existing posts reference `img/in-post` or `daily-assets`.
+   - For assets: inspect how existing posts reference `img/in-post` or `html-documents`.
 
 3. Choose the smallest compatible change.
    - Follow existing front matter style and indentation.
    - Prefer explicit `permalink` when a user-facing URL must be stable.
    - Use `relative_url` or `site.baseurl` for local links inside generated pages.
    - Keep standalone HTML/CSS isolated when it could collide with the blog theme.
-   - For uploaded HTML documents, place the HTML in `daily-assets/`, add an entry to `_data/html_documents.yml`, and let `/daily/html-documents/` be the visible Daily entry point.
+   - For uploaded HTML documents, place the HTML in `html-documents/`, add an entry to `_data/html_documents.yml`, and let `/daily/html-documents/` be the visible Daily entry point.
    - If a standalone HTML document already had a direct Daily post, keep that post only as a hidden compatibility page when preserving old URLs matters.
 
 4. Review the result against the request.
@@ -83,8 +83,9 @@ Only stage, commit, or push when the user explicitly asks for that action.
 | --- | --- | --- |
 | Future-dated daily post | The post appears in `/daily/`, but Jekyll does not write the detail page, so the list link returns 404. | `verify-daily-links.rb` fails when a daily post date is later than the current build time. |
 | Standalone HTML not registered | The HTML file exists, but there is no visible Daily entry point for users to find it. | `verify-html-documents.rb` checks `_data/html_documents.yml` and `/daily/html-documents/`. |
-| Registered HTML asset missing | The list links to an HTML file that was moved or not committed. | `verify-html-documents.rb` checks every registered `/daily-assets/*.html` file exists. |
+| Registered HTML asset missing | The list links to an HTML file that was moved or not committed. | `verify-html-documents.rb` checks every registered `/html-documents/*.html` file exists. |
 | Hidden compatibility page exposed | A direct compatibility page is generated but should not appear in the Daily list. | `verify-built-site.rb` checks generated Daily output after `jekyll build`. |
+| Personal/profile links exposed | About, Portfolio, RSS, Facebook, GitHub, old avatar, or old real-name markers reappear. | `verify-privacy.rb` checks source markers and generated `_site` output. |
 | Missing stable daily permalink | A user-facing Daily URL can change if the filename or collection rules change. | `verify-daily-links.rb` checks Daily URL shape and PSP's stable permalink. |
 | Missing category page | A post tag can render to a category link that has no corresponding `category/<tag>.html`. | `verify-project-structure.rb` checks tags against category pages. |
 | Missing local asset | A post or layout can link to a file that does not exist in the repository. | `verify-content-links.rb` scans local `href` and `src` targets. |
@@ -106,11 +107,12 @@ ruby scripts/verify-daily-links.rb
 ruby scripts/verify-html-documents.rb
 ruby scripts/verify-content-links.rb
 ruby scripts/verify-built-site.rb
+ruby scripts/verify-privacy.rb
 ```
 
 Add a standalone HTML document:
 
-1. Put the file under `daily-assets/`, for example `daily-assets/example.html`.
+1. Put the file under `html-documents/`, for example `html-documents/example.html`.
 2. Add a matching entry to `_data/html_documents.yml`.
 3. Run `scripts/verify-all.sh`.
 4. Open `/daily/html-documents/` and use the generated link to reach the HTML page.
@@ -118,7 +120,7 @@ Add a standalone HTML document:
 When the user says they are adding an HTML file or asks to publish an HTML document:
 
 1. Treat it as a standalone HTML document unless they explicitly ask for a normal blog post.
-2. Copy or create the HTML under `daily-assets/` with a stable, lowercase, hyphenated filename.
+2. Copy or create the HTML under `html-documents/` with a stable, lowercase, hyphenated filename.
 3. Register it in `_data/html_documents.yml` with `title`, `description`, `path`, `date`, and optional `tags`.
 4. Do not embed it with an iframe in a Daily post by default.
 5. Use `/daily/html-documents/` as the visible Daily entry point.

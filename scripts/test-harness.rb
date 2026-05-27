@@ -56,6 +56,7 @@ with_temp_repo do |repo|
   expect_success(repo, ["ruby", "scripts/verify-daily-links.rb"], "daily link check")
   expect_success(repo, ["ruby", "scripts/verify-html-documents.rb"], "HTML documents check")
   expect_success(repo, ["ruby", "scripts/verify-content-links.rb"], "content link check")
+  expect_success(repo, ["ruby", "scripts/verify-privacy.rb"], "privacy check")
 end
 
 with_temp_repo do |repo|
@@ -72,7 +73,7 @@ with_temp_repo do |repo|
 end
 
 with_temp_repo do |repo|
-  FileUtils.rm_f(repo.join("daily-assets/psp-problems.html"))
+  FileUtils.rm_f(repo.join("html-documents/psp-problems.html"))
 
   expect_failure(
     repo,
@@ -95,14 +96,27 @@ end
 
 with_temp_repo do |repo|
   data = repo.join("_data/html_documents.yml")
-  text = data.read.sub("/daily-assets/psp-problems.html", "/psp-problems.html")
+  text = data.read.sub("/html-documents/psp-problems.html", "/psp-problems.html")
   data.write(text)
 
   expect_failure(
     repo,
     ["ruby", "scripts/verify-html-documents.rb"],
     "HTML document path scope check",
-    "path must start with /daily-assets/"
+    "path must start with /html-documents/"
+  )
+end
+
+with_temp_repo do |repo|
+  post = repo.join("_daily/2026-05-27-html-documents.markdown")
+  personal_name = "Yong" + "hoon"
+  post.write(post.read.sub("author:     \"Pimi\"", "author:     \"#{personal_name}\""))
+
+  expect_failure(
+    repo,
+    ["ruby", "scripts/verify-privacy.rb"],
+    "personal name privacy check",
+    "contains personal marker"
   )
 end
 

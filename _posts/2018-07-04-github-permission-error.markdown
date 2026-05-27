@@ -32,6 +32,6 @@ tags:
 
 {% highlight bash %}
 $ git config --global user.name 'yh-kim'
-$ git config --global user.email btc_yh@naver.com
+$ git config --global user.email pimi@example.com
 {% endhighlight %}
 현재 프로젝트만 설정하고 싶다면 위의 코드에서 '--global'을 빼주면 된다.

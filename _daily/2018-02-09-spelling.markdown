@@ -2,7 +2,7 @@
 layout:     post
 title:      "맞춤법"
 date:       2018-02-09 00:00:00
-author:     "Yonghoon"
+author:     "Pimi"
 header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true
@@ -48,7 +48,7 @@ tags:
 
 > 책이에요.<br>
 > 아니에요.<br>
-> 용훈이예요.<br>
+> pimi예요.<br>
 > 동수예요.<br>
 > 뭐예요.(뭐 + 이에요)
 
