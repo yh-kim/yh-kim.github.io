@@ -111,8 +111,8 @@
 
     h1 {
       margin: 0;
-      font-size: 22px;
-      line-height: 1.14;
+      font-size: 19px;
+      line-height: 1.16;
       letter-spacing: 0;
       word-break: keep-all;
       text-wrap: balance;
@@ -120,8 +120,13 @@
 
     .poster {
       min-width: 0;
-      height: 100%;
+      min-height: 0;
+      height: auto;
       margin: 0;
+      display: grid;
+      place-items: center;
+      align-self: stretch;
+      overflow: hidden;
       background: #111;
       aspect-ratio: 800 / 1125;
     }
@@ -129,20 +134,25 @@
     .poster img {
       display: block;
       width: 100%;
-      height: 100%;
+      height: auto;
+      max-height: 100%;
       object-fit: contain;
       background: #111;
     }
 
     .media-row {
       display: grid;
-      grid-template-columns: minmax(0, 1.12fr) minmax(132px, .76fr);
+      grid-template-columns: minmax(0, .88fr) minmax(150px, .82fr);
       gap: 0;
       align-items: stretch;
+      overflow: hidden;
       background: rgba(255, 255, 255, .12);
     }
 
     .side-summary {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
       display: grid;
       grid-template-rows: 1.16fr .92fr .92fr;
       gap: 8px;
@@ -156,7 +166,7 @@
     .summary-box {
       position: relative;
       min-width: 0;
-      min-height: 86px;
+      min-height: 76px;
       overflow: hidden;
       padding: 13px 12px 13px 15px;
       display: grid;
@@ -218,6 +228,7 @@
     }
 
     .title-box {
+      min-height: 92px;
       background:
         linear-gradient(145deg, rgba(255, 200, 79, .2), rgba(255, 77, 143, .12) 48%, rgba(57, 214, 255, .08)),
         rgba(8, 11, 20, .84);
@@ -362,6 +373,47 @@
       }
     }
 
+    @media (max-width: 520px) {
+      .media-row {
+        grid-template-columns: minmax(0, .84fr) minmax(132px, .96fr);
+      }
+
+      .side-summary {
+        gap: 6px;
+        padding: 6px;
+      }
+
+      .summary-box {
+        min-height: 70px;
+        padding: 10px 9px 10px 12px;
+      }
+
+      .title-box {
+        min-height: 88px;
+      }
+
+      h1 {
+        font-size: 16px;
+      }
+
+      .title-store {
+        margin-top: 6px;
+        font-size: 11px;
+      }
+
+      .date-line {
+        font-size: 12px;
+      }
+
+      .time-line {
+        font-size: 13px;
+      }
+
+      .summary-box strong {
+        font-size: 14px;
+      }
+    }
+
     @media (max-width: 380px) {
       .page {
         padding: 8px;
@@ -379,24 +431,45 @@
       }
 
       .media-row {
-        grid-template-columns: minmax(0, 1fr) minmax(112px, .72fr);
+        grid-template-columns: minmax(0, .76fr) minmax(128px, 1fr);
       }
 
       .summary-box {
-        min-height: 80px;
-        padding: 10px;
+        min-height: 66px;
+        padding: 8px 8px 8px 11px;
+      }
+
+      .title-box {
+        min-height: 84px;
       }
 
       h1 {
-        font-size: 18px;
+        font-size: 15px;
       }
 
       .title-store {
-        font-size: 11px;
+        font-size: 10px;
       }
 
       .summary-box strong {
-        font-size: 15px;
+        font-size: 13px;
+      }
+
+      .summary-label {
+        font-size: 10px;
+      }
+
+      .date-line {
+        font-size: 11px;
+      }
+
+      .time-line {
+        font-size: 12px;
+      }
+
+      .map-button {
+        width: 30px;
+        height: 30px;
       }
     }
   </style>
