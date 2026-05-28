@@ -65,7 +65,7 @@ fail_with("home should lift the mobile welcome text slightly") unless home_html.
 fail_with("home should not add bottom safe-area padding over Safari controls") if home_html.include?("padding-bottom: max(40px, env(safe-area-inset-bottom))")
 fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#050917")
 fail_with("home should use the cosmic background asset") unless home_html.include?("cosmic-space-bg.png")
-fail_with("home should use cosmic display typography") unless home_html.include?("--cosmic-display-font") && home_html.include?("font-weight: 300")
+fail_with("home should use readable cosmic display typography") unless home_html.include?("--cosmic-display-font") && home_html.include?("font-weight: 380")
 fail_with("home should draw a meteor cursor trail") unless home_html.include?("quadraticCurveTo") && home_html.include?("drawMeteorTail")
 fail_with("home meteor cursor should use additive light blending") unless home_html.include?("globalCompositeOperation = 'lighter'")
 fail_with("home meteor cursor should keep old trail segments dim") unless home_html.include?("tailSegmentFade") && home_html.include?("maxTailSegments")
@@ -141,6 +141,8 @@ cosmic_typography_snippets = [
   "--cosmic-display-font",
   "font-size: 16px",
   "font-size: 15px",
+  "font-weight: 380",
+  "color: rgba(255, 255, 255, .96)",
   "text-transform: none",
   "text-rendering: geometricPrecision",
   ".intro-header .site-heading h1",
@@ -198,7 +200,13 @@ list_style_snippets = [
   "border-radius: 8px",
   "box-shadow: 0 14px 42px",
   ".layout-page .post-preview > .post-meta",
-  ".layout-page .postlist-container > hr"
+  ".layout-page .postlist-container > hr",
+  "font-weight: 620",
+  "font-weight: 430",
+  "color: rgba(21, 27, 44, 0.72)",
+  "-webkit-tap-highlight-color: transparent",
+  ".layout-page .post-preview:focus-within",
+  "outline: none !important"
 ]
 list_style_snippets.each do |snippet|
   fail_with("list pages should use the refined list styling") unless pickth_css.include?(snippet)
