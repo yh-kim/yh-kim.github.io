@@ -4,23 +4,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>방탈출 초대장</title>
-  <meta name="description" content="함께 갈 방탈출 테마 초대장">
+  <title>방탈출 정보</title>
+  <meta name="description" content="함께 갈 방탈출 테마 정보">
   <style>
     :root {
-      --bg: #070911;
-      --card: rgba(12, 16, 28, .9);
-      --card-2: rgba(18, 23, 38, .94);
-      --ink: #fff8ec;
-      --muted: #b9bfcd;
-      --line: rgba(255, 255, 255, .14);
-      --gold: #ffc84f;
-      --brass: #d8bd7a;
-      --brass-soft: rgba(216, 189, 122, .22);
-      --steel: #8fc8c2;
-      --pink: #ff4d8f;
-      --cyan: #39d6ff;
-      --shadow: 0 28px 80px rgba(0, 0, 0, .42);
+      --bg: #11131a;
+      --paper: #f6efe4;
+      --paper-soft: #fffaf2;
+      --paper-warm: #e8dcc7;
+      --ink: #fff8eb;
+      --paper-ink: #242532;
+      --muted: #746f78;
+      --line: rgba(44, 38, 35, .14);
+      --accent: #c06d42;
+      --accent-deep: #75432b;
+      --sage: #65877e;
+      --night: #202230;
+      --shadow: 0 26px 70px rgba(0, 0, 0, .32);
     }
 
     * {
@@ -68,30 +68,34 @@
       position: fixed;
       inset: 0;
       z-index: -2;
-      background:
-        linear-gradient(180deg, rgba(255, 77, 143, .15), rgba(57, 214, 255, .08) 48%, rgba(7, 9, 17, .95)),
-        linear-gradient(90deg, rgba(7, 9, 17, .94), rgba(7, 9, 17, .56), rgba(7, 9, 17, .94));
+      background: rgba(13, 14, 24, .72);
+      box-shadow: inset 0 -30vh 80vh rgba(16, 17, 26, .55);
     }
 
     .invite {
-      width: min(100%, 520px);
+      width: min(100%, 500px);
       display: flex;
       flex-direction: column;
-      border: 1px solid rgba(255, 255, 255, .18);
-      border-radius: 8px;
+      border: 1px solid rgba(246, 239, 228, .66);
+      border-radius: 20px;
       overflow: hidden;
-      background: var(--card);
+      background: var(--paper);
       box-shadow: var(--shadow);
       backdrop-filter: blur(18px);
     }
 
     .header {
-      padding: 10px 14px;
-      background:
-        linear-gradient(135deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .02)),
-        linear-gradient(90deg, rgba(18, 22, 33, .98), rgba(32, 30, 43, .98));
-      border-bottom: 1px solid rgba(216, 189, 122, .2);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+      padding: 13px 15px 15px;
+      background: var(--night);
+      border-bottom: 1px solid rgba(246, 239, 228, .16);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
     }
 
     .label {
@@ -99,177 +103,52 @@
       align-items: center;
       gap: 8px;
       margin: 0;
-      color: rgba(232, 214, 170, .9);
-      font-size: 11px;
+      color: #e9c790;
+      font-size: 12px;
       font-weight: 900;
     }
 
-    .spark {
+    .spark,
+    .section-label::before {
       width: 8px;
       height: 8px;
       flex: 0 0 8px;
-      background: var(--brass);
+      background: var(--accent);
       transform: rotate(45deg);
-      box-shadow: 0 0 14px rgba(216, 189, 122, .42);
+      box-shadow: 0 0 14px rgba(192, 109, 66, .38);
     }
 
-    h1 {
-      margin: 0;
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--accent-deep);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .section-label::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      flex-basis: 6px;
+      opacity: .9;
+    }
+
+    .header-title {
+      margin: 8px 0 0;
+      color: #fff8ec;
       font-size: 22px;
       line-height: 1.16;
       letter-spacing: 0;
       word-break: keep-all;
       text-wrap: balance;
+      text-shadow: 0 10px 24px rgba(0, 0, 0, .24);
     }
 
-    .poster {
-      position: relative;
-      width: 100%;
-      min-width: 0;
-      min-height: 0;
-      height: 100%;
-      max-width: 100%;
-      margin: 0;
-      display: grid;
-      place-items: center;
-      align-self: stretch;
-      overflow: hidden;
-      background: #111;
-      contain: paint;
-    }
-
-    .poster img {
-      position: absolute;
-      inset: 0;
-      display: block;
-      width: 100%;
-      height: 100%;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      object-position: center;
-      background: #111;
-    }
-
-    .media-row {
-      height: clamp(360px, 78vw, 420px);
-      display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, .72fr);
-      gap: 1px;
-      align-items: stretch;
-      overflow: hidden;
-      background: rgba(255, 255, 255, .12);
-    }
-
-    .side-summary {
-      position: relative;
-      z-index: 1;
-      min-width: 0;
-      height: 100%;
-      overflow: hidden;
-      display: grid;
-      grid-template-rows: minmax(0, 1.06fr) minmax(0, .72fr) minmax(0, .54fr) minmax(0, .56fr);
-      gap: 8px;
-      padding: 8px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .025)),
-        linear-gradient(135deg, rgba(255, 77, 143, .2), rgba(57, 214, 255, .12));
-    }
-
-    .summary-box {
-      --summary-left: 8px;
-      position: relative;
-      min-width: 0;
-      min-height: 0;
-      overflow: hidden;
-      padding: 12px 10px;
-      display: grid;
-      align-content: center;
-      border: 1px solid rgba(255, 255, 255, .16);
-      border-radius: 8px;
-      background:
-        linear-gradient(145deg, rgba(255, 255, 255, .11), rgba(255, 255, 255, .035)),
-        rgba(8, 11, 20, .82);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .12),
-        0 10px 24px rgba(0, 0, 0, .18);
-    }
-
-    .summary-box::before {
-      content: "";
-      position: absolute;
-      top: 12px;
-      bottom: 12px;
-      left: 0;
-      width: 3px;
-      border-radius: 0 99px 99px 0;
-      background: linear-gradient(180deg, var(--brass), var(--steel));
-      opacity: .82;
-    }
-
-    .summary-label {
-      position: absolute;
-      top: 8px;
-      left: var(--summary-left);
-      z-index: 1;
-      display: block;
-      color: rgba(255, 248, 236, .64);
-      font-size: 11px;
-      font-weight: 900;
-    }
-
-    .summary-box strong {
-      display: block;
-      margin-top: 0;
-      color: var(--ink);
-      font-size: 16px;
-      font-weight: 900;
-      line-height: 1.24;
-      overflow-wrap: anywhere;
-    }
-
-    .summary-box strong span {
-      display: block;
-    }
-
-    .date-line {
-      color: rgba(255, 248, 236, .78);
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .time-line {
-      margin-top: 3px;
-      color: var(--ink);
-      font-size: 15.5px;
-      font-weight: 950;
-      white-space: nowrap;
-    }
-
-    .title-box {
-      min-height: 0;
-      padding: 26px 10px 8px 12px;
-      align-content: center;
-      background:
-        linear-gradient(145deg, rgba(216, 189, 122, .15), rgba(255, 255, 255, .05) 48%, rgba(143, 200, 194, .08)),
-        rgba(8, 11, 20, .84);
-    }
-
-    .title-box::before {
-      background: linear-gradient(180deg, var(--brass), #a58d55);
-    }
-
-    .title-box .summary-label {
-      color: rgba(232, 214, 170, .9);
-    }
-
-    .title-box h1 {
-      margin-top: 0;
-      text-shadow: 0 8px 24px rgba(0, 0, 0, .28);
-    }
-
-    .title-store {
-      margin: 8px 0 0;
+    .header-store {
+      margin: 7px 0 0;
       color: rgba(255, 248, 236, .72);
       font-size: 12px;
       font-weight: 800;
@@ -277,136 +156,310 @@
       word-break: keep-all;
     }
 
-    .summary-box.area {
-      min-height: 0;
-      padding: 20px 42px 7px 10px;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0;
-      align-content: center;
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
     }
 
-    .summary-box.area strong {
-      position: static;
-      margin-top: 0;
-      transform: none;
-      font-size: 16px;
-      line-height: 1.1;
-      text-align: left;
+    .header-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
     }
 
-    .summary-box.area .map-button {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-    }
-
-    .reservation-box {
-      min-height: 0;
-      padding: 20px 8px 7px 10px;
-      align-content: center;
-    }
-
-    .pair-box {
-      min-height: 0;
-      padding: 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      align-content: stretch;
-      background:
-        linear-gradient(145deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .025)),
-        rgba(8, 11, 20, .82);
-    }
-
-    .pair-box::before {
-      display: none;
-    }
-
-    .pair-item {
-      position: relative;
-      min-width: 0;
-      display: grid;
-      align-content: center;
-      padding: 15px 6px 5px 6px;
-      background: transparent;
-    }
-
-    .pair-item + .pair-item {
-      border-left: 1px solid rgba(255, 255, 255, .16);
-    }
-
-    .pair-item span {
-      position: absolute;
-      top: 4px;
-      left: 6px;
-      color: rgba(255, 248, 236, .62);
+    .meta-badge {
+      align-items: center;
+      gap: 4px;
+      display: inline-flex;
+      width: fit-content;
+      padding: 5px 10px;
+      border: 1px solid rgba(246, 239, 228, .18);
+      border-radius: 999px;
+      color: #f3dbc0;
+      background: rgba(246, 239, 228, .08);
       font-size: 11px;
       font-weight: 900;
+      line-height: 1;
     }
 
-    .pair-item strong {
-      margin: 0;
-      color: var(--ink);
-      font-size: 13.5px;
-      line-height: 1.16;
+    .meta-location {
+      padding: 3px 5px 3px 10px;
+    }
+
+    .meta-location .map-button {
+      width: 20px;
+      height: 20px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #f3dbc0;
+    }
+
+    .meta-location .map-button svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .stat-pill {
+      --stat-bg: rgba(246, 239, 228, .08);
+      --stat-border: rgba(246, 239, 228, .18);
+      --stat-label: rgba(255, 248, 235, .68);
+      --stat-value: #f3dbc0;
+      display: inline-flex;
+      overflow: hidden;
+      border: 1px solid var(--stat-border);
+      border-radius: 999px;
+      color: var(--stat-value);
+      background: var(--stat-bg);
+      font-size: 10px;
       font-weight: 900;
+      line-height: 1;
     }
 
-    .facts {
+    .stat-pill span {
+      padding: 5px 7px;
+      color: var(--stat-label);
+      border-right: 1px solid var(--stat-border);
+    }
+
+    .stat-pill strong {
+      padding: 5px 8px;
+      font-weight: 950;
+    }
+
+    .stat-low {
+      --stat-bg: rgba(101, 135, 126, .16);
+      --stat-border: rgba(143, 181, 169, .34);
+      --stat-label: rgba(218, 235, 230, .72);
+      --stat-value: #e0f1ec;
+    }
+
+    .stat-mid {
+      --stat-bg: rgba(192, 109, 66, .16);
+      --stat-border: rgba(220, 146, 92, .34);
+      --stat-label: rgba(246, 221, 199, .76);
+      --stat-value: #ffe1c8;
+    }
+
+    .stat-high {
+      --stat-bg: rgba(183, 72, 65, .2);
+      --stat-border: rgba(218, 104, 94, .38);
+      --stat-label: rgba(255, 219, 216, .76);
+      --stat-value: #ffd3ce;
+    }
+
+    .stat-none {
+      --stat-bg: rgba(120, 130, 148, .14);
+      --stat-border: rgba(162, 170, 184, .28);
+      --stat-label: rgba(226, 231, 239, .68);
+      --stat-value: #e7edf5;
+    }
+
+    .poster-intro {
+      display: grid;
+      grid-template-columns: minmax(170px, 1.22fr) minmax(0, .78fr);
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .poster-panel {
+      min-width: 0;
+      margin: 0;
+      padding: 12px;
+      display: grid;
+      align-content: center;
+      background: var(--paper-warm);
+    }
+
+    .poster-frame {
+      aspect-ratio: 2 / 3;
+      width: 100%;
+      height: auto;
+      max-height: 430px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(73, 54, 40, .14);
+      border-radius: 14px;
+      background: #111;
+      box-shadow:
+        0 0 0 5px rgba(255, 255, 255, .66),
+        0 18px 42px rgba(65, 41, 27, .22);
+    }
+
+    .poster-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .intro-panel {
+      min-width: 0;
+      padding: 3px 13px 9px;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 4px;
+      align-content: stretch;
+      background: var(--paper-soft);
+    }
+
+    .intro-panel p {
+      margin: 5px 0 0;
+      color: #4f4959;
+      font-size: 11px;
+      line-height: 1.42;
+      max-height: 164px;
+      overflow: hidden;
+      white-space: pre-line;
+      word-break: keep-all;
+    }
+
+    .info-grid {
       display: grid;
       gap: 1px;
-      background: rgba(255, 255, 255, .1);
+      background: var(--line);
     }
 
-    .facts-row {
-      display: grid;
-      gap: 1px;
+    .info-grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .facts-row.three {
+    .info-grid.three {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .fact {
-      min-height: 68px;
-      padding: 11px 13px;
-      background: rgba(8, 11, 20, .9);
+    .info-cell {
+      position: relative;
+      min-width: 0;
+      min-height: 76px;
+      padding: 13px 14px;
+      display: grid;
+      align-content: center;
+      background: var(--paper-soft);
     }
 
-    .fact b {
-      display: block;
-      margin-bottom: 5px;
-      color: var(--muted);
-      font-size: 12px;
+    .info-cell:nth-child(even) {
+      background: #f2e8d8;
+    }
+
+    .info-label {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 7px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      color: var(--accent-deep);
+      background: rgba(192, 109, 66, .12);
+      font-size: 10px;
       font-weight: 900;
+      line-height: 1;
     }
 
-    .fact strong {
+    .info-value {
       display: block;
-      color: var(--ink);
+      color: var(--paper-ink);
       font-size: 16px;
-      line-height: 1.25;
+      font-weight: 900;
+      line-height: 1.22;
       overflow-wrap: anywhere;
     }
 
+    .date-line {
+      color: #786f78;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .time-line {
+      display: block;
+      margin-top: 2px;
+      color: var(--paper-ink);
+      font-size: 16px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .intro-reservation {
+      min-width: 0;
+      padding-top: 3px;
+      border-top: 1px solid var(--line);
+    }
+
+    .intro-reservation .section-label {
+      margin-bottom: 5px;
+    }
+
+    .intro-reservation .time-line {
+      font-size: 14px;
+    }
+
+    .week-calendar {
+      width: min(100%, 112px);
+      margin-top: 7px;
+      padding: 7px 8px;
+      border: 1px solid rgba(36, 37, 50, .12);
+      border-radius: 10px;
+    }
+
+    .week-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      align-items: center;
+    }
+
+    .week-row + .week-row {
+      margin-top: 6px;
+    }
+
+    .week-dot {
+      width: 7px;
+      height: 7px;
+      margin: 0 auto;
+      border-radius: 999px;
+      background: rgba(36, 37, 50, .2);
+    }
+
+    .week-dot.today {
+      background: #3478f6;
+    }
+
+    .week-dot.event {
+      background: #d94f45;
+    }
+
+    .week-dot.is-both {
+      background: #d94f45;
+    }
+
+    .compact-cell {
+      min-height: 68px;
+    }
+
+    .compact-cell .info-value {
+      font-size: 15px;
+    }
+
     .map-button {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 0;
-      border: 1px solid rgba(216, 189, 122, .48);
-      border-radius: 8px;
-      color: #f1dfac;
-      background:
-        linear-gradient(145deg, rgba(255, 255, 255, .11), rgba(255, 255, 255, .02)),
-        rgba(25, 29, 39, .86);
+      border: 1px solid rgba(246, 239, 228, .22);
+      border-radius: 999px;
+      color: #f3dbc0;
+      background: rgba(246, 239, 228, .1);
       text-decoration: none;
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, .1),
-        0 10px 20px rgba(0, 0, 0, .28);
+        0 6px 12px rgba(0, 0, 0, .12);
     }
 
     .map-button svg {
@@ -416,30 +469,8 @@
     }
 
     .map-button:focus-visible {
-      outline: 3px solid rgba(216, 189, 122, .48);
+      outline: 3px solid rgba(244, 135, 154, .38);
       outline-offset: 3px;
-    }
-
-    .intro {
-      padding: 15px 16px 17px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .025)),
-        var(--card-2);
-    }
-
-    .intro b {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--gold);
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .intro p {
-      margin: 0;
-      color: #eee6db;
-      font-size: 15px;
-      white-space: pre-line;
     }
 
     @media (min-width: 900px) {
@@ -448,7 +479,7 @@
       }
 
       .invite {
-        width: min(100%, 520px);
+        width: min(100%, 500px);
       }
     }
 
@@ -465,11 +496,11 @@
       reservedDate: "6월 3일 수요일",
       reservedTime: "17:40",
       playMinutes: 80,
-      genre: "코믹 / 어드벤처",
+      genre: "코믹/어드벤처",
       difficulty: "쉬움 ~ 보통",
       fear: "거의 없음",
       activity: "보통",
-      price: "1인 33,000원",
+      price: "33,000원",
       description: "먼 옛날, 사람들의 마음은 저 밤하늘처럼 어둠으로 가득 차 있었어요.\n그 모습을 안타깝게 여기신 붐붐박사님께선 이렇게 말씀하셨죠.\n\n“붐 붐...”\n폭죽을 터뜨리자!",
       posterUrl: "./escape-room-invite-assets/poster.jpg",
       mapUrl: "https://map.naver.com/p/search/%EC%B1%84%EB%84%9027%20%EB%B2%84%ED%84%B0%ED%94%8C%EB%9D%BC%EC%9D%B4%EC%A0%90"
@@ -477,73 +508,50 @@
   </script>
 
   <main class="page">
-    <article class="invite" aria-label="방탈출 초대장">
+    <article class="invite" aria-label="방탈출 정보">
       <header class="header">
-        <p class="label"><span class="spark" aria-hidden="true"></span><span data-field="label"></span></p>
-      </header>
-
-      <section class="media-row" aria-label="포스터와 주요 정보">
-        <figure class="poster">
-          <img data-image="posterUrl" src="" alt="">
-        </figure>
-
-        <div class="side-summary">
-          <section class="summary-box title-box" aria-label="테마 이름">
-            <span class="summary-label">테마</span>
-            <h1 data-field="title"></h1>
-            <p class="title-store" data-field="store"></p>
-          </section>
-
-          <section class="summary-box reservation-box" aria-label="예약 시간">
-            <span class="summary-label">예약 시간</span>
-            <strong><span class="date-line" data-field="reservedDate"></span><span class="time-line" data-time-range></span></strong>
-          </section>
-
-          <section class="summary-box area" aria-label="지역">
-            <span class="summary-label">지역</span>
-            <strong data-field="area"></strong>
+        <div class="header-top">
+          <p class="label"><span class="spark" aria-hidden="true"></span><span data-field="label"></span></p>
+        </div>
+        <h1 class="header-title" data-field="title"></h1>
+        <p class="header-store" data-field="store"></p>
+        <div class="header-meta" aria-label="테마 요약">
+          <span class="meta-badge" data-play-minutes></span>
+          <span class="meta-badge" data-field="genre"></span>
+          <span class="meta-badge" data-field="price"></span>
+          <span class="meta-badge meta-location">
+            <span data-field="area"></span>
             <a class="map-button" data-link="mapUrl" href="#" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도 열기" title="네이버 지도 열기">
               <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path>
                 <circle cx="12" cy="10" r="2.5"></circle>
               </svg>
             </a>
-          </section>
-
-          <section class="summary-box pair-box" aria-label="장르와 가격">
-            <div class="pair-item">
-              <span>장르</span>
-              <strong data-field="genre"></strong>
-            </div>
-            <div class="pair-item">
-              <span>가격</span>
-              <strong data-field="price"></strong>
-            </div>
-          </section>
+          </span>
         </div>
+        <div class="header-stats" data-stat-pills aria-label="난이도 공포도 활동성"></div>
+      </header>
+
+      <section class="poster-intro" aria-label="포스터와 테마 소개">
+        <figure class="poster-panel">
+          <div class="poster-frame">
+            <img data-image="posterUrl" src="" alt="">
+          </div>
+        </figure>
+
+        <section class="intro-panel">
+          <div class="intro-copy">
+            <span class="section-label">테마 소개</span>
+            <p data-field="description"></p>
+          </div>
+          <div class="intro-reservation">
+            <span class="section-label">예약 시간</span>
+            <strong class="info-value"><span class="date-line" data-field="reservedDate"></span><span class="time-line" data-time-range></span></strong>
+            <div class="week-calendar" data-week-calendar aria-label="오늘 주부터 예약 당일까지"></div>
+          </div>
+        </section>
       </section>
 
-      <section class="facts" aria-label="테마 정보">
-        <div class="facts-row three">
-          <div class="fact">
-            <b>난이도</b>
-            <strong data-field="difficulty"></strong>
-          </div>
-          <div class="fact">
-            <b>공포도</b>
-            <strong data-field="fear"></strong>
-          </div>
-          <div class="fact">
-            <b>활동성</b>
-            <strong data-field="activity"></strong>
-          </div>
-        </div>
-      </section>
-
-      <section class="intro" aria-label="테마 소개">
-        <b>테마 소개</b>
-        <p data-field="description"></p>
-      </section>
     </article>
   </main>
 
@@ -575,8 +583,127 @@
         const dayMinutes = ((value % 1440) + 1440) % 1440;
         return `${String(Math.floor(dayMinutes / 60)).padStart(2, "0")}:${String(dayMinutes % 60).padStart(2, "0")}`;
       };
-      node.textContent = `${format(start)} - ${format(end)} (${inviteData.playMinutes}분)`;
+      node.textContent = `${format(start)} - ${format(end)}`;
     });
+
+    document.querySelectorAll("[data-play-minutes]").forEach((node) => {
+      node.textContent = `${inviteData.playMinutes}분`;
+    });
+
+    const statTone = (label, value) => {
+      const text = String(value || "").replace(/\s/g, "");
+
+      if (text.includes("없음") || text.includes("낮음")) return "stat-none";
+      if (text.includes("쉬움") || text.includes("적음")) return "stat-low";
+      if (text.includes("보통") || text.includes("중간")) return "stat-mid";
+      if (text.includes("높음") || text.includes("어려움") || text.includes("많음")) return "stat-high";
+      if (label === "공포도") return "stat-none";
+      return "stat-mid";
+    };
+
+    const buildStatPill = (label, value) => {
+      const pill = document.createElement("span");
+      const name = document.createElement("span");
+      const text = document.createElement("strong");
+
+      pill.className = `stat-pill ${statTone(label, value)}`;
+      name.textContent = label;
+      text.textContent = value;
+      pill.append(name, text);
+      return pill;
+    };
+
+    document.querySelectorAll("[data-stat-pills]").forEach((node) => {
+      node.replaceChildren(
+        buildStatPill("난이도", inviteData.difficulty),
+        buildStatPill("공포도", inviteData.fear),
+        buildStatPill("활동성", inviteData.activity)
+      );
+    });
+
+    const atStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const addDays = (date, days) => {
+      const next = atStartOfDay(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    };
+
+    const isSameDay = (a, b) => (
+      a.getFullYear() === b.getFullYear()
+      && a.getMonth() === b.getMonth()
+      && a.getDate() === b.getDate()
+    );
+
+    const startOfWeek = (date, weekStartsOn = 0) => {
+      const start = atStartOfDay(date);
+      const diff = (start.getDay() - weekStartsOn + 7) % 7;
+      start.setDate(start.getDate() - diff);
+      return start;
+    };
+
+    const parseKoreanMonthDay = (text, baseYear) => {
+      const match = text.match(/(\d+)월\s*(\d+)일/);
+      if (!match) return null;
+      return new Date(baseYear, Number(match[1]) - 1, Number(match[2]));
+    };
+
+    const buildWeekDotCalendar = ({
+      todayDate = new Date(),
+      eventDate,
+      weekStartsOn = 0
+    }) => {
+      const todayStart = atStartOfDay(todayDate);
+      const eventStart = atStartOfDay(eventDate);
+      const firstWeek = startOfWeek(todayStart, weekStartsOn);
+      const eventWeek = startOfWeek(eventStart, weekStartsOn);
+      const weekCount = Math.max(1, Math.round((eventWeek - firstWeek) / (7 * 24 * 60 * 60 * 1000)) + 1);
+      const root = document.createElement("div");
+
+      root.className = "week-calendar-inner";
+
+      for (let week = 0; week < weekCount; week += 1) {
+        const row = document.createElement("div");
+        row.className = "week-row";
+
+        for (let day = 0; day < 7; day += 1) {
+          const date = addDays(firstWeek, week * 7 + day);
+          const dot = document.createElement("span");
+          const isToday = isSameDay(date, todayStart);
+          const isEvent = isSameDay(date, eventStart);
+
+          dot.className = "week-dot";
+          if (isToday) dot.classList.add("today");
+          if (isEvent) dot.classList.add("event");
+          if (isToday && isEvent) dot.classList.add("is-both");
+          dot.setAttribute("aria-label", `${date.getMonth() + 1}월 ${date.getDate()}일${isToday ? " 오늘" : ""}${isEvent ? " 예약 당일" : ""}`);
+          row.append(dot);
+        }
+
+        root.append(row);
+      }
+
+      return root;
+    };
+
+    const renderWeekDotCalendar = (selector, options) => {
+      document.querySelectorAll(selector).forEach((node) => {
+        node.replaceChildren(buildWeekDotCalendar(options));
+      });
+    };
+
+    const today = new Date();
+    const eventDate = parseKoreanMonthDay(inviteData.reservedDate, today.getFullYear());
+    if (eventDate && eventDate < atStartOfDay(today)) {
+      eventDate.setFullYear(eventDate.getFullYear() + 1);
+    }
+    if (eventDate) {
+      renderWeekDotCalendar("[data-week-calendar]", {
+        todayDate: today,
+        eventDate,
+        weekStartsOn: 0
+      });
+    }
   </script>
 </body>
 
