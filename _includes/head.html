@@ -72,10 +72,6 @@
 
         body.layout-home {
             background-color: #050917;
-            background-image: url("{{ "/img/cosmic-space-bg.png" | prepend: site.baseurl }}");
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: cover;
         }
 
         .site-main {
@@ -84,9 +80,8 @@
         }
 
         body.layout-home .site-main {
-            background: #050917 url("{{ "/img/cosmic-space-bg.png" | prepend: site.baseurl }}") center center / cover no-repeat;
+            background: transparent;
             min-height: 100vh;
-            min-height: 100dvh;
         }
 
         .navbar {
