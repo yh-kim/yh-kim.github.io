@@ -60,14 +60,18 @@ fail_with("home should include ripple canvas") unless home_html.include?("data-r
 fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
 fail_with("home should prevent page scroll") unless home_html.include?("overflow: hidden")
 fail_with("home should prevent mobile text selection") unless home_html.include?("-webkit-user-select: none") && home_html.include?("-webkit-touch-callout: none") && home_html.include?("::selection")
-fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#18212b")
-fail_with("home should use the dark background") unless home_html.include?("#15181d")
-fail_with("home should draw a flowing cursor trail") unless home_html.include?("quadraticCurveTo")
+fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#050917")
+fail_with("home should use the cosmic background asset") unless home_html.include?("cosmic-space-bg.png")
+fail_with("home should draw a meteor cursor trail") unless home_html.include?("quadraticCurveTo") && home_html.include?("drawMeteorTail")
+fail_with("home meteor cursor should use additive light blending") unless home_html.include?("globalCompositeOperation = 'lighter'")
+fail_with("home meteor cursor should keep old trail segments dim") unless home_html.include?("tailSegmentFade") && home_html.include?("maxTailSegments")
+fail_with("home meteor cursor should draw a bright head glow") unless home_html.include?("createRadialGradient") && home_html.include?("headGlow")
 fail_with("home cursor trail should use a stable tail") unless home_html.include?("tailLength")
 fail_with("home cursor trail should stay responsive") unless home_html.include?("lerp")
-fail_with("home should include starfield layer") unless home_html.include?("background-size: 110px 110px")
-fail_with("home cursor trail should suppress slow-move flashing") unless home_html.include?("drawEnergy") && home_html.include?("slowSpeedLimit")
-fail_with("home cursor trail should fade out gradually") unless home_html.include?("drawEnergy *= 0.975")
+fail_with("home should include a background-only cosmic asset") unless home_html.include?("/img/cosmic-space-bg.png")
+fail_with("home starfield should not use a repeated grid") if home_html.include?("110px 110px") || home_html.include?("170px 170px")
+fail_with("home cursor trail should suppress slow-move flashing") unless home_html.include?("movementEnergy") && home_html.include?("slowSpeedLimit")
+fail_with("home cursor trail should stay visible a little longer") unless home_html.include?("tailLength = 34") && home_html.include?("drawEnergy *= 0.982")
 fail_with("home cursor trail should support touch input") unless home_html.include?("touchmove") && home_html.include?("touchstart")
 fail_with("mobile navigation should handle iPhone taps") unless home_html.include?("touchend") && home_html.include?("lastTouchToggle") && home_html.include?("$toggle.contains")
 fail_with("home should not list dev posts") if home_html.include?('class="post-preview"')
@@ -87,24 +91,29 @@ end
 daily_index_html = daily_index.read
 note_index_html = note_index.read
 dev_index_html = dev_index.read
-theme_color = '<meta name="theme-color" content="#18212b">'
+cosmic_asset = SITE.join("img/cosmic-space-bg.png")
+fail_with("cosmic background asset is missing from _site") unless cosmic_asset.file?
+png_signature = File.binread(cosmic_asset.to_s, 8)
+fail_with("cosmic background should be a PNG asset") unless png_signature == "\x89PNG\r\n\x1A\n".b
+
+theme_color = '<meta name="theme-color" content="#050917">'
 safe_area_snippets = [
   "ios-safe-area-bg",
   "env(safe-area-inset-top)",
-  "background: #18212b",
+  "background: #050917",
   "z-index: 2"
 ]
 fixed_nav_snippets = [
   ".navbar-custom.is-fixed",
-  "rgba(24, 33, 43, .96)",
+  "rgba(5, 9, 23, .94)",
   "border-bottom-color: rgba(255, 255, 255, .08)"
 ]
 content_background_snippets = [
   'class="layout-',
   'class="site-main"',
   "background: #ffffff",
-  "background-color: #18212b",
-  "background-image: linear-gradient(180deg, #18212b 0, #18212b 140px, #ffffff 140px, #ffffff 100%)",
+  "background-color: #050917",
+  "background-image: linear-gradient(180deg, #050917 0, #050917 140px, #ffffff 140px, #ffffff 100%)",
   "background-size: 100% 100%",
   "background-color: transparent",
   "body.layout-home .site-main",
@@ -156,8 +165,8 @@ fail_with("note page should not include cursor canvas") if note_index_html.inclu
 fail_with("dev page should not include cursor canvas") if dev_index_html.include?("data-ripple-canvas")
 
 space_header_snippets = [
-  "linear-gradient(180deg, #161b27 0%, #070a10 100%) !important",
-  "background-size: 110px 110px, 170px 170px",
+  "cosmic-space-bg.png",
+  ".intro-header:before",
   ".intro-header:after"
 ]
 
