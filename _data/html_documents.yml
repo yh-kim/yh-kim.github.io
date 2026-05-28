@@ -1,3 +1,10 @@
+- title: "방탈출 초대장"
+  description: "같이 갈 방탈출 테마, 예약 시간, 지역, 난이도, 포스터를 한 화면에 정리한 초대장"
+  path: "/html-documents/escape-room-invite.html"
+  date: "2026-05-28"
+  tags:
+    - EscapeRoom
+    - Invite
 - title: "PSP 시험 힌트 총정리"
   description: "시험 직전용 핵심 단어, 예상 문답, 오픈북 전략 정리"
   path: "/html-documents/psp-problems.html"
