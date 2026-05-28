@@ -62,6 +62,7 @@ fail_with("home should include pointer ripple behavior") unless home_html.includ
 fail_with("home should prevent page scroll") unless home_html.include?("overflow: hidden")
 fail_with("home should prevent mobile text selection") unless home_html.include?("-webkit-user-select: none") && home_html.include?("-webkit-touch-callout: none") && home_html.include?("::selection")
 fail_with("home should lift the mobile welcome text slightly") unless home_html.include?("padding-top: 42vh")
+fail_with("home should cover the mobile dynamic viewport") unless home_html.include?("height: 100dvh") && home_html.include?("padding-bottom: max(40px, env(safe-area-inset-bottom))")
 fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#050917")
 fail_with("home should use the cosmic background asset") unless home_html.include?("cosmic-space-bg.png")
 fail_with("home should use cosmic display typography") unless home_html.include?("--cosmic-display-font") && home_html.include?("font-weight: 300")
