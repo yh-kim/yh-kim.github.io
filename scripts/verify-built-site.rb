@@ -52,6 +52,7 @@ dev_index = SITE.join("dev/index.html")
 html_documents = SITE.join("daily/html-documents/index.html")
 home_html = SITE.join("index.html").read
 pickth_css = SITE.join("css/pickth.css").read
+pickth_js = SITE.join("js/pickth.js").read
 fail_with("_site/daily/index.html is missing") unless daily_index.file?
 fail_with("_site/note/index.html is missing") unless note_index.file?
 fail_with("_site/dev/index.html is missing") unless dev_index.file?
@@ -187,25 +188,48 @@ end
 fail_with("daily page should use the space mobile theme color") unless daily_index_html.include?(theme_color)
 fail_with("note page should use the space mobile theme color") unless note_index_html.include?(theme_color)
 fail_with("dev page should use the space mobile theme color") unless dev_index_html.include?(theme_color)
+script_src_snippets = [
+  'src="/js/jquery.min.js"',
+  'src="/js/bootstrap.min.js"',
+  'src="/js/hux-blog.min.js"',
+  'src="/js/pickth.js"'
+]
+script_src_snippets.each do |snippet|
+  fail_with("shared scripts should be referenced without trailing spaces") unless note_index_html.include?(snippet)
+end
+fail_with("shared script paths should not contain trailing spaces") if note_index_html.match?(%r{src="/js/[^"]+\.js\s+"})
 fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
 fail_with("note page should list daily posts") unless note_index_html.include?("post-preview")
 fail_with("dev page should hide old dev posts") if dev_index_html.include?('class="post-preview"')
+fail_with("note page should navigate with native form buttons") unless note_index_html.include?('<form class="post-preview-form" action="/daily/html-documents/" method="get">') && note_index_html.include?('<button class="post-preview" type="submit"') && !note_index_html.match?(/<article class="post-preview"|data-href=|<a class="post-title-link"/)
+note_index_html.scan(/<form class="post-preview-form" action="([^"]+)" method="get">/).flatten.each do |href|
+  fail_with("note clickable card points to a missing page: #{href}") unless built_path_for(href).file?
+end
 fail_with("note page should use the space header") unless note_index_html.include?("space-header")
 fail_with("dev page should use the space header") unless dev_index_html.include?("space-header")
 fail_with("note page should not include cursor canvas") if note_index_html.include?("data-ripple-canvas")
 fail_with("dev page should not include cursor canvas") if dev_index_html.include?("data-ripple-canvas")
 
+fail_with("post cards should not rely on custom JavaScript navigation") if pickth_js.include?("data-href") || pickth_js.include?("window.location.href")
+
 list_style_snippets = [
+  ".layout-page .post-preview-form",
   ".layout-page .post-preview",
   "border-radius: 8px",
-  "box-shadow: 0 14px 42px",
+  "cursor: pointer",
+  "touch-action: manipulation",
+  "appearance: none",
+  "box-shadow: 0 18px 56px",
   ".layout-page .post-preview > .post-meta",
   ".layout-page .postlist-container > hr",
-  "font-weight: 620",
+  "Apple SD Gothic Neo",
+  "-webkit-touch-callout: none",
+  "font-weight: 720",
+  "font-weight: 560",
   "font-weight: 430",
-  "color: rgba(21, 27, 44, 0.72)",
+  "color: #465062",
   "-webkit-tap-highlight-color: transparent",
-  ".layout-page .post-preview:focus-within",
+  ".layout-page .post-preview::after",
   "outline: none !important"
 ]
 list_style_snippets.each do |snippet|
@@ -215,8 +239,11 @@ end
 html_document_style_snippets = [
   ".post-container .html-document-list",
   ".post-container .html-document-item",
-  "grid-template-columns: minmax(0, 1fr) auto",
-  ".post-container .html-document-meta"
+  "grid-template-columns: minmax(0, 1fr)",
+  ".post-container .html-document-meta",
+  ".post-container .html-document-tags",
+  ".post-container .html-document-date",
+  "color: #5146b2"
 ]
 html_document_style_snippets.each do |snippet|
   fail_with("HTML document post should use compact document list styling") unless pickth_css.include?(snippet)
