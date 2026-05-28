@@ -161,6 +161,7 @@ th {
 }
 
 .layout-page .post-preview .post-title {
+  display: block;
   grid-column: 1;
   margin: 0 0 10px;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
@@ -172,6 +173,7 @@ th {
 }
 
 .layout-page .post-preview .post-subtitle {
+  display: block;
   grid-column: 1;
   margin: 0 0 12px;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
@@ -183,8 +185,8 @@ th {
 }
 
 .layout-page .post-content-preview {
-  grid-column: 1;
   display: -webkit-box;
+  grid-column: 1;
   max-width: 64ch;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
@@ -199,6 +201,7 @@ th {
 }
 
 .layout-page .post-preview > .post-meta {
+  display: inline-flex;
   grid-column: 2;
   grid-row: 1 / 4;
   align-self: start;

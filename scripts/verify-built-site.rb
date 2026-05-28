@@ -224,6 +224,8 @@ list_style_snippets = [
   ".layout-page .postlist-container > hr",
   "Apple SD Gothic Neo",
   "-webkit-touch-callout: none",
+  ".layout-page .post-preview .post-title {\n  display: block;",
+  ".layout-page .post-preview .post-subtitle {\n  display: block;",
   "font-weight: 720",
   "font-weight: 560",
   "font-weight: 430",
