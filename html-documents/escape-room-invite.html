@@ -15,6 +15,9 @@
       --muted: #b9bfcd;
       --line: rgba(255, 255, 255, .14);
       --gold: #ffc84f;
+      --brass: #d8bd7a;
+      --brass-soft: rgba(216, 189, 122, .22);
+      --steel: #8fc8c2;
       --pink: #ff4d8f;
       --cyan: #39d6ff;
       --shadow: 0 28px 80px rgba(0, 0, 0, .42);
@@ -85,9 +88,10 @@
     .header {
       padding: 10px 14px;
       background:
-        radial-gradient(circle at 20% 0%, rgba(255, 200, 79, .26), transparent 34%),
-        linear-gradient(135deg, rgba(255, 77, 143, .24), rgba(57, 214, 255, .13));
-      border-bottom: 1px solid rgba(255, 255, 255, .13);
+        linear-gradient(135deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .02)),
+        linear-gradient(90deg, rgba(18, 22, 33, .98), rgba(32, 30, 43, .98));
+      border-bottom: 1px solid rgba(216, 189, 122, .2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
     }
 
     .label {
@@ -95,7 +99,7 @@
       align-items: center;
       gap: 8px;
       margin: 0;
-      color: var(--gold);
+      color: rgba(232, 214, 170, .9);
       font-size: 11px;
       font-weight: 900;
     }
@@ -104,14 +108,14 @@
       width: 8px;
       height: 8px;
       flex: 0 0 8px;
-      background: var(--gold);
+      background: var(--brass);
       transform: rotate(45deg);
-      box-shadow: 0 0 18px rgba(255, 200, 79, .82);
+      box-shadow: 0 0 14px rgba(216, 189, 122, .42);
     }
 
     h1 {
       margin: 0;
-      font-size: 19px;
+      font-size: 22px;
       line-height: 1.16;
       letter-spacing: 0;
       word-break: keep-all;
@@ -148,6 +152,7 @@
     }
 
     .media-row {
+      height: clamp(360px, 78vw, 420px);
       display: grid;
       grid-template-columns: minmax(0, .9fr) minmax(0, .72fr);
       gap: 1px;
@@ -160,8 +165,10 @@
       position: relative;
       z-index: 1;
       min-width: 0;
+      height: 100%;
+      overflow: hidden;
       display: grid;
-      grid-template-rows: 1.16fr .92fr .92fr;
+      grid-template-rows: minmax(0, 1.06fr) minmax(0, .72fr) minmax(0, .54fr) minmax(0, .56fr);
       gap: 8px;
       padding: 8px;
       background:
@@ -170,11 +177,12 @@
     }
 
     .summary-box {
+      --summary-left: 8px;
       position: relative;
       min-width: 0;
-      min-height: 76px;
+      min-height: 0;
       overflow: hidden;
-      padding: 13px 12px 13px 15px;
+      padding: 12px 10px;
       display: grid;
       align-content: center;
       border: 1px solid rgba(255, 255, 255, .16);
@@ -195,11 +203,15 @@
       left: 0;
       width: 3px;
       border-radius: 0 99px 99px 0;
-      background: linear-gradient(180deg, var(--gold), var(--pink));
-      opacity: .95;
+      background: linear-gradient(180deg, var(--brass), var(--steel));
+      opacity: .82;
     }
 
     .summary-label {
+      position: absolute;
+      top: 8px;
+      left: var(--summary-left);
+      z-index: 1;
       display: block;
       color: rgba(255, 248, 236, .64);
       font-size: 11px;
@@ -208,7 +220,7 @@
 
     .summary-box strong {
       display: block;
-      margin-top: 6px;
+      margin-top: 0;
       color: var(--ink);
       font-size: 16px;
       font-weight: 900;
@@ -229,27 +241,30 @@
     .time-line {
       margin-top: 3px;
       color: var(--ink);
-      font-size: 15px;
+      font-size: 15.5px;
       font-weight: 950;
+      white-space: nowrap;
     }
 
     .title-box {
-      min-height: 92px;
+      min-height: 0;
+      padding: 26px 10px 8px 12px;
+      align-content: center;
       background:
-        linear-gradient(145deg, rgba(255, 200, 79, .2), rgba(255, 77, 143, .12) 48%, rgba(57, 214, 255, .08)),
+        linear-gradient(145deg, rgba(216, 189, 122, .15), rgba(255, 255, 255, .05) 48%, rgba(143, 200, 194, .08)),
         rgba(8, 11, 20, .84);
     }
 
     .title-box::before {
-      background: linear-gradient(180deg, var(--gold), #ff9960);
+      background: linear-gradient(180deg, var(--brass), #a58d55);
     }
 
     .title-box .summary-label {
-      color: var(--gold);
+      color: rgba(232, 214, 170, .9);
     }
 
     .title-box h1 {
-      margin-top: 6px;
+      margin-top: 0;
       text-shadow: 0 8px 24px rgba(0, 0, 0, .28);
     }
 
@@ -263,21 +278,79 @@
     }
 
     .summary-box.area {
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px;
-      align-items: center;
+      min-height: 0;
+      padding: 20px 42px 7px 10px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
       align-content: center;
     }
 
-    .summary-box.area .summary-label,
     .summary-box.area strong {
-      grid-column: 1;
+      position: static;
+      margin-top: 0;
+      transform: none;
+      font-size: 16px;
+      line-height: 1.1;
+      text-align: left;
     }
 
     .summary-box.area .map-button {
-      grid-column: 2;
-      grid-row: 1 / 3;
-      align-self: center;
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+    }
+
+    .reservation-box {
+      min-height: 0;
+      padding: 20px 8px 7px 10px;
+      align-content: center;
+    }
+
+    .pair-box {
+      min-height: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      align-content: stretch;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .025)),
+        rgba(8, 11, 20, .82);
+    }
+
+    .pair-box::before {
+      display: none;
+    }
+
+    .pair-item {
+      position: relative;
+      min-width: 0;
+      display: grid;
+      align-content: center;
+      padding: 15px 6px 5px 6px;
+      background: transparent;
+    }
+
+    .pair-item + .pair-item {
+      border-left: 1px solid rgba(255, 255, 255, .16);
+    }
+
+    .pair-item span {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      color: rgba(255, 248, 236, .62);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .pair-item strong {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13.5px;
+      line-height: 1.16;
+      font-weight: 900;
     }
 
     .facts {
@@ -289,10 +362,6 @@
     .facts-row {
       display: grid;
       gap: 1px;
-    }
-
-    .facts-row.two {
-      grid-template-columns: 1fr 1fr;
     }
 
     .facts-row.three {
@@ -328,12 +397,16 @@
       align-items: center;
       justify-content: center;
       padding: 0;
-      border: 1px solid rgba(255, 200, 79, .58);
+      border: 1px solid rgba(216, 189, 122, .48);
       border-radius: 8px;
-      color: #1a1004;
-      background: linear-gradient(135deg, var(--gold), #ff9960);
+      color: #f1dfac;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .11), rgba(255, 255, 255, .02)),
+        rgba(25, 29, 39, .86);
       text-decoration: none;
-      box-shadow: 0 10px 22px rgba(255, 153, 96, .22);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .1),
+        0 10px 20px rgba(0, 0, 0, .28);
     }
 
     .map-button svg {
@@ -343,7 +416,7 @@
     }
 
     .map-button:focus-visible {
-      outline: 3px solid rgba(57, 214, 255, .72);
+      outline: 3px solid rgba(216, 189, 122, .48);
       outline-offset: 3px;
     }
 
@@ -379,112 +452,13 @@
       }
     }
 
-    @media (max-width: 520px) {
-      .media-row {
-        grid-template-columns: minmax(0, .88fr) minmax(0, .72fr);
-      }
-
-      .side-summary {
-        gap: 6px;
-        padding: 6px;
-      }
-
-      .summary-box {
-        min-height: 70px;
-        padding: 10px 9px 10px 12px;
-      }
-
-      .title-box {
-        min-height: 88px;
-      }
-
-      h1 {
-        font-size: 16px;
-      }
-
-      .title-store {
-        margin-top: 6px;
-        font-size: 11px;
-      }
-
-      .date-line {
-        font-size: 12px;
-      }
-
-      .time-line {
-        font-size: 13px;
-      }
-
-      .summary-box strong {
-        font-size: 14px;
-      }
-    }
-
-    @media (max-width: 380px) {
-      .page {
-        padding: 8px;
-      }
-
-      .header,
-      .intro {
-        padding-left: 14px;
-        padding-right: 14px;
-      }
-
-      .fact {
-        padding-left: 12px;
-        padding-right: 12px;
-      }
-
-      .media-row {
-        grid-template-columns: minmax(0, .92fr) minmax(0, .68fr);
-      }
-
-      .summary-box {
-        min-height: 66px;
-        padding: 8px 8px 8px 11px;
-      }
-
-      .title-box {
-        min-height: 84px;
-      }
-
-      h1 {
-        font-size: 15px;
-      }
-
-      .title-store {
-        font-size: 10px;
-      }
-
-      .summary-box strong {
-        font-size: 13px;
-      }
-
-      .summary-label {
-        font-size: 10px;
-      }
-
-      .date-line {
-        font-size: 11px;
-      }
-
-      .time-line {
-        font-size: 12px;
-      }
-
-      .map-button {
-        width: 30px;
-        height: 30px;
-      }
-    }
   </style>
 </head>
 
 <body>
   <script>
     const inviteData = {
-      label: "방탈출 초대장",
+      label: "방탈출 정보",
       title: "붐붐 박사의 폭죽놀이 유토피아",
       store: "채널27 버터플라이점",
       area: "홍대",
@@ -520,7 +494,7 @@
             <p class="title-store" data-field="store"></p>
           </section>
 
-          <section class="summary-box" aria-label="예약 시간">
+          <section class="summary-box reservation-box" aria-label="예약 시간">
             <span class="summary-label">예약 시간</span>
             <strong><span class="date-line" data-field="reservedDate"></span><span class="time-line" data-time-range></span></strong>
           </section>
@@ -528,27 +502,28 @@
           <section class="summary-box area" aria-label="지역">
             <span class="summary-label">지역</span>
             <strong data-field="area"></strong>
-            <a class="map-button" data-link="mapUrl" href="#" aria-label="네이버 지도 열기" title="네이버 지도 열기">
+            <a class="map-button" data-link="mapUrl" href="#" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도 열기" title="네이버 지도 열기">
               <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path>
                 <circle cx="12" cy="10" r="2.5"></circle>
               </svg>
             </a>
           </section>
+
+          <section class="summary-box pair-box" aria-label="장르와 가격">
+            <div class="pair-item">
+              <span>장르</span>
+              <strong data-field="genre"></strong>
+            </div>
+            <div class="pair-item">
+              <span>가격</span>
+              <strong data-field="price"></strong>
+            </div>
+          </section>
         </div>
       </section>
 
       <section class="facts" aria-label="테마 정보">
-        <div class="facts-row two">
-          <div class="fact">
-            <b>장르</b>
-            <strong data-field="genre"></strong>
-          </div>
-          <div class="fact">
-            <b>가격</b>
-            <strong data-field="price"></strong>
-          </div>
-        </div>
         <div class="facts-row three">
           <div class="fact">
             <b>난이도</b>
