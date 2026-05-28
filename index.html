@@ -62,14 +62,26 @@ layout: home
     position: relative;
     z-index: 2;
     margin: 0;
-    font-size: 22px;
-    color: rgba(255, 255, 255, .88);
-    text-shadow: 0 0 24px rgba(180, 205, 255, .25);
+    font-family: var(--cosmic-display-font);
+    font-size: 30px;
+    font-weight: 300;
+    letter-spacing: 0;
+    color: rgba(245, 247, 255, .88);
+    text-shadow:
+      0 0 16px rgba(172, 185, 255, .38),
+      0 0 44px rgba(91, 98, 202, .22),
+      0 10px 34px rgba(0, 0, 0, .38);
   }
 
   @media only screen and (max-width: 768px) {
     .home-ripple {
       background-position: 68% center;
+      align-items: flex-start;
+      padding-top: 42vh;
+    }
+
+    .home-ripple-text {
+      font-size: 28px;
     }
   }
 </style>

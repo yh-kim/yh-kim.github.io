@@ -2,13 +2,21 @@
 layout: page
 ---
 
-{% unless "site.tags[page.tag] | size > 0" %}
-  <p>No posts found.</p>
+{% assign visible_count = 0 %}
+{% for post in site.tags[page.tag] %}
+{% unless post.hidden %}
+{% assign visible_count = visible_count | plus: 1 %}
 {% endunless %}
+{% endfor %}
 
-<p>{{ page.tag }}({{ site.tags[page.tag] | size }})<p>
+{% if visible_count == 0 %}
+  <p>No posts found.</p>
+{% endif %}
+
+<p>{{ page.tag }}({{ visible_count }})<p>
 
 {% for post in site.tags[page.tag] %}
+{% unless post.hidden %}
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
         <h2 class="post-title">
@@ -28,6 +36,7 @@ layout: page
     </p>
 </div>
 <hr>
+{% endunless %}
 {% endfor %}
 
 <a href="#" class="jcm-top"></a>

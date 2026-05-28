@@ -51,6 +51,7 @@ note_index = SITE.join("note/index.html")
 dev_index = SITE.join("dev/index.html")
 html_documents = SITE.join("daily/html-documents/index.html")
 home_html = SITE.join("index.html").read
+pickth_css = SITE.join("css/pickth.css").read
 fail_with("_site/daily/index.html is missing") unless daily_index.file?
 fail_with("_site/note/index.html is missing") unless note_index.file?
 fail_with("_site/dev/index.html is missing") unless dev_index.file?
@@ -60,8 +61,10 @@ fail_with("home should include ripple canvas") unless home_html.include?("data-r
 fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
 fail_with("home should prevent page scroll") unless home_html.include?("overflow: hidden")
 fail_with("home should prevent mobile text selection") unless home_html.include?("-webkit-user-select: none") && home_html.include?("-webkit-touch-callout: none") && home_html.include?("::selection")
+fail_with("home should lift the mobile welcome text slightly") unless home_html.include?("padding-top: 42vh")
 fail_with("home should match the mobile safe area") unless home_html.include?("viewport-fit=cover") && home_html.include?("#050917")
 fail_with("home should use the cosmic background asset") unless home_html.include?("cosmic-space-bg.png")
+fail_with("home should use cosmic display typography") unless home_html.include?("--cosmic-display-font") && home_html.include?("font-weight: 300")
 fail_with("home should draw a meteor cursor trail") unless home_html.include?("quadraticCurveTo") && home_html.include?("drawMeteorTail")
 fail_with("home meteor cursor should use additive light blending") unless home_html.include?("globalCompositeOperation = 'lighter'")
 fail_with("home meteor cursor should keep old trail segments dim") unless home_html.include?("tailSegmentFade") && home_html.include?("maxTailSegments")
@@ -76,7 +79,7 @@ fail_with("home cursor trail should support touch input") unless home_html.inclu
 fail_with("mobile navigation should handle iPhone taps") unless home_html.include?("touchend") && home_html.include?("lastTouchToggle") && home_html.include?("$toggle.contains")
 fail_with("home should not list dev posts") if home_html.include?('class="post-preview"')
 fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
-fail_with("home should not use the generic page header") if home_html.include?("site-heading")
+fail_with("home should not use the generic page header") if home_html.include?('class="site-heading"')
 fail_with("home should not use the generic post list container") if home_html.include?('class="postlist-container"')
 
 nav_expected = [
@@ -87,6 +90,8 @@ nav_expected = [
 nav_expected.each do |snippet|
   fail_with("home navigation missing #{snippet}") unless home_html.include?(snippet)
 end
+fail_with("header navigation and title should not be text-selectable") unless home_html.include?(".navbar-custom *") && home_html.include?(".intro-header *") && home_html.include?("user-select: none")
+fail_with("post detail title should remain text-selectable") unless home_html.include?("body.layout-post .intro-header .post-heading h1") && home_html.include?("user-select: text")
 
 daily_index_html = daily_index.read
 note_index_html = note_index.read
@@ -108,6 +113,12 @@ fixed_nav_snippets = [
   "rgba(5, 9, 23, .94)",
   "border-bottom-color: rgba(255, 255, 255, .08)"
 ]
+hamburger_snippets = [
+  ".navbar-default .navbar-toggle .icon-bar",
+  "height: 1px",
+  "width: 21px",
+  "margin-top: 5px"
+]
 content_background_snippets = [
   'class="layout-',
   'class="site-main"',
@@ -124,6 +135,16 @@ mobile_menu_snippets = [
   "#huxblog_navbar .navbar-collapse",
   ".navbar-custom.is-fixed #huxblog_navbar .navbar-collapse a",
   "box-shadow: 0 10px 26px rgba(0, 0, 0, .24)"
+]
+cosmic_typography_snippets = [
+  "--cosmic-display-font",
+  "font-size: 16px",
+  "font-size: 15px",
+  "text-transform: none",
+  "text-rendering: geometricPrecision",
+  ".intro-header .site-heading h1",
+  ".intro-header.space-header .site-heading h1",
+  ".intro-header .post-heading h1"
 ]
 horizontal_overflow_snippets = [
   "overflow-x: hidden",
@@ -146,23 +167,51 @@ horizontal_overflow_snippets = [
   fixed_nav_snippets.each do |snippet|
     fail_with("#{label} page should keep the fixed top navigation in the space theme") unless html.include?(snippet)
   end
+  hamburger_snippets.each do |snippet|
+    fail_with("#{label} page should keep the mobile hamburger icon thin") unless html.include?(snippet)
+  end
   mobile_menu_snippets.each do |snippet|
     fail_with("#{label} page should keep scrolled mobile menu labels visible") unless html.include?(snippet)
+  end
+  cosmic_typography_snippets.each do |snippet|
+    fail_with("#{label} page should use the cosmic typography style") unless html.include?(snippet)
   end
   horizontal_overflow_snippets.each do |snippet|
     fail_with("#{label} page should prevent horizontal swipe whitespace") unless html.include?(snippet)
   end
+  fail_with("#{label} page should not include the old repeated star grid") if html.include?("background-size: 110px 110px")
 end
 fail_with("daily page should use the space mobile theme color") unless daily_index_html.include?(theme_color)
 fail_with("note page should use the space mobile theme color") unless note_index_html.include?(theme_color)
 fail_with("dev page should use the space mobile theme color") unless dev_index_html.include?(theme_color)
 fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
 fail_with("note page should list daily posts") unless note_index_html.include?("post-preview")
-fail_with("dev page should list dev posts") unless dev_index_html.include?("post-preview")
+fail_with("dev page should hide old dev posts") if dev_index_html.include?('class="post-preview"')
 fail_with("note page should use the space header") unless note_index_html.include?("space-header")
 fail_with("dev page should use the space header") unless dev_index_html.include?("space-header")
 fail_with("note page should not include cursor canvas") if note_index_html.include?("data-ripple-canvas")
 fail_with("dev page should not include cursor canvas") if dev_index_html.include?("data-ripple-canvas")
+
+list_style_snippets = [
+  ".layout-page .post-preview",
+  "border-radius: 8px",
+  "box-shadow: 0 14px 42px",
+  ".layout-page .post-preview > .post-meta",
+  ".layout-page .postlist-container > hr"
+]
+list_style_snippets.each do |snippet|
+  fail_with("list pages should use the refined list styling") unless pickth_css.include?(snippet)
+end
+
+html_document_style_snippets = [
+  ".post-container .html-document-list",
+  ".post-container .html-document-item",
+  "grid-template-columns: minmax(0, 1fr) auto",
+  ".post-container .html-document-meta"
+]
+html_document_style_snippets.each do |snippet|
+  fail_with("HTML document post should use compact document list styling") unless pickth_css.include?(snippet)
+end
 
 space_header_snippets = [
   "cosmic-space-bg.png",
@@ -193,8 +242,25 @@ ROOT.join("_daily").glob("*.{md,markdown}").each do |path|
   end
 end
 
+feed_html = SITE.join("feed.xml").read
+category_index_html = SITE.join("category/index.html").read
+tag_cloud_html = category_index_html[/<div id='tag_cloud' class="tags">(.*?)<\/div>/m, 1].to_s
+ROOT.join("_posts").glob("*.{md,markdown}").each do |path|
+  front_matter, = read_front_matter(path)
+  title = front_matter["title"].to_s
+  tags = [front_matter["tags"]].flatten.compact.map(&:to_s)
+  fail_with("old dev post should be marked hidden: #{path}") unless front_matter["hidden"] == true
+  fail_with("hidden dev post is linked from dev page: #{title}") if dev_index_html.include?(title)
+  fail_with("hidden dev post is exposed in feed: #{title}") if feed_html.include?(title)
+  tags.each do |tag|
+    fail_with("category index exposes hidden dev tag: #{tag}") if tag_cloud_html.include?("/category/#{tag}")
+  end
+end
+
 documents = Psych.safe_load(ROOT.join("_data/html_documents.yml").read, aliases: true) || []
 html_documents_html = html_documents.read
+fail_with("HTML document list post should use compact list markup") unless html_documents_html.include?("html-document-list") && html_documents_html.include?("html-document-item")
+fail_with("HTML document list post should not render document items as large markdown headings") if html_documents_html.include?("<h3")
 
 documents.each do |document|
   path = document["path"].to_s

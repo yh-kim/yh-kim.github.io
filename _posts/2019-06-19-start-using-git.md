@@ -6,6 +6,7 @@ author:     "Pimi"
 header-img: "img/home-bg.jpg"
 header-mask: 0.3
 catalog:    true
+hidden:     true
 tags:
     - [Git]
 ---

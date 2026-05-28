@@ -8,6 +8,7 @@ space-header: true
 ---
 
 {% for post in site.posts %}
+{% unless post.hidden %}
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
         <h2 class="post-title">
@@ -27,4 +28,5 @@ space-header: true
     </p>
 </div>
 <hr>
+{% endunless %}
 {% endfor %}

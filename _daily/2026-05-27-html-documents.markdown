@@ -16,18 +16,21 @@ tags:
 
 {% assign documents = site.data.html_documents | sort: "date" | reverse %}
 
+<div class="html-document-list">
 {% for document in documents %}
-### [{{ document.title }}]({{ document.path | relative_url }}){:target="_blank"}
-
-{{ document.description }}
-
-{% if document.tags %}
-`{{ document.tags | join: "`, `" }}`
-{% endif %}
-
-{% if document.date %}
-<span class="post-meta">{{ document.date }}</span>
-{% endif %}
-
----
+<a class="html-document-item" href="{{ document.path | relative_url }}" target="_blank" rel="noopener">
+  <span class="html-document-main">
+    <strong class="html-document-title">{{ document.title }}</strong>
+    <span class="html-document-description">{{ document.description }}</span>
+  </span>
+  <span class="html-document-meta">
+    {% if document.tags %}
+    <span class="html-document-tags">{{ document.tags | join: " · " }}</span>
+    {% endif %}
+    {% if document.date %}
+    <time class="html-document-date" datetime="{{ document.date }}">{{ document.date }}</time>
+    {% endif %}
+  </span>
+</a>
 {% endfor %}
+</div>

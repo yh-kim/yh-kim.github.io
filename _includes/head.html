@@ -47,6 +47,10 @@
     <link rel="stylesheet" href="{{ "/css/pickth.css" | prepend: site.baseurl }}">
 
     <style>
+        :root {
+            --cosmic-display-font: "SF Pro Display", "Avenir Next", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Pretendard", "Noto Sans KR", Arial, sans-serif;
+        }
+
         html {
             background-color: #050917;
             background-image: linear-gradient(180deg, #050917 0, #050917 140px, #ffffff 140px, #ffffff 100%);
@@ -87,6 +91,55 @@
             z-index: 20;
         }
 
+        .navbar-custom {
+            font-family: var(--cosmic-display-font);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: geometricPrecision;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .navbar-custom *,
+        .intro-header,
+        .intro-header * {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body.layout-post .intro-header .post-heading,
+        body.layout-post .intro-header .post-heading h1,
+        body.layout-post .intro-header .post-heading .subheading {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-family: var(--cosmic-display-font);
+            font-size: 15px;
+            font-weight: 450;
+            letter-spacing: 0;
+            color: rgba(255, 255, 255, .82);
+            text-shadow: 0 0 14px rgba(148, 166, 255, .22);
+        }
+
+        .navbar-custom .nav li a {
+            font-family: var(--cosmic-display-font);
+            font-size: 16px;
+            font-weight: 450;
+            letter-spacing: 0;
+            text-transform: none;
+            color: rgba(255, 255, 255, .84);
+            text-shadow: 0 0 16px rgba(148, 166, 255, .28);
+        }
+
+        .navbar-custom .navbar-brand:hover,
+        .navbar-custom .navbar-brand:focus,
+        .navbar-custom .nav li a:hover,
+        .navbar-custom .nav li a:focus {
+            color: #ffffff;
+            text-shadow: 0 0 18px rgba(190, 201, 255, .48);
+        }
+
         .navbar-custom.is-fixed {
             background-color: rgba(5, 9, 23, .94);
             border-bottom-color: rgba(255, 255, 255, .08);
@@ -106,6 +159,32 @@
 
         .navbar-custom.is-fixed .navbar-toggle .icon-bar {
             background-color: #ffffff;
+        }
+
+        .navbar-default .navbar-toggle {
+            padding: 18px 16px;
+            margin-top: 2px;
+            margin-right: 2px;
+            border-color: transparent;
+            background: transparent;
+        }
+
+        .navbar-default .navbar-toggle:hover,
+        .navbar-default .navbar-toggle:focus {
+            background: transparent;
+        }
+
+        .navbar-default .navbar-toggle .icon-bar,
+        .navbar-custom.is-fixed .navbar-toggle .icon-bar {
+            width: 21px;
+            height: 1px;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, .82);
+            box-shadow: 0 0 8px rgba(153, 171, 255, .22);
+        }
+
+        .navbar-default .navbar-toggle .icon-bar + .icon-bar {
+            margin-top: 5px;
         }
 
         @media only screen and (max-width: 768px) {
@@ -163,9 +242,65 @@
             z-index: 1;
         }
 
+        .intro-header .site-heading h1,
+        .intro-header .page-heading h1,
+        .intro-header .post-heading h1 {
+            font-family: var(--cosmic-display-font);
+            font-weight: 500;
+            letter-spacing: 0;
+            color: rgba(255, 255, 255, .94);
+            text-shadow:
+                0 0 18px rgba(161, 173, 255, .34),
+                0 10px 36px rgba(0, 0, 0, .42);
+        }
+
+        .intro-header .site-heading h1,
+        .intro-header .page-heading h1 {
+            font-size: 72px;
+            font-weight: 300;
+        }
+
+        .intro-header.space-header .site-heading h1 {
+            font-family: var(--cosmic-display-font) !important;
+            font-size: 74px;
+            font-weight: 300;
+        }
+
+        .intro-header .site-heading .subheading,
+        .intro-header .page-heading .subheading,
+        .intro-header .post-heading .subheading,
+        .intro-header .post-heading .meta {
+            font-family: var(--cosmic-display-font);
+            font-weight: 300;
+            letter-spacing: 0;
+            color: rgba(235, 239, 255, .72);
+            text-shadow: 0 0 14px rgba(125, 142, 255, .24);
+        }
+
+        .intro-header .post-heading .tags a {
+            font-family: var(--cosmic-display-font);
+            font-weight: 400;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
         @media only screen and (max-width: 768px) {
             .intro-header {
                 background-position: 68% center !important;
+            }
+
+            .navbar-custom .navbar-brand {
+                font-size: 14px;
+            }
+
+            .navbar-custom .nav li a {
+                font-size: 15px;
+            }
+
+            .intro-header .site-heading h1,
+            .intro-header .page-heading h1,
+            .intro-header.space-header .site-heading h1 {
+                font-size: 56px;
             }
         }
 

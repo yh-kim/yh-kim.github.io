@@ -7,6 +7,7 @@ author:     "Pimi"
 header-img: "img/in-post/start-toolbar/header.jpg"
 header-mask: 0.3
 catalog:    true
+hidden:     true
 tags:
     - Android
 ---
