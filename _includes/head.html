@@ -18,8 +18,37 @@
     <meta name="keywords"  content="{{ site.keyword }}">
     <meta name="theme-color" content="#050917">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    {% assign og_title = site.SEOTitle %}
+    {% if page.title %}
+        {% assign og_title = page.title | append: " - " | append: site.SEOTitle %}
+    {% endif %}
+    {% assign og_description = page.description %}
+    {% if og_description == nil or og_description == "" %}
+        {% assign og_description = page.subtitle %}
+    {% endif %}
+    {% if og_description == nil or og_description == "" %}
+        {% assign og_description = site.description %}
+    {% endif %}
+    {% assign og_url = page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url %}
     
     <title>{% if page.title %}{{ page.title }} - {{ site.SEOTitle }}{% else %}{{ site.SEOTitle }}{% endif %}</title>
+
+    <!-- Link Preview -->
+    <meta property="og:type" content="{% if page.layout == 'post' %}article{% else %}website{% endif %}">
+    <meta property="og:site_name" content="{{ site.SEOTitle }}">
+    <meta property="og:title" content="{{ og_title | strip_html | strip_newlines | escape }}">
+    <meta property="og:description" content="{{ og_description | strip_html | strip_newlines | escape }}">
+    <meta property="og:url" content="{{ og_url }}">
+    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/img/og-image.png">
+    <meta property="og:image:secure_url" content="{{ site.url }}{{ site.baseurl }}/img/og-image.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:image:alt" content="Pimi's Blog space icon">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ og_title | strip_html | strip_newlines | escape }}">
+    <meta name="twitter:description" content="{{ og_description | strip_html | strip_newlines | escape }}">
+    <meta name="twitter:image" content="{{ site.url }}{{ site.baseurl }}/img/og-image.png">
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="{{ site.baseurl }}/pwa/manifest.json">

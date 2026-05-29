@@ -44,6 +44,13 @@ def built_path_for(url)
   end
 end
 
+def png_size(path)
+  data = File.binread(path.to_s, 24)
+  return nil unless data.byteslice(0, 8) == "\x89PNG\r\n\x1A\n".b
+
+  data.byteslice(16, 8).unpack("NN")
+end
+
 fail_with("_site is missing. Run jekyll build first.") unless SITE.directory?
 
 daily_index = SITE.join("daily/index.html")
@@ -83,6 +90,22 @@ fail_with("home should not list dev posts") if home_html.include?('class="post-p
 fail_with("home should not show featured tags") if home_html.include?("FEATURED TAGS")
 fail_with("home should not use the generic page header") if home_html.include?('class="site-heading"')
 fail_with("home should not use the generic post list container") if home_html.include?('class="postlist-container"')
+
+og_image = SITE.join("img/og-image.png")
+fail_with("Open Graph preview image is missing from _site") unless og_image.file?
+fail_with("Open Graph preview image should be 512x512 PNG") unless png_size(og_image) == [512, 512]
+
+og_snippets = [
+  '<meta property="og:site_name" content="Pimi',
+  '<meta property="og:image" content="https://blog.pickth.com/img/og-image.png">',
+  '<meta property="og:image:type" content="image/png">',
+  '<meta property="og:image:width" content="512">',
+  '<meta property="og:image:height" content="512">',
+  '<meta name="twitter:card" content="summary">'
+]
+og_snippets.each do |snippet|
+  fail_with("pages should expose link preview metadata") unless home_html.include?(snippet)
+end
 
 nav_expected = [
   'href="/">home</a>',
