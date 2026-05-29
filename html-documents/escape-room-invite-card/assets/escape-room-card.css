@@ -464,6 +464,7 @@
     }
 
     .action-dock {
+      position: relative;
       display: flex;
       justify-content: flex-end;
       gap: 10px;
@@ -503,6 +504,44 @@
       color: #e8fff7;
       border-color: rgba(110, 169, 155, .5);
       background: rgba(72, 115, 104, .9);
+    }
+
+    .copy-menu {
+      position: absolute;
+      right: 2px;
+      bottom: calc(100% + 10px);
+      z-index: 3;
+      min-width: 148px;
+      padding: 6px;
+      display: grid;
+      gap: 4px;
+      border: 1px solid rgba(255, 248, 237, .24);
+      border-radius: 16px;
+      background: rgba(37, 35, 48, .96);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, .24);
+      backdrop-filter: blur(12px);
+    }
+
+    .copy-menu button {
+      width: 100%;
+      min-height: 36px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 11px;
+      color: #fff8ed;
+      background: transparent;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .copy-menu button:hover,
+    .copy-menu button:focus-visible {
+      outline: none;
+      background: rgba(255, 248, 237, .1);
     }
 
     .snackbar {

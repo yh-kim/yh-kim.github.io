@@ -194,8 +194,7 @@
       ].join("\n");
     };
 
-    const copyInviteInfo = async () => {
-      const text = invitationText();
+    const copyText = async (text) => {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
         return;
@@ -212,15 +211,90 @@
       textarea.remove();
     };
 
-    document.querySelector("[data-copy-info]")?.addEventListener("click", async (event) => {
-      const button = event.currentTarget;
+    const closeCopyMenu = () => {
+      document.querySelector(".copy-menu")?.remove();
+      document.querySelector("[data-copy-info]")?.setAttribute("aria-expanded", "false");
+    };
+
+    const copyByMode = async (mode, button) => {
+      const text = mode === "link" ? window.location.href : invitationText();
       try {
-        await copyInviteInfo();
+        await copyText(text);
         setButtonDone(button, "복사했어요");
         showToast("복사 완료");
       } catch {
         setButtonDone(button, "복사 실패");
         showToast("복사에 실패했어요");
       }
+    };
+
+    const openCopyMenu = (button) => {
+      closeCopyMenu();
+
+      const menu = document.createElement("div");
+      const linkButton = document.createElement("button");
+      const fullButton = document.createElement("button");
+
+      menu.className = "copy-menu";
+      menu.setAttribute("role", "menu");
+      menu.setAttribute("aria-label", "복사 방식 선택");
+      linkButton.type = "button";
+      linkButton.textContent = "링크만 복사";
+      linkButton.dataset.copyMode = "link";
+      fullButton.type = "button";
+      fullButton.textContent = "전체 정보 복사";
+      fullButton.dataset.copyMode = "full";
+      menu.append(linkButton, fullButton);
+      button.closest(".action-dock")?.append(menu);
+      button.setAttribute("aria-expanded", "true");
+      linkButton.focus();
+    };
+
+    document.querySelector("[data-copy-info]")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const button = event.currentTarget;
+      const isOpen = Boolean(document.querySelector(".copy-menu"));
+
+      if (isOpen) {
+        closeCopyMenu();
+        return;
+      }
+
+      openCopyMenu(button);
+    });
+
+    document.addEventListener("click", async (event) => {
+      const modeButton = event.target.closest("[data-copy-mode]");
+      if (!modeButton) {
+        closeCopyMenu();
+        return;
+      }
+
+      event.stopPropagation();
+      const copyButton = document.querySelector("[data-copy-info]");
+      const mode = modeButton.dataset.copyMode;
+      closeCopyMenu();
+      if (copyButton) await copyByMode(mode, copyButton);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeCopyMenu();
+    });
+
+    document.querySelectorAll("[data-list-link]").forEach((node) => {
+      node.addEventListener("click", (event) => {
+        if (!document.referrer) return;
+
+        const listUrl = new URL(node.href);
+        const referrerUrl = new URL(document.referrer);
+        const cameFromList = (
+          referrerUrl.origin === window.location.origin
+          && referrerUrl.pathname === listUrl.pathname
+        );
+
+        if (!cameFromList) return;
+        event.preventDefault();
+        window.history.back();
+      });
     });
 })();
