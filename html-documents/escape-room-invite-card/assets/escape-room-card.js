@@ -4,6 +4,9 @@
 
     document.title = inviteData.label;
     document.documentElement.style.setProperty("--poster-url", `url("${inviteData.posterUrl}")`);
+    if (inviteData.posterAspectRatio) {
+      document.documentElement.style.setProperty("--poster-aspect-ratio", inviteData.posterAspectRatio);
+    }
 
     document.querySelectorAll("[data-field]").forEach((node) => {
       const key = node.dataset.field;
@@ -101,9 +104,10 @@
     }) => {
       const todayStart = atStartOfDay(todayDate);
       const eventStart = atStartOfDay(eventDate);
-      const firstWeek = startOfWeek(todayStart, weekStartsOn);
-      const eventWeek = startOfWeek(eventStart, weekStartsOn);
-      const weekCount = Math.max(1, Math.round((eventWeek - firstWeek) / (7 * 24 * 60 * 60 * 1000)) + 1);
+      const isPastEvent = eventStart < todayStart;
+      const firstWeek = startOfWeek(isPastEvent ? eventStart : todayStart, weekStartsOn);
+      const lastWeek = startOfWeek(eventStart, weekStartsOn);
+      const weekCount = isPastEvent ? 1 : Math.max(1, Math.round((lastWeek - firstWeek) / (7 * 24 * 60 * 60 * 1000)) + 1);
       const root = document.createElement("div");
 
       root.className = "week-calendar-inner";
@@ -141,8 +145,9 @@
     };
 
     const today = new Date();
-    const eventDate = parseKoreanMonthDay(inviteData.reservedDate, today.getFullYear());
-    if (eventDate && eventDate < atStartOfDay(today)) {
+    const hasReservedYear = Number.isInteger(inviteData.reservedYear);
+    const eventDate = parseKoreanMonthDay(inviteData.reservedDate, hasReservedYear ? inviteData.reservedYear : today.getFullYear());
+    if (eventDate && !hasReservedYear && eventDate < atStartOfDay(today)) {
       eventDate.setFullYear(eventDate.getFullYear() + 1);
     }
     if (eventDate) {

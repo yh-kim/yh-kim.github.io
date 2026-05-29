@@ -65,6 +65,7 @@
     .escape-card-link {
       display: grid;
       grid-template-columns: 78px minmax(0, 1fr);
+      align-items: center;
       gap: 11px;
       min-height: 122px;
       padding: 12px;
@@ -79,7 +80,7 @@
 
     .poster {
       aspect-ratio: 2 / 3;
-      align-self: start;
+      align-self: center;
       overflow: hidden;
       border: 1px solid rgba(48, 42, 51, .12);
       border-radius: 14px;
@@ -92,6 +93,10 @@
       height: 100%;
       display: block;
       object-fit: contain;
+    }
+
+    .poster.square {
+      aspect-ratio: 1 / 1;
     }
 
     .summary {
@@ -157,6 +162,7 @@
 
       .escape-card-link {
         grid-template-columns: 84px minmax(0, 1fr);
+        align-items: center;
         gap: 11px;
         padding: 10px;
       }
@@ -181,6 +187,40 @@
       </header>
 
       <section class="card-list" aria-label="방탈출 카드 목록">
+        <a class="escape-card-link" href="./escape-room-invite-card/2.html" data-reserved-date="2026-05-24">
+          <span class="poster square">
+            <img src="./escape-room-invite-card/assets/poster-2.png" alt="머니머니부동산 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>머니머니부동산</h2>
+              <p class="store">키이스케이프 강남 스테이션점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">강남</span>
+              <span class="badge">5월 24일 일요일</span>
+              <span class="badge time">15:50 - 17:10</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/3.html" data-reserved-date="2026-04-11">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-3.png" alt="alone 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>alone</h2>
+              <p class="store">지구별 방탈출 홍대라스트시티점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge">4월 11일 토요일</span>
+              <span class="badge time">17:00 - 18:05</span>
+            </span>
+          </span>
+        </a>
+
         <a class="escape-card-link" href="./escape-room-invite-card/1.html" data-reserved-date="2026-06-03">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-1.jpg" alt="붐붐 박사의 폭죽놀이 유토피아 포스터">
