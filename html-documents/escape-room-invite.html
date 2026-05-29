@@ -185,7 +185,7 @@
       </header>
 
       <section class="card-list" aria-label="방탈출 카드 목록">
-        <a class="escape-card-link" href="./escape-room-invite-card/1.html">
+        <a class="escape-card-link" href="./escape-room-invite-card/1.html" data-reserved-date="2026-06-03">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-1.jpg" alt="붐붐 박사의 폭죽놀이 유토피아 포스터">
           </span>
@@ -206,6 +206,14 @@
       </section>
     </div>
   </main>
+  <script>
+    document.querySelectorAll(".card-list").forEach((list) => {
+      const cards = Array.from(list.querySelectorAll("[data-reserved-date]"));
+      cards
+        .sort((a, b) => b.dataset.reservedDate.localeCompare(a.dataset.reservedDate))
+        .forEach((card) => list.append(card));
+    });
+  </script>
 </body>
 
 </html>
