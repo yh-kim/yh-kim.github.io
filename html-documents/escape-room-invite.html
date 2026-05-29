@@ -58,14 +58,15 @@
 
     .card-list {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 14px;
     }
 
     .escape-card-link {
       display: grid;
-      grid-template-columns: 96px minmax(0, 1fr);
-      gap: 13px;
-      min-height: 148px;
+      grid-template-columns: 78px minmax(0, 1fr);
+      gap: 11px;
+      min-height: 122px;
       padding: 12px;
       border: 1px solid rgba(255, 248, 237, .62);
       border-radius: 18px;
@@ -78,6 +79,7 @@
 
     .poster {
       aspect-ratio: 2 / 3;
+      align-self: start;
       overflow: hidden;
       border: 1px solid rgba(48, 42, 51, .12);
       border-radius: 14px;
@@ -96,14 +98,14 @@
       min-width: 0;
       display: grid;
       align-content: center;
-      gap: 8px;
+      gap: 7px;
       padding: 2px 0;
     }
 
     .summary h2 {
       margin: 0;
       color: #252330;
-      font-size: 18px;
+      font-size: 15px;
       line-height: 1.18;
       letter-spacing: 0;
       word-break: keep-all;
@@ -125,8 +127,8 @@
     .badge {
       display: inline-flex;
       align-items: center;
-      min-height: 24px;
-      padding: 6px 8px;
+      min-height: 23px;
+      padding: 6px 7px;
       border: 1px solid rgba(48, 42, 51, .1);
       border-radius: 999px;
       color: #34313d;
@@ -148,17 +150,11 @@
       border-color: rgba(110, 169, 155, .28);
     }
 
-    .open-label {
-      width: fit-content;
-      padding: 6px 10px;
-      border-radius: 999px;
-      color: #fff8ed;
-      background: #252330;
-      font-size: 11px;
-      font-weight: 950;
-    }
-
     @media (max-width: 380px) {
+      .card-list {
+        grid-template-columns: 1fr;
+      }
+
       .escape-card-link {
         grid-template-columns: 84px minmax(0, 1fr);
         gap: 11px;
@@ -198,9 +194,7 @@
               <span class="badge area">홍대</span>
               <span class="badge">6월 3일 수요일</span>
               <span class="badge time">17:40 - 19:00</span>
-              <span class="badge">코믹/어드벤처</span>
             </span>
-            <span class="open-label">카드 열기</span>
           </span>
         </a>
       </section>

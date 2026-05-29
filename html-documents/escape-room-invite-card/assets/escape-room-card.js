@@ -185,7 +185,7 @@
         `🎭 정보: ${inviteData.genre} · ${inviteData.playMinutes}분 · ${inviteData.price}`,
         `🧩 난이도: ${inviteData.difficulty} / 공포도: ${inviteData.fear} / 활동성: ${inviteData.activity}`,
         "",
-        `🔗 카드 보기: ${url}`
+        url
       ].join("\n");
     };
 
