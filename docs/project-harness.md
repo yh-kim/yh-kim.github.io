@@ -120,6 +120,197 @@ Add a standalone HTML document:
 
 자세한 HTML 추가 가이드: `docs/html-documents-guide.md`.
 
+## Escape Room Invite Cards
+
+Use this workflow when the user asks to create or update a 방탈출 카드, 방탈출 초대장, or 방탈출 정보 page.
+
+### Source of Truth
+
+1. Look up the theme on 빠방 first.
+   - 빠방 primary site: `https://bbabang.net/`.
+   - 빠방 service identity: `빠방 - 빠른 방탈출 예약/평점 조회`.
+   - If the user gives a 빠방 link, screenshot, theme name, or reservation details, prefer that context over guessing.
+2. Pull these fields from 빠방 when available:
+   - Theme name.
+   - Store/branch name.
+   - Area, for example `홍대`.
+   - Genre.
+   - Play time in minutes.
+   - Difficulty.
+   - Fear level.
+   - Activity level.
+   - Price.
+   - Theme description.
+   - Poster image.
+3. Reservation date/time usually comes from the user, not from 빠방. Convert it into:
+   - `reservedDate`: Korean display text such as `6월 3일 수요일`.
+   - `reservedTime`: `HH:MM`.
+   - The visible time range is calculated by JS from `reservedTime + playMinutes`; do not hardcode the end time in card data.
+4. Use Naver Map search URL for `mapUrl`, based on the store/branch name. The area badge should remain clickable.
+5. Do not invent unavailable fields. Ask the user or leave a conservative value only when the user explicitly allows arbitrary content.
+6. Do not show 빠방 rating, source credit, or day plan text unless the user explicitly asks for it.
+7. Do not generate poster images. Save the poster found from 빠방 or another official/theme source.
+
+### How to Collect Data from 빠방
+
+Use this order. Do not jump straight to arbitrary web search unless 빠방 does not expose the needed detail.
+
+1. Open `https://bbabang.net/`.
+2. Use 빠방's own search to look up the exact theme name.
+   - Search by full theme name first.
+   - If no result appears, search by distinctive words from the title.
+   - If the store is known, search again with `theme name + store/branch`.
+3. Open the matching theme detail page/card and confirm it matches the user's request.
+   - Theme name must match.
+   - Store/branch must match when the user provided one.
+   - Area must match when the user provided one.
+4. Extract only the fields needed by `window.escapeRoomInviteData`:
+   - `title`: theme name.
+   - `store`: store/branch name.
+   - `area`: area shown by 빠방, or the area implied by the store.
+   - `playMinutes`: play time in minutes.
+   - `genre`: genre text.
+   - `difficulty`: difficulty text.
+   - `fear`: fear level.
+   - `activity`: activity level.
+   - `price`: per-person price or displayed price.
+   - `description`: theme introduction text.
+   - `posterUrl`: local poster path after saving the poster.
+5. Save the poster from 빠방.
+   - Prefer the actual theme poster image.
+   - Save it as `html-documents/escape-room-invite-card/assets/poster-N.jpg`.
+   - If the downloaded file is PNG/WebP, either keep the real extension and update `posterUrl`, or convert/rename only when the bytes are actually JPEG.
+   - Do not hotlink 빠방's image URL in the HTML.
+6. Create a Naver Map search URL for `mapUrl`.
+   - Use the exact store/branch text from 빠방.
+   - Example query shape: `https://map.naver.com/p/search/{encoded store name}`.
+7. If 빠방 blocks direct extraction, is login-gated, or the detail page cannot be reached:
+   - Ask the user for a 빠방 screenshot/link.
+   - Use the screenshot/link as the source of truth.
+   - If the poster is visible only in a screenshot, ask for the original poster image or a shareable 빠방 page before using a cropped screenshot.
+8. If a field is missing on 빠방:
+   - Do not invent it silently.
+   - Ask the user, or mark it with a conservative value only when the user explicitly allows arbitrary content.
+
+Useful search fallback when 빠방 internal search is hard to operate:
+
+```text
+site:bbabang.net "테마명"
+site:bbabang.net "테마명" "매장명"
+```
+
+This fallback may fail because 빠방 content may be rendered dynamically. A failed search does not mean the theme is absent from 빠방.
+
+### File Structure
+
+The public list page stays at:
+
+```text
+html-documents/escape-room-invite.html
+```
+
+Individual cards live under:
+
+```text
+html-documents/escape-room-invite-card/
+```
+
+Use numeric card files:
+
+```text
+html-documents/escape-room-invite-card/1.html
+html-documents/escape-room-invite-card/2.html
+html-documents/escape-room-invite-card/3.html
+```
+
+Shared card assets live under:
+
+```text
+html-documents/escape-room-invite-card/assets/
+```
+
+Poster files use the matching card number:
+
+```text
+poster-1.jpg
+poster-2.jpg
+poster-3.jpg
+```
+
+Common CSS and JS stay shared:
+
+```text
+escape-room-card.css
+escape-room-card.js
+```
+
+Do not duplicate the shared CSS/JS for each card unless the user asks for a one-off design that cannot be shared.
+
+Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or directory URLs should be left to the site's root `404.html` handling.
+
+### Adding a New Card
+
+1. Find the next card number by listing existing files:
+
+   ```bash
+   find html-documents/escape-room-invite-card -maxdepth 1 -name '*.html' | sort
+   ```
+
+2. Copy the latest card file to the next number.
+   - Example: copy `1.html` to `2.html`.
+   - Keep the same DOM structure.
+   - Change only `window.escapeRoomInviteData` unless layout changes are requested.
+
+3. Save the poster into `assets/poster-N.jpg`.
+   - Use a relative path in card data: `./assets/poster-N.jpg`.
+   - Never use `/Users/...` or another local absolute path.
+
+4. Update `window.escapeRoomInviteData` in `N.html`.
+   Required keys:
+
+   ```js
+   window.escapeRoomInviteData = {
+     label: "방탈출 정보",
+     title: "...",
+     store: "...",
+     area: "...",
+     reservedDate: "...",
+     reservedTime: "HH:MM",
+     playMinutes: 80,
+     genre: "...",
+     difficulty: "...",
+     fear: "...",
+     activity: "...",
+     price: "...",
+     description: "...",
+     posterUrl: "./assets/poster-N.jpg",
+     mapUrl: "..."
+   };
+   ```
+
+5. Update the list page `html-documents/escape-room-invite.html`.
+   - Add one list item linking to `./escape-room-invite-card/N.html`.
+   - Use the matching poster `./escape-room-invite-card/assets/poster-N.jpg`.
+   - Keep the list page as the only registered HTML document in `_data/html_documents.yml`.
+
+6. Do not run `ruby scripts/add-html-document.rb` only to register individual card files.
+   - The sync script scans only `html-documents/*.html`.
+   - Individual cards intentionally stay out of `/daily/html-documents/`.
+   - Run it only if the top-level list page metadata needs syncing.
+
+7. Verify:
+
+   ```bash
+   node --check html-documents/escape-room-invite-card/assets/escape-room-card.js
+   scripts/verify-all.sh
+   ```
+
+8. Report:
+   - New card URL, for example `/html-documents/escape-room-invite-card/2.html`.
+   - Updated list URL: `/html-documents/escape-room-invite.html`.
+   - Source used for the poster/details.
+   - Verification commands and results.
+
 When the user says they are adding an HTML file or asks to publish an HTML document:
 
 1. Treat it as a standalone HTML document unless they explicitly ask for a normal blog post.

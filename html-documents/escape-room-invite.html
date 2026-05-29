@@ -4,95 +4,208 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>방탈출 정보</title>
-  <meta name="description" content="함께 갈 방탈출 테마 정보">
-  <link rel="stylesheet" href="./escape-room-invite-assets/escape-room-card.css">
+  <title>방탈출 정보 목록</title>
+  <meta name="description" content="방탈출 테마 카드 목록">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: #17191f;
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: #252330;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+      background: #17191f;
+    }
+
+    .page {
+      min-height: 100svh;
+      display: grid;
+      place-items: start center;
+      padding: 20px 12px;
+    }
+
+    .list-shell {
+      width: min(100%, 540px);
+    }
+
+    .hero {
+      margin-bottom: 16px;
+      color: #fff8ed;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      margin: 8px 0 0;
+      color: rgba(255, 248, 237, .72);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .card-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .escape-card-link {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 13px;
+      min-height: 148px;
+      padding: 12px;
+      border: 1px solid rgba(255, 248, 237, .62);
+      border-radius: 18px;
+      color: inherit;
+      background: #fff8ed;
+      box-shadow: 0 16px 38px rgba(0, 0, 0, .2);
+      text-decoration: none;
+      overflow: hidden;
+    }
+
+    .poster {
+      aspect-ratio: 2 / 3;
+      overflow: hidden;
+      border: 1px solid rgba(48, 42, 51, .12);
+      border-radius: 14px;
+      background: #111;
+      box-shadow: 0 10px 22px rgba(65, 41, 27, .16);
+    }
+
+    .poster img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .summary {
+      min-width: 0;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      padding: 2px 0;
+    }
+
+    .summary h2 {
+      margin: 0;
+      color: #252330;
+      font-size: 18px;
+      line-height: 1.18;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .store {
+      margin: 0;
+      color: #6f6973;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 6px 8px;
+      border: 1px solid rgba(48, 42, 51, .1);
+      border-radius: 999px;
+      color: #34313d;
+      background: rgba(255, 255, 255, .72);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .badge.time {
+      color: #7d5220;
+      background: #fff4df;
+      border-color: rgba(213, 168, 79, .28);
+    }
+
+    .badge.area {
+      color: #355f57;
+      background: #eaf5f1;
+      border-color: rgba(110, 169, 155, .28);
+    }
+
+    .open-label {
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: #fff8ed;
+      background: #252330;
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    @media (max-width: 380px) {
+      .escape-card-link {
+        grid-template-columns: 84px minmax(0, 1fr);
+        gap: 11px;
+        padding: 10px;
+      }
+
+      .summary h2 {
+        font-size: 17px;
+      }
+
+      .badge {
+        font-size: 10px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <script>
-    window.escapeRoomInviteData = {
-      label: "방탈출 정보",
-      title: "붐붐 박사의 폭죽놀이 유토피아",
-      store: "채널27 버터플라이점",
-      area: "홍대",
-      reservedDate: "6월 3일 수요일",
-      reservedTime: "17:40",
-      playMinutes: 80,
-      genre: "코믹/어드벤처",
-      difficulty: "쉬움 ~ 보통",
-      fear: "거의 없음",
-      activity: "보통",
-      price: "33,000원",
-      description: "먼 옛날, 사람들의 마음은 저 밤하늘처럼 어둠으로 가득 차 있었어요.\n그 모습을 안타깝게 여기신 붐붐박사님께선 이렇게 말씀하셨죠.\n\n“붐 붐...”\n폭죽을 터뜨리자!",
-      posterUrl: "./escape-room-invite-assets/poster.jpg",
-      mapUrl: "https://map.naver.com/p/search/%EC%B1%84%EB%84%9027%20%EB%B2%84%ED%84%B0%ED%94%8C%EB%9D%BC%EC%9D%B4%EC%A0%90"
-    };
-  </script>
-
   <main class="page">
-    <div class="invite-shell">
-      <article class="invite" aria-label="방탈출 정보">
-        <header class="header">
-          <h1 class="header-title" data-field="title"></h1>
-          <p class="header-store" data-field="store"></p>
-          <div class="header-meta" aria-label="테마 요약">
-            <span class="meta-badge" data-field="genre"></span>
-            <span class="meta-badge" data-play-minutes></span>
-            <span class="meta-badge" data-field="price"></span>
-            <a class="meta-badge meta-location" data-link="mapUrl" href="#" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도 열기" title="네이버 지도 열기">
-              <span data-field="area"></span>
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path>
-                <circle cx="12" cy="10" r="2.5"></circle>
-              </svg>
-            </a>
-          </div>
-          <div class="header-stats" data-stat-pills aria-label="난이도 공포도 활동성"></div>
-        </header>
+    <div class="list-shell">
+      <header class="hero">
+        <h1>방탈출 정보</h1>
+        <p>방탈출 테마 카드를 모아두는 곳</p>
+      </header>
 
-        <section class="poster-intro" aria-label="포스터와 테마 소개">
-          <figure class="poster-panel">
-            <div class="poster-frame">
-              <img data-image="posterUrl" src="" alt="">
-            </div>
-          </figure>
-
-          <section class="intro-panel">
-            <div class="intro-reservation">
-              <span class="section-label">예약 시간</span>
-              <strong class="info-value"><span class="date-line" data-field="reservedDate"></span><span class="time-line" data-time-range></span></strong>
-              <div class="week-calendar" data-week-calendar aria-label="오늘 주부터 예약 당일까지"></div>
-            </div>
-            <div class="intro-copy">
-              <span class="section-label">테마 소개</span>
-              <p data-field="description"></p>
-            </div>
-          </section>
-        </section>
-      </article>
-
-      <div class="action-dock" aria-label="카드 작업">
-        <button class="action-button" type="button" data-save-card aria-label="카드를 이미지로 저장" title="카드를 이미지로 저장">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v12"></path>
-            <path d="m7 10 5 5 5-5"></path>
-            <path d="M5 21h14"></path>
-          </svg>
-        </button>
-        <button class="action-button" type="button" data-copy-info aria-label="방탈출 정보 복사" title="방탈출 정보 복사">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </button>
-      </div>
+      <section class="card-list" aria-label="방탈출 카드 목록">
+        <a class="escape-card-link" href="./escape-room-invite-card/1.html">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-1.jpg" alt="붐붐 박사의 폭죽놀이 유토피아 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>붐붐 박사의 폭죽놀이 유토피아</h2>
+              <p class="store">채널27 버터플라이점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge">6월 3일 수요일</span>
+              <span class="badge time">17:40 - 19:00</span>
+              <span class="badge">코믹/어드벤처</span>
+            </span>
+            <span class="open-label">카드 열기</span>
+          </span>
+        </a>
+      </section>
     </div>
   </main>
-
-  <div class="snackbar" role="status" aria-live="polite" data-snackbar></div>
-
-  <script src="./escape-room-invite-assets/escape-room-card.js"></script>
 </body>
 
 </html>

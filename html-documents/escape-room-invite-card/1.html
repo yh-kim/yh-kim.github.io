@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>방탈출 정보</title>
+  <meta name="description" content="함께 갈 방탈출 테마 정보">
+  <link rel="stylesheet" href="./assets/escape-room-card.css">
+</head>
+
+<body>
+  <script>
+    window.escapeRoomInviteData = {
+      label: "방탈출 정보",
+      title: "붐붐 박사의 폭죽놀이 유토피아",
+      store: "채널27 버터플라이점",
+      area: "홍대",
+      reservedDate: "6월 3일 수요일",
+      reservedTime: "17:40",
+      playMinutes: 80,
+      genre: "코믹/어드벤처",
+      difficulty: "쉬움 ~ 보통",
+      fear: "거의 없음",
+      activity: "보통",
+      price: "33,000원",
+      description: "먼 옛날, 사람들의 마음은 저 밤하늘처럼 어둠으로 가득 차 있었어요.\n그 모습을 안타깝게 여기신 붐붐박사님께선 이렇게 말씀하셨죠.\n\n“붐 붐...”\n폭죽을 터뜨리자!",
+      posterUrl: "./assets/poster-1.jpg",
+      mapUrl: "https://map.naver.com/p/search/%EC%B1%84%EB%84%9027%20%EB%B2%84%ED%84%B0%ED%94%8C%EB%9D%BC%EC%9D%B4%EC%A0%90"
+    };
+  </script>
+
+  <main class="page">
+    <div class="invite-shell">
+      <article class="invite" aria-label="방탈출 정보">
+        <header class="header">
+          <h1 class="header-title" data-field="title"></h1>
+          <p class="header-store" data-field="store"></p>
+          <div class="header-meta" aria-label="테마 요약">
+            <span class="meta-badge" data-field="genre"></span>
+            <span class="meta-badge" data-play-minutes></span>
+            <span class="meta-badge" data-field="price"></span>
+            <a class="meta-badge meta-location" data-link="mapUrl" href="#" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도 열기" title="네이버 지도 열기">
+              <span data-field="area"></span>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path>
+                <circle cx="12" cy="10" r="2.5"></circle>
+              </svg>
+            </a>
+          </div>
+          <div class="header-stats" data-stat-pills aria-label="난이도 공포도 활동성"></div>
+        </header>
+
+        <section class="poster-intro" aria-label="포스터와 테마 소개">
+          <figure class="poster-panel">
+            <div class="poster-frame">
+              <img data-image="posterUrl" src="" alt="">
+            </div>
+          </figure>
+
+          <section class="intro-panel">
+            <div class="intro-reservation">
+              <span class="section-label">예약 시간</span>
+              <strong class="info-value"><span class="date-line" data-field="reservedDate"></span><span class="time-line" data-time-range></span></strong>
+              <div class="week-calendar" data-week-calendar aria-label="오늘 주부터 예약 당일까지"></div>
+            </div>
+            <div class="intro-copy">
+              <span class="section-label">테마 소개</span>
+              <p data-field="description"></p>
+            </div>
+          </section>
+        </section>
+      </article>
+
+      <div class="action-dock" aria-label="카드 작업">
+        <button class="action-button" type="button" data-save-card aria-label="카드를 이미지로 저장" title="카드를 이미지로 저장">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"></path>
+            <path d="m7 10 5 5 5-5"></path>
+            <path d="M5 21h14"></path>
+          </svg>
+        </button>
+        <button class="action-button" type="button" data-copy-info aria-label="방탈출 정보 복사" title="방탈출 정보 복사">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <div class="snackbar" role="status" aria-live="polite" data-snackbar></div>
+
+  <script src="./assets/escape-room-card.js"></script>
+</body>
+
+</html>
