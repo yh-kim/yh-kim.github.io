@@ -1,16 +1,19 @@
 {
   "name": "Pimi's Blog",
   "short_name": "Pimi's Blog",
-  "description": "개인 블로그입니다.",
-  "icons": [{
-    "src": "icons/128.jpg",
-    "sizes": "128x128",
-    "type": "image/jpg"
-  }, {
-    "src": "icons/400.jpg",
-    "sizes": "400x400",
-    "type": "image/jpg"
-  }],
+  "description": "일상을 적어두는 공간입니다.",
+  "icons": [
+    {
+      "src": "icons/128.jpg",
+      "sizes": "128x128",
+      "type": "image/jpg"
+    },
+    {
+      "src": "icons/400.jpg",
+      "sizes": "400x400",
+      "type": "image/jpg"
+    }
+  ],
   "background_color": "#fff",
   "theme_color": "#000000",
   "start_url": "/",
