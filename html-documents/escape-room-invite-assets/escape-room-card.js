@@ -1,0 +1,379 @@
+(() => {
+    const inviteData = window.escapeRoomInviteData;
+    if (!inviteData) return;
+
+    document.title = inviteData.label;
+    document.documentElement.style.setProperty("--poster-url", `url("${inviteData.posterUrl}")`);
+
+    document.querySelectorAll("[data-field]").forEach((node) => {
+      const key = node.dataset.field;
+      node.textContent = inviteData[key] || "";
+    });
+
+    document.querySelectorAll("[data-image]").forEach((node) => {
+      const key = node.dataset.image;
+      node.src = inviteData[key] || "";
+      node.alt = `${inviteData.title} 포스터`;
+    });
+
+    document.querySelectorAll("[data-link]").forEach((node) => {
+      const key = node.dataset.link;
+      node.href = inviteData[key] || "#";
+    });
+
+    document.querySelectorAll("[data-time-range]").forEach((node) => {
+      const [hour, minute] = inviteData.reservedTime.split(":").map(Number);
+      const start = hour * 60 + minute;
+      const end = start + inviteData.playMinutes;
+      const format = (value) => {
+        const dayMinutes = ((value % 1440) + 1440) % 1440;
+        return `${String(Math.floor(dayMinutes / 60)).padStart(2, "0")}:${String(dayMinutes % 60).padStart(2, "0")}`;
+      };
+      node.textContent = `${format(start)} - ${format(end)}`;
+    });
+
+    document.querySelectorAll("[data-play-minutes]").forEach((node) => {
+      node.textContent = `${inviteData.playMinutes}분`;
+    });
+
+    const statTone = (label, value) => {
+      const text = String(value || "").replace(/\s/g, "");
+
+      if (text.includes("없음") || text.includes("낮음")) return "stat-none";
+      if (text.includes("쉬움") || text.includes("적음")) return "stat-low";
+      if (text.includes("보통") || text.includes("중간")) return "stat-mid";
+      if (text.includes("높음") || text.includes("어려움") || text.includes("많음")) return "stat-high";
+      if (label === "공포도") return "stat-none";
+      return "stat-mid";
+    };
+
+    const buildStatPill = (label, value) => {
+      const pill = document.createElement("span");
+      const name = document.createElement("span");
+      const text = document.createElement("strong");
+
+      pill.className = `stat-pill ${statTone(label, value)}`;
+      name.textContent = label;
+      text.textContent = value;
+      pill.append(name, text);
+      return pill;
+    };
+
+    document.querySelectorAll("[data-stat-pills]").forEach((node) => {
+      node.replaceChildren(
+        buildStatPill("난이도", inviteData.difficulty),
+        buildStatPill("공포도", inviteData.fear),
+        buildStatPill("활동성", inviteData.activity)
+      );
+    });
+
+    const atStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const addDays = (date, days) => {
+      const next = atStartOfDay(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    };
+
+    const isSameDay = (a, b) => (
+      a.getFullYear() === b.getFullYear()
+      && a.getMonth() === b.getMonth()
+      && a.getDate() === b.getDate()
+    );
+
+    const startOfWeek = (date, weekStartsOn = 0) => {
+      const start = atStartOfDay(date);
+      const diff = (start.getDay() - weekStartsOn + 7) % 7;
+      start.setDate(start.getDate() - diff);
+      return start;
+    };
+
+    const parseKoreanMonthDay = (text, baseYear) => {
+      const match = text.match(/(\d+)월\s*(\d+)일/);
+      if (!match) return null;
+      return new Date(baseYear, Number(match[1]) - 1, Number(match[2]));
+    };
+
+    const buildWeekDotCalendar = ({
+      todayDate = new Date(),
+      eventDate,
+      weekStartsOn = 0
+    }) => {
+      const todayStart = atStartOfDay(todayDate);
+      const eventStart = atStartOfDay(eventDate);
+      const firstWeek = startOfWeek(todayStart, weekStartsOn);
+      const eventWeek = startOfWeek(eventStart, weekStartsOn);
+      const weekCount = Math.max(1, Math.round((eventWeek - firstWeek) / (7 * 24 * 60 * 60 * 1000)) + 1);
+      const root = document.createElement("div");
+
+      root.className = "week-calendar-inner";
+
+      for (let week = 0; week < weekCount; week += 1) {
+        const row = document.createElement("div");
+        row.className = "week-row";
+
+        for (let day = 0; day < 7; day += 1) {
+          const date = addDays(firstWeek, week * 7 + day);
+          const dot = document.createElement("span");
+          const isToday = isSameDay(date, todayStart);
+          const isEvent = isSameDay(date, eventStart);
+          const dayOfWeek = date.getDay();
+
+          dot.className = "week-dot";
+          if (dayOfWeek === 0) dot.classList.add("is-sunday");
+          if (dayOfWeek === 6) dot.classList.add("is-saturday");
+          if (isToday) dot.classList.add("today");
+          if (isEvent) dot.classList.add("event");
+          dot.setAttribute("aria-label", `${date.getMonth() + 1}월 ${date.getDate()}일${isToday ? " 오늘" : ""}${isEvent ? " 예약 당일" : ""}`);
+          row.append(dot);
+        }
+
+        root.append(row);
+      }
+
+      return root;
+    };
+
+    const renderWeekDotCalendar = (selector, options) => {
+      document.querySelectorAll(selector).forEach((node) => {
+        node.replaceChildren(buildWeekDotCalendar(options));
+      });
+    };
+
+    const today = new Date();
+    const eventDate = parseKoreanMonthDay(inviteData.reservedDate, today.getFullYear());
+    if (eventDate && eventDate < atStartOfDay(today)) {
+      eventDate.setFullYear(eventDate.getFullYear() + 1);
+    }
+    if (eventDate) {
+      renderWeekDotCalendar("[data-week-calendar]", {
+        todayDate: today,
+        eventDate,
+        weekStartsOn: 0
+      });
+    }
+
+    const showToast = (message) => {
+      const snackbar = document.querySelector("[data-snackbar]");
+      if (!snackbar) return;
+
+      snackbar.textContent = message;
+      snackbar.classList.add("is-visible");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => {
+        snackbar.classList.remove("is-visible");
+      }, 2100);
+    };
+
+    const setButtonDone = (button, message) => {
+      const originalTitle = button.title;
+      button.classList.add("is-done");
+      button.title = message;
+      setTimeout(() => {
+        button.classList.remove("is-done");
+        button.title = originalTitle;
+      }, 1400);
+    };
+
+    const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const loadImage = (src) => new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = src;
+    });
+
+    const canvasToBlob = (canvas) => new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error("이미지를 만들지 못했어요."));
+      }, "image/png", 1);
+    });
+
+    const inlineInviteImages = async (clone) => {
+      const cloneImages = Array.from(clone.querySelectorAll("img"));
+      const sourceImages = Array.from(document.querySelectorAll(".invite img"));
+
+      await Promise.all(cloneImages.map(async (image, index) => {
+        const source = sourceImages[index];
+        const src = source?.currentSrc || source?.src || image.src;
+        if (!src) return;
+
+        const response = await fetch(src);
+        const blob = await response.blob();
+        image.src = await blobToDataUrl(blob);
+      }));
+    };
+
+    const applyCaptureVariables = (node) => {
+      const rootStyle = getComputedStyle(document.documentElement);
+      [
+        "--bg",
+        "--paper",
+        "--paper-soft",
+        "--paper-warm",
+        "--ink",
+        "--muted",
+        "--line",
+        "--line-strong",
+        "--coral",
+        "--coral-soft",
+        "--mint",
+        "--mint-soft",
+        "--gold",
+        "--blue",
+        "--shadow"
+      ].forEach((name) => {
+        node.style.setProperty(name, rootStyle.getPropertyValue(name).trim());
+      });
+    };
+
+    const getDocumentStyles = () => Array.from(document.styleSheets)
+      .map((sheet) => {
+        try {
+          return Array.from(sheet.cssRules || []).map((rule) => rule.cssText).join("\n");
+        } catch {
+          return "";
+        }
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const renderInviteElementBlob = async () => {
+      const source = document.querySelector(".invite");
+      if (!source) throw new Error("저장할 카드를 찾지 못했어요.");
+
+      const rect = source.getBoundingClientRect();
+      const width = Math.ceil(rect.width);
+      const height = Math.ceil(rect.height);
+      const scale = Math.min(2, window.devicePixelRatio || 1);
+      const clone = source.cloneNode(true);
+
+      applyCaptureVariables(clone);
+      clone.style.width = `${width}px`;
+      clone.style.height = `${height}px`;
+      clone.style.margin = "0";
+      clone.style.boxShadow = "none";
+      clone.style.backdropFilter = "none";
+
+      await inlineInviteImages(clone);
+
+      const style = getDocumentStyles();
+      const serialized = new XMLSerializer().serializeToString(clone);
+      const svgText = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+          <foreignObject width="100%" height="100%">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;">
+              <style>${style}</style>
+              ${serialized}
+            </div>
+          </foreignObject>
+        </svg>`;
+      const svgUrl = URL.createObjectURL(new Blob([svgText], { type: "image/svg+xml;charset=utf-8" }));
+      const image = await loadImage(svgUrl);
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      context.scale(scale, scale);
+      context.drawImage(image, 0, 0, width, height);
+      URL.revokeObjectURL(svgUrl);
+      return canvasToBlob(canvas);
+    };
+
+    const saveInviteAsImage = async () => {
+      const blob = await renderInviteElementBlob();
+      const filename = "escape-room-invite.png";
+      const file = typeof File === "function" ? new File([blob], filename, { type: "image/png" }) : null;
+
+      if (file && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: inviteData.title,
+          text: "방탈출 정보 카드"
+        });
+        return "이미지를 저장/공유했어요";
+      }
+
+      const url = URL.createObjectURL(blob);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+      if (isIOS) {
+        window.open(url, "_blank", "noopener,noreferrer");
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+        return "이미지를 새 창으로 열었어요";
+      }
+
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = url;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      return "이미지 저장을 시작했어요";
+    };
+
+    const invitationText = () => {
+      const time = document.querySelector("[data-time-range]")?.textContent || "";
+      const url = window.location.href;
+      return [
+        `🎆 테마: ${inviteData.title}`,
+        `📍 매장: ${inviteData.store} (${inviteData.area})`,
+        `🗓️ 예약: ${inviteData.reservedDate} ${time}`,
+        `🎭 정보: ${inviteData.genre} · ${inviteData.playMinutes}분 · ${inviteData.price}`,
+        `🧩 난이도: ${inviteData.difficulty} / 공포도: ${inviteData.fear} / 활동성: ${inviteData.activity}`,
+        "",
+        `🔗 카드 보기: ${url}`
+      ].join("\n");
+    };
+
+    const copyInviteInfo = async () => {
+      const text = invitationText();
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.append(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    };
+
+    document.querySelector("[data-save-card]")?.addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      try {
+        const message = await saveInviteAsImage();
+        setButtonDone(button, "저장 완료");
+        showToast(message);
+      } catch (error) {
+        setButtonDone(button, "저장 실패");
+        showToast(error.name === "AbortError" ? "저장을 취소했어요" : "화면 그대로 저장을 지원하지 않아요");
+      }
+    });
+
+    document.querySelector("[data-copy-info]")?.addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      try {
+        await copyInviteInfo();
+        setButtonDone(button, "복사했어요");
+        showToast("복사 완료");
+      } catch {
+        setButtonDone(button, "복사 실패");
+        showToast("복사에 실패했어요");
+      }
+    });
+})();
