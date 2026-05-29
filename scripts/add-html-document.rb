@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "date"
+require "cgi"
 require "fileutils"
 require "optparse"
 require "pathname"
@@ -68,9 +69,67 @@ def title_from_html(path)
   path.basename(".html").to_s.split(/[-_]+/).map(&:capitalize).join(" ")
 end
 
+def description_from_html(path)
+  text = path.read
+  match = text.match(%r{<meta\s+name=["']description["']\s+content=["']([^"']*)["'][^>]*>}im)
+  match && match[1].gsub(/\s+/, " ").strip
+end
+
+def ensure_link_preview_metadata(path, public_path, title:, description:)
+  text = path.read
+  return unless text.match?(%r{</head>}i)
+
+  changed = false
+  additions = []
+  clean_title = CGI.escapeHTML(title.to_s.strip.empty? ? title_from_html(path) : title.to_s.strip)
+  clean_description = CGI.escapeHTML(description.to_s.strip.empty? ? (description_from_html(path) || "Pimi's Blog") : description.to_s.strip)
+  clean_url = "https://blog.pickth.com#{public_path}"
+
+  unless text.include?('href="/img/favicon.ico"')
+    additions << '  <link rel="shortcut icon" href="/img/favicon.ico">'
+    changed = true
+  end
+
+  unless text.include?('property="og:image"') && text.include?("https://blog.pickth.com/img/og-image.png")
+    additions.concat([
+      '  <meta property="og:type" content="website">',
+      '  <meta property="og:site_name" content="Pimi\'s Blog">',
+      "  <meta property=\"og:title\" content=\"#{clean_title}\">",
+      "  <meta property=\"og:description\" content=\"#{clean_description}\">",
+      "  <meta property=\"og:url\" content=\"#{clean_url}\">",
+      '  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">',
+      '  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">',
+      '  <meta property="og:image:type" content="image/png">',
+      '  <meta property="og:image:width" content="512">',
+      '  <meta property="og:image:height" content="512">',
+      '  <meta property="og:image:alt" content="Pimi\'s Blog space icon">',
+      '  <meta name="twitter:card" content="summary">',
+      "  <meta name=\"twitter:title\" content=\"#{clean_title}\">",
+      "  <meta name=\"twitter:description\" content=\"#{clean_description}\">",
+      '  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">'
+    ])
+    changed = true
+  end
+
+  return unless changed
+
+  path.write(text.sub(%r{</head>}i, "#{additions.join("\n")}\n</head>"))
+end
+
 def sync_documents
   TARGET_DIR.mkpath
   DATA_FILE.dirname.mkpath
+
+  TARGET_DIR.glob("**/*.html").sort.each do |file|
+    relative_path = file.relative_path_from(TARGET_DIR).to_s
+    public_path = "/html-documents/#{relative_path}"
+    ensure_link_preview_metadata(
+      file,
+      public_path,
+      title: title_from_html(file),
+      description: description_from_html(file).to_s
+    )
+  end
 
   existing_documents = load_documents
   existing_by_path = existing_documents.each_with_object({}) do |document, index|
@@ -170,6 +229,7 @@ if target.exist? && !options[:force] && !same_file
 end
 
 FileUtils.cp(source, target) unless same_file
+ensure_link_preview_metadata(target, path, title: title, description: options[:description].to_s)
 
 entry = {
   "title" => title,

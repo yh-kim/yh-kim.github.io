@@ -56,12 +56,43 @@ documents.each_with_index do |document, index|
   asset = ROOT.join(path.delete_prefix("/"))
   fail_with("#{label} points to missing HTML asset: #{path}") unless asset.file?
 
+  html = asset.read
+  preview_snippets = [
+    '<link rel="shortcut icon" href="/img/favicon.ico">',
+    '<meta property="og:site_name" content="Pimi',
+    '<meta property="og:url" content="https://blog.pickth.com',
+    '<meta property="og:image" content="https://blog.pickth.com/img/og-image.png">',
+    '<meta property="og:image:width" content="512">',
+    '<meta property="og:image:height" content="512">',
+    '<meta name="twitter:card" content="summary">'
+  ]
+  preview_snippets.each do |snippet|
+    fail_with("#{label} HTML asset missing link preview metadata: #{path}") unless html.include?(snippet)
+  end
+
   if document["date"]
     begin
       Date.iso8601(document["date"].to_s)
     rescue Date::Error
       fail_with("#{label} date must use YYYY-MM-DD: #{document["date"]}")
     end
+  end
+end
+
+ROOT.join("html-documents").glob("**/*.html").sort.each do |asset|
+  public_path = "/html-documents/#{asset.relative_path_from(ROOT.join("html-documents"))}"
+  html = asset.read
+  preview_snippets = [
+    '<link rel="shortcut icon" href="/img/favicon.ico">',
+    '<meta property="og:site_name" content="Pimi',
+    '<meta property="og:url" content="https://blog.pickth.com',
+    '<meta property="og:image" content="https://blog.pickth.com/img/og-image.png">',
+    '<meta property="og:image:width" content="512">',
+    '<meta property="og:image:height" content="512">',
+    '<meta name="twitter:card" content="summary">'
+  ]
+  preview_snippets.each do |snippet|
+    fail_with("#{public_path} missing link preview metadata") unless html.include?(snippet)
   end
 end
 
