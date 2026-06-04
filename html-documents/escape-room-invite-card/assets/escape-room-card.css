@@ -420,37 +420,36 @@
       flex: 0 0 auto;
       min-width: 28px;
       display: grid;
-      gap: 3px;
+      grid-template-rows: repeat(2, 7px);
+      gap: 4px;
       margin-right: 5px;
       color: #675f69;
       font-size: 9px;
       font-weight: 700;
-      line-height: 1;
+      line-height: 7px;
     }
 
-    .week-calendar-legend span {
+    .week-calendar-legend > span {
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      min-height: 8px;
-      line-height: 1;
+      height: 7px;
+      min-height: 7px;
+      line-height: 7px;
       white-space: nowrap;
     }
 
     .legend-dot {
       width: 7px;
       height: 7px;
-      min-width: 7px;
-      max-width: 7px;
-      min-height: 7px;
-      max-height: 7px;
       flex: 0 0 7px;
-      display: block;
-      aspect-ratio: 1 / 1;
+      display: inline-block;
+      padding: 0;
       box-sizing: border-box;
       border: 1px solid transparent;
-      border-radius: 999px;
+      border-radius: 50%;
       background: #ffffff;
+      line-height: 0;
     }
 
     .legend-today {
