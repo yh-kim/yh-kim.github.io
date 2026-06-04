@@ -148,7 +148,9 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - `reservedDate`: Korean display text such as `6월 3일 수요일`.
    - `reservedTime`: `HH:MM`.
    - The visible time range is calculated by JS from `reservedTime + playMinutes`; do not hardcode the end time in card data.
-4. Prefer a direct Naver Map place URL for `mapUrl`, based on the store/branch place ID. The area badge should remain clickable.
+4. Prefer a direct Naver Map place URL for `mapUrl`, based on the verified Naver store/branch place ID. The area badge should remain clickable.
+   - Always verify the map target while creating a card. A numeric ID from a third-party directory is not automatically a Naver place ID.
+   - If a direct Naver place URL cannot be verified, use an exact Naver Map search URL as a fallback rather than a guessed place entry URL.
 5. Do not invent unavailable fields. Ask the user or leave a conservative value only when the user explicitly allows arbitrary content.
 6. Do not show 빠방 rating, source credit, or day plan text unless the user explicitly asks for it.
 7. Do not generate poster images. Save the poster found from 빠방 or another official/theme source.
@@ -236,15 +238,24 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
    - Use the real extension from the bytes or content type: `.jpg`, `.png`, or `.webp`.
    - Update `posterUrl` and the list page to match the real extension.
    - Do not hotlink 빠방's image URL in the HTML.
-8. Create a direct Naver Map URL for `mapUrl`.
+8. Create and verify a Naver Map URL for `mapUrl`.
    - Prefer a place entry URL: `https://map.naver.com/p/entry/place/{placeId}`.
+   - Do not reuse numeric IDs from non-Naver sites such as `placeview.co.kr`; those IDs can look like place IDs but may point to the wrong Naver target.
    - Search the exact store name first, then the store name plus address/area:
 
      ```text
      "{store name}" "map.naver.com/p/entry/place"
      "{store name}" "pcmap.place.naver.com"
+     "{store name}" "booking.naver.com"
      "{store name}" "네이버 방문자리뷰"
      "{store name}" "{address or area}" "이 블로그의 체크인"
+     ```
+
+   - A reliable source is the store's Naver Booking page when 빠방 exposes `store_homepage` or search finds a booking page. Inspect the HTML for `placeId`:
+
+     ```bash
+     curl -L -s '<naver booking URL>' -o /tmp/naver-booking.html
+     rg -n "placeId|bookingPlace|bizName|address" /tmp/naver-booking.html
      ```
 
    - If search results or blog posts show a Naver check-in map, open the mobile blog post and inspect the HTML for `data-linkdata` or `__se_module_data`; Naver place IDs appear as `placeId`.
@@ -255,8 +266,18 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
      rg -n "placeId|data-linkdata|__se_module_data|store name" /tmp/naver-blog.html
      ```
 
-   - Convert the found ID into `https://map.naver.com/p/entry/place/{placeId}` and verify it with `curl -L -I`.
-   - If no Naver place ID is available, use a search URL only as a fallback and include the exact store/branch text plus area/address.
+   - Convert the found ID into `https://map.naver.com/p/entry/place/{placeId}` and verify it:
+
+     ```bash
+     curl -L -I 'https://map.naver.com/p/entry/place/<placeId>'
+     ```
+
+   - A `200` response only proves the entry URL exists. Still confirm the ID came from a Naver source tied to the same store/branch, address, or booking page.
+   - If no Naver place ID is available, use a search URL only as a fallback and include the exact store/branch text plus area/address:
+
+     ```text
+     https://map.naver.com/p/search/{URL-encoded exact store name and address}
+     ```
 9. If 빠방 blocks direct extraction, is login-gated, or the detail page cannot be reached after the search-index path:
    - Ask the user for a 빠방 screenshot/link.
    - Use the screenshot/link as the source of truth.
@@ -376,14 +397,19 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
    - Individual cards intentionally stay out of `/daily/html-documents/`.
    - Run it only if the top-level list page metadata needs syncing.
 
-7. Verify:
+7. Verify the Naver Map link before final validation.
+   - For direct place links, confirm the place ID came from Naver Booking, Naver Map, or a Naver check-in source for the same store/branch.
+   - Open or `curl -L -I` the final `mapUrl`.
+   - If the direct place URL is uncertain, replace it with an exact Naver Map search URL instead of guessing.
+
+8. Verify:
 
    ```bash
    node --check html-documents/escape-room-invite-card/assets/escape-room-card.js
    scripts/verify-all.sh
    ```
 
-8. Report:
+9. Report:
    - New card URL, for example `/html-documents/escape-room-invite-card/2.html`.
    - Updated list URL: `/html-documents/escape-room-invite.html`.
    - Source used for the poster/details.

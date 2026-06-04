@@ -244,7 +244,7 @@
 
     .poster-intro {
       display: grid;
-      grid-template-columns: minmax(0, 1.25fr) minmax(118px, .75fr);
+      grid-template-columns: minmax(0, 1.25fr) minmax(160px, .75fr);
       background: var(--paper);
     }
 
@@ -396,13 +396,14 @@
 
     .week-calendar {
       width: calc(100% + 4px);
+      min-width: 125px;
       margin-left: -2px;
       margin-right: -2px;
       margin-top: 5px;
-      padding: 5px 8px 5px 4px;
+      padding: 5px 8px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       border: 1px solid rgba(48, 42, 51, .12);
       border-radius: 10px;
       background: rgba(255, 255, 255, .55);
@@ -410,16 +411,17 @@
 
     .week-calendar-inner {
       flex: 1 1 auto;
-      min-width: 0;
+      min-width: 79px;
       display: grid;
       justify-content: center;
     }
 
     .week-calendar-legend {
       flex: 0 0 auto;
+      min-width: 28px;
       display: grid;
       gap: 3px;
-      margin-right: 1px;
+      margin-right: 5px;
       color: #675f69;
       font-size: 9px;
       font-weight: 700;
@@ -430,13 +432,22 @@
       display: inline-flex;
       align-items: center;
       gap: 3px;
+      min-height: 8px;
+      line-height: 1;
       white-space: nowrap;
     }
 
     .legend-dot {
       width: 7px;
       height: 7px;
+      min-width: 7px;
+      max-width: 7px;
+      min-height: 7px;
+      max-height: 7px;
       flex: 0 0 7px;
+      display: block;
+      aspect-ratio: 1 / 1;
+      box-sizing: border-box;
       border: 1px solid transparent;
       border-radius: 999px;
       background: #ffffff;
@@ -454,7 +465,7 @@
       display: grid;
       grid-template-columns: repeat(7, 7px);
       justify-content: center;
-      gap: 4px;
+      gap: 5px;
       align-items: center;
     }
 
