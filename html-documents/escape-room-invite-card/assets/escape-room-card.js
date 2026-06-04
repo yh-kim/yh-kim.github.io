@@ -138,9 +138,21 @@
       return root;
     };
 
+    const buildCalendarLegend = () => {
+      const legend = document.createElement("div");
+      const todayItem = document.createElement("span");
+      const eventItem = document.createElement("span");
+
+      legend.className = "week-calendar-legend";
+      todayItem.innerHTML = '<span class="legend-dot legend-today" aria-hidden="true"></span><span>오늘</span>';
+      eventItem.innerHTML = '<span class="legend-dot legend-event" aria-hidden="true"></span><span>예약</span>';
+      legend.append(todayItem, eventItem);
+      return legend;
+    };
+
     const renderWeekDotCalendar = (selector, options) => {
       document.querySelectorAll(selector).forEach((node) => {
-        node.replaceChildren(buildWeekDotCalendar(options));
+        node.replaceChildren(buildWeekDotCalendar(options), buildCalendarLegend());
       });
     };
 

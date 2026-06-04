@@ -399,10 +399,55 @@
       margin-left: -2px;
       margin-right: -2px;
       margin-top: 5px;
-      padding: 5px 4px;
+      padding: 5px 8px 5px 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       border: 1px solid rgba(48, 42, 51, .12);
       border-radius: 10px;
       background: rgba(255, 255, 255, .55);
+    }
+
+    .week-calendar-inner {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid;
+      justify-content: center;
+    }
+
+    .week-calendar-legend {
+      flex: 0 0 auto;
+      display: grid;
+      gap: 3px;
+      margin-right: 1px;
+      color: #675f69;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .week-calendar-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+    }
+
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 7px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: #ffffff;
+    }
+
+    .legend-today {
+      border-color: #2f9e7e;
+    }
+
+    .legend-event {
+      border-color: #c78a1d;
     }
 
     .week-row {
