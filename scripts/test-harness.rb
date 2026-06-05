@@ -191,6 +191,42 @@ with_temp_repo do |repo|
 end
 
 with_temp_repo do |repo|
+  recipes = repo.join("html-documents/home-cooking-recipes/assets/recipes.js")
+  recipes.write(recipes.read.sub('tags: ["냉국", "여름", "반찬"]', 'tags: ["냉국", "집밥", "반찬"]'))
+
+  expect_failure(
+    repo,
+    ["ruby", "scripts/verify-html-documents.rb"],
+    "home cooking broad recipe tag check",
+    "recipe tag must be category-like"
+  )
+end
+
+with_temp_repo do |repo|
+  recipes = repo.join("html-documents/home-cooking-recipes/assets/recipes.js")
+  recipes.write(recipes.read.sub('searchIngredients: ["오이", "양파", "청양고추", "냉면육수"]', 'searchIngredients: ["오이", "간장", "청양고추", "냉면육수"]'))
+
+  expect_failure(
+    repo,
+    ["ruby", "scripts/verify-html-documents.rb"],
+    "home cooking generic seasoning ingredient check",
+    "search ingredient must not include generic seasoning"
+  )
+end
+
+with_temp_repo do |repo|
+  recipes = repo.join("html-documents/home-cooking-recipes/assets/recipes.js")
+  recipes.write(recipes.read.sub("오이와 냉면육수가 만드는 차갑고 새콤한 냉국", "더운 날에 바로 꺼내기 좋은 레시피입니다"))
+
+  expect_failure(
+    repo,
+    ["ruby", "scripts/verify-html-documents.rb"],
+    "home cooking display text should describe food",
+    "display text must describe the food"
+  )
+end
+
+with_temp_repo do |repo|
   post = repo.join("_daily/2026-05-27-html-documents.markdown")
   personal_name = "Yong" + "hoon"
   post.write(post.read.sub("author:     \"Pimi\"", "author:     \"#{personal_name}\""))

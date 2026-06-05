@@ -132,6 +132,7 @@ Use this workflow when the user asks to analyze a recipe post, Instagram reel, c
    - Do not use long romanized food names unless the user explicitly asks for descriptive filenames.
 3. Keep recipe assets under `html-documents/home-cooking-recipes/assets/`.
    - Use short food-specific names such as `oi-naengguk.png`.
+   - Keep shared recipe CSS, JavaScript, and generated images in this assets folder.
    - List cards and detail pages should reference local assets, not temporary generated-image paths.
 4. Keep the standalone document registry entry in `_data/html_documents.yml`.
    - The visible document title is `레시피 리스트`.
@@ -145,6 +146,7 @@ Use this workflow when the user asks to analyze a recipe post, Instagram reel, c
    - Caption ingredients.
    - Caption cooking steps.
    - Public preview image or embed URL.
+   - Use public preview images only to verify visible ingredients, plating, or menu identity. They are source-analysis material, not final card artwork.
 3. If public metadata is blocked or incomplete, ask for caption text, screenshots, or a local video file instead of inventing details.
 4. If the caption or metadata does not include enough recipe detail, analyze the video itself.
    - Prefer direct visual inspection of the reel/embed when available.
@@ -162,18 +164,41 @@ Use this workflow when the user asks to analyze a recipe post, Instagram reel, c
 Each recipe added to `html-documents/home-cooking-recipes.html` must add one `.recipe-card` with:
 
 1. A short detail link such as `/html-documents/home-cooking-recipes/1.html`.
-2. `data-tags` with only searchable recipe tags such as `냉국 여름 반찬`.
-   - Do not include broad document tags like `요리` or `다이어트` here unless they are meant to be actual recipe filters.
-3. `data-ingredients` with ingredients users may search by, such as `오이 양파 청양고추 냉면육수`.
-4. A generated or local food image that looks appetizing and represents the food itself.
-   - Prefer generating a fresh food image with the image generation tool for each recipe.
+2. `data-tags` with searchable recipe category tags, not menu names or ingredients.
+   - Good tag types: cooking form or method such as `냉국`, `비빔`, `조림`, `찜`; season or context such as `여름`, `제철`, `도시락`; serving role such as `반찬`.
+   - Do not use broad document tags like `요리`, `다이어트`, or `집밥`.
+   - Do not use menu names as tags, for example `김치찜`, `비빔밥`, `부타노가쿠니`.
+   - Do not use ingredients as tags, for example `돼지고기`, `묵은지`, `마늘쫑`, `오이`.
+   - Normalize duplicate concepts to one canonical tag. Use `반찬`, not both `반찬` and `밥반찬`.
+   - Keep tags short and few, usually 2-4 tags per recipe.
+3. `data-ingredients` with meaningful food ingredients users may search by, such as `오이 양파 청양고추 냉면육수`.
+   - Include primary visible or defining ingredients, not every seasoning.
+   - Exclude generic seasonings and pantry items such as `간장`, `설탕`, `소금`, `물`, `식초`, `고춧가루`, `참기름`, `깨`, `기름`, `맛술`, `미림`, `꿀` unless the ingredient is the main searchable identity of the recipe.
+   - Order ingredients by group: vegetables and kimchi first, aromatics and herbs next, protein next, staple or packaged base last.
+   - Use one canonical ingredient name where possible, for example `청양고추` instead of mixing `고추` and `청양고추`.
+   - Keep visible ingredient chips to major ingredients only; keep `searchIngredients` slightly broader only when it helps lookup.
+4. A generated food image that looks appetizing and represents the food itself.
+   - Generate a fresh food image with the image generation tool for each recipe before wiring the card/detail image.
+   - Do not use Instagram thumbnails, source preview images, stock placeholders, or unrelated local images as the final recipe card image unless the user explicitly approves a temporary fallback.
    - Save the final selected generated image into `html-documents/home-cooking-recipes/assets/`.
    - Never reference generated images from `$CODEX_HOME/generated_images/...` directly in HTML.
 5. A visible time pill such as `약 10분`.
 6. A small set of visible tag pills.
 7. A compact summary and major ingredient chips.
+   - User-facing summary text must describe the food, flavor, texture, ingredients, or serving situation.
+   - Do not describe the storage process, source-analysis process, or document state.
+   - Avoid phrases such as `레시피입니다`, `정리했습니다`, `게시물의 마지막 메뉴`, `캡션 기반`, `영상 확인 필요`, `추가 확인`, or `보강해야 합니다` in visible recipe descriptions, method steps, and memos.
+   - If source details are incomplete, keep the visible text conservative and food-centered rather than showing analysis notes.
 
 The list filters are split into `태그` and `재료`. Both filter types must stay backed by `data-tags` and `data-ingredients`, and the `AND`/`OR` control applies across the selected tag and ingredient chips.
+
+Filter UI rules:
+
+1. Default filter logic is `OR`.
+2. The tag and ingredient layer shows chips only.
+   - Show a short layer title using only `태그` or `재료`.
+   - Do not show a separate confirm button.
+3. Users select or deselect chips, then tap the outside overlay or press Escape to close and apply.
 
 ### Detail Page Requirements
 
@@ -184,10 +209,14 @@ Each recipe detail page must include:
    - Falls back to `/html-documents/home-cooking-recipes.html` when opened directly or from elsewhere.
 2. A top source button, for example `Instagram에서 보기`, when a source URL exists.
 3. Recipe title, short description, time, and major ingredients.
+   - The short description must be about the dish itself, not the fact that it was saved or analyzed.
 4. A `준비물` section where ingredients render two per row on normal/mobile layouts.
 5. A `조리방법` section that matches the source as closely as possible.
 6. A short memo only when useful.
+   - Memos should give cooking or taste guidance. Do not use memos to explain scraping limits, source availability, or why the page was created.
 7. The generated/local food image and, when available, an Instagram embed or video.
+   - On detail pages, place the food image as a compact thumbnail at the top-right of the title/description area.
+   - Do not render the detail food image as a large media column image.
    - If direct MP4 download is not available from public metadata, use the embed and report that local video download was unavailable.
 8. A bottom-right button that scrolls to the top.
 

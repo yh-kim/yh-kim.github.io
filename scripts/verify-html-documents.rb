@@ -8,6 +8,7 @@ require "psych"
 ROOT = Pathname.new(__dir__).join("..").expand_path
 DATA_FILE = ROOT.join("_data/html_documents.yml")
 LIST_POST = ROOT.join("_daily/2026-05-27-html-documents.markdown")
+RECIPE_DATA_FILE = ROOT.join("html-documents/home-cooking-recipes/assets/recipes.js")
 
 def fail_with(message)
   warn "FAIL: #{message}"
@@ -107,6 +108,53 @@ ROOT.join("html-documents").glob("**/*.html").sort.each do |asset|
 
   html.scan(/href=["'](#.*?)["']/).flatten.each do |anchor|
     fail_with("#{public_path} must use data-scroll-target instead of hash anchor navigation: href=\"#{anchor}\"")
+  end
+end
+
+if RECIPE_DATA_FILE.file?
+  recipe_data = RECIPE_DATA_FILE.read
+  banned_recipe_tags = %w[요리 다이어트 집밥 한그릇 밥반찬 돼지고기 묵은지 마늘쫑 오이 김치찜 비빔밥 부타노가쿠니 삼겹김치찜]
+  banned_search_ingredients = %w[간장 설탕 소금 물 식초 양조식초 양조간장 고춧가루 참기름 깨 통깨 기름 맛술 미림 꿀 흑설탕 흰설탕 다진마늘]
+  banned_display_phrases = [
+    "레시피입니다",
+    "정리했습니다",
+    "저장했습니다",
+    "저장한",
+    "게시물의 마지막",
+    "캡션 기반",
+    "캡션 기준",
+    "영상 확인",
+    "자막 확인",
+    "추가 확인",
+    "보강해야"
+  ]
+
+  recipe_data.scan(/tags:\s*\[(.*?)\]/m).flatten.each do |raw_tags|
+    raw_tags.scan(/"([^"]+)"/).flatten.each do |tag|
+      fail_with("home cooking recipe tag must be category-like, not broad/menu/ingredient: #{tag}") if banned_recipe_tags.include?(tag)
+    end
+  end
+
+  recipe_data.scan(/searchIngredients:\s*\[(.*?)\]/m).flatten.each do |raw_ingredients|
+    raw_ingredients.scan(/"([^"]+)"/).flatten.each do |ingredient|
+      if banned_search_ingredients.include?(ingredient)
+        fail_with("home cooking recipe search ingredient must not include generic seasoning: #{ingredient}")
+      end
+    end
+  end
+
+  recipe_data.scan(/(?:description|memo):\s*"([^"]*)"/).flatten.each do |text|
+    banned_display_phrases.each do |phrase|
+      fail_with("home cooking recipe display text must describe the food, not source/workflow state: #{phrase}") if text.include?(phrase)
+    end
+  end
+
+  recipe_data.scan(/steps:\s*\[(.*?)\]/m).flatten.each do |raw_steps|
+    raw_steps.scan(/"([^"]+)"/).flatten.each do |step|
+      banned_display_phrases.each do |phrase|
+        fail_with("home cooking recipe method text must describe cooking, not source/workflow state: #{phrase}") if step.include?(phrase)
+      end
+    end
   end
 end
 
