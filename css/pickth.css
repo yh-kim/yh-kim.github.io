@@ -110,8 +110,15 @@ th {
   font: inherit;
   text-align: left;
   cursor: pointer;
+  text-decoration: none;
   touch-action: manipulation;
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.layout-page .post-preview:hover,
+.layout-page .post-preview:focus {
+  color: inherit;
+  text-decoration: none;
 }
 
 .layout-page .post-preview::before {

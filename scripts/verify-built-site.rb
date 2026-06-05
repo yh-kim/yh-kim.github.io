@@ -225,7 +225,8 @@ fail_with("shared script paths should not contain trailing spaces") if note_inde
 fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
 fail_with("note page should list HTML documents") unless note_index_html.include?("post-preview")
 fail_with("dev page should hide old dev posts") if dev_index_html.include?('class="post-preview"')
-fail_with("note page should navigate with native form buttons") unless note_index_html.include?('<button class="post-preview" type="submit"') && !note_index_html.match?(/<article class="post-preview"|data-href=|<a class="post-title-link"/)
+fail_with("note page should navigate with direct card links without query strings") unless note_index_html.include?('<a class="post-preview" href="/html-documents/') && !note_index_html.match?(/<form class="post-preview-form"|method="get"|<button class="post-preview"|data-href=|<a class="post-title-link"/)
+fail_with("note page should not show placeholder labels for untagged documents") if note_index_html.include?("HTML Document")
 fail_with("note page should expose HTML document tag filter links") unless note_index_html.include?('href="/note/" data-doc-filter="all"') && note_index_html.include?('data-document-card') && note_index_html.include?('data-tags=')
 fail_with("note all filter should not append a hash") if note_index_html.include?('href="#all"')
 fail_with("note page should move tag filters above list on mobile") unless note_index_html.include?("note-document-index-row") && pickth_css.include?(".layout-page .note-document-index-row .sidebar-container") && pickth_css.include?("order: 1")
@@ -245,7 +246,7 @@ allowed_note_tags.each do |tag|
   fail_with("note page tag filter should link to hash URL: #{tag}") unless note_index_html.include?("href=\"##{CGI.escape(tag)}\"")
 end
 fail_with("note Etc filter should show untagged documents") unless note_index_html.include?('data-doc-filter="Etc"') && note_index_html.include?('selected === "Etc" && tags.length === 0')
-note_index_html.scan(/<form class="post-preview-form" action="([^"]+)" method="get">/).flatten.each do |href|
+note_index_html.scan(/<a class="post-preview" href="([^"]+)"/).flatten.each do |href|
   fail_with("note clickable card points to a missing page: #{href}") unless built_path_for(href).file?
 end
 fail_with("note page should use the space header") unless note_index_html.include?("space-header")
@@ -359,7 +360,7 @@ documents.each do |document|
   path = document["path"].to_s
   fail_with("registered HTML document missing from _site: #{path}") unless built_path_for(path).file?
   fail_with("HTML document list does not link to #{path}") unless html_documents_html.include?("href=\"#{path}\"")
-  fail_with("note page does not link to registered HTML document: #{path}") unless note_index_html.include?("action=\"#{path}\"")
+  fail_with("note page does not link to registered HTML document: #{path}") unless note_index_html.include?("href=\"#{path}\"")
 end
 
 puts "OK: built site verified."

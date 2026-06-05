@@ -11,8 +11,8 @@ html-document-tags: true
 {% assign documents = site.data.html_documents | sort: "date" | reverse %}
 
 {% for document in documents %}
-<form class="post-preview-form" action="{{ document.path | relative_url }}" method="get" data-document-card data-tags="{% if document.tags %}{{ document.tags | join: '|' | escape }}{% endif %}">
-    <button class="post-preview" type="submit" aria-label="{{ document.title | escape }}">
+<div class="post-preview-form" data-document-card data-tags="{% if document.tags %}{{ document.tags | join: '|' | escape }}{% endif %}">
+    <a class="post-preview" href="{{ document.path | relative_url }}" aria-label="{{ document.title | escape }}">
     <span class="post-title">
         {{ document.title }}
     </span>
@@ -21,14 +21,16 @@ html-document-tags: true
         {{ document.description }}
     </span>
     {% endif %}
+    {% if document.tags %}
     <span class="post-content-preview">
-        {% if document.tags %}{{ document.tags | join: " · " }}{% else %}HTML Document{% endif %}
+        {{ document.tags | join: " · " }}
     </span>
+    {% endif %}
     <span class="post-meta">
         {% if document.date %}{{ document.date | date: "%B %-d, %Y" }}{% endif %}
     </span>
-    </button>
-</form>
+    </a>
+</div>
 <hr>
 {% endfor %}
 
