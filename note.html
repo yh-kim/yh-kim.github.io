@@ -69,8 +69,9 @@ html-document-tags: true
       function applyFilter(selected) {
         var shown = 0;
         cards.forEach(function (card) {
-          var tags = (card.getAttribute("data-tags") || "").split("|");
-          var visible = selected === "all" || tags.indexOf(selected) !== -1;
+          var tagValue = card.getAttribute("data-tags") || "";
+          var tags = tagValue ? tagValue.split("|") : [];
+          var visible = selected === "all" || tags.indexOf(selected) !== -1 || (selected === "Etc" && tags.length === 0);
           card.hidden = !visible;
           if (visible) shown += 1;
         });

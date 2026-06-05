@@ -48,6 +48,7 @@ layout: default
                             <a href="#{{ tag | uri_escape }}" data-doc-filter="{{ tag | escape }}" aria-pressed="false">{{ tag }}</a>
                             {% endunless %}
                         {% endfor %}
+                        <a href="#Etc" data-doc-filter="Etc" aria-pressed="false">Etc</a>
                     </div>
                     <button class="note-document-tag-toggle" type="button" data-note-tag-toggle aria-expanded="false" aria-label="태그 펼치기">▾</button>
                     {% else %}
@@ -109,6 +110,7 @@ layout: default
                             <a href="#{{ tag | uri_escape }}" data-doc-filter="{{ tag | escape }}" aria-pressed="false">{{ tag }}</a>
                             {% endunless %}
                         {% endfor %}
+                        <a href="#Etc" data-doc-filter="Etc" aria-pressed="false">Etc</a>
                     </div>
                     <button class="note-document-tag-toggle" type="button" data-note-tag-toggle aria-expanded="false" aria-label="태그 펼치기">▾</button>
                     {% else %}

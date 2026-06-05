@@ -235,7 +235,7 @@ fail_with("note mobile tag expand button should only show when tags overflow") u
 fail_with("note tag filter script must initialize after sidebar tags are rendered") unless note_index_html.include?('DOMContentLoaded", initNoteFilters') && note_index_html.include?("function initNoteFilters()")
 fail_with("note tag filter should support direct hash URLs") unless note_index_html.include?("function selectedFromHash()") && note_index_html.include?('window.addEventListener("hashchange"')
 fail_with("note all filter should remove hash without navigation") unless note_index_html.include?('history.pushState(null, "", window.location.pathname + window.location.search)')
-allowed_note_tags = %w[동물 다이어트 방탈출 맞춤법]
+allowed_note_tags = %w[동물 다이어트 방탈출 맞춤법 Etc]
 note_index_html.scan(/data-doc-filter="([^"]+)"/).flatten.each do |tag|
   next if tag == "all"
   fail_with("note page exposes unsupported document tag: #{tag}") unless allowed_note_tags.include?(tag)
@@ -244,6 +244,7 @@ allowed_note_tags.each do |tag|
   fail_with("note page is missing document tag filter: #{tag}") unless note_index_html.include?("data-doc-filter=\"#{tag}\"")
   fail_with("note page tag filter should link to hash URL: #{tag}") unless note_index_html.include?("href=\"##{CGI.escape(tag)}\"")
 end
+fail_with("note Etc filter should show untagged documents") unless note_index_html.include?('data-doc-filter="Etc"') && note_index_html.include?('selected === "Etc" && tags.length === 0')
 note_index_html.scan(/<form class="post-preview-form" action="([^"]+)" method="get">/).flatten.each do |href|
   fail_with("note clickable card points to a missing page: #{href}") unless built_path_for(href).file?
 end
