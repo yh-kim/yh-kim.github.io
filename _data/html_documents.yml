@@ -3,20 +3,26 @@
   path: "/html-documents/escape-room-invite.html"
   date: '2026-05-28'
   tags:
-  - EscapeRoom
-  - Invite
+  - 방탈출
 - title: PSP 시험 힌트 총정리
   description: 시험 직전용 핵심 단어, 예상 문답, 오픈북 전략 정리
   path: "/html-documents/psp-problems.html"
   date: '2026-05-27'
-  tags:
-  - PSP
-  - Study
 - title: 스위치온 다이어트 음식 선택 가이드
   description: 단계별 식품 확장, 음식 판단 기준, 외식 선택법을 한눈에 보는 가이드
   path: "/html-documents/switch-on-diet-food-guide.html"
   date: '2026-06-05'
   tags:
-  - Diet
-  - Food
-  - Guide
+  - 다이어트
+- title: 동물 이름 모음
+  description: 짧고 독특한 동물 이름을 번호와 함께 훑어보는 정리 문서
+  path: "/html-documents/animal-names.html"
+  date: '2018-01-04'
+  tags:
+  - 동물
+- title: 맞춤법
+  description: 자주 헷갈리는 맞춤법과 띄어쓰기 규칙을 예문 중심으로 정리
+  path: "/html-documents/korean-spelling.html"
+  date: '2018-02-09'
+  tags:
+  - 맞춤법

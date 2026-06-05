@@ -38,6 +38,18 @@ layout: default
                 <section>
                     <!-- no hr -->
                     <h5><a href="{{'/category/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
+                    {% if page.html-document-tags %}
+                    {% capture html_document_tag_buffer %}{% for document in site.data.html_documents %}{% for tag in document.tags %}{{ tag }}|{% endfor %}{% endfor %}{% endcapture %}
+                    {% assign html_document_tags = html_document_tag_buffer | split: "|" | uniq | sort %}
+                    <div class="tags note-document-tags" aria-label="HTML document tag filters">
+                        <a href="{{ '/note/' | relative_url }}" data-doc-filter="all" aria-pressed="true">All</a>
+                        {% for tag in html_document_tags %}
+                            {% unless tag == "" %}
+                            <a href="#{{ tag | uri_escape }}" data-doc-filter="{{ tag | escape }}" aria-pressed="false">{{ tag }}</a>
+                            {% endunless %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
                                 <!--****tag->category****-->
                     <!--<h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>-->
                     <div class="tags">
@@ -53,6 +65,7 @@ layout: default
                             {% endif %}
         				{% endfor %}
         			</div>
+                    {% endif %}
                 </section>
                 {% endif %}
 
@@ -85,6 +98,18 @@ layout: default
                 <section>
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="{{'/category/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>
+                    {% if page.html-document-tags %}
+                    {% capture html_document_tag_buffer %}{% for document in site.data.html_documents %}{% for tag in document.tags %}{{ tag }}|{% endfor %}{% endfor %}{% endcapture %}
+                    {% assign html_document_tags = html_document_tag_buffer | split: "|" | uniq | sort %}
+                    <div class="tags note-document-tags" aria-label="HTML document tag filters">
+                        <a href="{{ '/note/' | relative_url }}" data-doc-filter="all" aria-pressed="true">All</a>
+                        {% for tag in html_document_tags %}
+                            {% unless tag == "" %}
+                            <a href="#{{ tag | uri_escape }}" data-doc-filter="{{ tag | escape }}" aria-pressed="false">{{ tag }}</a>
+                            {% endunless %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
                     <!--****tag->category****-->
                     <!--<h5><a href="{{'/tags/' | prepend: site.baseurl }}">FEATURED TAGS</a></h5>-->
                     <div class="tags">
@@ -100,6 +125,7 @@ layout: default
                             {% endif %}
                         {% endfor %}
                     </div>
+                    {% endif %}
                 </section>
                 {% endif %}
 

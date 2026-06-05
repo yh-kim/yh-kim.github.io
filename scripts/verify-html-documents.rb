@@ -36,6 +36,7 @@ documents = Psych.safe_load(DATA_FILE.read, aliases: true) || []
 fail_with("_data/html_documents.yml must be a list") unless documents.is_a?(Array)
 fail_with("_data/html_documents.yml must contain at least one document") if documents.empty?
 
+allowed_tags = %w[동물 다이어트 방탈출 맞춤법]
 seen_paths = {}
 documents.each_with_index do |document, index|
   label = "_data/html_documents.yml[#{index}]"
@@ -70,12 +71,21 @@ documents.each_with_index do |document, index|
     fail_with("#{label} HTML asset missing link preview metadata: #{path}") unless html.include?(snippet)
   end
 
+  html.scan(/href=["'](#.*?)["']/).flatten.each do |anchor|
+    fail_with("#{label} must use data-scroll-target instead of hash anchor navigation: href=\"#{anchor}\"")
+  end
+
   if document["date"]
     begin
       Date.iso8601(document["date"].to_s)
     rescue Date::Error
       fail_with("#{label} date must use YYYY-MM-DD: #{document["date"]}")
     end
+  end
+
+  tags = Array(document["tags"]).flatten.compact.map(&:to_s)
+  tags.each do |tag|
+    fail_with("#{label} has unsupported HTML document tag: #{tag}") unless allowed_tags.include?(tag)
   end
 end
 
@@ -93,6 +103,10 @@ ROOT.join("html-documents").glob("**/*.html").sort.each do |asset|
   ]
   preview_snippets.each do |snippet|
     fail_with("#{public_path} missing link preview metadata") unless html.include?(snippet)
+  end
+
+  html.scan(/href=["'](#.*?)["']/).flatten.each do |anchor|
+    fail_with("#{public_path} must use data-scroll-target instead of hash anchor navigation: href=\"#{anchor}\"")
   end
 end
 

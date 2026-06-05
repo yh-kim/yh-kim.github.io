@@ -5,28 +5,102 @@ description: ""
 header-img: "img/about-bg.jpg"
 sidebar: false
 space-header: true
+html-document-tags: true
 ---
 
-{% for post in site.daily reversed %}
-{% unless post.hidden %}
-<form class="post-preview-form" action="{{ post.url | prepend: site.baseurl }}" method="get">
-    <button class="post-preview" type="submit" aria-label="{{ post.title | escape }}">
+{% assign documents = site.data.html_documents | sort: "date" | reverse %}
+
+{% for document in documents %}
+<form class="post-preview-form" action="{{ document.path | relative_url }}" method="get" data-document-card data-tags="{% if document.tags %}{{ document.tags | join: '|' | escape }}{% endif %}">
+    <button class="post-preview" type="submit" aria-label="{{ document.title | escape }}">
     <span class="post-title">
-        {{ post.title }}
+        {{ document.title }}
     </span>
-    {% if post.subtitle %}
+    {% if document.description %}
     <span class="post-subtitle">
-        {{ post.subtitle }}
+        {{ document.description }}
     </span>
     {% endif %}
     <span class="post-content-preview">
-        {{ post.content | strip_html | truncate:200 }}
+        {% if document.tags %}{{ document.tags | join: " · " }}{% else %}HTML Document{% endif %}
     </span>
     <span class="post-meta">
-        {{ post.date | date: "%B %-d, %Y" }}
+        {% if document.date %}{{ document.date | date: "%B %-d, %Y" }}{% endif %}
     </span>
     </button>
 </form>
 <hr>
-{% endunless %}
 {% endfor %}
+
+<p class="note-filter-empty" data-note-filter-empty hidden>선택한 태그에 해당하는 문서가 없습니다.</p>
+
+<script>
+  (function () {
+    function initNoteFilters() {
+      var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-doc-filter]"));
+      var cards = Array.prototype.slice.call(document.querySelectorAll("[data-document-card]"));
+      var empty = document.querySelector("[data-note-filter-empty]");
+      var knownFilters = buttons.map(function (button) {
+        return button.getAttribute("data-doc-filter");
+      });
+
+      function selectedFromHash() {
+        var raw = window.location.hash ? window.location.hash.slice(1) : "";
+        if (!raw) return "all";
+
+        try {
+          raw = decodeURIComponent(raw);
+        } catch (error) {
+          raw = "all";
+        }
+
+        return knownFilters.indexOf(raw) !== -1 ? raw : "all";
+      }
+
+      function setActive(selected) {
+        buttons.forEach(function (button) {
+          var active = button.getAttribute("data-doc-filter") === selected;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      }
+
+      function applyFilter(selected) {
+        var shown = 0;
+        cards.forEach(function (card) {
+          var tags = (card.getAttribute("data-tags") || "").split("|");
+          var visible = selected === "all" || tags.indexOf(selected) !== -1;
+          card.hidden = !visible;
+          if (visible) shown += 1;
+        });
+        if (empty) empty.hidden = shown !== 0;
+        setActive(selected);
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+          var selected = button.getAttribute("data-doc-filter") || "all";
+          if (selected === "all") {
+            event.preventDefault();
+            if (window.location.hash) {
+              history.pushState(null, "", window.location.pathname + window.location.search);
+            }
+          }
+          applyFilter(selected);
+        });
+      });
+
+      window.addEventListener("hashchange", function () {
+        applyFilter(selectedFromHash());
+      });
+
+      applyFilter(selectedFromHash());
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initNoteFilters);
+    } else {
+      initNoteFilters();
+    }
+  })();
+</script>

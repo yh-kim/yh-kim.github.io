@@ -2,6 +2,7 @@
 layout:     post
 title:      "동물 이름 모음"
 date:       2018-01-04 00:00:00
+hidden:     true
 author:     "Pimi"
 header-img: "img/home-bg.jpg"
 header-mask: 0.3
@@ -10,37 +11,6 @@ tags:
     - Animals
 ---
 
-목록은 [여기](http://animal.memozee.com/animal/Dic/){:target="_blank"}에서 가져왔다.
+이 글은 독립 HTML 문서로 옮겼습니다.
 
-01호금조
-02사향소
-03나나니
-04고라니
-05삼광조
-06사슴쥐
-07산천어
-08상딱새
-09고사리
-10소쩍새
-11태양새
-12스쿠터
-13심해어
-14도마뱀
-15동고비
-16동사리
-17풍금새
-18가물치
-19바구미
-20왜가리
-21유니콘
-22감옥게
-23백상어
-24개연어
-25인드리
-26임팔라
-27범고래
-28부시벅
-29전복
-30불테리어
-31곰치
-32진돗개
+[동물 이름 모음 HTML로 열기]({{ '/html-documents/animal-names.html' | relative_url }}){:target="_blank"}

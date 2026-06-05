@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "date"
+require "cgi"
 require "pathname"
 require "psych"
 
@@ -109,12 +110,12 @@ end
 
 nav_expected = [
   'href="/">home</a>',
-  'href="/note">note</a>',
-  'href="/dev">dev</a>'
+  'href="/note">note</a>'
 ]
 nav_expected.each do |snippet|
   fail_with("home navigation missing #{snippet}") unless home_html.include?(snippet)
 end
+fail_with("home navigation should not expose dev menu") if home_html.include?('href="/dev">dev</a>')
 fail_with("header navigation and title should not be text-selectable") unless home_html.include?(".navbar-custom *") && home_html.include?(".intro-header *") && home_html.include?("user-select: none")
 fail_with("post detail title should remain text-selectable") unless home_html.include?("body.layout-post .intro-header .post-heading h1") && home_html.include?("user-select: text")
 
@@ -222,9 +223,23 @@ script_src_snippets.each do |snippet|
 end
 fail_with("shared script paths should not contain trailing spaces") if note_index_html.match?(%r{src="/js/[^"]+\.js\s+"})
 fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
-fail_with("note page should list daily posts") unless note_index_html.include?("post-preview")
+fail_with("note page should list HTML documents") unless note_index_html.include?("post-preview")
 fail_with("dev page should hide old dev posts") if dev_index_html.include?('class="post-preview"')
-fail_with("note page should navigate with native form buttons") unless note_index_html.include?('<form class="post-preview-form" action="/daily/html-documents/" method="get">') && note_index_html.include?('<button class="post-preview" type="submit"') && !note_index_html.match?(/<article class="post-preview"|data-href=|<a class="post-title-link"/)
+fail_with("note page should navigate with native form buttons") unless note_index_html.include?('<button class="post-preview" type="submit"') && !note_index_html.match?(/<article class="post-preview"|data-href=|<a class="post-title-link"/)
+fail_with("note page should expose HTML document tag filter links") unless note_index_html.include?('href="/note/" data-doc-filter="all"') && note_index_html.include?('data-document-card') && note_index_html.include?('data-tags=')
+fail_with("note all filter should not append a hash") if note_index_html.include?('href="#all"')
+fail_with("note tag filter script must initialize after sidebar tags are rendered") unless note_index_html.include?('DOMContentLoaded", initNoteFilters') && note_index_html.include?("function initNoteFilters()")
+fail_with("note tag filter should support direct hash URLs") unless note_index_html.include?("function selectedFromHash()") && note_index_html.include?('window.addEventListener("hashchange"')
+fail_with("note all filter should remove hash without navigation") unless note_index_html.include?('history.pushState(null, "", window.location.pathname + window.location.search)')
+allowed_note_tags = %w[동물 다이어트 방탈출 맞춤법]
+note_index_html.scan(/data-doc-filter="([^"]+)"/).flatten.each do |tag|
+  next if tag == "all"
+  fail_with("note page exposes unsupported document tag: #{tag}") unless allowed_note_tags.include?(tag)
+end
+allowed_note_tags.each do |tag|
+  fail_with("note page is missing document tag filter: #{tag}") unless note_index_html.include?("data-doc-filter=\"#{tag}\"")
+  fail_with("note page tag filter should link to hash URL: #{tag}") unless note_index_html.include?("href=\"##{CGI.escape(tag)}\"")
+end
 note_index_html.scan(/<form class="post-preview-form" action="([^"]+)" method="get">/).flatten.each do |href|
   fail_with("note clickable card points to a missing page: #{href}") unless built_path_for(href).file?
 end
@@ -272,6 +287,17 @@ html_document_style_snippets = [
 ]
 html_document_style_snippets.each do |snippet|
   fail_with("HTML document post should use compact document list styling") unless pickth_css.include?(snippet)
+end
+
+note_filter_style_snippets = [
+  ".layout-page .note-document-tags",
+  ".layout-page .note-document-tags a",
+  ".layout-page .note-document-tags a.is-active",
+  ".layout-page .note-filter-empty",
+  "-webkit-line-clamp: 2"
+]
+note_filter_style_snippets.each do |snippet|
+  fail_with("note page should use compact mobile cards and document tag filters") unless pickth_css.include?(snippet)
 end
 
 space_header_snippets = [
@@ -327,6 +353,7 @@ documents.each do |document|
   path = document["path"].to_s
   fail_with("registered HTML document missing from _site: #{path}") unless built_path_for(path).file?
   fail_with("HTML document list does not link to #{path}") unless html_documents_html.include?("href=\"#{path}\"")
+  fail_with("note page does not link to registered HTML document: #{path}") unless note_index_html.include?("action=\"#{path}\"")
 end
 
 puts "OK: built site verified."

@@ -88,7 +88,7 @@ with_temp_repo do |repo|
       "--date",
       "2026-05-27",
       "--tags",
-      "Test,HTML"
+      "동물"
     ],
     "add HTML document script"
   )
@@ -96,6 +96,38 @@ with_temp_repo do |repo|
 
   fail_with("add HTML document script should copy the source file") unless repo.join("html-documents/temp-html.html").file?
   fail_with("add HTML document script should register the new file") unless repo.join("_data/html_documents.yml").read.include?("/html-documents/temp-html.html")
+end
+
+with_temp_repo do |repo|
+  source = repo.join("tmp-html-source.html")
+  source.write("<!doctype html><html><head><title>Temp</title></head><body>Temp</body></html>\n")
+
+  expect_failure(
+    repo,
+    [
+      "ruby",
+      "scripts/add-html-document.rb",
+      "tmp-html-source.html",
+      "--title",
+      "Temp HTML",
+      "--tags",
+      "Study"
+    ],
+    "add HTML document script unsupported tag check",
+    "unsupported HTML document tag"
+  )
+end
+
+with_temp_repo do |repo|
+  data = repo.join("_data/html_documents.yml")
+  data.write(data.read.sub("- 동물", "- Study"))
+
+  expect_failure(
+    repo,
+    ["ruby", "scripts/verify-html-documents.rb"],
+    "unsupported HTML document tag check",
+    "has unsupported HTML document tag"
+  )
 end
 
 with_temp_repo do |repo|
@@ -143,6 +175,18 @@ with_temp_repo do |repo|
     ["ruby", "scripts/verify-html-documents.rb"],
     "HTML document path scope check",
     "path must start with /html-documents/"
+  )
+end
+
+with_temp_repo do |repo|
+  html = repo.join("html-documents/psp-problems.html")
+  html.write(html.read.sub("</body>", '<a href="#exam">시험 정보</a></body>'))
+
+  expect_failure(
+    repo,
+    ["ruby", "scripts/verify-html-documents.rb"],
+    "HTML document hash anchor navigation check",
+    "must use data-scroll-target instead of hash anchor navigation"
   )
 end
 

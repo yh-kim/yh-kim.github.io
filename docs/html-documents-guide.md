@@ -62,7 +62,7 @@ ruby scripts/add-html-document.rb
 원본 HTML을 직접 복사까지 하고 싶을 때는 아래 방식도 가능하다.
 
 ```bash
-ruby scripts/add-html-document.rb ~/Downloads/my-note.html --title "My Note" --slug my-note --description "설명" --tags Study,HTML
+ruby scripts/add-html-document.rb ~/Downloads/my-note.html --title "My Note" --slug my-note --description "설명" --tags 맞춤법
 ```
 
 복사 방식 옵션:
@@ -71,7 +71,7 @@ ruby scripts/add-html-document.rb ~/Downloads/my-note.html --title "My Note" --s
 - `--slug`: 배포 파일명. 생략하면 원본 파일명을 기준으로 만든다.
 - `--description`: 목록에 표시할 짧은 설명.
 - `--date`: 문서 날짜. 생략하면 오늘 날짜.
-- `--tags`: 쉼표로 구분한 태그. 예: `Study,HTML`
+- `--tags`: 쉼표로 구분한 태그. 허용 태그는 `동물`, `다이어트`, `방탈출`, `맞춤법`입니다.
 - `--force`: 같은 path가 이미 있을 때 파일과 목록 항목을 교체한다.
 
 스크립트 실행 후 검증:

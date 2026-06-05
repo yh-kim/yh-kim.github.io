@@ -11,6 +11,7 @@ require "psych"
 ROOT = Pathname.new(__dir__).join("..").expand_path
 DATA_FILE = ROOT.join("_data/html_documents.yml")
 TARGET_DIR = ROOT.join("html-documents")
+ALLOWED_TAGS = %w[동물 다이어트 방탈출 맞춤법].freeze
 
 def fail_with(message)
   warn "FAIL: #{message}"
@@ -28,12 +29,12 @@ def usage
       --slug SLUG              Output filename without .html. Defaults to source filename.
       --description TEXT       Description shown in /daily/html-documents/.
       --date YYYY-MM-DD        Document date. Defaults to today.
-      --tags TAG1,TAG2         Comma-separated tags.
+      --tags TAG1,TAG2         Comma-separated tags. Allowed: 동물, 다이어트, 방탈출, 맞춤법.
       --force                  Replace an existing file and registry entry for the same path.
 
     Example:
       ruby scripts/add-html-document.rb
-      ruby scripts/add-html-document.rb ~/Downloads/note.html --title "시험 정리" --slug exam-note --tags Study,HTML
+      ruby scripts/add-html-document.rb ~/Downloads/note.html --title "맞춤법" --slug korean-spelling --tags 맞춤법
   TEXT
 end
 
@@ -177,6 +178,8 @@ parser = OptionParser.new do |opts|
   opts.on("--date DATE") { |value| options[:date] = value }
   opts.on("--tags TAGS") do |value|
     options[:tags] = value.split(",").map(&:strip).reject(&:empty?)
+    unsupported = options[:tags] - ALLOWED_TAGS
+    fail_with("unsupported HTML document tag(s): #{unsupported.join(', ')}") unless unsupported.empty?
   end
   opts.on("--force") { options[:force] = true }
   opts.on("-h", "--help") do
