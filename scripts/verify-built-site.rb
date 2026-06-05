@@ -228,6 +228,10 @@ fail_with("dev page should hide old dev posts") if dev_index_html.include?('clas
 fail_with("note page should navigate with native form buttons") unless note_index_html.include?('<button class="post-preview" type="submit"') && !note_index_html.match?(/<article class="post-preview"|data-href=|<a class="post-title-link"/)
 fail_with("note page should expose HTML document tag filter links") unless note_index_html.include?('href="/note/" data-doc-filter="all"') && note_index_html.include?('data-document-card') && note_index_html.include?('data-tags=')
 fail_with("note all filter should not append a hash") if note_index_html.include?('href="#all"')
+fail_with("note page should move tag filters above list on mobile") unless note_index_html.include?("note-document-index-row") && pickth_css.include?(".layout-page .note-document-index-row .sidebar-container") && pickth_css.include?("order: 1")
+fail_with("note mobile tag filter should collapse to one row with an icon expand button") unless note_index_html.include?('data-note-tag-toggle') && note_index_html.include?('aria-label="태그 펼치기">▾</button>') && note_index_html.include?("note-document-tag-panel") && pickth_css.include?("flex-wrap: nowrap") && pickth_css.include?(".layout-page .note-document-tag-panel.is-expanded .note-document-tags")
+fail_with("note mobile tag filter should hide heading and use balanced compact spacing") unless pickth_css.include?(".layout-page .note-document-tag-panel > h5") && pickth_css.include?("display: none !important") && pickth_css.include?("margin-bottom: 8px") && pickth_css.include?("gap: 4px")
+fail_with("note mobile tag expand button should only show when tags overflow") unless note_index_html.include?("function updateToggleVisibility()") && note_index_html.include?("tagList.scrollWidth > tagList.clientWidth") && pickth_css.include?(".layout-page .note-document-tag-toggle[hidden]")
 fail_with("note tag filter script must initialize after sidebar tags are rendered") unless note_index_html.include?('DOMContentLoaded", initNoteFilters') && note_index_html.include?("function initNoteFilters()")
 fail_with("note tag filter should support direct hash URLs") unless note_index_html.include?("function selectedFromHash()") && note_index_html.include?('window.addEventListener("hashchange"')
 fail_with("note all filter should remove hash without navigation") unless note_index_html.include?('history.pushState(null, "", window.location.pathname + window.location.search)')
@@ -257,7 +261,7 @@ list_style_snippets = [
   "cursor: pointer",
   "touch-action: manipulation",
   "appearance: none",
-  "box-shadow: 0 18px 56px",
+  "box-shadow: 0 8px 24px",
   ".layout-page .post-preview > .post-meta",
   ".layout-page .postlist-container > hr",
   "Apple SD Gothic Neo",
@@ -266,8 +270,8 @@ list_style_snippets = [
   ".layout-page .post-preview .post-subtitle {\n  display: block;",
   "font-weight: 720",
   "font-weight: 560",
-  "font-weight: 430",
-  "color: #465062",
+  "background: rgba(75, 95, 168, 0.09)",
+  "color: #3f4f96",
   "-webkit-tap-highlight-color: transparent",
   ".layout-page .post-preview::after",
   "outline: none !important"
@@ -293,8 +297,9 @@ note_filter_style_snippets = [
   ".layout-page .note-document-tags",
   ".layout-page .note-document-tags a",
   ".layout-page .note-document-tags a.is-active",
+  ".layout-page .note-document-tag-toggle",
   ".layout-page .note-filter-empty",
-  "-webkit-line-clamp: 2"
+  "box-shadow: 0 8px 20px"
 ]
 note_filter_style_snippets.each do |snippet|
   fail_with("note page should use compact mobile cards and document tag filters") unless pickth_css.include?(snippet)

@@ -40,6 +40,7 @@ html-document-tags: true
       var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-doc-filter]"));
       var cards = Array.prototype.slice.call(document.querySelectorAll("[data-document-card]"));
       var empty = document.querySelector("[data-note-filter-empty]");
+      var tagPanels = Array.prototype.slice.call(document.querySelectorAll(".note-document-tag-panel"));
       var knownFilters = buttons.map(function (button) {
         return button.getAttribute("data-doc-filter");
       });
@@ -88,6 +89,32 @@ html-document-tags: true
           }
           applyFilter(selected);
         });
+      });
+
+      tagPanels.forEach(function (panel) {
+        var toggle = panel.querySelector("[data-note-tag-toggle]");
+        var tagList = panel.querySelector(".note-document-tags");
+        if (!toggle) return;
+
+        function updateToggleVisibility() {
+          if (!tagList) return;
+
+          var shouldShow = tagList.scrollWidth > tagList.clientWidth + 1 || panel.classList.contains("is-expanded");
+          panel.classList.toggle("has-overflow", shouldShow);
+          toggle.hidden = !shouldShow;
+        }
+
+        toggle.addEventListener("click", function () {
+          var expanded = !panel.classList.contains("is-expanded");
+          panel.classList.toggle("is-expanded", expanded);
+          toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+          toggle.setAttribute("aria-label", expanded ? "태그 접기" : "태그 펼치기");
+          toggle.textContent = expanded ? "▴" : "▾";
+          updateToggleVisibility();
+        });
+
+        updateToggleVisibility();
+        window.addEventListener("resize", updateToggleVisibility);
       });
 
       window.addEventListener("hashchange", function () {

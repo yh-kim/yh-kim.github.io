@@ -76,12 +76,12 @@ th {
 }
 
 .layout-page .post-preview-form {
-  margin: 0 0 18px;
+  margin: 0 0 10px;
 }
 
 .layout-page .postlist-container {
-  padding-top: 34px;
-  padding-bottom: 52px;
+  padding-top: 26px;
+  padding-bottom: 46px;
 }
 
 .layout-page .postlist-container > hr {
@@ -91,22 +91,21 @@ th {
 .layout-page .post-preview {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: 28px;
+  column-gap: 18px;
+  row-gap: 6px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   width: 100%;
   margin: 0;
-  padding: 26px 28px;
+  padding: 18px 20px;
   appearance: none;
   -webkit-appearance: none;
   outline: 0;
-  border: 1px solid rgba(66, 78, 139, 0.13);
+  border: 1px solid rgba(36, 48, 64, 0.10);
   border-radius: 8px;
-  background:
-    radial-gradient(circle at 0 0, rgba(127, 105, 255, 0.12), transparent 22rem),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.94));
-  box-shadow: 0 18px 56px rgba(12, 18, 42, 0.08);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 24px rgba(12, 18, 42, 0.045);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -119,9 +118,9 @@ th {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 3px;
-  background: linear-gradient(180deg, rgba(128, 101, 255, 0.82), rgba(97, 177, 255, 0.26));
-  opacity: 0.72;
+  width: 4px;
+  background: linear-gradient(180deg, #4b5fa8 0%, #327f93 100%);
+  opacity: 0.9;
   z-index: -1;
 }
 
@@ -129,28 +128,26 @@ th {
   content: "";
   position: absolute;
   top: 50%;
-  right: 28px;
-  width: 9px;
-  height: 9px;
-  border-top: 1px solid rgba(64, 72, 116, 0.46);
-  border-right: 1px solid rgba(64, 72, 116, 0.46);
+  right: 18px;
+  width: 7px;
+  height: 7px;
+  border-top: 1px solid rgba(60, 75, 90, 0.42);
+  border-right: 1px solid rgba(60, 75, 90, 0.42);
   transform: translateY(-50%) rotate(45deg);
   transition: transform 180ms ease, border-color 180ms ease;
 }
 
 .layout-page .post-preview:hover,
 .layout-page .post-preview:focus-visible {
-  transform: translateY(-2px);
-  border-color: rgba(95, 104, 218, 0.30);
-  box-shadow: 0 22px 68px rgba(12, 18, 42, 0.12);
-  background:
-    radial-gradient(circle at 0 0, rgba(127, 105, 255, 0.17), transparent 22rem),
-    linear-gradient(145deg, rgba(255, 255, 255, 1), rgba(247, 249, 255, 0.96));
+  transform: translateY(-1px);
+  border-color: rgba(75, 95, 168, 0.24);
+  box-shadow: 0 12px 30px rgba(12, 18, 42, 0.07);
+  background: #fff;
 }
 
 .layout-page .post-preview:hover::after,
 .layout-page .post-preview:focus-visible::after {
-  border-color: rgba(84, 72, 190, 0.70);
+  border-color: rgba(75, 95, 168, 0.72);
   transform: translate(3px, -50%) rotate(45deg);
 }
 
@@ -163,11 +160,11 @@ th {
 .layout-page .post-preview .post-title {
   display: block;
   grid-column: 1;
-  margin: 0 0 10px;
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 720;
-  line-height: 1.3;
+  line-height: 1.28;
   letter-spacing: 0;
   color: #111827;
 }
@@ -175,29 +172,33 @@ th {
 .layout-page .post-preview .post-subtitle {
   display: block;
   grid-column: 1;
-  margin: 0 0 12px;
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.45;
   letter-spacing: 0;
-  color: #4f5668;
+  color: #5b6472;
 }
 
 .layout-page .post-content-preview {
-  display: -webkit-box;
+  display: inline-flex;
+  width: fit-content;
   grid-column: 1;
   max-width: 64ch;
-  margin: 0;
+  margin: 3px 0 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(75, 95, 168, 0.09);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
-  font-size: 15px;
+  font-size: 12px;
   font-style: normal;
-  font-weight: 430;
-  line-height: 1.68;
-  color: #465062;
+  font-weight: 720;
+  line-height: 1.15;
+  color: #3f4f96;
   overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .layout-page .post-preview > .post-meta {
@@ -206,29 +207,47 @@ th {
   grid-row: 1 / 4;
   align-self: start;
   margin: 0;
-  padding: 7px 10px;
-  border: 1px solid rgba(87, 94, 159, 0.10);
+  padding: 6px 9px;
+  border: 1px solid rgba(36, 48, 64, 0.08);
   border-radius: 999px;
-  background: rgba(243, 245, 255, 0.72);
+  background: rgba(248, 250, 252, 0.92);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-style: normal;
   font-weight: 560;
   line-height: 1;
-  color: #5c6376;
+  color: #667085;
   white-space: nowrap;
 }
 
 @media only screen and (max-width: 768px) {
+  .layout-page .note-document-index-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .layout-page .note-document-index-row .sidebar-container {
+    order: 1;
+    padding-top: 12px;
+  }
+
+  .layout-page .note-document-index-row .postlist-container {
+    order: 2;
+  }
+
+  .layout-page .note-document-index-row .sidebar-container h5 {
+    display: none;
+  }
+
   .layout-page .postlist-container {
-    padding-top: 14px;
+    padding-top: 8px;
     padding-bottom: 26px;
   }
 
   .layout-page .post-preview {
     display: block;
-    padding: 15px 16px 14px;
-    box-shadow: 0 10px 30px rgba(12, 18, 42, 0.06);
+    padding: 13px 14px 12px;
+    box-shadow: 0 8px 20px rgba(12, 18, 42, 0.045);
   }
 
   .layout-page .post-preview-form {
@@ -240,42 +259,41 @@ th {
   .layout-page .post-preview:focus-within,
   .layout-page .post-preview:active {
     transform: none;
-    border-color: rgba(66, 78, 139, 0.13);
-    box-shadow: 0 18px 56px rgba(12, 18, 42, 0.08);
+    border-color: rgba(36, 48, 64, 0.10);
+    box-shadow: 0 8px 20px rgba(12, 18, 42, 0.045);
   }
 
   .layout-page .post-preview::after {
-    top: 21px;
-    right: 16px;
+    top: 19px;
+    right: 14px;
   }
 
   .layout-page .post-preview .post-title {
-    margin-bottom: 5px;
-    font-size: 18px;
+    margin-bottom: 4px;
+    font-size: 17px;
     font-weight: 720;
     padding-right: 20px;
   }
 
   .layout-page .post-preview .post-subtitle {
-    margin-bottom: 7px;
-    font-size: 13px;
+    margin-bottom: 6px;
+    font-size: 12.5px;
     font-weight: 500;
-    line-height: 1.42;
+    line-height: 1.38;
     color: #4f5668;
   }
 
   .layout-page .post-content-preview {
     font-size: 12px;
-    font-weight: 430;
-    line-height: 1.35;
-    color: #465062;
-    -webkit-line-clamp: 2;
+    font-weight: 720;
+    line-height: 1.15;
+    max-width: 100%;
   }
 
   .layout-page .post-preview > .post-meta {
     display: inline-flex;
-    margin-top: 9px;
-    padding: 5px 8px;
+    margin-top: 7px;
+    padding: 4px 7px;
     font-size: 11px;
     font-weight: 560;
     color: #5c6376;
@@ -285,14 +303,18 @@ th {
 .layout-page .note-document-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 2px;
+}
+
+.layout-page .note-document-tag-toggle {
+  display: none;
 }
 
 .layout-page .note-document-tags a {
   display: inline-flex;
   align-items: center;
-  min-height: 26px;
-  padding: 0 10px;
+  min-height: 24px;
+  padding: 0 7px;
   border: 1px solid rgba(191, 191, 191, .8);
   border-radius: 999px;
   background: transparent;
@@ -308,10 +330,58 @@ th {
 .layout-page .note-document-tags a:hover,
 .layout-page .note-document-tags a:focus-visible,
 .layout-page .note-document-tags a.is-active {
-  border-color: #0085a1;
-  background: rgba(0, 133, 161, .12);
-  color: #0085a1;
+  border-color: #4b5fa8;
+  background: rgba(75, 95, 168, .12);
+  color: #3f4f96;
   outline: 0;
+}
+
+@media only screen and (max-width: 768px) {
+  .layout-page .note-document-tag-panel > h5 {
+    display: none !important;
+  }
+
+  .layout-page .note-document-tag-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 4px;
+    align-items: start;
+    margin-bottom: 8px;
+  }
+
+  .layout-page .note-document-tag-panel .note-document-tags {
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    max-height: 24px;
+  }
+
+  .layout-page .note-document-tag-panel.is-expanded .note-document-tags {
+    flex-wrap: wrap;
+    max-height: none;
+  }
+
+  .layout-page .note-document-tag-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0;
+    border: 1px solid rgba(75, 95, 168, .25);
+    border-radius: 999px;
+    background: rgba(75, 95, 168, .08);
+    color: #3f4f96;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 820;
+    line-height: 1;
+  }
+
+  .layout-page .note-document-tag-toggle[hidden] {
+    display: none;
+  }
 }
 
 .layout-page .note-filter-empty {
