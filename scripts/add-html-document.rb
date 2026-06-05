@@ -11,7 +11,7 @@ require "psych"
 ROOT = Pathname.new(__dir__).join("..").expand_path
 DATA_FILE = ROOT.join("_data/html_documents.yml")
 TARGET_DIR = ROOT.join("html-documents")
-ALLOWED_TAGS = %w[동물 다이어트 방탈출 맞춤법].freeze
+ALLOWED_TAGS = %w[동물 다이어트 방탈출 맞춤법 요리].freeze
 
 def fail_with(message)
   warn "FAIL: #{message}"
@@ -29,7 +29,7 @@ def usage
       --slug SLUG              Output filename without .html. Defaults to source filename.
       --description TEXT       Description shown in /daily/html-documents/.
       --date YYYY-MM-DD        Document date. Defaults to today.
-      --tags TAG1,TAG2         Comma-separated tags. Allowed: 동물, 다이어트, 방탈출, 맞춤법.
+      --tags TAG1,TAG2         Comma-separated tags. Allowed: 동물, 다이어트, 방탈출, 맞춤법, 요리.
       --force                  Replace an existing file and registry entry for the same path.
 
     Example:

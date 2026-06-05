@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>오이냉국 | 집밥 레시피 보관함</title>
+  <meta name="description" content="오이, 양파, 청양고추, 시판 냉면육수로 만드는 오이냉국 레시피">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="오이냉국 | 집밥 레시피 보관함">
+  <meta property="og:description" content="오이, 양파, 청양고추, 시판 냉면육수로 만드는 오이냉국 레시피">
+  <meta property="og:url" content="https://blog.pickth.com/html-documents/home-cooking-recipes/1.html">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Pimi's Blog space icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="오이냉국 | 집밥 레시피 보관함">
+  <meta name="twitter:description" content="오이, 양파, 청양고추, 시판 냉면육수로 만드는 오이냉국 레시피">
+  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+  <style>
+    :root {
+      --bg: #fff6ef;
+      --paper: #fffaf6;
+      --ink: #24251f;
+      --muted: #746b61;
+      --line: #ead9c8;
+      --accent: #e86645;
+      --accent-soft: #ffe7dc;
+      --herb: #5f8a4b;
+      --herb-soft: #edf5df;
+      --sky: #547f92;
+      --sky-soft: #e8f1f3;
+      --shadow: 0 16px 36px rgba(97, 69, 44, .12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+      line-height: 1.68;
+      background:
+        linear-gradient(180deg, #fffaf6 0%, var(--bg) 58%, #fffaf4 100%);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1040px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 16px;
+    }
+
+    .icon-button {
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--accent);
+      appearance: none;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: 0 8px 22px rgba(74, 58, 38, .08);
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .top-source-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      gap: 18px;
+      align-items: end;
+      padding: 18px 0 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: 1.02;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 1.8vw, 18px);
+      font-weight: 560;
+    }
+
+    .fact-box {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 247, .94);
+      box-shadow: var(--shadow);
+    }
+
+    .fact-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .fact-row:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .fact-row span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .fact-row strong {
+      text-align: right;
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      gap: 18px;
+      padding: 0 0 52px;
+    }
+
+    .content {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .panel {
+      display: grid;
+      gap: 12px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 247, .94);
+      box-shadow: 0 14px 36px rgba(74, 58, 38, .09);
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 6px 0;
+      color: #403a33;
+      font-size: 15px;
+    }
+
+    .prep-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .prep-list li {
+      margin: 0;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      font-size: 14px;
+      font-weight: 760;
+      overflow-wrap: anywhere;
+    }
+
+    .memo {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 560;
+    }
+
+    .media {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      min-width: 0;
+    }
+
+    .photo {
+      display: block;
+      width: 100%;
+      max-height: 320px;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #efe6d8;
+      box-shadow: var(--shadow);
+    }
+
+    .embed-wrap {
+      width: min(100%, 300px);
+      justify-self: center;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .embed-wrap iframe {
+      display: block;
+      width: 100%;
+      min-height: 360px;
+      border: 0;
+    }
+
+    .top-button {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 5;
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--accent);
+      appearance: none;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: 900;
+      box-shadow: 0 14px 34px rgba(74, 58, 38, .18);
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        width: min(100% - 20px, 1040px);
+      }
+
+      .hero,
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .top-actions {
+        padding-top: 10px;
+      }
+
+      .icon-button {
+        width: 34px;
+        height: 34px;
+        font-size: 18px;
+      }
+
+      .hero {
+        padding-top: 14px;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .panel,
+      .fact-box {
+        padding: 16px;
+      }
+
+      .photo {
+        max-height: 240px;
+      }
+
+      .embed-wrap iframe {
+        min-height: 340px;
+      }
+
+      .prep-list {
+        gap: 7px;
+      }
+
+      .prep-list li {
+        padding: 7px 8px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="page">
+    <div class="top-actions">
+      <button class="icon-button" type="button" id="backButton" aria-label="뒤로가기">&#8592;</button>
+      <a class="top-source-link" href="https://www.instagram.com/reel/C7P-iZDS_e4/" target="_blank" rel="noopener">Instagram에서 보기</a>
+    </div>
+    <div class="hero">
+      <div>
+        <h1>오이냉국</h1>
+        <p class="lead">오이와 시판 냉면육수로 빠르게 만드는 시원한 냉국. 입맛이 떨어지는 더운 날에 바로 꺼내기 좋은 레시피입니다.</p>
+      </div>
+      <aside class="fact-box" aria-label="레시피 요약">
+        <div class="fact-row">
+          <span>걸리는 시간</span>
+          <strong>약 10분</strong>
+        </div>
+        <div class="fact-row">
+          <span>주요 재료</span>
+          <strong>오이, 양파, 청양고추, 냉면육수</strong>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="content" aria-label="오이냉국 레시피">
+      <article class="panel">
+        <h2>준비물</h2>
+        <ul class="prep-list">
+          <li>오이 1개</li>
+          <li>양파 1/4개</li>
+          <li>청양고추 1개</li>
+          <li>양조간장 1스푼</li>
+          <li>양조식초 1스푼</li>
+          <li>설탕 반 스푼</li>
+          <li>고춧가루 반 스푼</li>
+          <li>물 200ml</li>
+          <li>시판 냉면육수 1봉</li>
+          <li>통깨 1스푼</li>
+          <li>얼음 적당량</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h2>조리방법</h2>
+        <ol>
+          <li>오이 1개를 길게 어슷 썬 뒤 얇게 채썬다.</li>
+          <li>양파 1/4개를 잘게 썬다.</li>
+          <li>청양고추 1개는 반으로 갈라 씨를 제거하고 잘게 썬다.</li>
+          <li>볼에 손질한 오이, 양파, 청양고추를 모두 넣는다.</li>
+          <li>양조간장, 양조식초, 설탕, 고춧가루, 물 200ml를 넣는다.</li>
+          <li>시판 냉면육수 1봉을 부어 섞는다.</li>
+          <li>통깨와 얼음을 넣어 마무리한다.</li>
+        </ol>
+      </article>
+
+      <article class="panel">
+        <h2>메모</h2>
+        <p class="memo">캡션 기준으로 정리했습니다. 냉면육수가 맛의 중심이라, 집에 있는 육수 제품의 간에 따라 물이나 식초 양만 살짝 조절하면 좋습니다.</p>
+      </article>
+    </section>
+
+    <aside class="media" aria-label="사진과 영상">
+      <img class="photo" src="/html-documents/home-cooking-recipes/assets/oi-naengguk.png" alt="오이냉국">
+      <div class="embed-wrap">
+        <iframe src="https://www.instagram.com/reel/C7P-iZDS_e4/embed" title="오이냉국 Instagram Reel" loading="lazy" allowtransparency="true"></iframe>
+      </div>
+    </aside>
+  </main>
+  <button class="top-button" type="button" aria-label="맨위로 이동" id="scrollTopButton">&#8593;</button>
+  <script>
+    const recipeListPath = "/html-documents/home-cooking-recipes.html";
+
+    document.querySelector("#backButton").addEventListener("click", () => {
+      const referrer = document.referrer ? new URL(document.referrer) : null;
+      const cameFromList = referrer
+        && referrer.origin === window.location.origin
+        && referrer.pathname === recipeListPath;
+
+      if (cameFromList && window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = recipeListPath;
+      }
+    });
+
+    document.querySelector("#scrollTopButton").addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</body>
+
+</html>

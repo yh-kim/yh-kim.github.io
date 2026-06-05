@@ -236,7 +236,7 @@ fail_with("note mobile tag expand button should only show when tags overflow") u
 fail_with("note tag filter script must initialize after sidebar tags are rendered") unless note_index_html.include?('DOMContentLoaded", initNoteFilters') && note_index_html.include?("function initNoteFilters()")
 fail_with("note tag filter should support direct hash URLs") unless note_index_html.include?("function selectedFromHash()") && note_index_html.include?('window.addEventListener("hashchange"')
 fail_with("note all filter should remove hash without navigation") unless note_index_html.include?('history.pushState(null, "", window.location.pathname + window.location.search)')
-allowed_note_tags = %w[동물 다이어트 방탈출 맞춤법 Etc]
+allowed_note_tags = %w[동물 다이어트 방탈출 맞춤법 요리 Etc]
 note_index_html.scan(/data-doc-filter="([^"]+)"/).flatten.each do |tag|
   next if tag == "all"
   fail_with("note page exposes unsupported document tag: #{tag}") unless allowed_note_tags.include?(tag)

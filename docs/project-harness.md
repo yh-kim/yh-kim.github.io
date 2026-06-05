@@ -120,6 +120,91 @@ Add a standalone HTML document:
 
 자세한 HTML 추가 가이드: `docs/html-documents-guide.md`.
 
+## Home Cooking Recipe List
+
+Use this workflow when the user asks to analyze a recipe post, Instagram reel, cooking link, caption, screenshot, or video and add it to the home cooking recipe list.
+
+### Files and Structure
+
+1. Keep the list page at `html-documents/home-cooking-recipes.html`.
+2. Keep recipe detail pages under `html-documents/home-cooking-recipes/`.
+   - Use short stable filenames such as `1.html`, `2.html`, etc.
+   - Do not use long romanized food names unless the user explicitly asks for descriptive filenames.
+3. Keep recipe assets under `html-documents/home-cooking-recipes/assets/`.
+   - Use short food-specific names such as `oi-naengguk.png`.
+   - List cards and detail pages should reference local assets, not temporary generated-image paths.
+4. Keep the standalone document registry entry in `_data/html_documents.yml`.
+   - The visible document title is `레시피 리스트`.
+   - Keep `_data/html_documents.yml` sorted by `date` descending.
+
+### Source Analysis
+
+1. Preserve the original user-provided URL.
+2. For Instagram links, try to extract public metadata first:
+   - Recipe title or food name.
+   - Caption ingredients.
+   - Caption cooking steps.
+   - Public preview image or embed URL.
+3. If public metadata is blocked or incomplete, ask for caption text, screenshots, or a local video file instead of inventing details.
+4. If the caption or metadata does not include enough recipe detail, analyze the video itself.
+   - Prefer direct visual inspection of the reel/embed when available.
+   - If the video cannot be inspected from the public page, ask the user for a screen recording, downloaded video, screenshots, or copied subtitle/caption text.
+   - Extract visible ingredients, quantities, preparation actions, cooking order, cooking time hints, and plating/final state from the video.
+   - Mark uncertain quantities conservatively, for example `적당량`, and mention that the amount was inferred from video when needed.
+   - Do not fill missing ingredients or steps from generic recipe knowledge unless the user explicitly allows approximation.
+5. Verify the cooking method against the source text or visible video when possible.
+   - If only the caption is available, say the recipe is caption-based.
+   - Do not claim direct video verification unless the video content was actually visible or available.
+6. Keep the original Instagram embed or source link on the detail page when available, but do not make the recipe card depend on Instagram thumbnails.
+
+### List Card Requirements
+
+Each recipe added to `html-documents/home-cooking-recipes.html` must add one `.recipe-card` with:
+
+1. A short detail link such as `/html-documents/home-cooking-recipes/1.html`.
+2. `data-tags` with only searchable recipe tags such as `냉국 여름 반찬`.
+   - Do not include broad document tags like `요리` or `다이어트` here unless they are meant to be actual recipe filters.
+3. `data-ingredients` with ingredients users may search by, such as `오이 양파 청양고추 냉면육수`.
+4. A generated or local food image that looks appetizing and represents the food itself.
+   - Prefer generating a fresh food image with the image generation tool for each recipe.
+   - Save the final selected generated image into `html-documents/home-cooking-recipes/assets/`.
+   - Never reference generated images from `$CODEX_HOME/generated_images/...` directly in HTML.
+5. A visible time pill such as `약 10분`.
+6. A small set of visible tag pills.
+7. A compact summary and major ingredient chips.
+
+The list filters are split into `태그` and `재료`. Both filter types must stay backed by `data-tags` and `data-ingredients`, and the `AND`/`OR` control applies across the selected tag and ingredient chips.
+
+### Detail Page Requirements
+
+Each recipe detail page must include:
+
+1. A back button that:
+   - Calls browser history back when the user came from `home-cooking-recipes.html`.
+   - Falls back to `/html-documents/home-cooking-recipes.html` when opened directly or from elsewhere.
+2. A top source button, for example `Instagram에서 보기`, when a source URL exists.
+3. Recipe title, short description, time, and major ingredients.
+4. A `준비물` section where ingredients render two per row on normal/mobile layouts.
+5. A `조리방법` section that matches the source as closely as possible.
+6. A short memo only when useful.
+7. The generated/local food image and, when available, an Instagram embed or video.
+   - If direct MP4 download is not available from public metadata, use the embed and report that local video download was unavailable.
+8. A bottom-right button that scrolls to the top.
+
+### Verification
+
+After adding or changing a recipe, run:
+
+```bash
+scripts/verify-all.sh
+```
+
+If changing these recipe instructions, validation scripts, or harness behavior, also run:
+
+```bash
+ruby scripts/test-harness.rb
+```
+
 ## Escape Room Invite Cards
 
 Use this workflow when the user asks to create or update a 방탈출 카드, 방탈출 초대장, or 방탈출 정보 page.

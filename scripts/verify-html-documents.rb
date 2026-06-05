@@ -36,7 +36,7 @@ documents = Psych.safe_load(DATA_FILE.read, aliases: true) || []
 fail_with("_data/html_documents.yml must be a list") unless documents.is_a?(Array)
 fail_with("_data/html_documents.yml must contain at least one document") if documents.empty?
 
-allowed_tags = %w[동물 다이어트 방탈출 맞춤법]
+allowed_tags = %w[동물 다이어트 방탈출 맞춤법 요리]
 seen_paths = {}
 documents.each_with_index do |document, index|
   label = "_data/html_documents.yml[#{index}]"
