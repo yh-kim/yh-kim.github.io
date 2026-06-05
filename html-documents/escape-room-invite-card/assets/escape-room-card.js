@@ -21,7 +21,11 @@
 
     document.querySelectorAll("[data-link]").forEach((node) => {
       const key = node.dataset.link;
-      node.href = inviteData[key] || "#";
+      if (inviteData[key]) {
+        node.href = inviteData[key];
+      } else {
+        node.removeAttribute("href");
+      }
     });
 
     document.querySelectorAll("[data-time-range]").forEach((node) => {

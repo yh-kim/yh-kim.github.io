@@ -30,6 +30,11 @@
     html {
       min-height: 100%;
       background: #17191f;
+      --html-doc-top-bg: rgba(255, 248, 237, .9);
+      --html-doc-top-color: #252330;
+      --html-doc-top-border: 1px solid rgba(255, 248, 237, .45);
+      --html-doc-top-shadow: 0 14px 34px rgba(0, 0, 0, .32);
+      --html-doc-top-focus: rgba(255, 248, 237, .38);
     }
 
     body {
@@ -281,6 +286,7 @@
         .forEach((card) => list.append(card));
     });
   </script>
+  <script src="/js/html-document-scroll.js"></script>
 </body>
 
 </html>

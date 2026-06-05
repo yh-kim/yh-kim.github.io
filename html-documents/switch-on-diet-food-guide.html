@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>스위치온 다이어트 음식 선택 가이드</title>
+  <meta name="description" content="스위치온 다이어트 단계별 식품 확장, 음식 판단 기준, 외식 선택법을 한눈에 보는 가이드">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="스위치온 다이어트 음식 선택 가이드">
+  <meta property="og:description" content="스위치온 다이어트 단계별 식품 확장, 음식 판단 기준, 외식 선택법을 한눈에 보는 가이드">
+  <meta property="og:url" content="https://blog.pickth.com/html-documents/switch-on-diet-food-guide.html">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Pimi's Blog space icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="스위치온 다이어트 음식 선택 가이드">
+  <meta name="twitter:description" content="스위치온 다이어트 단계별 식품 확장, 음식 판단 기준, 외식 선택법을 한눈에 보는 가이드">
+  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+  <style>
+    :root {
+      --bg: #f4f8f5;
+      --paper: #fffefa;
+      --paper-cool: #f8fbfd;
+      --ink: #223028;
+      --muted: #65736b;
+      --soft: #edf3ee;
+      --line: #d9e2dc;
+      --sage: #3f8f67;
+      --sage-soft: #e5f3ea;
+      --sky: #5b8db8;
+      --sky-soft: #e8f2f8;
+      --sun: #d7a64d;
+      --sun-soft: #fff1cf;
+      --berry: #8a6aa7;
+      --berry-soft: #f0eaf7;
+      --coral: #d8745f;
+      --coral-soft: #fde9e3;
+      --radius: 8px;
+      --shadow: 0 18px 48px rgba(73, 90, 80, .12);
+      --html-doc-top-bg: rgba(255, 254, 250, .92);
+      --html-doc-top-color: #2f7658;
+      --html-doc-top-border: 1px solid rgba(63, 143, 103, .28);
+      --html-doc-top-shadow: 0 14px 34px rgba(63, 143, 103, .2);
+      --html-doc-top-focus: rgba(63, 143, 103, .35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+      line-height: 1.62;
+      background:
+        linear-gradient(180deg, #fbfdfb 0%, var(--bg) 52%, #f8fbfd 100%);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1160px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+      gap: 26px;
+      align-items: stretch;
+      min-height: calc(100vh - 72px);
+      padding: 28px 0 34px;
+    }
+
+    .hero-copy {
+      display: grid;
+      align-content: center;
+      min-width: 0;
+      padding: clamp(26px, 4.5vw, 54px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(255, 254, 250, .98), rgba(245, 251, 247, .96));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      padding: 7px 11px;
+      border: 1px solid #c9dfd0;
+      border-radius: 999px;
+      background: var(--sage-soft);
+      color: #2d7351;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(40px, 6vw, 76px);
+      line-height: 1.02;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .lead {
+      max-width: 700px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: clamp(16px, 1.7vw, 19px);
+      line-height: 1.78;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 11px 15px;
+      border: 0;
+      border-radius: var(--radius);
+      appearance: none;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 900;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .button.primary {
+      background: var(--sage);
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(63, 143, 103, .22);
+    }
+
+    .button.secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #375046;
+    }
+
+    .hero-card {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 18px;
+      min-width: 0;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .meal-order {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border: 1px solid #dfe8e2;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #fbfffc, #f1f8f3);
+    }
+
+    .meal-order h2 {
+      margin: 0;
+      color: #2f6048;
+      font-size: 19px;
+      line-height: 1.28;
+      letter-spacing: 0;
+    }
+
+    .order-step {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .72);
+    }
+
+    .order-step b {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--sage-soft);
+      color: #2f7658;
+      font-size: 13px;
+    }
+
+    .order-step strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .order-step span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper-cool);
+    }
+
+    .metric b {
+      display: block;
+      color: var(--sage);
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .soft-note {
+      padding: 16px;
+      border: 1px solid #dce6df;
+      border-radius: var(--radius);
+      background: #f7fbf8;
+      color: #51655b;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-top: 1px solid rgba(63, 143, 103, .12);
+      border-bottom: 1px solid rgba(63, 143, 103, .18);
+      background: rgba(244, 248, 245, .88);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-inner {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      overflow: visible;
+      padding: 10px 0;
+      scrollbar-width: none;
+    }
+
+    .nav-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav button {
+      flex: 0 0 auto;
+      padding: 9px 12px;
+      border: 0;
+      border-radius: 999px;
+      appearance: none;
+      background: transparent;
+      color: #3e5a4b;
+      font-size: 13px;
+      font-weight: 900;
+      font-family: inherit;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .nav button:hover {
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(80, 100, 90, .1);
+    }
+
+    main {
+      padding: 28px 0 74px;
+    }
+
+    .section {
+      margin-top: 24px;
+      padding: clamp(22px, 3.6vw, 36px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 254, 250, .9);
+      box-shadow: 0 14px 38px rgba(73, 90, 80, .08);
+    }
+
+    .section.alt {
+      background: rgba(248, 251, 253, .9);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, .85fr) minmax(260px, .52fr);
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(26px, 3.4vw, 40px);
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.72;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .principle,
+    .phase,
+    .decision,
+    .example,
+    .outside li {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .principle {
+      padding: 18px;
+      min-height: 178px;
+    }
+
+    .principle .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 14px;
+      border-radius: var(--radius);
+      background: var(--sage-soft);
+      color: #2f7658;
+      font-weight: 950;
+    }
+
+    .principle strong,
+    .phase h3,
+    .decision h3,
+    .example h3 {
+      display: block;
+      margin: 0 0 8px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .principle p,
+    .phase p,
+    .decision p,
+    .example p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.68;
+    }
+
+    .avoid-band {
+      display: grid;
+      grid-template-columns: minmax(220px, .55fr) 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .avoid-copy {
+      padding: 18px;
+      border-radius: var(--radius);
+      background: var(--coral-soft);
+      color: #7c4339;
+    }
+
+    .avoid-copy strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .avoid-copy p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: center;
+      padding: 18px;
+      border: 1px solid #ead9cf;
+      border-radius: var(--radius);
+      background: #fffaf7;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 11px;
+      border: 1px solid #ebc8bd;
+      border-radius: 999px;
+      background: #fff;
+      color: #8b4d41;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .reset {
+      background: var(--sage-soft);
+      border-color: #c5decf;
+    }
+
+    .week1 {
+      background: var(--sky-soft);
+      border-color: #c8ddea;
+    }
+
+    .week2 {
+      background: var(--sun-soft);
+      border-color: #ecd39b;
+    }
+
+    .week3 {
+      background: var(--berry-soft);
+      border-color: #d9cde5;
+    }
+
+    .week4 {
+      background: #eef2ef;
+      border-color: #d7dfda;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .phase {
+      min-height: 0;
+    }
+
+    .phase-top {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .phase-top span {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .phase-top.sage {
+      background: var(--sage-soft);
+    }
+
+    .phase-top.sky {
+      background: var(--sky-soft);
+    }
+
+    .phase-top.sun {
+      background: var(--sun-soft);
+    }
+
+    .phase-top.berry {
+      background: var(--berry-soft);
+    }
+
+    .phase-body {
+      padding: 16px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #34483e;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .decision-grid,
+    .examples {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .decision {
+      padding: 18px;
+      min-height: 150px;
+    }
+
+    .decision.good {
+      background: var(--sage-soft);
+    }
+
+    .decision.care {
+      background: var(--sun-soft);
+    }
+
+    .decision.pause {
+      background: var(--coral-soft);
+    }
+
+    .table-wrap {
+      overflow: visible;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      background: #eef4ef;
+      color: #31443a;
+      font-size: 13px;
+    }
+
+    .decision-table th:nth-child(1),
+    .decision-table td:nth-child(1) {
+      width: 26%;
+    }
+
+    .decision-table th:nth-child(2),
+    .decision-table td:nth-child(2) {
+      width: 38%;
+    }
+
+    .decision-table th:nth-child(3),
+    .decision-table td:nth-child(3) {
+      width: 36%;
+    }
+
+    .shake-table th:nth-child(1),
+    .shake-table td:nth-child(1) {
+      width: 16%;
+    }
+
+    .shake-table th:nth-child(2),
+    .shake-table td:nth-child(2) {
+      width: 34%;
+    }
+
+    .shake-table th:nth-child(3),
+    .shake-table td:nth-child(3) {
+      width: 50%;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .shake {
+      display: grid;
+      grid-template-columns: minmax(240px, .55fr) 1fr;
+      gap: 14px;
+    }
+
+    .shake-note {
+      padding: 20px;
+      border: 1px solid #cddfd4;
+      border-radius: var(--radius);
+      background: #f2faf5;
+      color: #315846;
+    }
+
+    .shake-note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .shake-note p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.68;
+    }
+
+    .examples {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .example {
+      min-height: 170px;
+      padding: 18px;
+      border-left-width: 5px;
+    }
+
+    .example.good {
+      border-left-color: var(--sage);
+    }
+
+    .example.care {
+      border-left-color: var(--sun);
+    }
+
+    .example.limit {
+      border-left-color: var(--sky);
+    }
+
+    .example.pause {
+      border-left-color: var(--coral);
+    }
+
+    .outside {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .outside li {
+      padding: 15px;
+      background: #fff;
+      color: #34483f;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+
+    .finish {
+      margin-top: 24px;
+      padding: 30px;
+      border: 1px solid #cbded1;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, #eef8f1, #fff9ee);
+      text-align: center;
+      box-shadow: 0 18px 48px rgba(73, 90, 80, .1);
+    }
+
+    .finish p {
+      margin: 0;
+      color: #2f6048;
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 950;
+      line-height: 1.28;
+    }
+
+    .finish span {
+      display: block;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 16px, 1160px);
+      }
+
+      .hero {
+        gap: 10px;
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding: 8px 0 14px;
+      }
+
+      h1 {
+        max-width: 100%;
+        font-size: 28px;
+        line-height: 1.08;
+        overflow-wrap: anywhere;
+        word-break: keep-all;
+      }
+
+      .hero-copy {
+        padding: 18px;
+      }
+
+      .eyebrow {
+        margin-bottom: 10px;
+        padding: 5px 9px;
+        font-size: 10px;
+      }
+
+      .lead {
+        margin-top: 12px;
+        font-size: 13px;
+        line-height: 1.58;
+        overflow-wrap: anywhere;
+      }
+
+      .hero-actions {
+        gap: 7px;
+        margin-top: 14px;
+      }
+
+      .button {
+        min-height: 36px;
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .hero-card {
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .meal-order {
+        gap: 7px;
+        padding: 10px;
+      }
+
+      .meal-order h2 {
+        font-size: 15px;
+      }
+
+      .order-step {
+        grid-template-columns: 26px minmax(0, 1fr);
+        gap: 8px;
+        padding: 8px;
+      }
+
+      .order-step b {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+      }
+
+      .order-step strong {
+        margin-bottom: 1px;
+        font-size: 13px;
+      }
+
+      .order-step span {
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      .hero-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .metric {
+        padding: 10px;
+      }
+
+      .metric b {
+        font-size: 19px;
+      }
+
+      .metric span {
+        margin-top: 4px;
+        font-size: 10px;
+      }
+
+      .soft-note {
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .nav {
+        position: static;
+      }
+
+      .nav-inner {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 5px;
+        overflow: visible;
+        padding: 8px 0;
+      }
+
+      .nav button {
+        min-width: 0;
+        padding: 7px 4px;
+        background: rgba(255, 255, 255, .62);
+        font-size: 11px;
+        text-align: center;
+      }
+
+      main {
+        padding: 10px 0 40px;
+      }
+
+      .section-head,
+      .principles,
+      .avoid-band,
+      .phase-grid,
+      .decision-grid,
+      .shake,
+      .examples {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        margin-top: 10px;
+        padding: 14px;
+      }
+
+      .section-head {
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .section-head h2 {
+        font-size: 22px;
+        line-height: 1.18;
+      }
+
+      .section-head p {
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .principles,
+      .phase-grid,
+      .decision-grid,
+      .examples,
+      .outside {
+        gap: 7px;
+      }
+
+      .principle,
+      .decision,
+      .example {
+        min-height: 0;
+        padding: 9px 10px;
+        overflow: visible;
+      }
+
+      .principle .num {
+        float: left;
+        width: 26px;
+        height: 26px;
+        margin: 0 8px 4px 0;
+        font-size: 12px;
+      }
+
+      .principle strong,
+      .phase h3,
+      .decision h3,
+      .example h3 {
+        margin-bottom: 4px;
+        font-size: 15px;
+        line-height: 1.24;
+      }
+
+      .principle p,
+      .phase p,
+      .decision p,
+      .example p {
+        font-size: 11.5px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+      }
+
+      .principle p {
+        clear: both;
+        margin-top: 2px;
+      }
+
+      .avoid-band,
+      .shake {
+        gap: 7px;
+      }
+
+      .avoid-copy,
+      .badges,
+      .shake-note {
+        padding: 12px;
+      }
+
+      .avoid-copy strong,
+      .shake-note strong {
+        margin-bottom: 4px;
+        font-size: 15px;
+      }
+
+      .avoid-copy p,
+      .shake-note p {
+        font-size: 12px;
+        line-height: 1.48;
+      }
+
+      .badges,
+      .chips {
+        gap: 5px;
+      }
+
+      .badge,
+      .chip {
+        min-height: 0;
+        padding: 5px 7px;
+        font-size: 11px;
+        line-height: 1.25;
+        white-space: normal;
+      }
+
+      .phase {
+        min-height: 0;
+        overflow: visible;
+      }
+
+      .phase-top,
+      .phase-body {
+        padding: 12px;
+      }
+
+      .phase-top span {
+        margin-bottom: 3px;
+        font-size: 10px;
+      }
+
+      .phase-body .chips {
+        margin-top: 10px;
+      }
+
+      .table-wrap {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+      }
+
+      table,
+      thead,
+      tbody,
+      tr,
+      th,
+      td {
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+
+      thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+
+      tr {
+        margin-top: 7px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        overflow: hidden;
+      }
+
+      td {
+        display: block;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--line);
+        font-size: 11.5px;
+        line-height: 1.42;
+        overflow-wrap: anywhere;
+      }
+
+      td:last-child {
+        border-bottom: 0;
+      }
+
+      td:before {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        margin: 0 5px 0 0;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: var(--sage-soft);
+        color: #5c6e63;
+        font-size: 9.5px;
+        font-weight: 900;
+        line-height: 1.2;
+        vertical-align: 1px;
+      }
+
+      .decision-table tr,
+      .shake-table tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .decision-table td:nth-child(1),
+      .decision-table td:nth-child(2),
+      .decision-table td:nth-child(3),
+      .shake-table td:nth-child(1),
+      .shake-table td:nth-child(2),
+      .shake-table td:nth-child(3) {
+        width: auto;
+      }
+
+      .decision-table td:nth-child(1),
+      .shake-table td:nth-child(3) {
+        grid-column: 1 / -1;
+      }
+
+      .decision-table td:nth-child(1) {
+        background: #f8fbf8;
+        color: #1f3028;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .decision-table td:nth-child(2),
+      .shake-table td:nth-child(1) {
+        border-right: 1px solid var(--line);
+      }
+
+      .decision-table td:nth-child(2),
+      .decision-table td:nth-child(3),
+      .shake-table td:nth-child(1),
+      .shake-table td:nth-child(2) {
+        border-bottom: 0;
+      }
+
+      .decision-table td:nth-child(2):before,
+      .decision-table td:nth-child(3):before,
+      .shake-table td:nth-child(1):before,
+      .shake-table td:nth-child(2):before {
+        display: block;
+        margin: 0 0 3px;
+      }
+
+      .shake-table td:nth-child(3) {
+        border-top: 1px solid var(--line);
+      }
+
+      .decision-table td:nth-child(1):before {
+        content: "질문";
+      }
+
+      .decision-table td:nth-child(2):before {
+        content: "확인";
+      }
+
+      .decision-table td:nth-child(3):before {
+        content: "예시";
+      }
+
+      .shake-table td:nth-child(1):before {
+        content: "시기";
+      }
+
+      .shake-table td:nth-child(2):before {
+        content: "흐름";
+      }
+
+      .shake-table td:nth-child(3):before {
+        content: "이유";
+      }
+
+      .outside {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .outside li {
+        padding: 10px;
+        font-size: 11px;
+        line-height: 1.42;
+      }
+
+      .finish {
+        margin-top: 10px;
+        padding: 18px 14px;
+      }
+
+      .finish p {
+        font-size: 22px;
+      }
+
+      .finish span {
+        margin-top: 8px;
+        font-size: 12px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .nav,
+      .hero-actions {
+        display: none;
+      }
+
+      .hero-copy,
+      .hero-card,
+      .section,
+      .finish {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="page hero">
+    <section class="hero-copy">
+      <p class="eyebrow">Diet decision board</p>
+      <h1>오늘 먹을 수 있는 걸 빠르게 고르는 가이드</h1>
+      <p class="lead">스위치온 다이어트는 완벽한 금지표보다 흐름이 중요합니다. 혈당을 흔드는 요소를 줄이고, 단백질을 먼저 채우고, 몸이 적응할수록 식품을 넓혀갑니다.</p>
+      <div class="hero-actions">
+        <button class="button primary" type="button" data-scroll-target="foods">주차별 먹을 수 있는 것</button>
+        <button class="button secondary" type="button" data-scroll-target="decision">판단기준</button>
+      </div>
+    </section>
+
+    <aside class="hero-card" aria-label="식단 선택 요약">
+      <div class="meal-order" aria-label="식사 선택 순서">
+        <h2>한 끼를 고르는 순서</h2>
+        <div class="order-step"><b>1</b><span><strong>단백질 먼저</strong><span>고기, 생선, 두부, 계란처럼 포만감을 만드는 재료를 고릅니다.</span></span></div>
+        <div class="order-step"><b>2</b><span><strong>채소 충분히</strong><span>소화 부담을 낮추고 식사량을 자연스럽게 조절합니다.</span></span></div>
+        <div class="order-step"><b>3</b><span><strong>탄수화물 소량</strong><span>단계에 맞춰 밥, 고구마, 단호박을 마지막에 더합니다.</span></span></div>
+      </div>
+      <div class="hero-metrics">
+        <div class="metric"><b>1-3일</b><span>단순한 식사로 적응</span></div>
+        <div class="metric"><b>4주</b><span>식품을 단계별 확장</span></div>
+        <div class="metric"><b>3단계</b><span>가능, 조건부, 보류</span></div>
+        <div class="metric"><b>원재료</b><span>외식 선택의 기준</span></div>
+      </div>
+      <p class="soft-note">한 끼의 예외보다 중요한 것은 다음 끼니에서 다시 흐름을 회복하는 것입니다.</p>
+    </aside>
+  </header>
+
+  <nav class="nav" aria-label="문서 바로가기">
+    <div class="page nav-inner">
+      <button type="button" data-scroll-target="flow">큰 흐름</button>
+      <button type="button" data-scroll-target="foods">식품 확장</button>
+      <button type="button" data-scroll-target="decision">판단 기준</button>
+      <button type="button" data-scroll-target="shake">쉐이크</button>
+      <button type="button" data-scroll-target="practice">실전 예시</button>
+      <button type="button" data-scroll-target="outside">외식</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <section class="section" id="flow">
+      <div class="section-head">
+        <h2>큰 흐름은 세 가지입니다</h2>
+        <p>칼로리만 줄이는 방식보다, 몸이 지방을 에너지원으로 쓰기 쉬운 상태로 전환하도록 돕는 식단 흐름에 가깝습니다.</p>
+      </div>
+      <div class="principles">
+        <article class="principle"><span class="num">1</span><strong>혈당을 안정시키기</strong><p>당류, 밀가루, 달콤한 소스처럼 혈당을 빠르게 올리는 요소를 줄입니다.</p></article>
+        <article class="principle"><span class="num">2</span><strong>소화 부담 줄이기</strong><p>초기에는 단순한 재료 위주로 먹어 몸이 편하게 적응하도록 돕습니다.</p></article>
+        <article class="principle"><span class="num">3</span><strong>식품을 천천히 넓히기</strong><p>단백질, 지방, 탄수화물을 단계별로 늘려 지속 가능성을 높입니다.</p></article>
+      </div>
+      <div class="avoid-band">
+        <div class="avoid-copy"><strong>자주 반복되면 흐름을 흔드는 것들</strong><p>한 번 먹으면 실패가 아니라, 아래 요소가 반복될수록 대사 전환과 식욕 조절이 어려워질 수 있다는 뜻입니다.</p></div>
+        <div class="badges">
+          <span class="badge">커피</span>
+          <span class="badge">유제품</span>
+          <span class="badge">술</span>
+          <span class="badge">당류</span>
+          <span class="badge">밀가루</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="foods">
+      <div class="section-head">
+        <h2>단계별로 넓어지는 식품</h2>
+        <p>처음에는 단순하게 시작하고, 이후에는 포만감과 지속 가능성을 높이는 방향으로 선택지를 넓힙니다.</p>
+      </div>
+      <div class="phase-grid">
+        <article class="phase">
+          <div class="phase-top sage"><span>1-3일차</span><h3>적응과 리셋</h3></div>
+          <div class="phase-body"><p>소화 부담을 낮추고 혈당 변동을 줄이는 구간입니다.</p><div class="chips"><span class="chip">양배추</span><span class="chip">당근</span><span class="chip">두부</span><span class="chip">연두부</span><span class="chip">마늘</span><span class="chip">무</span><span class="chip">양파</span><span class="chip">오이</span><span class="chip">무가당 플레인요거트</span><span class="chip">브로콜리</span></div></div>
+        </article>
+        <article class="phase">
+          <div class="phase-top sky"><span>1주차</span><h3>단백질과 좋은 지방</h3></div>
+          <div class="phase-body"><p>자연식 단백질이 들어오면서 포만감을 만들기 쉬워집니다.</p><div class="chips"><span class="chip">계란</span><span class="chip">닭고기</span><span class="chip">생선</span><span class="chip">생선회</span><span class="chip">해산물</span><span class="chip">수육</span><span class="chip">버섯</span><span class="chip">아보카도</span><span class="chip">올리브오일</span><span class="chip">들기름</span><span class="chip">코코넛오일</span><span class="chip">잡곡밥</span><span class="chip">현미밥</span><span class="chip">간장</span><span class="chip">식초</span><span class="chip">녹차</span><span class="chip">허브티</span></div></div>
+        </article>
+        <article class="phase">
+          <div class="phase-top sun"><span>2주차</span><h3>에너지원 조절</h3></div>
+          <div class="phase-body"><p>견과류와 흰쌀밥이 추가됩니다. 밥은 단백질과 채소 뒤에 소량 곁들입니다.</p><div class="chips"><span class="chip">견과류</span><span class="chip">흰쌀밥</span></div></div>
+        </article>
+        <article class="phase">
+          <div class="phase-top berry"><span>3주차 이후</span><h3>실생활에 맞게 확장</h3></div>
+          <div class="phase-body"><p>선택지가 넓어지고, 외식도 원재료 중심으로 고르면 부담이 줄어듭니다.</p><div class="chips"><span class="chip">고구마</span><span class="chip">단호박</span><span class="chip">바나나</span><span class="chip">토마토</span><span class="chip">저지방 소고기</span><span class="chip">밤</span></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section alt" id="decision">
+      <div class="section-head">
+        <h2>허용 목록보다 쉬운 판단 기준</h2>
+        <p>설탕, 밀가루, 술은 절대 안 되는 기준으로 두고, 나머지는 원재료와 조리 방식, 소스 여부를 보고 판단합니다.</p>
+      </div>
+      <div class="decision-grid">
+        <article class="decision good"><h3>편하게 가능</h3><p>고기, 생선, 계란, 두부, 채소처럼 원재료가 분명하고 설탕, 밀가루, 술이 들어가지 않은 음식입니다.</p></article>
+        <article class="decision care"><h3>조건부 가능</h3><p>재료는 괜찮아도 소스, 양념, 국물, 가공 정도가 변수입니다. 소스는 빼고 국물은 적게 먹는 식으로 조절합니다.</p></article>
+        <article class="decision pause"><h3>절대 피하기</h3><p>설탕, 밀가루, 술이 들어간 음식은 제외합니다. 달콤한 양념, 빵, 면, 튀김옷, 주류는 보류가 아니라 금지 기준입니다.</p></article>
+      </div>
+      <div class="table-wrap decision-table">
+        <table>
+          <thead><tr><th>질문</th><th>확인할 것</th><th>예시</th></tr></thead>
+          <tbody>
+            <tr><td>설탕, 밀가루, 술이 들어갔나?</td><td>들어갔다면 선택하지 않습니다. 시럽, 빵가루, 면, 튀김옷, 주류도 같은 기준으로 봅니다.</td><td>케이크, 빵, 파스타, 라면, 튀김, 맥주, 와인</td></tr>
+            <tr><td>소스와 양념을 뺄 수 있나?</td><td>달콤한 소스, 고추장 양념, 데리야키, 과한 드레싱은 피하고 간장, 식초, 소금 정도로 줄입니다.</td><td>소스 뺀 샤브샤브, 양념 없는 회, 드레싱 따로 받는 샐러드</td></tr>
+            <tr><td>원재료 중심으로 먹을 수 있나?</td><td>단백질과 채소가 중심이면 가능성이 높습니다. 밥과 탄수화물은 허용 주차 이후 소량만 더합니다.</td><td>수육, 스테이크, 생선구이, 카이센동 밥 적게</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="shake">
+      <div class="section-head">
+        <h2>단백질 쉐이크는 줄여가는 도구</h2>
+        <p>초기에는 단백질 부족을 메우고, 시간이 지날수록 자연식 단백질 비중을 늘립니다.</p>
+      </div>
+      <div class="shake">
+        <div class="shake-note"><strong>탈 때는 물이 가장 무난합니다</strong><p>일반 우유인지 저지방 우유인지 모를 때는 물이나 무가당 두유가 더 안전한 선택입니다.</p></div>
+        <div class="table-wrap shake-table">
+          <table>
+            <thead><tr><th>시기</th><th>권장 흐름</th><th>이유</th></tr></thead>
+            <tbody>
+              <tr><td>1-3일차</td><td>단백질 20g 정도, 하루 4회</td><td>음식 제한이 강한 구간이라 근손실과 허기를 줄이는 데 도움</td></tr>
+              <tr><td>1주차</td><td>단백질 20g 정도, 하루 3회</td><td>계란, 닭고기, 생선 등 자연식 단백질이 들어오기 시작</td></tr>
+              <tr><td>2주차 이후</td><td>단백질 20g 정도, 하루 2회</td><td>식품 선택지가 넓어져 쉐이크 의존도를 낮출 수 있음</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="practice">
+      <div class="section-head">
+        <h2>실전 음식 예시</h2>
+        <p>음식 자체보다 조리 방식, 소스, 양, 시기가 판단의 핵심입니다.</p>
+      </div>
+      <div class="examples">
+        <article class="example good"><h3>가능 쪽에 가까움</h3><p>수육, 가브리살 수육, 샤브샤브. 고기와 채소 중심이라 좋고, 쌈장과 달콤한 소스는 줄이면 더 안정적입니다.</p></article>
+        <article class="example care"><h3>조건부</h3><p>카이센동, 스테이크, 굽네 오리지널. 재료 자체는 괜찮아도 소스, 버터, 양념이 관건입니다.</p></article>
+        <article class="example limit"><h3>양 조절</h3><p>땅콩버터, 견과류, 귀리. 좋은 지방과 식이섬유가 있지만 칼로리가 높아 양을 작게 잡습니다.</p></article>
+        <article class="example pause"><h3>잠시 미루기</h3><p>딸기 타르트, 순대, 달콤한 양념류. 밀가루, 당류, 전분, 가공 양념 비중이 높습니다.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="outside">
+      <div class="section-head">
+        <h2>외식할 때는 이렇게</h2>
+        <p>완벽한 식사보다 회복 가능한 식사를 목표로 잡으면 지속하기 쉽습니다.</p>
+      </div>
+      <ul class="outside">
+        <li>고기, 생선, 두부, 계란 같은 단백질 먼저 고르기</li>
+        <li>채소를 충분히 곁들이기</li>
+        <li>소스는 따로 받고 필요한 만큼만 찍기</li>
+        <li>국물은 맛보는 정도로 줄이기</li>
+        <li>밥과 탄수화물은 단계에 맞춰 소량 조절하기</li>
+      </ul>
+    </section>
+
+    <section class="finish" aria-label="마무리 문장">
+      <p>오늘은 원재료를 더 많이,<br>소스와 국물은 조금 덜.</p>
+      <span>한 끼의 예외보다 다음 끼의 회복 흐름이 더 중요합니다.</span>
+    </section>
+  </main>
+  <script src="/js/html-document-scroll.js"></script>
+</body>
+
+</html>
