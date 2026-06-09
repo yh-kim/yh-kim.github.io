@@ -6,7 +6,7 @@
 
     if (!hasReservationTime) {
       document.querySelectorAll(".intro-reservation").forEach((node) => {
-        node.hidden = true;
+        node.remove();
       });
     }
 

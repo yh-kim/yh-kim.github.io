@@ -263,7 +263,8 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - `reservedTime`: `HH:MM`.
    - The visible time range is calculated by JS from `reservedTime + playMinutes`; do not hardcode the end time in card data.
    - If the schedule is not decided, use `reservedDate: "일정 미정"` and omit `reservedYear` and `reservedTime`.
-   - Undated card detail pages hide the whole reservation-time section; do not show a placeholder calendar, time range, or `일정 미정` reservation box.
+   - Undated card detail pages must not include the reservation-time section in the static HTML. Do not leave an empty `.intro-reservation` block that depends on JavaScript hiding.
+   - The shared card script also removes `.intro-reservation` when `reservedTime` is missing, but this is a fallback. The HTML itself should already avoid showing a placeholder calendar, time range, or `일정 미정` reservation box.
    - Undated cards must appear before dated cards in the list. Dated cards keep the existing reservation-date descending order.
 4. Prefer a direct Naver Map place URL for `mapUrl`, based on the verified Naver store/branch place ID. The area badge should remain clickable.
    - Always verify the map target while creating a card. A numeric ID from a third-party directory is not automatically a Naver place ID.
