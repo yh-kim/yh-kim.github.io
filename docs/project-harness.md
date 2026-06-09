@@ -262,6 +262,9 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - `reservedDate`: Korean display text such as `6월 3일 수요일`.
    - `reservedTime`: `HH:MM`.
    - The visible time range is calculated by JS from `reservedTime + playMinutes`; do not hardcode the end time in card data.
+   - If the schedule is not decided, use `reservedDate: "일정 미정"` and omit `reservedYear` and `reservedTime`.
+   - Undated card detail pages hide the whole reservation-time section; do not show a placeholder calendar, time range, or `일정 미정` reservation box.
+   - Undated cards must appear before dated cards in the list. Dated cards keep the existing reservation-date descending order.
 4. Prefer a direct Naver Map place URL for `mapUrl`, based on the verified Naver store/branch place ID. The area badge should remain clickable.
    - Always verify the map target while creating a card. A numeric ID from a third-party directory is not automatically a Naver place ID.
    - If a direct Naver place URL cannot be verified, use an exact Naver Map search URL as a fallback rather than a guessed place entry URL.
@@ -501,10 +504,20 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
    };
    ```
 
+   For an undated card, use:
+
+   ```js
+   reservedDate: "일정 미정"
+   ```
+
+   and omit `reservedYear` and `reservedTime`. The card script hides the whole reservation-time section for undated cards.
+
 5. Update the list page `html-documents/escape-room-invite.html`.
    - Add one list item linking to `./escape-room-invite-card/N.html`.
    - Use the matching poster `./escape-room-invite-card/assets/poster-N.ext`.
    - Keep the list page as the only registered HTML document in `_data/html_documents.yml`.
+   - For an undated card, set `data-reserved-date=""` and omit date/time badges from the list card. Keep only always-valid summary badges such as area.
+   - The list sort policy is: undated cards first, then dated cards by `data-reserved-date` descending.
 
 6. Do not run `ruby scripts/add-html-document.rb` only to register individual card files.
    - The sync script scans only `html-documents/*.html`.

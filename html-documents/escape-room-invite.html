@@ -208,7 +208,22 @@
       </header>
 
       <section class="card-list" aria-label="방탈출 카드 목록">
-        <a class="escape-card-link" href="./escape-room-invite-card/5.html" data-reserved-date="2026-06-15">
+        <a class="escape-card-link" href="./escape-room-invite-card/6.html" data-reserved-date="">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-6.jpg" alt="사요나라, 세이코! 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>사요나라, 세이코!</h2>
+              <p class="store">채널27 버터플라이점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/5.html" data-reserved-date="">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-5.jpg" alt="퀘스천마크 포스터">
           </span>
@@ -219,8 +234,23 @@
             </span>
             <span class="badges" aria-label="요약 정보">
               <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/7.html" data-reserved-date="2026-06-15">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-7.jpg" alt="학교 : 그 날의 이야기 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>학교 : 그 날의 이야기</h2>
+              <p class="store">라이브시네마</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
               <span class="badge">6월 15일 월요일</span>
-              <span class="badge time">20:20 - 21:35</span>
+              <span class="badge time">19:25 - 21:05</span>
             </span>
           </span>
         </a>
@@ -299,7 +329,15 @@
     document.querySelectorAll(".card-list").forEach((list) => {
       const cards = Array.from(list.querySelectorAll("[data-reserved-date]"));
       cards
-        .sort((a, b) => b.dataset.reservedDate.localeCompare(a.dataset.reservedDate))
+        .sort((a, b) => {
+          const aDate = a.dataset.reservedDate;
+          const bDate = b.dataset.reservedDate;
+
+          if (!aDate && !bDate) return 0;
+          if (!aDate) return -1;
+          if (!bDate) return 1;
+          return bDate.localeCompare(aDate);
+        })
         .forEach((card) => list.append(card));
     });
   </script>

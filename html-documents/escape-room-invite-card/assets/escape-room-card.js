@@ -2,6 +2,14 @@
     const inviteData = window.escapeRoomInviteData;
     if (!inviteData) return;
 
+    const hasReservationTime = Boolean(inviteData.reservedDate && inviteData.reservedTime);
+
+    if (!hasReservationTime) {
+      document.querySelectorAll(".intro-reservation").forEach((node) => {
+        node.hidden = true;
+      });
+    }
+
     document.title = inviteData.label;
     document.documentElement.style.setProperty("--poster-url", `url("${inviteData.posterUrl}")`);
     if (inviteData.posterAspectRatio) {
@@ -29,6 +37,12 @@
     });
 
     document.querySelectorAll("[data-time-range]").forEach((node) => {
+      if (!hasReservationTime) {
+        node.hidden = true;
+        node.textContent = "";
+        return;
+      }
+
       const [hour, minute] = inviteData.reservedTime.split(":").map(Number);
       const start = hour * 60 + minute;
       const end = start + inviteData.playMinutes;
@@ -172,6 +186,10 @@
         eventDate,
         weekStartsOn: 0
       });
+    } else {
+      document.querySelectorAll("[data-week-calendar]").forEach((node) => {
+        node.hidden = true;
+      });
     }
 
     const showToast = (message) => {
@@ -199,15 +217,20 @@
     const invitationText = () => {
       const time = document.querySelector("[data-time-range]")?.textContent || "";
       const url = window.location.href;
-      return [
+      const lines = [
         `🎆 테마: ${inviteData.title}`,
         `📍 매장: ${inviteData.store} (${inviteData.area})`,
-        `🗓️ 예약: ${inviteData.reservedDate} ${time}`,
         `🎭 정보: ${inviteData.genre} · ${inviteData.playMinutes}분 · ${inviteData.price}`,
         `🧩 난이도: ${inviteData.difficulty} / 공포도: ${inviteData.fear} / 활동성: ${inviteData.activity}`,
         "",
         url
-      ].join("\n");
+      ];
+
+      if (hasReservationTime) {
+        lines.splice(2, 0, `🗓️ 예약: ${inviteData.reservedDate} ${time}`);
+      }
+
+      return lines.join("\n");
     };
 
     const copyText = async (text) => {
