@@ -254,7 +254,7 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - Difficulty.
    - Fear level.
    - Activity level.
-   - Price.
+   - Price. Display per-person prices with `각`, for example `각 33,000원`; display team/package prices with `팀`, for example `팀 180,000원`.
    - Theme description.
    - Poster image.
 3. Reservation date/time usually comes from the user, not from 빠방. Convert it into:
@@ -272,7 +272,7 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - Link-only copy and the URL line inside full-info copy should use the clean card URL by default, but include that card's private token when the detail page itself is opened with the private token.
    - Full-info copy should include the reservation line only when the detail page itself is opened with that card's private token; otherwise omit reservation date/time from copied text.
    - On the list page, the small area immediately to the right of the `방탈출 정보` title should toggle the list private token only on double-click. The area should blend into the header background and not look like a visible control.
-   - On detail cards, double-clicking the price badge should toggle the same card URL between clean and that card's private-token URL.
+   - On detail cards, the small area immediately to the right of the title should toggle the same card URL between clean and that card's private-token URL only on double-click. The area should blend into the header background and not look like a visible control.
    - Private-token double-click toggles should use `window.location.replace(...)`, not `assign(...)`, so toggling reservation visibility does not add a browser history entry.
    - OG/Twitter meta descriptions should not include reservation date/time because previews cannot reliably respect private query tokens.
    - List cards should still show reservation-state background colors regardless of private-token state: undated and past reservation date must share the same muted gray tone, reservation day uses the active day tone, and upcoming reservation date uses the upcoming tone. Detail cards should keep the unified coral/cream card theme.
@@ -281,7 +281,7 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - The shared card script also removes `.intro-reservation` when `reservedTime` is missing, but this is a fallback. The HTML itself should already avoid showing a placeholder calendar, time range, or `일정 미정` reservation box.
    - Undated cards still need every non-reservation theme field filled the same way as dated cards: genre, play time, price, difficulty, fear level, activity level, store, area, poster, map URL, and theme description.
    - Undated card static HTML should still include fallback text for those non-reservation fields, especially the header meta badges, stat pills, poster `src`/`alt`, and theme description. Only the reservation-time section is omitted.
-   - Undated cards must appear before dated cards in the list. Dated cards keep the existing reservation-date descending order.
+   - Undated cards must appear after dated cards in the list. Dated cards keep the existing reservation-date descending order.
 4. Prefer a direct Naver Map place URL for `mapUrl`, based on the verified Naver store/branch place ID. The area badge should remain clickable.
    - Always verify the map target while creating a card. A numeric ID from a third-party directory is not automatically a Naver place ID.
    - If a direct Naver place URL cannot be verified, use an exact Naver Map search URL as a fallback rather than a guessed place entry URL.
@@ -353,7 +353,7 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
    - `store_name` -> store/branch name.
    - `location` -> display area such as `홍대` or `강남`.
    - `playtime` -> `playMinutes`.
-   - `price` -> display price, usually formatted as per-person price.
+   - `price` -> display price. Prefix per-person prices with `각`; prefix team/package prices with `팀`.
    - `description` -> theme introduction text.
    - `poster_loc` -> preferred poster path.
    - `thumb_loc` -> fallback poster path if `poster_loc` is missing or unavailable.
@@ -538,7 +538,7 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
    - Do not reuse another card's token. The list private token and every detail card token must be different from each other.
    - Keep the list page as the only registered HTML document in `_data/html_documents.yml`.
    - For an undated card, set `data-reserved-date=""` and omit date/time badges from the list card. Keep only always-valid summary badges such as area.
-   - The list sort policy is: undated cards first, then dated cards by `data-reserved-date` descending.
+   - The list sort policy is: dated cards by `data-reserved-date` descending first, then undated cards.
 
 6. Do not run `ruby scripts/add-html-document.rb` only to register individual card files.
    - The sync script scans only `html-documents/*.html`.

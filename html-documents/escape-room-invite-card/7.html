@@ -40,7 +40,7 @@
       difficulty: "쉬움 ~ 보통",
       fear: "높음",
       activity: "보통",
-      price: "33,000원",
+      price: "각 33,000원",
       description: "(해당 테마는 전국 졸업률에 포함되지 않습니다.)\n\n배우와 함께 스토리를 만들어가는 롤플레잉 체험 공간\n\n※ [라이브시네마]는 100분 테마로 회차당 고정금액 220,000원으로 이용할 수 있습니다.\n※ 최대 플레이 인원은 5인이며 최소 플레이 인원 3인입니다.",
       posterUrl: "./assets/poster-7.jpg",
       posterAspectRatio: "500 / 707",
@@ -52,7 +52,10 @@
     <div class="invite-shell">
       <article class="invite" aria-label="방탈출 정보">
         <header class="header">
-          <h1 class="header-title" data-field="title"></h1>
+          <div class="header-title-row">
+            <h1 class="header-title" data-field="title"></h1>
+            <button class="reservation-hotspot" type="button" data-reservation-hotspot aria-label="예약 정보 보기"></button>
+          </div>
           <p class="header-store" data-field="store"></p>
           <div class="header-meta" aria-label="테마 요약">
             <span class="meta-badge" data-field="genre"></span>

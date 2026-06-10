@@ -386,6 +386,126 @@
             </span>
           </span>
         </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/9.html" data-reserved-date="">
+          <span class="poster square">
+            <img src="./escape-room-invite-card/assets/poster-9.jpg" alt="피안화 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>피안화</h2>
+              <p class="store">플레이33 홍대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/10.html" data-reserved-date="">
+          <span class="poster square">
+            <img src="./escape-room-invite-card/assets/poster-10.jpg" alt="목격자 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>목격자</h2>
+              <p class="store">플레이33 건대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">건대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/11.html" data-reserved-date="">
+          <span class="poster square">
+            <img src="./escape-room-invite-card/assets/poster-11.png" alt="다이얼 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>다이얼</h2>
+              <p class="store">플레이33 건대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">건대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/12.html" data-reserved-date="">
+          <span class="poster square">
+            <img src="./escape-room-invite-card/assets/poster-12.png" alt="그 날 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>그 날</h2>
+              <p class="store">플레이33 건대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">건대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/13.html" data-reserved-date="">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-13.png" alt="피노키오 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>피노키오</h2>
+              <p class="store">지구별 방탈출 홍대어드벤처점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/14.html" data-reserved-date="">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-14.jpg" alt="가암성당 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>가암성당</h2>
+              <p class="store">클레버타운</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">신촌</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/15.html" data-reserved-date="">
+          <span class="poster square">
+            <img src="./escape-room-invite-card/assets/poster-15.png" alt="괴록 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>괴록</h2>
+              <p class="store">후즈데어</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">강남</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="./escape-room-invite-card/16.html" data-reserved-date="">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-16.png" alt="오시리스 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>오시리스</h2>
+              <p class="store">서울 이스케이프 룸 홍대 2호점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
       </section>
     </div>
   </main>
@@ -400,7 +520,15 @@
       "5.html": "n3t8",
       "6.html": "h7r5",
       "7.html": "d2m9",
-      "8.html": "x5a4"
+      "8.html": "x5a4",
+      "9.html": "r9k4",
+      "10.html": "t3v8",
+      "11.html": "u6p2",
+      "12.html": "w5q9",
+      "13.html": "y2n6",
+      "14.html": "c8j5",
+      "15.html": "g4x7",
+      "16.html": "o9b3"
     };
     const showReservation = new URLSearchParams(window.location.search).get(reservationQueryKey) === listReservationQueryValue;
     const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -461,8 +589,8 @@
           const bDate = b.dataset.reservedDate;
 
           if (!aDate && !bDate) return 0;
-          if (!aDate) return -1;
-          if (!bDate) return 1;
+          if (!aDate) return 1;
+          if (!bDate) return -1;
           return bDate.localeCompare(aDate);
         })
         .forEach((card) => list.append(card));

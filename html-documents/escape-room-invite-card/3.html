@@ -40,7 +40,7 @@
       difficulty: "보통 ~ 어려움",
       fear: "낮음",
       activity: "적음",
-      price: "24,000원",
+      price: "각 24,000원",
       description: "\"지훈아,\n이제 더 이상\n외롭지 않아도 돼.\"\n\nALONE은 하나의 공간에서 모든 이야기를 풀어가는 모노룸 형식의 테마입니다.\n예약 시 참고 바랍니다.",
       posterUrl: "./assets/poster-3.png",
       posterAspectRatio: "601 / 846",
@@ -52,7 +52,10 @@
     <div class="invite-shell">
       <article class="invite" aria-label="방탈출 정보">
         <header class="header">
-          <h1 class="header-title" data-field="title"></h1>
+          <div class="header-title-row">
+            <h1 class="header-title" data-field="title"></h1>
+            <button class="reservation-hotspot" type="button" data-reservation-hotspot aria-label="예약 정보 보기"></button>
+          </div>
           <p class="header-store" data-field="store"></p>
           <div class="header-meta" aria-label="테마 요약">
             <span class="meta-badge" data-field="genre"></span>

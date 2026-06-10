@@ -38,7 +38,15 @@
       "5.html": "n3t8",
       "6.html": "h7r5",
       "7.html": "d2m9",
-      "8.html": "x5a4"
+      "8.html": "x5a4",
+      "9.html": "r9k4",
+      "10.html": "t3v8",
+      "11.html": "u6p2",
+      "12.html": "w5q9",
+      "13.html": "y2n6",
+      "14.html": "c8j5",
+      "15.html": "g4x7",
+      "16.html": "o9b3"
     };
     const currentCardFile = window.location.pathname.split("/").pop();
     const reservationQueryValue = cardReservationTokens[currentCardFile] || "";
@@ -98,7 +106,7 @@
       window.location.replace(url.toString());
     };
 
-    document.querySelectorAll('[data-field="price"]').forEach((node) => {
+    document.querySelectorAll("[data-reservation-hotspot]").forEach((node) => {
       node.addEventListener("dblclick", (event) => {
         event.preventDefault();
         toggleReservationQuery();

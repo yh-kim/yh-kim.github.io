@@ -40,7 +40,7 @@
       difficulty: "쉬움 ~ 보통",
       fear: "거의 없음",
       activity: "보통",
-      price: "33,000원",
+      price: "각 33,000원",
       description: "먼 옛날, 사람들의 마음은 저 밤하늘처럼 어둠으로 가득 차 있었어요.\n그 모습을 안타깝게 여기신 붐붐박사님께선 이렇게 말씀하셨죠.\n\n“붐 붐...”\n폭죽을 터뜨리자!",
       posterUrl: "./assets/poster-1.jpg",
       mapUrl: "https://map.naver.com/p/entry/place/2009700690"
@@ -51,7 +51,10 @@
     <div class="invite-shell">
       <article class="invite" aria-label="방탈출 정보">
         <header class="header">
-          <h1 class="header-title" data-field="title"></h1>
+          <div class="header-title-row">
+            <h1 class="header-title" data-field="title"></h1>
+            <button class="reservation-hotspot" type="button" data-reservation-hotspot aria-label="예약 정보 보기"></button>
+          </div>
           <p class="header-store" data-field="store"></p>
           <div class="header-meta" aria-label="테마 요약">
             <span class="meta-badge" data-field="genre"></span>

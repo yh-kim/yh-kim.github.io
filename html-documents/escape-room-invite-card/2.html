@@ -40,7 +40,7 @@
       difficulty: "보통 ~ 어려움",
       fear: "거의 없음",
       activity: "보통",
-      price: "34,000원",
+      price: "각 34,000원",
       description: "안녕하세요, 어른이 여러분.\n오랜만에 우리 어른이 여러분들을 위해서 새로운 주제를 들고 왔는데, 뭘까~요?\n짜잔! 바로바로 키이스케이프 사에서 야심차게 출시한 시즌 2,\n'머니머니 부. 동. 산!'\n\n울고 싶을 만큼 혹독한 세상에서도 이왕이면 내 건물 안에서 우는 게 나으니까!\n본격 머니머니 장르와 자본주의의 꽃, 부동산의 콜라보.",
       posterUrl: "./assets/poster-2.png",
       posterAspectRatio: "1 / 1",
@@ -52,7 +52,10 @@
     <div class="invite-shell">
       <article class="invite" aria-label="방탈출 정보">
         <header class="header">
-          <h1 class="header-title" data-field="title"></h1>
+          <div class="header-title-row">
+            <h1 class="header-title" data-field="title"></h1>
+            <button class="reservation-hotspot" type="button" data-reservation-hotspot aria-label="예약 정보 보기"></button>
+          </div>
           <p class="header-store" data-field="store"></p>
           <div class="header-meta" aria-label="테마 요약">
             <span class="meta-badge" data-field="genre"></span>

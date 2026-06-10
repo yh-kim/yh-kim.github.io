@@ -132,7 +132,14 @@
       flex-basis: 5px;
     }
 
+    .header-title-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+
     .header-title {
+      min-width: 0;
       margin: 0;
       color: var(--ink);
       font-size: 25px;
@@ -140,6 +147,24 @@
       letter-spacing: 0;
       word-break: keep-all;
       text-wrap: balance;
+    }
+
+    .reservation-hotspot {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 26px;
+      margin-top: 1px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      appearance: none;
+      background: transparent;
+      cursor: default;
+    }
+
+    .reservation-hotspot:focus-visible {
+      outline: 2px solid rgba(230, 107, 88, .35);
+      outline-offset: 2px;
     }
 
     .header-store {
