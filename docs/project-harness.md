@@ -481,11 +481,16 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
 
 ### Adding a New Card
 
-1. Find the next card number by listing existing files:
+1. Find the next card number by listing existing files and using the highest existing number plus one:
 
    ```bash
-   find html-documents/escape-room-invite-card -maxdepth 1 -name '*.html' | sort
+   find html-documents/escape-room-invite-card -maxdepth 1 -name '*.html' \
+     | sed -E 's#.*/([0-9]+)\.html#\1#' \
+     | sort -n \
+     | tail -1
    ```
+
+   If an old card was deleted and a number is missing, do not reuse the gap. Keep card URLs append-only and create the new card at `max + 1`.
 
 2. Copy the latest card file to the next number.
    - Example: copy `1.html` to `2.html`.
