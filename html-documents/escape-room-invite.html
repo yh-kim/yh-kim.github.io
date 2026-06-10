@@ -61,11 +61,32 @@
       color: #fff8ed;
     }
 
+    .hero-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .hero h1 {
       margin: 0;
       font-size: 26px;
       line-height: 1.15;
       letter-spacing: 0;
+    }
+
+    .reservation-hotspot {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      cursor: default;
+    }
+
+    .reservation-hotspot:focus-visible {
+      outline: 2px solid rgba(255, 248, 237, .42);
+      outline-offset: 3px;
     }
 
     .hero p {
@@ -97,6 +118,25 @@
       box-shadow: 0 16px 38px rgba(0, 0, 0, .2);
       text-decoration: none;
       overflow: hidden;
+    }
+
+    .escape-card-link.status-undated,
+    .escape-card-link.status-past {
+      border-color: rgba(87, 93, 107, .32);
+      background: #e8ebf0;
+      box-shadow: 0 14px 30px rgba(14, 16, 21, .18);
+    }
+
+    .escape-card-link.status-today {
+      border-color: rgba(222, 113, 73, .44);
+      background: #ffe8db;
+      box-shadow: 0 16px 34px rgba(99, 44, 24, .2);
+    }
+
+    .escape-card-link.status-upcoming {
+      border-color: rgba(50, 139, 126, .4);
+      background: #ddf2ef;
+      box-shadow: 0 16px 34px rgba(18, 68, 65, .18);
     }
 
     .poster {
@@ -176,6 +216,10 @@
       border-color: rgba(110, 169, 155, .28);
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     @media (max-width: 380px) {
       .card-list {
         grid-template-columns: 1fr;
@@ -203,7 +247,10 @@
   <main class="page">
     <div class="list-shell">
       <header class="hero">
-        <h1>방탈출 정보</h1>
+        <div class="hero-title-row">
+          <h1>방탈출 정보</h1>
+          <button class="reservation-hotspot" type="button" data-reservation-hotspot aria-label="예약 정보 보기"></button>
+        </div>
         <p>방탈출 테마 카드를 모아두는 곳</p>
       </header>
 
@@ -238,6 +285,23 @@
           </span>
         </a>
 
+        <a class="escape-card-link" href="./escape-room-invite-card/8.html" data-reserved-date="2026-06-16">
+          <span class="poster">
+            <img src="./escape-room-invite-card/assets/poster-8.jpg" alt="당신 없이는 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>당신 없이는</h2>
+              <p class="store">이머시브스튜디오 홍대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge reservation-badge" hidden>6월 16일 화요일</span>
+              <span class="badge time reservation-badge" hidden>20:10 - 21:30</span>
+            </span>
+          </span>
+        </a>
+
         <a class="escape-card-link" href="./escape-room-invite-card/7.html" data-reserved-date="2026-06-15">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-7.jpg" alt="학교 : 그 날의 이야기 포스터">
@@ -249,8 +313,8 @@
             </span>
             <span class="badges" aria-label="요약 정보">
               <span class="badge area">홍대</span>
-              <span class="badge">6월 15일 월요일</span>
-              <span class="badge time">19:25 - 21:05</span>
+              <span class="badge reservation-badge" hidden>6월 15일 월요일</span>
+              <span class="badge time reservation-badge" hidden>19:25 - 21:05</span>
             </span>
           </span>
         </a>
@@ -266,8 +330,8 @@
             </span>
             <span class="badges" aria-label="요약 정보">
               <span class="badge area">홍대</span>
-              <span class="badge">6월 9일 화요일</span>
-              <span class="badge time">19:20 - 20:30</span>
+              <span class="badge reservation-badge" hidden>6월 9일 화요일</span>
+              <span class="badge time reservation-badge" hidden>19:20 - 20:30</span>
             </span>
           </span>
         </a>
@@ -283,8 +347,8 @@
             </span>
             <span class="badges" aria-label="요약 정보">
               <span class="badge area">강남</span>
-              <span class="badge">5월 24일 일요일</span>
-              <span class="badge time">15:50 - 17:10</span>
+              <span class="badge reservation-badge" hidden>5월 24일 일요일</span>
+              <span class="badge time reservation-badge" hidden>15:50 - 17:10</span>
             </span>
           </span>
         </a>
@@ -300,8 +364,8 @@
             </span>
             <span class="badges" aria-label="요약 정보">
               <span class="badge area">홍대</span>
-              <span class="badge">4월 11일 토요일</span>
-              <span class="badge time">17:00 - 18:05</span>
+              <span class="badge reservation-badge" hidden>4월 11일 토요일</span>
+              <span class="badge time reservation-badge" hidden>17:00 - 18:05</span>
             </span>
           </span>
         </a>
@@ -317,8 +381,8 @@
             </span>
             <span class="badges" aria-label="요약 정보">
               <span class="badge area">홍대</span>
-              <span class="badge">6월 3일 수요일</span>
-              <span class="badge time">17:40 - 19:00</span>
+              <span class="badge reservation-badge" hidden>6월 3일 수요일</span>
+              <span class="badge time reservation-badge" hidden>17:40 - 19:00</span>
             </span>
           </span>
         </a>
@@ -326,6 +390,69 @@
     </div>
   </main>
   <script>
+    const reservationQueryKey = "m";
+    const listReservationQueryValue = "l8s2";
+    const cardReservationTokens = {
+      "1.html": "v8k2",
+      "2.html": "q4n7",
+      "3.html": "p6w1",
+      "4.html": "z9c3",
+      "5.html": "n3t8",
+      "6.html": "h7r5",
+      "7.html": "d2m9",
+      "8.html": "x5a4"
+    };
+    const showReservation = new URLSearchParams(window.location.search).get(reservationQueryKey) === listReservationQueryValue;
+    const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const cardFileFromHref = (href) => {
+      try {
+        return new URL(href, window.location.href).pathname.split("/").pop();
+      } catch {
+        return href.split("/").pop().split("?")[0];
+      }
+    };
+    const parseReservedDate = (value) => {
+      if (!value) return null;
+      const [year, month, day] = value.split("-").map(Number);
+      if (!year || !month || !day) return null;
+      return new Date(year, month - 1, day);
+    };
+    const reservationStatus = (value) => {
+      const reservedDate = parseReservedDate(value);
+      if (!reservedDate) return "status-undated";
+
+      const today = startOfDay(new Date());
+      const reservedDay = startOfDay(reservedDate);
+      if (reservedDay.getTime() === today.getTime()) return "status-today";
+      return reservedDay < today ? "status-past" : "status-upcoming";
+    };
+
+    document.querySelectorAll(".reservation-badge").forEach((badge) => {
+      badge.hidden = !showReservation;
+    });
+
+    document.querySelectorAll(".escape-card-link").forEach((link) => {
+      const href = link.getAttribute("href").split("?")[0];
+      const cardToken = cardReservationTokens[cardFileFromHref(href)];
+      link.href = showReservation && cardToken ? `${href}?${reservationQueryKey}=${cardToken}` : href;
+      link.classList.add("reservation-status", reservationStatus(link.dataset.reservedDate));
+    });
+
+    const toggleReservationQuery = () => {
+      const url = new URL(window.location.href);
+      if (showReservation) {
+        url.searchParams.delete(reservationQueryKey);
+      } else {
+        url.searchParams.set(reservationQueryKey, listReservationQueryValue);
+      }
+      window.location.replace(url.toString());
+    };
+
+    document.querySelector("[data-reservation-hotspot]")?.addEventListener("dblclick", (event) => {
+      event.preventDefault();
+      toggleReservationQuery();
+    });
+
     document.querySelectorAll(".card-list").forEach((list) => {
       const cards = Array.from(list.querySelectorAll("[data-reserved-date]"));
       cards

@@ -2,11 +2,78 @@
     const inviteData = window.escapeRoomInviteData;
     if (!inviteData) return;
 
-    const hasReservationTime = Boolean(inviteData.reservedDate && inviteData.reservedTime);
+    const atStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-    if (!hasReservationTime) {
+    const addDays = (date, days) => {
+      const next = atStartOfDay(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    };
+
+    const isSameDay = (a, b) => (
+      a.getFullYear() === b.getFullYear()
+      && a.getMonth() === b.getMonth()
+      && a.getDate() === b.getDate()
+    );
+
+    const startOfWeek = (date, weekStartsOn = 0) => {
+      const start = atStartOfDay(date);
+      const diff = (start.getDay() - weekStartsOn + 7) % 7;
+      start.setDate(start.getDate() - diff);
+      return start;
+    };
+
+    const parseKoreanMonthDay = (text, baseYear) => {
+      const match = text.match(/(\d+)월\s*(\d+)일/);
+      if (!match) return null;
+      return new Date(baseYear, Number(match[1]) - 1, Number(match[2]));
+    };
+
+    const reservationQueryKey = "m";
+    const cardReservationTokens = {
+      "1.html": "v8k2",
+      "2.html": "q4n7",
+      "3.html": "p6w1",
+      "4.html": "z9c3",
+      "5.html": "n3t8",
+      "6.html": "h7r5",
+      "7.html": "d2m9",
+      "8.html": "x5a4"
+    };
+    const currentCardFile = window.location.pathname.split("/").pop();
+    const reservationQueryValue = cardReservationTokens[currentCardFile] || "";
+    const searchParams = new URLSearchParams(window.location.search);
+    const showReservation = searchParams.get(reservationQueryKey) === reservationQueryValue;
+    const hasReservationTime = Boolean(inviteData.reservedDate && inviteData.reservedTime);
+    const shouldShowReservation = hasReservationTime && showReservation;
+    const today = new Date();
+    const hasReservedYear = Number.isInteger(inviteData.reservedYear);
+    const eventDate = hasReservationTime
+      ? parseKoreanMonthDay(inviteData.reservedDate, hasReservedYear ? inviteData.reservedYear : today.getFullYear())
+      : null;
+
+    if (eventDate && !hasReservedYear && eventDate < atStartOfDay(today)) {
+      eventDate.setFullYear(eventDate.getFullYear() + 1);
+    }
+
+    const reservationStatus = () => {
+      if (!eventDate) return "status-undated";
+
+      const todayStart = atStartOfDay(today);
+      const eventStart = atStartOfDay(eventDate);
+      if (isSameDay(eventStart, todayStart)) return "status-today";
+      return eventStart < todayStart ? "status-past" : "status-upcoming";
+    };
+
+    document.querySelector(".invite")?.classList.add("reservation-status", reservationStatus());
+
+    if (!shouldShowReservation) {
       document.querySelectorAll(".intro-reservation").forEach((node) => {
         node.remove();
+      });
+    } else {
+      document.querySelectorAll(".intro-reservation").forEach((node) => {
+        node.removeAttribute("hidden");
       });
     }
 
@@ -19,6 +86,23 @@
     document.querySelectorAll("[data-field]").forEach((node) => {
       const key = node.dataset.field;
       node.textContent = inviteData[key] || "";
+    });
+
+    const toggleReservationQuery = () => {
+      const url = new URL(window.location.href);
+      if (showReservation) {
+        url.searchParams.delete(reservationQueryKey);
+      } else {
+        url.searchParams.set(reservationQueryKey, reservationQueryValue);
+      }
+      window.location.replace(url.toString());
+    };
+
+    document.querySelectorAll('[data-field="price"]').forEach((node) => {
+      node.addEventListener("dblclick", (event) => {
+        event.preventDefault();
+        toggleReservationQuery();
+      });
     });
 
     document.querySelectorAll("[data-image]").forEach((node) => {
@@ -88,33 +172,6 @@
       );
     });
 
-    const atStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-    const addDays = (date, days) => {
-      const next = atStartOfDay(date);
-      next.setDate(next.getDate() + days);
-      return next;
-    };
-
-    const isSameDay = (a, b) => (
-      a.getFullYear() === b.getFullYear()
-      && a.getMonth() === b.getMonth()
-      && a.getDate() === b.getDate()
-    );
-
-    const startOfWeek = (date, weekStartsOn = 0) => {
-      const start = atStartOfDay(date);
-      const diff = (start.getDay() - weekStartsOn + 7) % 7;
-      start.setDate(start.getDate() - diff);
-      return start;
-    };
-
-    const parseKoreanMonthDay = (text, baseYear) => {
-      const match = text.match(/(\d+)월\s*(\d+)일/);
-      if (!match) return null;
-      return new Date(baseYear, Number(match[1]) - 1, Number(match[2]));
-    };
-
     const buildWeekDotCalendar = ({
       todayDate = new Date(),
       eventDate,
@@ -174,13 +231,7 @@
       });
     };
 
-    const today = new Date();
-    const hasReservedYear = Number.isInteger(inviteData.reservedYear);
-    const eventDate = parseKoreanMonthDay(inviteData.reservedDate, hasReservedYear ? inviteData.reservedYear : today.getFullYear());
-    if (eventDate && !hasReservedYear && eventDate < atStartOfDay(today)) {
-      eventDate.setFullYear(eventDate.getFullYear() + 1);
-    }
-    if (eventDate) {
+    if (eventDate && shouldShowReservation) {
       renderWeekDotCalendar("[data-week-calendar]", {
         todayDate: today,
         eventDate,
@@ -214,19 +265,30 @@
       }, 1400);
     };
 
+    const copyUrl = () => {
+      const url = new URL(window.location.href);
+      url.search = "";
+      url.hash = "";
+
+      if (shouldShowReservation) {
+        url.searchParams.set(reservationQueryKey, reservationQueryValue);
+      }
+
+      return url.toString();
+    };
+
     const invitationText = () => {
       const time = document.querySelector("[data-time-range]")?.textContent || "";
-      const url = window.location.href;
       const lines = [
         `🎆 테마: ${inviteData.title}`,
         `📍 매장: ${inviteData.store} (${inviteData.area})`,
         `🎭 정보: ${inviteData.genre} · ${inviteData.playMinutes}분 · ${inviteData.price}`,
         `🧩 난이도: ${inviteData.difficulty} / 공포도: ${inviteData.fear} / 활동성: ${inviteData.activity}`,
         "",
-        url
+        copyUrl()
       ];
 
-      if (hasReservationTime) {
+      if (shouldShowReservation) {
         lines.splice(2, 0, `🗓️ 예약: ${inviteData.reservedDate} ${time}`);
       }
 
@@ -256,7 +318,7 @@
     };
 
     const copyByMode = async (mode, button) => {
-      const text = mode === "link" ? window.location.href : invitationText();
+      const text = mode === "link" ? copyUrl() : invitationText();
       try {
         await copyText(text);
         setButtonDone(button, "복사했어요");
@@ -321,19 +383,9 @@
     });
 
     document.querySelectorAll("[data-list-link]").forEach((node) => {
-      node.addEventListener("click", (event) => {
-        if (!document.referrer) return;
-
-        const listUrl = new URL(node.href);
-        const referrerUrl = new URL(document.referrer);
-        const cameFromList = (
-          referrerUrl.origin === window.location.origin
-          && referrerUrl.pathname === listUrl.pathname
-        );
-
-        if (!cameFromList) return;
-        event.preventDefault();
-        window.history.back();
-      });
+      const listUrl = new URL(node.href);
+      listUrl.search = "";
+      listUrl.hash = "";
+      node.href = listUrl.toString();
     });
 })();

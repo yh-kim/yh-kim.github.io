@@ -79,6 +79,7 @@
     }
 
     .invite {
+      --state-accent: var(--coral);
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -102,7 +103,7 @@
       position: absolute;
       inset: 0 0 auto;
       height: 9px;
-      background: var(--coral);
+      background: var(--state-accent);
     }
 
     .section-label::before {
@@ -110,8 +111,8 @@
       height: 5px;
       flex: 0 0 5px;
       border-radius: 999px;
-      background: var(--coral);
-      box-shadow: 0 0 0 2px rgba(230, 107, 88, .1);
+      background: var(--state-accent);
+      box-shadow: 0 0 0 2px rgba(48, 42, 51, .06);
     }
 
     .section-label {
@@ -263,7 +264,7 @@
       padding: 10px;
       display: grid;
       align-content: center;
-      background: #efe2cf;
+      background: var(--paper-warm);
       border-right: 1px solid var(--line);
     }
 
@@ -351,7 +352,7 @@
     }
 
     .info-cell:nth-child(even) {
-      background: #f2e8d8;
+      background: var(--paper-warm);
     }
 
     .info-label {
@@ -396,7 +397,7 @@
       padding-right: 6px;
       padding-bottom: 7px;
       padding-left: 6px;
-      background: #fbf7ef;
+      background: var(--paper-soft);
     }
 
     .intro-reservation .section-label {

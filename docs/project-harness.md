@@ -262,9 +262,25 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - `reservedDate`: Korean display text such as `6월 3일 수요일`.
    - `reservedTime`: `HH:MM`.
    - The visible time range is calculated by JS from `reservedTime + playMinutes`; do not hardcode the end time in card data.
+   - Reservation date/time is private by default. Hide reservation date, reservation time, and calendar on the public list and card detail unless the URL includes the private reservation query token.
+   - Do not use a meaningful or shared query flag. The list page should use its own private token, and each detail card should use a different per-card token so one card URL cannot unlock another card by reusing the same suffix.
+   - Keep the list-page card token map and the detail shared-script token map in sync whenever adding a card.
+   - Dated card detail pages should keep the reservation-time section in static HTML with `hidden`, and the shared card script should reveal it only when that card's private token is present.
+   - Dated list cards should keep date/time badges in static HTML with `hidden`, and the list script should reveal them only when the list private token is present.
+   - When the list page is opened with the list private token, card links should preserve reservation visibility by linking each detail page with that card's own private token.
+   - The detail page's list/back button should always navigate to the clean list URL without the private token.
+   - Link-only copy and the URL line inside full-info copy should use the clean card URL by default, but include that card's private token when the detail page itself is opened with the private token.
+   - Full-info copy should include the reservation line only when the detail page itself is opened with that card's private token; otherwise omit reservation date/time from copied text.
+   - On the list page, the small area immediately to the right of the `방탈출 정보` title should toggle the list private token only on double-click. The area should blend into the header background and not look like a visible control.
+   - On detail cards, double-clicking the price badge should toggle the same card URL between clean and that card's private-token URL.
+   - Private-token double-click toggles should use `window.location.replace(...)`, not `assign(...)`, so toggling reservation visibility does not add a browser history entry.
+   - OG/Twitter meta descriptions should not include reservation date/time because previews cannot reliably respect private query tokens.
+   - List cards should still show reservation-state background colors regardless of private-token state: undated and past reservation date must share the same muted gray tone, reservation day uses the active day tone, and upcoming reservation date uses the upcoming tone. Detail cards should keep the unified coral/cream card theme.
    - If the schedule is not decided, use `reservedDate: "일정 미정"` and omit `reservedYear` and `reservedTime`.
    - Undated card detail pages must not include the reservation-time section in the static HTML. Do not leave an empty `.intro-reservation` block that depends on JavaScript hiding.
    - The shared card script also removes `.intro-reservation` when `reservedTime` is missing, but this is a fallback. The HTML itself should already avoid showing a placeholder calendar, time range, or `일정 미정` reservation box.
+   - Undated cards still need every non-reservation theme field filled the same way as dated cards: genre, play time, price, difficulty, fear level, activity level, store, area, poster, map URL, and theme description.
+   - Undated card static HTML should still include fallback text for those non-reservation fields, especially the header meta badges, stat pills, poster `src`/`alt`, and theme description. Only the reservation-time section is omitted.
    - Undated cards must appear before dated cards in the list. Dated cards keep the existing reservation-date descending order.
 4. Prefer a direct Naver Map place URL for `mapUrl`, based on the verified Naver store/branch place ID. The area badge should remain clickable.
    - Always verify the map target while creating a card. A numeric ID from a third-party directory is not automatically a Naver place ID.
@@ -511,11 +527,15 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
    reservedDate: "일정 미정"
    ```
 
-   and omit `reservedYear` and `reservedTime`. The card script hides the whole reservation-time section for undated cards.
+   and omit `reservedYear` and `reservedTime`. Keep all other fields exactly as complete as a dated card. The card script removes the whole reservation-time section for undated cards, but the static HTML for an undated card should not include that section in the first place.
 
 5. Update the list page `html-documents/escape-room-invite.html`.
    - Add one list item linking to `./escape-room-invite-card/N.html`.
    - Use the matching poster `./escape-room-invite-card/assets/poster-N.ext`.
+   - Add a new unique private token for `N.html` to both token maps:
+     - `cardReservationTokens` in `html-documents/escape-room-invite.html`.
+     - `cardReservationTokens` in `html-documents/escape-room-invite-card/assets/escape-room-card.js`.
+   - Do not reuse another card's token. The list private token and every detail card token must be different from each other.
    - Keep the list page as the only registered HTML document in `_data/html_documents.yml`.
    - For an undated card, set `data-reserved-date=""` and omit date/time badges from the list card. Keep only always-valid summary badges such as area.
    - The list sort policy is: undated cards first, then dated cards by `data-reserved-date` descending.
