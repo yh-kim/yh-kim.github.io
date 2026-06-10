@@ -52,11 +52,11 @@
       min-height: 100svh;
       display: grid;
       place-items: start center;
-      padding: 20px 12px;
+      padding: 22px clamp(18px, 4vw, 48px);
     }
 
     .list-shell {
-      width: min(100%, 540px);
+      width: min(100%, 1480px);
     }
 
     .hero {
@@ -91,7 +91,7 @@
 
     .card-list {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 344px), 1fr));
       gap: 14px;
     }
 
@@ -107,11 +107,11 @@
       display: grid;
       grid-template-columns: 78px minmax(0, 1fr);
       align-items: center;
-      gap: 11px;
-      min-height: 122px;
-      padding: 12px;
+      gap: 10px;
+      min-height: 0;
+      padding: 7px 10px;
       border: 1px solid rgba(255, 248, 237, .62);
-      border-radius: 18px;
+      border-radius: 16px;
       color: inherit;
       background: #fff8ed;
       box-shadow: 0 16px 38px rgba(0, 0, 0, .2);
@@ -143,7 +143,7 @@
       align-self: center;
       overflow: hidden;
       border: 1px solid rgba(48, 42, 51, .12);
-      border-radius: 14px;
+      border-radius: 12px;
       background: #111;
       box-shadow: 0 10px 22px rgba(65, 41, 27, .16);
     }
@@ -163,8 +163,8 @@
       min-width: 0;
       display: grid;
       align-content: center;
-      gap: 7px;
-      padding: 2px 0;
+      gap: 5px;
+      padding: 0;
     }
 
     .summary h2 {
@@ -203,6 +203,35 @@
       line-height: 1;
     }
 
+    .list-stats {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 4px;
+      min-width: 238px;
+      margin-top: 1px;
+    }
+
+    .list-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      min-width: 0;
+      padding: 4px 6px;
+      border: 1px solid rgba(48, 42, 51, .08);
+      border-radius: 999px;
+      color: #34313d;
+      background: rgba(255, 255, 255, .58);
+      font-size: 9.5px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .list-stat span {
+      color: #807985;
+      font-weight: 800;
+    }
+
     .badge.time {
       color: #7d5220;
       background: #fff4df;
@@ -225,10 +254,10 @@
       }
 
       .escape-card-link {
-        grid-template-columns: 84px minmax(0, 1fr);
+        grid-template-columns: 82px minmax(0, 1fr);
         align-items: center;
-        gap: 11px;
-        padding: 10px;
+        gap: 9px;
+        padding: 7px 9px;
       }
 
       .summary h2 {
@@ -253,7 +282,7 @@
       </header>
 
       <section class="card-list" aria-label="방탈출 카드 목록">
-        <a class="escape-card-link" href="./escape-room-invite-card/6.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/6.html" data-reserved-date="" data-difficulty="보통" data-fear="낮음" data-activity="보통">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-6.jpg" alt="사요나라, 세이코! 포스터">
           </span>
@@ -268,7 +297,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/8.html" data-reserved-date="2026-06-16">
+        <a class="escape-card-link" href="./escape-room-invite-card/8.html" data-reserved-date="2026-06-16" data-difficulty="쉬움" data-fear="높음" data-activity="많음">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-8.jpg" alt="당신 없이는 포스터">
           </span>
@@ -285,7 +314,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/7.html" data-reserved-date="2026-06-15">
+        <a class="escape-card-link" href="./escape-room-invite-card/7.html" data-reserved-date="2026-06-15" data-difficulty="쉬움 ~ 보통" data-fear="높음" data-activity="보통">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-7.jpg" alt="학교 : 그 날의 이야기 포스터">
           </span>
@@ -302,7 +331,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/4.html" data-reserved-date="2026-06-09">
+        <a class="escape-card-link" href="./escape-room-invite-card/4.html" data-reserved-date="2026-06-09" data-difficulty="보통" data-fear="낮음 ~ 보통" data-activity="보통">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-4.png" alt="Chapter 02 : 쿠키 포스터">
           </span>
@@ -319,7 +348,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/2.html" data-reserved-date="2026-05-24">
+        <a class="escape-card-link" href="./escape-room-invite-card/2.html" data-reserved-date="2026-05-24" data-difficulty="보통 ~ 어려움" data-fear="거의 없음" data-activity="보통">
           <span class="poster square">
             <img src="./escape-room-invite-card/assets/poster-2.png" alt="머니머니부동산 포스터">
           </span>
@@ -336,7 +365,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/3.html" data-reserved-date="2026-04-11">
+        <a class="escape-card-link" href="./escape-room-invite-card/3.html" data-reserved-date="2026-04-11" data-difficulty="보통 ~ 어려움" data-fear="낮음" data-activity="적음">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-3.png" alt="alone 포스터">
           </span>
@@ -353,7 +382,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/1.html" data-reserved-date="2026-06-03">
+        <a class="escape-card-link" href="./escape-room-invite-card/1.html" data-reserved-date="2026-06-03" data-difficulty="쉬움 ~ 보통" data-fear="거의 없음" data-activity="보통">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-1.jpg" alt="붐붐 박사의 폭죽놀이 유토피아 포스터">
           </span>
@@ -370,7 +399,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/9.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/9.html" data-reserved-date="" data-difficulty="쉬움 ~ 보통" data-fear="높음" data-activity="보통 ~ 많음">
           <span class="poster square">
             <img src="./escape-room-invite-card/assets/poster-9.jpg" alt="피안화 포스터">
           </span>
@@ -385,7 +414,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/10.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/10.html" data-reserved-date="" data-difficulty="쉬움" data-fear="높음" data-activity="보통 ~ 많음">
           <span class="poster square">
             <img src="./escape-room-invite-card/assets/poster-10.jpg" alt="목격자 포스터">
           </span>
@@ -400,7 +429,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/11.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/11.html" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="보통">
           <span class="poster square">
             <img src="./escape-room-invite-card/assets/poster-11.png" alt="다이얼 포스터">
           </span>
@@ -415,7 +444,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/12.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/12.html" data-reserved-date="" data-difficulty="쉬움 ~ 보통" data-fear="높음" data-activity="보통">
           <span class="poster square">
             <img src="./escape-room-invite-card/assets/poster-12.png" alt="그 날 포스터">
           </span>
@@ -430,7 +459,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/13.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/13.html" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="많음">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-13.png" alt="피노키오 포스터">
           </span>
@@ -445,7 +474,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/14.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/14.html" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="많음">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-14.jpg" alt="가암성당 포스터">
           </span>
@@ -460,7 +489,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/15.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/15.html" data-reserved-date="" data-difficulty="쉬움 ~ 보통" data-fear="보통 ~ 높음" data-activity="보통">
           <span class="poster square">
             <img src="./escape-room-invite-card/assets/poster-15.png" alt="괴록 포스터">
           </span>
@@ -475,7 +504,7 @@
           </span>
         </a>
 
-        <a class="escape-card-link" href="./escape-room-invite-card/16.html" data-reserved-date="">
+        <a class="escape-card-link" href="./escape-room-invite-card/16.html" data-reserved-date="" data-difficulty="쉬움" data-fear="높음" data-activity="보통 ~ 많음">
           <span class="poster">
             <img src="./escape-room-invite-card/assets/poster-16.png" alt="오시리스 포스터">
           </span>
@@ -552,8 +581,35 @@
     document.querySelectorAll(".escape-card-link").forEach((link) => {
       const href = link.getAttribute("href").split("?")[0];
       const cardToken = cardReservationTokens[cardFileFromHref(href)];
+      const summary = link.querySelector(".summary");
+      const stats = [
+        ["난이도", link.dataset.difficulty],
+        ["공포", link.dataset.fear],
+        ["활동", link.dataset.activity]
+      ].filter(([, value]) => value);
+
       link.href = showReservation && cardToken ? `${href}?${reservationQueryKey}=${cardToken}` : href;
       link.classList.add("reservation-status", reservationStatus(link.dataset.reservedDate));
+
+      if (summary && stats.length && !summary.querySelector(".list-stats")) {
+        const statRow = document.createElement("span");
+        statRow.className = "list-stats";
+        statRow.setAttribute("aria-label", "난이도 공포도 활동성");
+
+        stats.forEach(([label, value]) => {
+          const item = document.createElement("span");
+          const name = document.createElement("span");
+          const text = document.createElement("strong");
+
+          item.className = "list-stat";
+          name.textContent = label;
+          text.textContent = value;
+          item.append(name, text);
+          statRow.append(item);
+        });
+
+        summary.append(statRow);
+      }
     });
 
     const toggleReservationQuery = () => {

@@ -542,6 +542,7 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
      - `cardReservationTokens` in `html-documents/escape-room-invite-card/assets/escape-room-card.js`.
    - Do not reuse another card's token. The list private token and every detail card token must be different from each other.
    - Keep the list page as the only registered HTML document in `_data/html_documents.yml`.
+   - Add `data-difficulty`, `data-fear`, and `data-activity` to the list card anchor so the list can render the same compact stat pills shown on detail cards.
    - For an undated card, set `data-reserved-date=""` and omit date/time badges from the list card. Keep only always-valid summary badges such as area.
    - The list sort policy is: today/future reservations first by nearest date, undated cards next, and past reservations last by most recent date.
    - Avoid showing the unsorted list before JavaScript finishes. The list page should hide `.card-list` only when the early `js` class is present, sort and decorate cards, then reveal it by adding `is-ready`.
