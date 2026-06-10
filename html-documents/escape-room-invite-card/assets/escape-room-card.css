@@ -133,9 +133,7 @@
     }
 
     .header-title-row {
-      position: relative;
       display: block;
-      padding-right: 34px;
     }
 
     .header-title {
@@ -147,29 +145,11 @@
       letter-spacing: 0;
       word-break: keep-all;
       text-wrap: balance;
-    }
-
-    .reservation-hotspot {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 26px;
-      height: 26px;
-      padding: 0;
-      border: 0;
-      border-radius: 999px;
-      -webkit-appearance: none;
-      appearance: none;
-      color: transparent;
-      background: transparent;
-      box-shadow: none;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
       cursor: default;
-    }
-
-    .reservation-hotspot:focus-visible {
-      outline: 2px solid rgba(230, 107, 88, .35);
-      outline-offset: 2px;
     }
 
     .header-store {

@@ -106,12 +106,30 @@
       window.location.replace(url.toString());
     };
 
-    document.querySelectorAll("[data-reservation-hotspot]").forEach((node) => {
-      node.addEventListener("dblclick", (event) => {
-        event.preventDefault();
-        toggleReservationQuery();
+    const bindTripleClick = (node, callback) => {
+      if (!node) return;
+
+      let count = 0;
+      let timer = 0;
+
+      node.addEventListener("click", (event) => {
+        count = event.detail > 1 ? event.detail : count + 1;
+        clearTimeout(timer);
+
+        if (count >= 3) {
+          event.preventDefault();
+          count = 0;
+          callback();
+          return;
+        }
+
+        timer = setTimeout(() => {
+          count = 0;
+        }, 650);
       });
-    });
+    };
+
+    bindTripleClick(document.querySelector(".header-title"), toggleReservationQuery);
 
     document.querySelectorAll("[data-image]").forEach((node) => {
       const key = node.dataset.image;

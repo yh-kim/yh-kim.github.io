@@ -271,9 +271,9 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - The detail page's list/back button should always navigate to the clean list URL without the private token.
    - Link-only copy and the URL line inside full-info copy should use the clean card URL by default, but include that card's private token when the detail page itself is opened with the private token.
    - Full-info copy should include the reservation line only when the detail page itself is opened with that card's private token; otherwise omit reservation date/time from copied text.
-   - On the list page, the small area immediately to the right of the `방탈출 정보` title should toggle the list private token only on double-click. The area should blend into the header background and not look like a visible control.
-   - On detail cards, the small area immediately to the right of the title should toggle the same card URL between clean and that card's private-token URL only on double-click. The area should blend into the header background and not look like a visible control.
-   - Private-token double-click toggles should use `window.location.replace(...)`, not `assign(...)`, so toggling reservation visibility does not add a browser history entry.
+   - On the list page, triple-clicking or triple-tapping the `방탈출 정보` title should toggle the list private token.
+   - On detail cards, triple-clicking or triple-tapping the theme title should toggle the same card URL between clean and that card's private-token URL.
+   - Private-token title toggles should use `window.location.replace(...)`, not `assign(...)`, so toggling reservation visibility does not add a browser history entry.
    - OG/Twitter meta descriptions should not include reservation date/time because previews cannot reliably respect private query tokens.
    - List cards should still show reservation-state background colors regardless of private-token state: undated and past reservation date must share the same muted gray tone, reservation day uses the active day tone, and upcoming reservation date uses the upcoming tone. Detail cards should keep the unified coral/cream card theme.
    - If the schedule is not decided, use `reservedDate: "일정 미정"` and omit `reservedYear` and `reservedTime`.
