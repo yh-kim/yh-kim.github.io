@@ -22,6 +22,9 @@
   <meta name="twitter:title" content="방탈출 정보 목록">
   <meta name="twitter:description" content="방탈출 테마 카드 목록">
   <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+  <script>
+    document.documentElement.classList.add("js");
+  </script>
   <style>
     * {
       box-sizing: border-box;
@@ -102,6 +105,14 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 14px;
+    }
+
+    .js .card-list {
+      visibility: hidden;
+    }
+
+    .js .card-list.is-ready {
+      visibility: visible;
     }
 
     .escape-card-link {
@@ -554,6 +565,14 @@
       if (reservedDay.getTime() === today.getTime()) return "status-today";
       return reservedDay < today ? "status-past" : "status-upcoming";
     };
+    const reservationSortGroup = (value) => {
+      const reservedDate = parseReservedDate(value);
+      if (!reservedDate) return 1;
+
+      const today = startOfDay(new Date());
+      const reservedDay = startOfDay(reservedDate);
+      return reservedDay < today ? 2 : 0;
+    };
 
     document.querySelectorAll(".reservation-badge").forEach((badge) => {
       badge.hidden = !showReservation;
@@ -583,17 +602,21 @@
 
     document.querySelectorAll(".card-list").forEach((list) => {
       const cards = Array.from(list.querySelectorAll("[data-reserved-date]"));
-      cards
+      const sortedCards = cards
         .sort((a, b) => {
           const aDate = a.dataset.reservedDate;
           const bDate = b.dataset.reservedDate;
+          const aGroup = reservationSortGroup(aDate);
+          const bGroup = reservationSortGroup(bDate);
 
-          if (!aDate && !bDate) return 0;
-          if (!aDate) return 1;
-          if (!bDate) return -1;
+          if (aGroup !== bGroup) return aGroup - bGroup;
+          if (!aDate || !bDate) return 0;
+          if (aGroup === 0) return aDate.localeCompare(bDate);
           return bDate.localeCompare(aDate);
-        })
-        .forEach((card) => list.append(card));
+        });
+
+      list.append(...sortedCards);
+      list.classList.add("is-ready");
     });
   </script>
   <script src="/js/html-document-scroll.js"></script>

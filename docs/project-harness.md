@@ -281,7 +281,7 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - The shared card script also removes `.intro-reservation` when `reservedTime` is missing, but this is a fallback. The HTML itself should already avoid showing a placeholder calendar, time range, or `일정 미정` reservation box.
    - Undated cards still need every non-reservation theme field filled the same way as dated cards: genre, play time, price, difficulty, fear level, activity level, store, area, poster, map URL, and theme description.
    - Undated card static HTML should still include fallback text for those non-reservation fields, especially the header meta badges, stat pills, poster `src`/`alt`, and theme description. Only the reservation-time section is omitted.
-   - Undated cards must appear after dated cards in the list. Dated cards keep the existing reservation-date descending order.
+   - List cards should be sorted by reservation state: today/future reservations first, undated cards next, and past reservations last.
 4. Prefer a direct Naver Map place URL for `mapUrl`, based on the verified Naver store/branch place ID. The area badge should remain clickable.
    - Always verify the map target while creating a card. A numeric ID from a third-party directory is not automatically a Naver place ID.
    - If a direct Naver place URL cannot be verified, use an exact Naver Map search URL as a fallback rather than a guessed place entry URL.
@@ -538,7 +538,8 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
    - Do not reuse another card's token. The list private token and every detail card token must be different from each other.
    - Keep the list page as the only registered HTML document in `_data/html_documents.yml`.
    - For an undated card, set `data-reserved-date=""` and omit date/time badges from the list card. Keep only always-valid summary badges such as area.
-   - The list sort policy is: dated cards by `data-reserved-date` descending first, then undated cards.
+   - The list sort policy is: today/future reservations first by nearest date, undated cards next, and past reservations last by most recent date.
+   - Avoid showing the unsorted list before JavaScript finishes. The list page should hide `.card-list` only when the early `js` class is present, sort and decorate cards, then reveal it by adding `is-ready`.
 
 6. Do not run `ruby scripts/add-html-document.rb` only to register individual card files.
    - The sync script scans only `html-documents/*.html`.

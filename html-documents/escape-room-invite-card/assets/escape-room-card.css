@@ -133,9 +133,9 @@
     }
 
     .header-title-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 7px;
+      position: relative;
+      display: block;
+      padding-right: 34px;
     }
 
     .header-title {
@@ -150,15 +150,20 @@
     }
 
     .reservation-hotspot {
+      position: absolute;
+      top: 0;
+      right: 0;
       width: 26px;
       height: 26px;
-      flex: 0 0 26px;
-      margin-top: 1px;
       padding: 0;
       border: 0;
       border-radius: 999px;
+      -webkit-appearance: none;
       appearance: none;
+      color: transparent;
       background: transparent;
+      box-shadow: none;
+      -webkit-tap-highlight-color: transparent;
       cursor: default;
     }
 
