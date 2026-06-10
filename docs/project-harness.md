@@ -274,6 +274,7 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - On the list page, triple-clicking or triple-tapping the `방탈출 정보` title should toggle the list private token.
    - On detail cards, triple-clicking or triple-tapping the theme title should toggle the same card URL between clean and that card's private-token URL.
    - Private-token title toggles should use `window.location.replace(...)`, not `assign(...)`, so toggling reservation visibility does not add a browser history entry.
+   - Detail card pages should prevent accidental double-tap zoom while preserving the card interaction: use `maximum-scale=1` in the viewport meta and keep `touch-action: manipulation` on the shared detail-page shell.
    - OG/Twitter meta descriptions should not include reservation date/time because previews cannot reliably respect private query tokens.
    - List cards should still show reservation-state background colors regardless of private-token state: undated and past reservation date must share the same muted gray tone, reservation day uses the active day tone, and upcoming reservation date uses the upcoming tone. Detail cards should keep the unified coral/cream card theme.
    - If the schedule is not decided, use `reservedDate: "일정 미정"` and omit `reservedYear` and `reservedTime`.
