@@ -285,7 +285,7 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - List cards should be sorted by reservation state: today/future reservations first, undated cards next, and past reservations last.
 4. Prefer a direct Naver Map place URL for `mapUrl`, based on the verified Naver store/branch place ID. The area badge should remain clickable.
    - Always verify the map target while creating a card. A numeric ID from a third-party directory is not automatically a Naver place ID.
-   - If a direct Naver place URL cannot be verified, use an exact Naver Map search URL as a fallback rather than a guessed place entry URL.
+   - Do not stop at a generic Naver Map search URL when the card can be tied to a Naver place/check-in source. Use a search URL only as a temporary fallback when the place ID cannot be verified in the same task, and report why.
 5. Do not invent unavailable fields. Ask the user or leave a conservative value only when the user explicitly allows arbitrary content.
 6. Do not show 빠방 rating, source credit, or day plan text unless the user explicitly asks for it.
 7. Do not generate poster images. Save the poster found from 빠방 or another official/theme source.
@@ -376,13 +376,15 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
 8. Create and verify a Naver Map URL for `mapUrl`.
    - Prefer a place entry URL: `https://map.naver.com/p/entry/place/{placeId}`.
    - Do not reuse numeric IDs from non-Naver sites such as `placeview.co.kr`; those IDs can look like place IDs but may point to the wrong Naver target.
-   - Search the exact store name first, then the store name plus address/area:
+   - Search the exact store name first, then the store name plus address/area. If the user gave an abbreviated or imprecise theme name, resolve the official theme/store from 빠방 or web search first, then search with the resolved theme and branch:
 
      ```text
      "{store name}" "map.naver.com/p/entry/place"
      "{store name}" "pcmap.place.naver.com"
      "{store name}" "booking.naver.com"
      "{store name}" "네이버 방문자리뷰"
+     "{theme name}" "{store name}" 블로그
+     "{theme name}" "{store name}" 위치
      "{store name}" "{address or area}" "이 블로그의 체크인"
      ```
 
@@ -393,12 +395,13 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
      rg -n "placeId|bookingPlace|bizName|address" /tmp/naver-booking.html
      ```
 
-   - If search results or blog posts show a Naver check-in map, open the mobile blog post and inspect the HTML for `data-linkdata` or `__se_module_data`; Naver place IDs appear as `placeId`.
+   - If Naver Map search/API requests are blocked by 429, captcha, or a service-limit page, do not treat that as proof that a direct place URL is unavailable. Search Naver View/blog with the theme name and branch name. Many escape-room review posts include a top location block or check-in module that links to `https://m.place.naver.com/place/{placeId}`.
+   - If search results or blog posts show a Naver check-in map, open the mobile blog post and inspect the HTML for `data-linkdata`, `__se_module_data`, `m.place.naver.com/place/`, or a `location_component`. Naver place IDs appear as `placeId` or in the mobile place URL.
    - Useful extraction command:
 
      ```bash
      curl -L -s 'https://m.blog.naver.com/PostView.naver?blogId=<blogId>&logNo=<logNo>' -o /tmp/naver-blog.html
-     rg -n "placeId|data-linkdata|__se_module_data|store name" /tmp/naver-blog.html
+     rg -n "placeId|m\\.place\\.naver\\.com/place|location_component|data-linkdata|__se_module_data|store name" /tmp/naver-blog.html
      ```
 
    - Convert the found ID into `https://map.naver.com/p/entry/place/{placeId}` and verify it:
@@ -408,7 +411,12 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
      ```
 
    - A `200` response only proves the entry URL exists. Still confirm the ID came from a Naver source tied to the same store/branch, address, or booking page.
-   - If no Naver place ID is available, use a search URL only as a fallback and include the exact store/branch text plus area/address:
+   - Cross-check the extracted Naver place source against the 빠방 store record before writing `mapUrl`:
+     - Store/branch names should match exactly or be an obvious spacing/brand variant, such as `플레이33` and `PLAY33`.
+     - Address should match the 빠방 `qstores` address or the official store address at least to district, road/lot, building floor, or branch identity.
+     - If multiple independent blog check-ins repeat the same place ID for the same branch, prefer that ID.
+     - If the blog place name is a broader brand name, such as `서울이스케이프룸 홍대점`, use it only when the post/theme/branch context and address confirm it is the intended branch.
+   - If no Naver place ID is available after booking-page and blog/check-in lookup, use a search URL only as a temporary fallback and include the exact store/branch text plus area/address. Mention the fallback in the work report so it can be revisited:
 
      ```text
      https://map.naver.com/p/search/{URL-encoded exact store name and address}
