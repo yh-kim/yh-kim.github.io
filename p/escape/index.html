@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>방탈출 정보 목록</title>
+  <meta name="description" content="방탈출 테마 카드 목록">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="방탈출 정보 목록">
+  <meta property="og:description" content="방탈출 테마 카드 목록">
+      <meta property="og:url" content="https://blog.pickth.com/p/escape/">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Pimi's Blog space icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="방탈출 정보 목록">
+  <meta name="twitter:description" content="방탈출 테마 카드 목록">
+  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+  <script>
+    document.documentElement.classList.add("js");
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: #17191f;
+      --html-doc-top-bg: rgba(255, 248, 237, .9);
+      --html-doc-top-color: #252330;
+      --html-doc-top-border: 1px solid rgba(255, 248, 237, .45);
+      --html-doc-top-shadow: 0 14px 34px rgba(0, 0, 0, .32);
+      --html-doc-top-focus: rgba(255, 248, 237, .38);
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: #252330;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+      background: #17191f;
+    }
+
+    .page {
+      min-height: 100svh;
+      display: grid;
+      place-items: start center;
+      padding: 22px clamp(18px, 4vw, 48px);
+    }
+
+    .list-shell {
+      width: min(100%, 1480px);
+    }
+
+    .hero {
+      margin-bottom: 16px;
+      color: #fff8ed;
+    }
+
+    .hero-title-row {
+      display: block;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: 0;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      cursor: default;
+    }
+
+    .hero p {
+      margin: 8px 0 0;
+      color: rgba(255, 248, 237, .72);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .card-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 344px), 1fr));
+      gap: 14px;
+    }
+
+    .js .card-list {
+      visibility: hidden;
+    }
+
+    .js .card-list.is-ready {
+      visibility: visible;
+    }
+
+    .escape-card-link {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      min-height: 0;
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 248, 237, .62);
+      border-radius: 16px;
+      color: inherit;
+      background: #fff8ed;
+      box-shadow: 0 16px 38px rgba(0, 0, 0, .2);
+      text-decoration: none;
+      overflow: hidden;
+    }
+
+    .escape-card-link.status-past {
+      border-color: rgba(87, 93, 107, .32);
+      background: #e8ebf0;
+      box-shadow: 0 14px 30px rgba(14, 16, 21, .18);
+    }
+
+    .escape-card-link.status-undated {
+      border-color: rgba(231, 162, 79, .42);
+      background: #fff4e4;
+      box-shadow: 0 16px 34px rgba(95, 61, 27, .16);
+    }
+
+    .escape-card-link.status-today {
+      border-color: rgba(222, 113, 73, .44);
+      background: #ffe8db;
+      box-shadow: 0 16px 34px rgba(99, 44, 24, .2);
+    }
+
+    .escape-card-link.status-upcoming {
+      border-color: rgba(50, 139, 126, .4);
+      background: #ddf2ef;
+      box-shadow: 0 16px 34px rgba(18, 68, 65, .18);
+    }
+
+    .poster {
+      aspect-ratio: 2 / 3;
+      align-self: center;
+      overflow: hidden;
+      border: 1px solid rgba(48, 42, 51, .12);
+      border-radius: 12px;
+      background: #111;
+      box-shadow: 0 10px 22px rgba(65, 41, 27, .16);
+    }
+
+    .poster img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .poster.square {
+      aspect-ratio: 1 / 1;
+    }
+
+    .summary {
+      min-width: 0;
+      display: grid;
+      align-content: center;
+      gap: 5px;
+      padding: 0;
+    }
+
+    .summary h2 {
+      margin: 0;
+      color: #252330;
+      font-size: 15px;
+      line-height: 1.18;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .store {
+      margin: 0;
+      color: #6f6973;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 23px;
+      padding: 6px 7px;
+      border: 1px solid rgba(48, 42, 51, .1);
+      border-radius: 999px;
+      color: #34313d;
+      background: rgba(255, 255, 255, .72);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .list-stats {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 4px;
+      min-width: 238px;
+      margin-top: 1px;
+    }
+
+    .list-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      min-width: 0;
+      padding: 4px 6px;
+      border: 1px solid rgba(48, 42, 51, .08);
+      border-radius: 999px;
+      color: #34313d;
+      background: rgba(255, 255, 255, .58);
+      font-size: 9.5px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .list-stat span {
+      color: #807985;
+      font-weight: 800;
+    }
+
+    .badge.time {
+      color: #7d5220;
+      background: #fff4df;
+      border-color: rgba(213, 168, 79, .28);
+    }
+
+    .badge.area {
+      color: #355f57;
+      background: #eaf5f1;
+      border-color: rgba(110, 169, 155, .28);
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 380px) {
+      .card-list {
+        grid-template-columns: 1fr;
+      }
+
+      .escape-card-link {
+        grid-template-columns: 82px minmax(0, 1fr);
+        align-items: center;
+        gap: 9px;
+        padding: 7px 9px;
+      }
+
+      .summary h2 {
+        font-size: 17px;
+      }
+
+      .badge {
+        font-size: 10px;
+      }
+    }
+  </style>
+
+
+</head>
+
+<body>
+  <main class="page">
+    <div class="list-shell">
+      <header class="hero">
+        <div class="hero-title-row">
+          <h1>방탈출 정보</h1>
+        </div>
+        <p>방탈출 테마 카드를 모아두는 곳</p>
+      </header>
+
+      <section class="card-list" aria-label="방탈출 카드 목록">
+        <a class="escape-card-link" href="/p/escape/8" data-reserved-date="2026-06-16" data-difficulty="쉬움" data-fear="높음" data-activity="많음">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-8.jpg" alt="당신 없이는 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>당신 없이는</h2>
+              <p class="store">이머시브스튜디오 홍대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge reservation-badge" hidden>6월 16일 화요일</span>
+              <span class="badge time reservation-badge" hidden>20:10 - 21:30</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/7" data-reserved-date="2026-06-15" data-difficulty="쉬움 ~ 보통" data-fear="높음" data-activity="보통">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-7.jpg" alt="학교 : 그 날의 이야기 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>학교 : 그 날의 이야기</h2>
+              <p class="store">라이브시네마</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge reservation-badge" hidden>6월 15일 월요일</span>
+              <span class="badge time reservation-badge" hidden>19:25 - 21:05</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/4" data-reserved-date="2026-06-09" data-difficulty="보통" data-fear="낮음 ~ 보통" data-activity="보통">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-4.png" alt="Chapter 02 : 쿠키 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>Chapter 02 : 쿠키</h2>
+              <p class="store">더챕터</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge reservation-badge" hidden>6월 9일 화요일</span>
+              <span class="badge time reservation-badge" hidden>19:20 - 20:30</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/2" data-reserved-date="2026-05-24" data-difficulty="보통 ~ 어려움" data-fear="거의 없음" data-activity="보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-2.png" alt="머니머니부동산 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>머니머니부동산</h2>
+              <p class="store">키이스케이프 강남 스테이션점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">강남</span>
+              <span class="badge reservation-badge" hidden>5월 24일 일요일</span>
+              <span class="badge time reservation-badge" hidden>15:50 - 17:10</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/3" data-reserved-date="2026-04-11" data-difficulty="보통 ~ 어려움" data-fear="낮음" data-activity="적음">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-3.png" alt="alone 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>alone</h2>
+              <p class="store">지구별 방탈출 홍대라스트시티점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge reservation-badge" hidden>4월 11일 토요일</span>
+              <span class="badge time reservation-badge" hidden>17:00 - 18:05</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/1" data-reserved-date="2026-06-03" data-difficulty="쉬움 ~ 보통" data-fear="거의 없음" data-activity="보통">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-1.jpg" alt="붐붐 박사의 폭죽놀이 유토피아 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>붐붐 박사의 폭죽놀이 유토피아</h2>
+              <p class="store">채널27 버터플라이점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge reservation-badge" hidden>6월 3일 수요일</span>
+              <span class="badge time reservation-badge" hidden>17:40 - 19:00</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/9" data-reserved-date="" data-difficulty="쉬움 ~ 보통" data-fear="높음" data-activity="보통 ~ 많음">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-9.jpg" alt="피안화 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>피안화</h2>
+              <p class="store">플레이33 홍대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/10" data-reserved-date="" data-difficulty="쉬움" data-fear="높음" data-activity="보통 ~ 많음">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-10.jpg" alt="목격자 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>목격자</h2>
+              <p class="store">플레이33 건대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">건대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/11" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-11.png" alt="다이얼 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>다이얼</h2>
+              <p class="store">플레이33 건대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">건대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/12" data-reserved-date="" data-difficulty="쉬움 ~ 보통" data-fear="높음" data-activity="보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-12.png" alt="그 날 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>그 날</h2>
+              <p class="store">플레이33 건대점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">건대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/13" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="많음">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-13.png" alt="피노키오 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>피노키오</h2>
+              <p class="store">지구별 방탈출 홍대어드벤처점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/14" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="많음">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-14.jpg" alt="가암성당 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>가암성당</h2>
+              <p class="store">클레버타운</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">신촌</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/15" data-reserved-date="" data-difficulty="쉬움 ~ 보통" data-fear="보통 ~ 높음" data-activity="보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-15.png" alt="괴록 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>괴록</h2>
+              <p class="store">후즈데어</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">강남</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/16" data-reserved-date="2026-07-06" data-difficulty="쉬움" data-fear="높음" data-activity="보통 ~ 많음">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-16.png" alt="오시리스 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>오시리스</h2>
+              <p class="store">서울 이스케이프 룸 홍대 2호점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge date" data-reserved-badge hidden>7월 6일 월요일</span>
+              <span class="badge time" data-reserved-badge hidden>19:20</span>
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/17" data-reserved-date="" data-difficulty="보통 ~ 어려움" data-fear="낮음" data-activity="보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-17.jpg" alt="머니머니패키지 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>머니머니패키지</h2>
+              <p class="store">키이스케이프 LOG_IN 1</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">강남</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/18" data-reserved-date="" data-difficulty="어려움" data-fear="거의 없음" data-activity="적음 ~ 보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-18.jpg" alt="퀴즈카페 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>퀴즈카페</h2>
+              <p class="store">찰리이스케이프</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">잠실</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/19" data-reserved-date="" data-difficulty="어려움" data-fear="거의 없음" data-activity="적음 ~ 보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-19.png" alt="퀴즈카페2 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>퀴즈카페2</h2>
+              <p class="store">찰리이스케이프 2호점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">잠실</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/20" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="보통 ~ 많음">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-20.png" alt="허수아비 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>허수아비</h2>
+              <p class="store">둠 이스케이프 FEAR점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">수원</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/21" data-reserved-date="" data-difficulty="보통 ~ 어려움" data-fear="거의 없음" data-activity="많음">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-21.jpg" alt="게임의 법칙 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>게임의 법칙</h2>
+              <p class="store">티켓 투 이스케이프</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/22" data-reserved-date="" data-difficulty="쉬움 ~ 보통" data-fear="보통" data-activity="보통 ~ 많음">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-22.jpg" alt="범계: 산군토벌기 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>범계: 산군토벌기</h2>
+              <p class="store">나비잠</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">범계</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/23" data-reserved-date="" data-difficulty="보통 ~ 어려움" data-fear="매우 높음" data-activity="보통">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-23.png" alt="나폴리탄 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>나폴리탄</h2>
+              <p class="store">둠 이스케이프 1호점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">인천</span>
+            </span>
+          </span>
+        </a>
+
+        <a class="escape-card-link" href="/p/escape/24" data-reserved-date="" data-difficulty="보통" data-fear="높음" data-activity="보통">
+          <span class="poster">
+            <img src="/p/escape/assets/poster-24.png" alt="춘화각 : 피할 수 없는 저주 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>춘화각 : 피할 수 없는 저주</h2>
+              <p class="store">상상의문 수원2호점</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">수원</span>
+            </span>
+          </span>
+        </a>
+      </section>
+    </div>
+  </main>
+  <script>
+    const reservationQueryKey = "m";
+    const listReservationQueryValue = "l8s2";
+    const cardReservationTokens = {
+      "1.html": "v8k2",
+      "2.html": "q4n7",
+      "3.html": "p6w1",
+      "4.html": "z9c3",
+      "7.html": "d2m9",
+      "8.html": "x5a4",
+      "9.html": "r9k4",
+      "10.html": "t3v8",
+      "11.html": "u6p2",
+      "12.html": "w5q9",
+      "13.html": "y2n6",
+      "14.html": "c8j5",
+      "15.html": "g4x7",
+      "16.html": "o9b3",
+      "17.html": "n4s8",
+      "18.html": "f6v3",
+      "19.html": "b2q7",
+      "20.html": "k9m5",
+      "21.html": "s3d8",
+      "22.html": "j7p4",
+      "23.html": "e5t9",
+      "24.html": "h6r2"
+    };
+    const showReservation = new URLSearchParams(window.location.search).get(reservationQueryKey) === listReservationQueryValue;
+    const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const cardFileFromHref = (href) => {
+      const normalize = (value) => {
+        const lastSegment = String(value || "")
+          .split("?", 1)[0]
+          .replace(/\/+$/, "")
+          .split("/")
+          .filter(Boolean)
+          .pop() || "";
+
+        return /^\d+$/.test(lastSegment) ? `${lastSegment}.html` : lastSegment;
+      };
+
+      try {
+        return normalize(new URL(href, window.location.href).pathname);
+      } catch {
+        return normalize(href);
+      }
+    };
+    const parseReservedDate = (value) => {
+      if (!value) return null;
+      const [year, month, day] = value.split("-").map(Number);
+      if (!year || !month || !day) return null;
+      return new Date(year, month - 1, day);
+    };
+    const reservationStatus = (value) => {
+      const reservedDate = parseReservedDate(value);
+      if (!reservedDate) return "status-undated";
+
+      const today = startOfDay(new Date());
+      const reservedDay = startOfDay(reservedDate);
+      if (reservedDay.getTime() === today.getTime()) return "status-today";
+      return reservedDay < today ? "status-past" : "status-upcoming";
+    };
+    const reservationSortGroup = (value) => {
+      const reservedDate = parseReservedDate(value);
+      if (!reservedDate) return 1;
+
+      const today = startOfDay(new Date());
+      const reservedDay = startOfDay(reservedDate);
+      return reservedDay < today ? 2 : 0;
+    };
+
+    document.querySelectorAll(".reservation-badge").forEach((badge) => {
+      badge.hidden = !showReservation;
+    });
+
+    document.querySelectorAll(".escape-card-link").forEach((link) => {
+      const href = link.getAttribute("href").split("?")[0];
+      const cardToken = cardReservationTokens[cardFileFromHref(href)];
+      const summary = link.querySelector(".summary");
+      const stats = [
+        ["난이도", link.dataset.difficulty],
+        ["공포", link.dataset.fear],
+        ["활동", link.dataset.activity]
+      ].filter(([, value]) => value);
+
+      link.href = showReservation && cardToken ? `${href}?${reservationQueryKey}=${cardToken}` : href;
+      link.classList.add("reservation-status", reservationStatus(link.dataset.reservedDate));
+
+      if (summary && stats.length && !summary.querySelector(".list-stats")) {
+        const statRow = document.createElement("span");
+        statRow.className = "list-stats";
+        statRow.setAttribute("aria-label", "난이도 공포도 활동성");
+
+        stats.forEach(([label, value]) => {
+          const item = document.createElement("span");
+          const name = document.createElement("span");
+          const text = document.createElement("strong");
+
+          item.className = "list-stat";
+          name.textContent = label;
+          text.textContent = value;
+          item.append(name, text);
+          statRow.append(item);
+        });
+
+        summary.append(statRow);
+      }
+    });
+
+    const toggleReservationQuery = () => {
+      const url = new URL(window.location.href);
+      const isShowingReservation = url.searchParams.get(reservationQueryKey) === listReservationQueryValue;
+      if (isShowingReservation) {
+        url.searchParams.delete(reservationQueryKey);
+      } else {
+        url.searchParams.set(reservationQueryKey, listReservationQueryValue);
+      }
+      window.location.replace(url.toString());
+    };
+
+    const bindTripleClick = (node, callback) => {
+      if (!node) return;
+
+      let count = 0;
+      let timer = 0;
+
+      node.addEventListener("click", (event) => {
+        count = event.detail > 1 ? event.detail : count + 1;
+        clearTimeout(timer);
+
+        if (count >= 3) {
+          event.preventDefault();
+          count = 0;
+          callback();
+          return;
+        }
+
+        timer = setTimeout(() => {
+          count = 0;
+        }, 650);
+      });
+    };
+
+    bindTripleClick(document.querySelector(".hero h1"), toggleReservationQuery);
+
+    document.querySelectorAll(".card-list").forEach((list) => {
+      const cards = Array.from(list.querySelectorAll("[data-reserved-date]"));
+      const sortedCards = cards
+        .sort((a, b) => {
+          const aDate = a.dataset.reservedDate;
+          const bDate = b.dataset.reservedDate;
+          const aGroup = reservationSortGroup(aDate);
+          const bGroup = reservationSortGroup(bDate);
+
+          if (aGroup !== bGroup) return aGroup - bGroup;
+          if (!aDate || !bDate) return 0;
+          if (aGroup === 0) return aDate.localeCompare(bDate);
+          return bDate.localeCompare(aDate);
+        });
+
+      list.append(...sortedCards);
+      list.classList.add("is-ready");
+    });
+  </script>
+  <script src="/js/html-document-scroll.js"></script>
+</body>
+
+</html>

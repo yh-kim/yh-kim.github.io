@@ -55,5 +55,5 @@ scripts/verify-all.sh
 ## 기본 규칙
 
 - 사용자가 요청하지 않으면 커밋, 푸시, 배포를 하지 않습니다.
-- HTML 파일은 `html-documents/`에 넣고 `ruby scripts/add-html-document.rb`로 목록을 동기화합니다.
+- HTML 파일은 `p/`에 넣고 `ruby scripts/add-html-document.rb`로 목록을 동기화합니다.
 - `_posts/`는 dev 글, `_daily/`는 note 글입니다.

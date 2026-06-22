@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>맞춤법</title>
+  <meta name="description" content="자주 헷갈리는 맞춤법과 띄어쓰기 규칙을 예문 중심으로 정리한 문서">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="맞춤법">
+  <meta property="og:description" content="자주 헷갈리는 맞춤법과 띄어쓰기 규칙을 예문 중심으로 정리한 문서">
+  <meta property="og:type" content="article">
+      <meta property="og:url" content="https://blog.pickth.com/p/spelling/">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta name="twitter:card" content="summary">
+  <style>
+    :root {
+      --ink: #202631;
+      --muted: #667085;
+      --line: #dce3ea;
+      --paper: #fffdfa;
+      --blue: #eaf3ff;
+      --green: #eaf8ef;
+      --violet: #f2edff;
+      --sun: #fff4d6;
+      --shadow: 0 18px 48px rgba(26, 40, 64, .10);
+      --html-doc-top-bg: #2f5f7f;
+      --html-doc-top-color: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #f6f9fc 0%, #fffdfa 42%, #f8fafc 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.66;
+    }
+
+    .page {
+      width: min(1000px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 38px 0 16px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .38fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .hero-copy,
+    .summary {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .88);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      padding: clamp(24px, 4.5vw, 46px);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #315d7c;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 62px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 650px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 2.4vw, 18px);
+      font-weight: 520;
+    }
+
+    .summary {
+      display: grid;
+      gap: 10px;
+      align-content: center;
+      padding: 20px;
+    }
+
+    .summary button {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 850;
+      font-family: inherit;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    main {
+      padding: 10px 0 56px;
+    }
+
+    .section {
+      margin-top: 14px;
+      padding: clamp(18px, 3vw, 28px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .90);
+      box-shadow: 0 12px 34px rgba(26, 40, 64, .06);
+    }
+
+    .section h2 {
+      margin: 0 0 14px;
+      font-size: clamp(23px, 4vw, 34px);
+      line-height: 1.2;
+    }
+
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .rule-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .rule-card h3 {
+      margin: 0 0 9px;
+      font-size: 18px;
+      line-height: 1.28;
+    }
+
+    .rule-card ul,
+    .rule-card ol {
+      margin: 0;
+      padding-left: 19px;
+      color: #3d4756;
+      font-size: 14px;
+    }
+
+    .example {
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--blue);
+      color: #27384d;
+      font-size: 14px;
+      font-weight: 720;
+    }
+
+    .source {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .source a {
+      color: #2f5f7f;
+      font-weight: 800;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .soft {
+      background: var(--green);
+    }
+
+    .violet {
+      background: var(--violet);
+    }
+
+    .sun {
+      background: var(--sun);
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 18px, 1000px);
+      }
+
+      header {
+        padding: 12px 0 8px;
+      }
+
+      .hero,
+      .rule-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .hero-copy,
+      .summary,
+      .section {
+        border-radius: 14px;
+      }
+
+      .hero-copy,
+      .summary {
+        padding: 16px;
+      }
+
+      .section {
+        margin-top: 9px;
+        padding: 14px;
+      }
+
+      .rule-card {
+        padding: 12px;
+      }
+
+      .rule-card h3 {
+        font-size: 16px;
+      }
+
+      .rule-card ul,
+      .rule-card ol,
+      .example {
+        font-size: 13px;
+      }
+    }
+  </style>
+
+
+</head>
+<body>
+  <header class="page">
+    <div class="hero">
+      <section class="hero-copy">
+        <p class="eyebrow">Korean writing note</p>
+        <h1>맞춤법</h1>
+        <p class="lead">자주 헷갈리는 표현을 규칙, 예문, 출처 중심으로 다시 찾기 쉽게 정리했습니다.</p>
+      </section>
+      <nav class="summary" aria-label="문서 바로가기">
+        <button type="button" data-scroll-target="usage">올바른 사용법</button>
+        <button type="button" data-scroll-target="spacing">띄어쓰기</button>
+        <button type="button" data-scroll-target="sources">출처</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="section" id="usage">
+      <h2>올바른 사용법</h2>
+      <div class="rule-grid">
+        <article class="rule-card">
+          <h3>갈게 / 갈께</h3>
+          <ul><li>약속을 나타내는 종결어미는 <strong>-ㄹ게</strong>이므로 <strong>갈게</strong>로 적습니다.</li></ul>
+          <div class="example">조금 이따가 갈게</div>
+          <p class="source">출처: <a href="http://krdic.naver.com/rescript_detail.nhn?seq=6371" target="_blank" rel="noopener">네이버 사전</a></p>
+        </article>
+
+        <article class="rule-card">
+          <h3>했대 / 했데</h3>
+          <ul>
+            <li><strong>했대</strong>: 남이 말한 내용을 간접적으로 전달할 때 사용합니다.</li>
+            <li><strong>했데</strong>: 직접 경험한 사실을 나중에 보고하듯 말할 때 사용합니다.</li>
+          </ul>
+          <div class="example">그 사람은 아주 똑똑하대. / 고향은 하나도 변하지 않았데.</div>
+          <p class="source">출처: <a href="http://krdic.naver.com/rescript_detail.nhn?seq=4318" target="_blank" rel="noopener">네이버 사전</a></p>
+        </article>
+
+        <article class="rule-card soft">
+          <h3>에요 / 이에요 / 예요</h3>
+          <ul>
+            <li><strong>에요</strong>: '이다'나 '아니다'의 어간 뒤에 붙는 어미입니다.</li>
+            <li><strong>이에요</strong>: 서술격 조사 어간 '-이-' 뒤에 '-에요'가 붙은 말입니다.</li>
+            <li><strong>예요</strong>: '이에요'의 준말입니다.</li>
+          </ul>
+          <div class="example">책이에요. / 아니에요. / pimi예요. / 뭐예요.</div>
+          <p class="source">출처: <a href="http://krdic.naver.com/rescript_detail.nhn?seq=1657" target="_blank" rel="noopener">네이버 사전</a></p>
+        </article>
+
+        <article class="rule-card">
+          <h3>대로 / 데로</h3>
+          <ul>
+            <li><strong>대로</strong>: 어떤 상태나 행동이 나타나는 즉시를 뜻하는 의존 명사입니다.</li>
+            <li><strong>데로</strong>: 장소의 뜻을 나타내는 '데' 뒤에 조사 '로'가 붙은 경우입니다.</li>
+          </ul>
+          <div class="example">집에 도착하는 대로 편지를 쓰다.</div>
+          <p class="source">출처: <a href="http://krdic.naver.com/rescript_detail.nhn?seq=7442" target="_blank" rel="noopener">네이버 사전</a></p>
+        </article>
+
+        <article class="rule-card">
+          <h3>던지 / 든지</h3>
+          <ul>
+            <li><strong>던지</strong>: 막연한 의문이 있는 채로 뒤 절과 관련시킬 때 씁니다.</li>
+            <li><strong>든지</strong>: 어느 것이든 선택될 수 있거나 뒤 절과 상관없음을 나타냅니다.</li>
+          </ul>
+          <div class="example">얼마나 춥던지 손이 곱았다. / 집에 가든지 학교에 가든지 해라.</div>
+          <p class="source">출처: <a href="http://krdic.naver.com/rescript_detail.nhn?seq=6820" target="_blank" rel="noopener">네이버 사전</a></p>
+        </article>
+
+        <article class="rule-card violet">
+          <h3>로서 / 로써</h3>
+          <ul>
+            <li><strong>로서</strong>: 지위, 신분, 자격을 나타냅니다.</li>
+            <li><strong>로써</strong>: 재료, 수단, 도구, 시간의 한계를 나타냅니다.</li>
+          </ul>
+          <div class="example">교사로서 할 일이 아니다. / 대화로써 갈등을 풀다.</div>
+          <p class="source">출처: <a href="https://ko.dict.naver.com/#/correct/korean/info?seq=6913" target="_blank" rel="noopener">네이버 사전</a></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="spacing">
+      <h2>띄어쓰기</h2>
+      <div class="rule-grid">
+        <article class="rule-card wide sun">
+          <h3>띄어쓰기 법칙</h3>
+          <ol>
+            <li>띄어쓰기는 낱말을 단위로 하되 조사는 윗말에 붙여 씁니다.</li>
+            <li>수를 우리글로 적을 경우, 십진법에 따라 띄어 씁니다.</li>
+            <li>둘 이상의 낱말로 된 고유명사는 낱말을 단위로 띄어 씁니다.</li>
+            <li>성과 이름은 띄어 씁니다.</li>
+            <li>둘 이상의 낱말이 합쳐서 한 뜻의 낱말이 된 복합어는 붙여 씁니다.</li>
+            <li>문장에서 앞뒤 관계가 특별한 경우에는 적당히 붙여 쓸 수 있습니다.</li>
+          </ol>
+        </article>
+
+        <article class="rule-card">
+          <h3>헷갈리는 띄어쓰기</h3>
+          <ul>
+            <li>뭐 할 거예요</li>
+            <li>할 수가</li>
+            <li>할 테다</li>
+          </ul>
+        </article>
+
+        <article class="rule-card">
+          <h3>안 / 못</h3>
+          <ul>
+            <li>'안'과 '못'은 긍정문을 부정문으로 만듭니다.</li>
+            <li>'못하다'는 능력이 없거나 비교 대상에 미치지 못한다는 뜻일 때 붙여 씁니다.</li>
+            <li>그 외에는 '못'이 부사이므로 띄어 씁니다.</li>
+          </ul>
+        </article>
+
+        <article class="rule-card soft">
+          <h3>못 되다 / 못되다</h3>
+          <ul>
+            <li>성질이나 하는 짓이 악하거나 고약하다는 뜻이면 <strong>못되다</strong>가 바릅니다.</li>
+            <li>다른 경우에는 '못'이 부사이므로 <strong>못 되다</strong>가 바릅니다.</li>
+          </ul>
+        </article>
+
+        <article class="rule-card">
+          <h3>것이라고</h3>
+          <ul><li>서술격 조사 '-이다'는 조사처럼 앞말과 붙여 씁니다.</li></ul>
+          <div class="example">문제가 있을 것이라고 생각합니다.</div>
+        </article>
+
+        <article class="rule-card">
+          <h3>것보다</h3>
+          <ul><li>'-보다', '-보다는' 등은 조사이므로 앞말과 붙여 씁니다.</li></ul>
+          <div class="example">생각했던 것보다 좋았다.</div>
+        </article>
+
+        <article class="rule-card">
+          <h3>써야 한다</h3>
+          <ul><li>보조용언은 본용언과 띄어 씀을 원칙으로 합니다.</li></ul>
+          <div class="example">앞말과 띄어 써야 한다.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="sources">
+      <h2>출처</h2>
+      <p class="source">품사와 문장 성분: <a href="http://snustudy.com/220843584472" target="_blank" rel="noopener">수재모 블로그</a></p>
+      <p class="source">띄어쓰기 법칙: <a href="http://kin.naver.com/qna/detail.nhn?d1id=11&dirId=110801&docId=54358380&qb=7ZWc6rWt7Ja0IOudhOyWtOyTsOq4sCDrspXsuZk=&enc=utf8&section=kin&rank=1&search_sort=0&spq=0&pid=TozQOwpySEsssZB2QBlssssss/d-111888&sid=FRSzzgBUH4n3iRyc6G5rvA%3D%3D" target="_blank" rel="noopener">네이버 지식인</a></p>
+      <p class="source">띄어쓰기 설명: <a href="http://terms.naver.com/entry.nhn?docId=1711843&cid=42001&categoryId=42001#TABLE_OF_CONTENT2" target="_blank" rel="noopener">네이버 지식백과 - 글쓰기의 전략</a>, <a href="http://speller.cs.pusan.ac.kr/PnuWebSpeller/" target="_blank" rel="noopener">한국어 맞춤법/문법 검사기</a></p>
+    </section>
+  </main>
+  <script src="/js/html-document-scroll.js"></script>
+</body>
+</html>

@@ -54,6 +54,7 @@ required_dirs = %w[
   _includes
   _data
   category
+  p
   css
   js
   img

@@ -13,4 +13,4 @@ tags:
 
 이 글은 독립 HTML 문서로 옮겼습니다.
 
-[동물 이름 모음 HTML로 열기]({{ '/html-documents/animal-names.html' | relative_url }}){:target="_blank"}
+[동물 이름 모음 HTML로 열기]({{ '/p/animals/' | relative_url }}){:target="_blank"}

@@ -11,14 +11,14 @@ This repository is a Jekyll-based personal blog with a few standalone static are
 | `_daily/` | Daily collection posts. These are listed by `daily.html` and generated under `/daily/.../`. |
 | `_layouts/` | Page templates. `default.html` wraps the common shell, `page.html` renders top-level pages, `post.html` renders posts and daily entries, `tag.html` renders category pages. |
 | `_includes/` | Shared partials such as `<head>`, navigation, footer, and About page snippets. |
-| `_data/html_documents.yml` | Registry for standalone HTML documents published from `html-documents/`. |
+| `_data/html_documents.yml` | Registry for standalone HTML documents published from `p/`. |
 | `index.html` | Home page. Lists `_posts` via `paginator.posts`. |
 | `daily.html` | Daily landing page. Lists `site.daily` entries. |
 | `about.html`, `tags.html`, `404.html`, `offline.html` | Static Jekyll pages. |
 | `category/` | One page per blog tag. Each page uses `layout: tag` and points at a matching tag name. |
 | `css/`, `less/`, `js/`, `fonts/`, `img/` | Theme styles, source Less files, scripts, fonts, and shared images. |
 | `img/in-post/` | Images used inside blog posts. |
-| `html-documents/` | Standalone HTML documents served directly, such as full study notes or generated pages. |
+| `p/` | Standalone HTML documents served directly, such as full study notes or generated pages. |
 | `portfolio/` | Standalone portfolio page and its own assets. |
 | `pwa/`, `sw.js`, `offline.html` | PWA manifest, icons, service worker, and offline fallback. |
 | `scripts/` | Local verification harness. Run `scripts/verify-all.sh` after changes. |
@@ -36,16 +36,16 @@ Use this sequence for any prompt or change request:
 2. Read the relevant files before editing.
    - For posts: read a nearby existing post, the target layout, and `_config.yml`.
    - For daily: read `daily.html`, `_config.yml` collection settings, and one existing `_daily` file.
-   - For standalone HTML documents: read `_data/html_documents.yml`, `_daily/2026-05-27-html-documents.markdown`, and the target file in `html-documents/`.
+   - For standalone HTML documents: read `_data/html_documents.yml`, `_daily/2026-05-27-html-documents.markdown`, and the target file in `p/`.
    - For navigation or layout: read `_includes/nav.html`, `_layouts/default.html`, and the specific layout.
-   - For assets: inspect how existing posts reference `img/in-post` or `html-documents`.
+   - For assets: inspect how existing posts reference `img/in-post` or `page`.
 
 3. Choose the smallest compatible change.
    - Follow existing front matter style and indentation.
    - Prefer explicit `permalink` when a user-facing URL must be stable.
    - Use `relative_url` or `site.baseurl` for local links inside generated pages.
    - Keep standalone HTML/CSS isolated when it could collide with the blog theme.
-   - For uploaded HTML documents, place the HTML in `html-documents/`, add an entry to `_data/html_documents.yml`, and let `/daily/html-documents/` be the visible Daily entry point.
+   - For uploaded HTML documents, place the HTML in `p/`, add an entry to `_data/html_documents.yml`, and let `/daily/p/` be the visible Daily entry point.
    - If a standalone HTML document already had a direct Daily post, keep that post only as a hidden compatibility page when preserving old URLs matters.
 
 4. Review the result against the request.
@@ -82,8 +82,8 @@ Only stage, commit, or push when the user explicitly asks for that action.
 | Case | Symptom | Harness Coverage |
 | --- | --- | --- |
 | Future-dated daily post | The post appears in `/daily/`, but Jekyll does not write the detail page, so the list link returns 404. | `verify-daily-links.rb` fails when a daily post date is later than the current build time. |
-| Standalone HTML not registered | The HTML file exists, but there is no visible Daily entry point for users to find it. | `verify-html-documents.rb` checks `_data/html_documents.yml` and `/daily/html-documents/`. |
-| Registered HTML asset missing | The list links to an HTML file that was moved or not committed. | `verify-html-documents.rb` checks every registered `/html-documents/*.html` file exists. |
+| Standalone HTML not registered | The HTML file exists, but there is no visible Daily entry point for users to find it. | `verify-html-documents.rb` checks `_data/html_documents.yml` and `/daily/p/`. |
+| Registered HTML asset missing | The list links to an HTML file that was moved or not committed. | `verify-html-documents.rb` checks every registered `/p/...` file exists. |
 | Hidden compatibility page exposed | A direct compatibility page is generated but should not appear in the Daily list. | `verify-built-site.rb` checks generated Daily output after `jekyll build`. |
 | Personal/profile links exposed | About, Portfolio, RSS, Facebook, GitHub, old avatar, or old real-name markers reappear. | `verify-privacy.rb` checks source markers and generated `_site` output. |
 | Missing stable daily permalink | A user-facing Daily URL can change if the filename or collection rules change. | `verify-daily-links.rb` checks Daily URL shape and PSP's stable permalink. |
@@ -112,25 +112,25 @@ ruby scripts/verify-privacy.rb
 
 Add a standalone HTML document:
 
-1. Put the file under `html-documents/`, for example `html-documents/example.html`.
+1. Put the file under `p/`, for example `p/example/index.html`.
 2. Run `ruby scripts/add-html-document.rb` to sync `_data/html_documents.yml` from the folder.
 3. Review the generated entry in `_data/html_documents.yml`.
 4. Run `scripts/verify-all.sh`.
-5. Open `/daily/html-documents/` and use the generated link to reach the HTML page.
+5. Open `/daily/p/` and use the generated link to reach the HTML page.
 
 자세한 HTML 추가 가이드: `docs/html-documents-guide.md`.
 
-## Home Cooking Recipe List
+## Recipe List
 
-Use this workflow when the user asks to analyze a recipe post, Instagram reel, cooking link, caption, screenshot, or video and add it to the home cooking recipe list.
+Use this workflow when the user asks to analyze a recipe post, Instagram reel, cooking link, caption, screenshot, or video and add it to the recipe list.
 
 ### Files and Structure
 
-1. Keep the list page at `html-documents/home-cooking-recipes.html`.
-2. Keep recipe detail pages under `html-documents/home-cooking-recipes/`.
-   - Use short stable filenames such as `1.html`, `2.html`, etc.
+1. Keep the list page at `p/recipes/index.html`.
+2. Keep recipe detail pages under `p/recipes/`.
+   - Use short stable directories such as `1/index.html`, `2/index.html`, etc.
    - Do not use long romanized food names unless the user explicitly asks for descriptive filenames.
-3. Keep recipe assets under `html-documents/home-cooking-recipes/assets/`.
+3. Keep recipe assets under `p/recipes/assets/`.
    - Use short food-specific names such as `oi-naengguk.png`.
    - Keep shared recipe CSS, JavaScript, and generated images in this assets folder.
    - List cards and detail pages should reference local assets, not temporary generated-image paths.
@@ -161,9 +161,9 @@ Use this workflow when the user asks to analyze a recipe post, Instagram reel, c
 
 ### List Card Requirements
 
-Each recipe added to `html-documents/home-cooking-recipes.html` must add one `.recipe-card` with:
+Each recipe added to `p/recipes/index.html` must add one `.recipe-card` with:
 
-1. A short detail link such as `/html-documents/home-cooking-recipes/1.html`.
+1. A short detail link such as `/p/recipes/1/`.
 2. `data-tags` with searchable recipe category tags, not menu names or ingredients.
    - Good tag types: cooking form or method such as `냉국`, `비빔`, `조림`, `찜`; season or context such as `여름`, `제철`, `도시락`; serving role such as `반찬`.
    - Do not use broad document tags like `요리`, `다이어트`, or `집밥`.
@@ -180,7 +180,7 @@ Each recipe added to `html-documents/home-cooking-recipes.html` must add one `.r
 4. A generated food image that looks appetizing and represents the food itself.
    - Generate a fresh food image with the image generation tool for each recipe before wiring the card/detail image.
    - Do not use Instagram thumbnails, source preview images, stock placeholders, or unrelated local images as the final recipe card image unless the user explicitly approves a temporary fallback.
-   - Save the final selected generated image into `html-documents/home-cooking-recipes/assets/`.
+   - Save the final selected generated image into `p/recipes/assets/`.
    - Never reference generated images from `$CODEX_HOME/generated_images/...` directly in HTML.
 5. A visible time pill such as `약 10분`.
 6. A small set of visible tag pills.
@@ -205,8 +205,8 @@ Filter UI rules:
 Each recipe detail page must include:
 
 1. A back button that:
-   - Calls browser history back when the user came from `home-cooking-recipes.html`.
-   - Falls back to `/html-documents/home-cooking-recipes.html` when opened directly or from elsewhere.
+   - Calls browser history back when the user came from `/p/recipes/`.
+   - Falls back to `/p/recipes/` when opened directly or from elsewhere.
 2. A top source button, for example `Instagram에서 보기`, when a source URL exists.
 3. Recipe title, short description, time, and major ingredients.
    - The short description must be about the dish itself, not the fact that it was saved or analyzed.
@@ -276,7 +276,7 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
    - Private-token title toggles should use `window.location.replace(...)`, not `assign(...)`, so toggling reservation visibility does not add a browser history entry.
    - Detail card pages should prevent accidental double-tap zoom while preserving the card interaction: use `maximum-scale=1` in the viewport meta and keep `touch-action: manipulation` on the shared detail-page shell.
    - OG/Twitter meta descriptions should not include reservation date/time because previews cannot reliably respect private query tokens.
-   - List cards should still show reservation-state background colors regardless of private-token state: undated and past reservation date must share the same muted gray tone, reservation day uses the active day tone, and upcoming reservation date uses the upcoming tone. Detail cards should keep the unified coral/cream card theme.
+   - List cards should still show reservation-state background colors regardless of private-token state: undated candidate cards use a brighter warm tone, past reservation dates use a muted gray tone, reservation day uses the active day tone, and upcoming reservation dates use the upcoming tone. Detail cards should keep the unified coral/cream card theme.
    - If the schedule is not decided, use `reservedDate: "일정 미정"` and omit `reservedYear` and `reservedTime`.
    - Undated card detail pages must not include the reservation-time section in the static HTML. Do not leave an empty `.intro-reservation` block that depends on JavaScript hiding.
    - The shared card script also removes `.intro-reservation` when `reservedTime` is missing, but this is a fallback. The HTML itself should already avoid showing a placeholder calendar, time range, or `일정 미정` reservation box.
@@ -369,7 +369,7 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
 
    - Keep `/` path separators and URL-encode spaces/non-ASCII path parts.
    - Verify the response is an image with `curl -I` or `file`.
-   - Save it under `html-documents/escape-room-invite-card/assets/poster-N.ext`.
+   - Save it under `p/escape/assets/poster-N.ext`.
    - Use the real extension from the bytes or content type: `.jpg`, `.png`, or `.webp`.
    - Update `posterUrl` and the list page to match the real extension.
    - Do not hotlink 빠방's image URL in the HTML.
@@ -444,27 +444,27 @@ Search-engine results may miss 빠방 because 빠방 content is rendered dynamic
 The public list page stays at:
 
 ```text
-html-documents/escape-room-invite.html
+p/escape/
 ```
 
 Individual cards live under:
 
 ```text
-html-documents/escape-room-invite-card/
+p/escape/
 ```
 
 Use numeric card files:
 
 ```text
-html-documents/escape-room-invite-card/1.html
-html-documents/escape-room-invite-card/2.html
-html-documents/escape-room-invite-card/3.html
+p/escape/1/index.html
+p/escape/2/index.html
+p/escape/3/index.html
 ```
 
 Shared card assets live under:
 
 ```text
-html-documents/escape-room-invite-card/assets/
+p/escape/assets/
 ```
 
 Poster files use the matching card number:
@@ -486,15 +486,15 @@ escape-room-card.js
 
 Do not duplicate the shared CSS/JS for each card unless the user asks for a one-off design that cannot be shared.
 
-Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or directory URLs should be left to the site's root `404.html` handling.
+Keep `p/escape/index.html` as the list page. Invalid card URLs should be left to the site's root `404.html` handling.
 
 ### Adding a New Card
 
 1. Find the next card number by listing existing files and using the highest existing number plus one:
 
    ```bash
-   find html-documents/escape-room-invite-card -maxdepth 1 -name '*.html' \
-     | sed -E 's#.*/([0-9]+)\.html#\1#' \
+   find p/escape -mindepth 2 -maxdepth 2 -name 'index.html' \
+     | sed -E 's#.*/([0-9]+)/index\.html#\1#' \
      | sort -n \
      | tail -1
    ```
@@ -543,12 +543,12 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
 
    and omit `reservedYear` and `reservedTime`. Keep all other fields exactly as complete as a dated card. The card script removes the whole reservation-time section for undated cards, but the static HTML for an undated card should not include that section in the first place.
 
-5. Update the list page `html-documents/escape-room-invite.html`.
-   - Add one list item linking to `./escape-room-invite-card/N.html`.
-   - Use the matching poster `./escape-room-invite-card/assets/poster-N.ext`.
+5. Update the list page `p/escape/index.html`.
+   - Add one list item linking to `/p/escape/N`.
+   - Use the matching poster `/p/escape/assets/poster-N.ext`.
    - Add a new unique private token for `N.html` to both token maps:
-     - `cardReservationTokens` in `html-documents/escape-room-invite.html`.
-     - `cardReservationTokens` in `html-documents/escape-room-invite-card/assets/escape-room-card.js`.
+     - `cardReservationTokens` in `p/escape/index.html`.
+     - `cardReservationTokens` in `p/escape/assets/escape-room-card.js`.
    - Do not reuse another card's token. The list private token and every detail card token must be different from each other.
    - Keep the list page as the only registered HTML document in `_data/html_documents.yml`.
    - Add `data-difficulty`, `data-fear`, and `data-activity` to the list card anchor so the list can render the same compact stat pills shown on detail cards.
@@ -557,8 +557,8 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
    - Avoid showing the unsorted list before JavaScript finishes. The list page should hide `.card-list` only when the early `js` class is present, sort and decorate cards, then reveal it by adding `is-ready`.
 
 6. Do not run `ruby scripts/add-html-document.rb` only to register individual card files.
-   - The sync script scans only `html-documents/*.html`.
-   - Individual cards intentionally stay out of `/daily/html-documents/`.
+   - The sync script scans only `p/*/index.html`.
+   - Individual cards intentionally stay out of `/daily/p/`.
    - Run it only if the top-level list page metadata needs syncing.
 
 7. Verify the Naver Map link before final validation.
@@ -569,24 +569,24 @@ Do not add `html-documents/escape-room-invite-card/index.html`. Invalid or direc
 8. Verify:
 
    ```bash
-   node --check html-documents/escape-room-invite-card/assets/escape-room-card.js
+   node --check p/escape/assets/escape-room-card.js
    scripts/verify-all.sh
    ```
 
 9. Report:
-   - New card URL, for example `/html-documents/escape-room-invite-card/2.html`.
-   - Updated list URL: `/html-documents/escape-room-invite.html`.
+   - New card URL, for example `/p/escape/2`.
+   - Updated list URL: `/p/escape/`.
    - Source used for the poster/details.
    - Verification commands and results.
 
 When the user says they are adding an HTML file or asks to publish an HTML document:
 
 1. Treat it as a standalone HTML document unless they explicitly ask for a normal blog post.
-2. Copy or create the HTML under `html-documents/` with a stable, lowercase, hyphenated filename.
+2. Copy or create the HTML under `p/` with a stable, lowercase, hyphenated filename.
 3. Run `ruby scripts/add-html-document.rb` to sync `_data/html_documents.yml`.
 4. Review the generated `title`, `description`, `date`, and optional `tags`.
 5. Do not embed it with an iframe in a Daily post by default.
-6. Use `/daily/html-documents/` as the visible Daily entry point.
+6. Use `/daily/p/` as the visible Daily entry point.
 7. Preserve or create a direct Daily compatibility page only when there is already a shared URL or the user asks for one.
 8. Run `scripts/verify-all.sh` and `ruby scripts/test-harness.rb`.
 9. Stop before commit and report the changed files and verification output.

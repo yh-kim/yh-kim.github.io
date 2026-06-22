@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>집밥 레시피 보관함</title>
+  <meta name="description" content="집에서 해먹은 요리의 시간, 주요 재료, 레시피를 모아두는 개인 집밥 보관함">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <link rel="stylesheet" href="/p/recipes/assets/styles.css">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="집밥 레시피 보관함">
+  <meta property="og:description" content="집에서 해먹은 요리의 시간, 주요 재료, 레시피를 모아두는 개인 집밥 보관함">
+      <meta property="og:url" content="https://blog.pickth.com/p/recipes/1/">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Pimi's Blog space icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="집밥 레시피 보관함">
+  <meta name="twitter:description" content="집에서 해먹은 요리의 시간, 주요 재료, 레시피를 모아두는 개인 집밥 보관함">
+  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+
+
+</head>
+
+<body class="detail-page" data-recipe-id="1">
+  <header class="page">
+    <div class="top-actions">
+      <button class="icon-button" type="button" id="backButton" aria-label="뒤로가기">&#8592;</button>
+      <div class="source-links" id="sourceLinks"></div>
+    </div>
+    <div class="detail-hero">
+      <div class="hero-text">
+        <div>
+          <h1 id="recipeTitle"></h1>
+          <p class="lead" id="recipeLead"></p>
+        </div>
+      </div>
+      <aside class="fact-box" aria-label="레시피 요약">
+        <div class="fact-row">
+          <span>걸리는 시간</span>
+          <strong id="recipeTime"></strong>
+        </div>
+        <div class="fact-row">
+          <span>주요 재료</span>
+          <strong id="recipeIngredients"></strong>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <main class="page detail-main">
+    <section class="content" aria-label="레시피">
+      <article class="panel">
+        <h2>준비물</h2>
+        <ul class="prep-list" id="prepList"></ul>
+      </article>
+      <div class="content" id="methodContainer"></div>
+      <article class="panel" id="memoPanel">
+        <h2>메모</h2>
+        <p class="memo" id="recipeMemo"></p>
+      </article>
+    </section>
+    <aside class="media" id="recipeMedia" aria-label="사진과 영상"></aside>
+  </main>
+
+  <button class="top-button" type="button" aria-label="맨위로 이동" id="scrollTopButton">&#8593;</button>
+  <script src="/p/recipes/assets/recipes.js"></script>
+  <script src="/p/recipes/assets/detail.js"></script>
+</body>
+
+</html>

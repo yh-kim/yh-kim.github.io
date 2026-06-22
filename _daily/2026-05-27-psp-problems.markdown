@@ -16,6 +16,6 @@ tags:
 
 PSP 시험 대비용으로 정리한 핵심 단어, 과별 포인트, 예상 문답, 오픈북 전략입니다.
 
-[PSP 시험 힌트 총정리 HTML로 열기]({{ '/html-documents/psp-problems.html' | relative_url }}){:target="_blank"}
+[PSP 시험 힌트 총정리 HTML로 열기]({{ '/p/psp/' | relative_url }}){:target="_blank"}
 
-다른 HTML 문서는 [HTML 문서 모음]({{ '/daily/html-documents/' | relative_url }})에서 볼 수 있습니다.
+다른 HTML 문서는 [HTML 문서 모음]({{ '/daily/p/' | relative_url }})에서 볼 수 있습니다.

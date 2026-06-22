@@ -8,7 +8,7 @@ require "psych"
 ROOT = Pathname.new(__dir__).join("..").expand_path
 DATA_FILE = ROOT.join("_data/html_documents.yml")
 LIST_POST = ROOT.join("_daily/2026-05-27-html-documents.markdown")
-RECIPE_DATA_FILE = ROOT.join("html-documents/home-cooking-recipes/assets/recipes.js")
+RECIPE_DATA_FILE = ROOT.join("p/recipes/assets/recipes.js")
 
 def fail_with(message)
   warn "FAIL: #{message}"
@@ -39,6 +39,14 @@ fail_with("_data/html_documents.yml must contain at least one document") if docu
 
 allowed_tags = %w[동물 다이어트 방탈출 맞춤법 요리]
 seen_paths = {}
+
+def document_asset_for(path)
+  clean = path.delete_prefix("/")
+  return ROOT.join(clean, "index.html") if path.end_with?("/")
+
+  ROOT.join(clean)
+end
+
 documents.each_with_index do |document, index|
   label = "_data/html_documents.yml[#{index}]"
   fail_with("#{label} must be a map") unless document.is_a?(Hash)
@@ -47,15 +55,15 @@ documents.each_with_index do |document, index|
   path = document["path"].to_s.strip
   fail_with("#{label} missing title") if title.empty?
   fail_with("#{label} missing path") if path.empty?
-  fail_with("#{label} path must start with /html-documents/: #{path}") unless path.start_with?("/html-documents/")
-  fail_with("#{label} path must end with .html: #{path}") unless path.end_with?(".html")
+  fail_with("#{label} path must start with /p/: #{path}") unless path.start_with?("/p/")
+  fail_with("#{label} path must end with /: #{path}") unless path.end_with?("/")
 
   if seen_paths[path]
     fail_with("#{label} duplicates #{seen_paths[path]} at #{path}")
   end
   seen_paths[path] = label
 
-  asset = ROOT.join(path.delete_prefix("/"))
+  asset = document_asset_for(path)
   fail_with("#{label} points to missing HTML asset: #{path}") unless asset.file?
 
   html = asset.read
@@ -90,8 +98,9 @@ documents.each_with_index do |document, index|
   end
 end
 
-ROOT.join("html-documents").glob("**/*.html").sort.each do |asset|
-  public_path = "/html-documents/#{asset.relative_path_from(ROOT.join("html-documents"))}"
+ROOT.join("p").glob("**/*.html").sort.each do |asset|
+  relative_path = asset.relative_path_from(ROOT.join("p")).to_s
+  public_path = relative_path.end_with?("/index.html") ? "/p/#{relative_path.delete_suffix("index.html")}" : "/p/#{relative_path}"
   html = asset.read
   preview_snippets = [
     '<link rel="shortcut icon" href="/img/favicon.ico">',
@@ -131,35 +140,35 @@ if RECIPE_DATA_FILE.file?
 
   recipe_data.scan(/tags:\s*\[(.*?)\]/m).flatten.each do |raw_tags|
     raw_tags.scan(/"([^"]+)"/).flatten.each do |tag|
-      fail_with("home cooking recipe tag must be category-like, not broad/menu/ingredient: #{tag}") if banned_recipe_tags.include?(tag)
+      fail_with("recipe tag must be category-like, not broad/menu/ingredient: #{tag}") if banned_recipe_tags.include?(tag)
     end
   end
 
   recipe_data.scan(/searchIngredients:\s*\[(.*?)\]/m).flatten.each do |raw_ingredients|
     raw_ingredients.scan(/"([^"]+)"/).flatten.each do |ingredient|
       if banned_search_ingredients.include?(ingredient)
-        fail_with("home cooking recipe search ingredient must not include generic seasoning: #{ingredient}")
+        fail_with("recipe search ingredient must not include generic seasoning: #{ingredient}")
       end
     end
   end
 
   recipe_data.scan(/(?:description|memo):\s*"([^"]*)"/).flatten.each do |text|
     banned_display_phrases.each do |phrase|
-      fail_with("home cooking recipe display text must describe the food, not source/workflow state: #{phrase}") if text.include?(phrase)
+      fail_with("recipe display text must describe the food, not source/workflow state: #{phrase}") if text.include?(phrase)
     end
   end
 
   recipe_data.scan(/steps:\s*\[(.*?)\]/m).flatten.each do |raw_steps|
     raw_steps.scan(/"([^"]+)"/).flatten.each do |step|
       banned_display_phrases.each do |phrase|
-        fail_with("home cooking recipe method text must describe cooking, not source/workflow state: #{phrase}") if step.include?(phrase)
+        fail_with("recipe method text must describe cooking, not source/workflow state: #{phrase}") if step.include?(phrase)
       end
     end
   end
 end
 
 front_matter, body = read_front_matter(LIST_POST)
-fail_with("HTML documents daily post must keep /daily/html-documents/ permalink") unless front_matter["permalink"] == "/daily/html-documents/"
+fail_with("HTML documents daily post must keep /daily/p/ permalink") unless front_matter["permalink"] == "/daily/p/"
 fail_with("HTML documents daily post must render site.data.html_documents") unless body.include?("site.data.html_documents")
 
 puts "OK: verified #{documents.length} HTML document(s)."

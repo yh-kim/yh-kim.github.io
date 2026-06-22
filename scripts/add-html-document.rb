@@ -10,7 +10,7 @@ require "psych"
 
 ROOT = Pathname.new(__dir__).join("..").expand_path
 DATA_FILE = ROOT.join("_data/html_documents.yml")
-TARGET_DIR = ROOT.join("html-documents")
+TARGET_DIR = ROOT.join("p")
 ALLOWED_TAGS = %w[동물 다이어트 방탈출 맞춤법 요리].freeze
 
 def fail_with(message)
@@ -25,16 +25,16 @@ def usage
       ruby scripts/add-html-document.rb SOURCE.html --title "Title" [options]
 
     Options:
-      --sync                   Sync _data/html_documents.yml from html-documents/. This is the default when SOURCE.html is omitted.
-      --slug SLUG              Output filename without .html. Defaults to source filename.
-      --description TEXT       Description shown in /daily/html-documents/.
+      --sync                   Sync _data/html_documents.yml from p/. This is the default when SOURCE.html is omitted.
+      --slug SLUG              Output directory name. Defaults to source filename.
+      --description TEXT       Description shown in /daily/p/.
       --date YYYY-MM-DD        Document date. Defaults to today.
       --tags TAG1,TAG2         Comma-separated tags. Allowed: 동물, 다이어트, 방탈출, 맞춤법, 요리.
       --force                  Replace an existing file and registry entry for the same path.
 
     Example:
       ruby scripts/add-html-document.rb
-      ruby scripts/add-html-document.rb ~/Downloads/note.html --title "맞춤법" --slug korean-spelling --tags 맞춤법
+      ruby scripts/add-html-document.rb ~/Downloads/note.html --title "맞춤법" --slug spelling --tags 맞춤법
   TEXT
 end
 
@@ -67,7 +67,9 @@ def title_from_html(path)
   title = match && match[1].gsub(/\s+/, " ").strip
   return title unless title.to_s.empty?
 
-  path.basename(".html").to_s.split(/[-_]+/).map(&:capitalize).join(" ")
+  fallback = path.basename(".html").to_s
+  fallback = path.dirname.basename.to_s if fallback == "index"
+  fallback.split(/[-_]+/).map(&:capitalize).join(" ")
 end
 
 def description_from_html(path)
@@ -85,6 +87,17 @@ def ensure_link_preview_metadata(path, public_path, title:, description:)
   clean_title = CGI.escapeHTML(title.to_s.strip.empty? ? title_from_html(path) : title.to_s.strip)
   clean_description = CGI.escapeHTML(description.to_s.strip.empty? ? (description_from_html(path) || "Pimi's Blog") : description.to_s.strip)
   clean_url = "https://blog.pickth.com#{public_path}"
+
+  if text.match?(%r{<meta\s+property=["']og:url["']\s+content=["'][^"']*["'][^>]*>}i)
+    updated = text.gsub(
+      %r{<meta\s+property=["']og:url["']\s+content=["'][^"']*["']([^>]*)>}i,
+      "  <meta property=\"og:url\" content=\"#{clean_url}\"\\1>"
+    )
+    if updated != text
+      text = updated
+      changed = true
+    end
+  end
 
   unless text.include?('href="/img/favicon.ico"')
     additions << '  <link rel="shortcut icon" href="/img/favicon.ico">'
@@ -123,7 +136,7 @@ def sync_documents
 
   TARGET_DIR.glob("**/*.html").sort.each do |file|
     relative_path = file.relative_path_from(TARGET_DIR).to_s
-    public_path = "/html-documents/#{relative_path}"
+    public_path = relative_path.end_with?("/index.html") ? "/p/#{relative_path.delete_suffix("index.html")}" : "/p/#{relative_path}"
     ensure_link_preview_metadata(
       file,
       public_path,
@@ -137,12 +150,15 @@ def sync_documents
     next unless document.is_a?(Hash)
 
     path = document["path"].to_s
-    index[path] = document if path.start_with?("/html-documents/") && path.end_with?(".html")
+    index[path] = document if path.start_with?("/p/") && (path.end_with?(".html") || path.end_with?("/"))
   end
 
-  documents = TARGET_DIR.glob("*.html").sort.map do |file|
-    path = "/html-documents/#{file.basename}"
-    existing = existing_by_path[path] || {}
+  document_files = TARGET_DIR.glob("*/index.html").sort
+  documents = document_files.map do |file|
+    relative_path = file.relative_path_from(TARGET_DIR).to_s
+    path = relative_path.end_with?("/index.html") ? "/p/#{relative_path.delete_suffix("index.html")}" : "/p/#{relative_path}"
+    legacy_path = path.end_with?("/") ? "#{path.delete_suffix("/")}.html" : path
+    existing = existing_by_path[path] || existing_by_path[legacy_path] || {}
     entry = {
       "title" => existing["title"].to_s.empty? ? title_from_html(file) : existing["title"],
       "description" => existing["description"].to_s,
@@ -153,12 +169,12 @@ def sync_documents
     entry
   end
 
-  fail_with("html-documents/ must contain at least one .html file") if documents.empty?
+  fail_with("p/ must contain at least one document HTML file") if documents.empty?
 
   dump_documents(documents)
 
   puts "OK: synced #{documents.length} HTML document(s)."
-  puts "List page: /daily/html-documents/"
+  puts "List page: /daily/p/"
 end
 
 options = {
@@ -212,11 +228,11 @@ end
 slug = slugify(options[:slug] || source.basename.to_s)
 fail_with("could not create a slug. Pass --slug explicitly.") unless slug
 
-TARGET_DIR.mkpath
+TARGET_DIR.join(slug).mkpath
 DATA_FILE.dirname.mkpath
 
-target = TARGET_DIR.join("#{slug}.html")
-path = "/html-documents/#{slug}.html"
+target = TARGET_DIR.join(slug, "index.html")
+path = "/p/#{slug}/"
 
 documents = load_documents
 existing_index = documents.index { |document| document.is_a?(Hash) && document["path"].to_s == path }
@@ -251,4 +267,4 @@ end
 dump_documents(documents)
 
 puts "OK: added #{path}"
-puts "List page: /daily/html-documents/"
+puts "List page: /daily/p/"

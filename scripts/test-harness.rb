@@ -62,7 +62,8 @@ end
 with_temp_repo do |repo|
   source = repo.join("tmp-html-source.html")
   source.write("<!doctype html><html><head><title>Temp</title></head><body>Temp</body></html>\n")
-  repo.join("html-documents/folder-added.html").write("<!doctype html><html><head><title>Folder Added</title></head><body>Folder</body></html>\n")
+  repo.join("p/folder-added").mkpath
+  repo.join("p/folder-added/index.html").write("<!doctype html><html><head><title>Folder Added</title></head><body>Folder</body></html>\n")
 
   expect_success(
     repo,
@@ -71,7 +72,7 @@ with_temp_repo do |repo|
   )
   expect_success(repo, ["ruby", "scripts/verify-html-documents.rb"], "HTML documents check after sync script")
 
-  fail_with("sync HTML documents script should register files already in html-documents") unless repo.join("_data/html_documents.yml").read.include?("/html-documents/folder-added.html")
+  fail_with("sync HTML documents script should register files already in p") unless repo.join("_data/html_documents.yml").read.include?("/p/folder-added/")
 
   expect_success(
     repo,
@@ -94,8 +95,8 @@ with_temp_repo do |repo|
   )
   expect_success(repo, ["ruby", "scripts/verify-html-documents.rb"], "HTML documents check after script")
 
-  fail_with("add HTML document script should copy the source file") unless repo.join("html-documents/temp-html.html").file?
-  fail_with("add HTML document script should register the new file") unless repo.join("_data/html_documents.yml").read.include?("/html-documents/temp-html.html")
+  fail_with("add HTML document script should copy the source file") unless repo.join("p/temp-html/index.html").file?
+  fail_with("add HTML document script should register the new file") unless repo.join("_data/html_documents.yml").read.include?("/p/temp-html/")
 end
 
 with_temp_repo do |repo|
@@ -144,7 +145,7 @@ with_temp_repo do |repo|
 end
 
 with_temp_repo do |repo|
-  FileUtils.rm_f(repo.join("html-documents/psp-problems.html"))
+  FileUtils.rm_f(repo.join("p/psp/index.html"))
 
   expect_failure(
     repo,
@@ -167,19 +168,19 @@ end
 
 with_temp_repo do |repo|
   data = repo.join("_data/html_documents.yml")
-  text = data.read.sub("/html-documents/psp-problems.html", "/psp-problems.html")
+  text = data.read.sub("/p/psp/", "/psp/")
   data.write(text)
 
   expect_failure(
     repo,
     ["ruby", "scripts/verify-html-documents.rb"],
     "HTML document path scope check",
-    "path must start with /html-documents/"
+    "path must start with /p/"
   )
 end
 
 with_temp_repo do |repo|
-  html = repo.join("html-documents/psp-problems.html")
+  html = repo.join("p/psp/index.html")
   html.write(html.read.sub("</body>", '<a href="#exam">시험 정보</a></body>'))
 
   expect_failure(
@@ -191,37 +192,37 @@ with_temp_repo do |repo|
 end
 
 with_temp_repo do |repo|
-  recipes = repo.join("html-documents/home-cooking-recipes/assets/recipes.js")
+  recipes = repo.join("p/recipes/assets/recipes.js")
   recipes.write(recipes.read.sub('tags: ["냉국", "여름", "반찬"]', 'tags: ["냉국", "집밥", "반찬"]'))
 
   expect_failure(
     repo,
     ["ruby", "scripts/verify-html-documents.rb"],
-    "home cooking broad recipe tag check",
+    "recipe broad recipe tag check",
     "recipe tag must be category-like"
   )
 end
 
 with_temp_repo do |repo|
-  recipes = repo.join("html-documents/home-cooking-recipes/assets/recipes.js")
+  recipes = repo.join("p/recipes/assets/recipes.js")
   recipes.write(recipes.read.sub('searchIngredients: ["오이", "양파", "청양고추", "냉면육수"]', 'searchIngredients: ["오이", "간장", "청양고추", "냉면육수"]'))
 
   expect_failure(
     repo,
     ["ruby", "scripts/verify-html-documents.rb"],
-    "home cooking generic seasoning ingredient check",
+    "recipe generic seasoning ingredient check",
     "search ingredient must not include generic seasoning"
   )
 end
 
 with_temp_repo do |repo|
-  recipes = repo.join("html-documents/home-cooking-recipes/assets/recipes.js")
+  recipes = repo.join("p/recipes/assets/recipes.js")
   recipes.write(recipes.read.sub("오이와 냉면육수가 만드는 차갑고 새콤한 냉국", "더운 날에 바로 꺼내기 좋은 레시피입니다"))
 
   expect_failure(
     repo,
     ["ruby", "scripts/verify-html-documents.rb"],
-    "home cooking display text should describe food",
+    "recipe display text should describe food",
     "display text must describe the food"
   )
 end

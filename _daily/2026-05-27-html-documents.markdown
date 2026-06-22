@@ -3,7 +3,7 @@ layout:     post
 title:      "HTML 문서 모음"
 subtitle:   "별도 HTML로 배포한 문서 목록"
 date:       2026-05-27 00:00:00
-permalink:  /daily/html-documents/
+permalink:  /daily/p/
 author:     "Pimi"
 header-img: "img/home-bg.jpg"
 header-mask: 0.3

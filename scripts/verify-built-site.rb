@@ -57,14 +57,14 @@ fail_with("_site is missing. Run jekyll build first.") unless SITE.directory?
 daily_index = SITE.join("daily/index.html")
 note_index = SITE.join("note/index.html")
 dev_index = SITE.join("dev/index.html")
-html_documents = SITE.join("daily/html-documents/index.html")
+html_documents = SITE.join("daily/p/index.html")
 home_html = SITE.join("index.html").read
 pickth_css = SITE.join("css/pickth.css").read
 pickth_js = SITE.join("js/pickth.js").read
 fail_with("_site/daily/index.html is missing") unless daily_index.file?
 fail_with("_site/note/index.html is missing") unless note_index.file?
 fail_with("_site/dev/index.html is missing") unless dev_index.file?
-fail_with("_site/daily/html-documents/index.html is missing") unless html_documents.file?
+fail_with("_site/daily/p/index.html is missing") unless html_documents.file?
 fail_with("home should keep the welcome copy") unless home_html.include?("hello.")
 fail_with("home should include ripple canvas") unless home_html.include?("data-ripple-canvas")
 fail_with("home should include pointer ripple behavior") unless home_html.include?("pointermove")
@@ -225,7 +225,7 @@ fail_with("shared script paths should not contain trailing spaces") if note_inde
 fail_with("daily compatibility page should link to note") unless daily_index_html.include?('href="/note/"')
 fail_with("note page should list HTML documents") unless note_index_html.include?("post-preview")
 fail_with("dev page should hide old dev posts") if dev_index_html.include?('class="post-preview"')
-fail_with("note page should navigate with direct card links without query strings") unless note_index_html.include?('<a class="post-preview" href="/html-documents/') && !note_index_html.match?(/<form class="post-preview-form"|method="get"|<button class="post-preview"|data-href=|<a class="post-title-link"/)
+fail_with("note page should navigate with direct card links without query strings") unless note_index_html.include?('<a class="post-preview" href="/p/') && !note_index_html.match?(/<form class="post-preview-form"|method="get"|<button class="post-preview"|data-href=|<a class="post-title-link"/)
 fail_with("note page should not show placeholder labels for untagged documents") if note_index_html.include?("HTML Document")
 fail_with("note page should expose HTML document tag filter links") unless note_index_html.include?('href="/note/" data-doc-filter="all"') && note_index_html.include?('data-document-card') && note_index_html.include?('data-tags=')
 fail_with("note all filter should not append a hash") if note_index_html.include?('href="#all"')

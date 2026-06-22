@@ -33,9 +33,9 @@ ruby scripts/add-html-document.rb
 
 ## HTML 문서 작업 규칙
 
-1. HTML 파일은 `html-documents/`에 둔다.
+1. HTML 파일은 `p/`에 둔다.
 2. `ruby scripts/add-html-document.rb`를 실행해서 `_data/html_documents.yml`을 동기화한다.
-3. HTML 목록 페이지는 `/daily/html-documents/`를 사용한다.
+3. HTML 목록 페이지는 `/daily/p/`를 사용한다.
 4. HTML을 Daily 글 안에 iframe으로 넣지 않는다.
 5. HTML 파일 안에는 `/Users/...` 같은 로컬 절대 경로를 넣지 않는다.
 
@@ -68,7 +68,7 @@ Jekyll이 없는 환경에서는 build 검증을 건너뛸 수 있다. 릴리스
 | --- | --- |
 | `_posts/` | 개발 글. `dev` 메뉴에 노출된다. |
 | `_daily/` | 노트 글. `note` 메뉴에 노출된다. |
-| `html-documents/` | 독립 HTML 문서 배포 위치. |
+| `p/` | 독립 HTML 문서 배포 위치. |
 | `_data/html_documents.yml` | HTML 문서 목록 데이터. |
 | `_layouts/`, `_includes/` | 블로그 화면 구조. |
 | `css/`, `js/`, `img/`, `fonts/` | 테마 자산. |

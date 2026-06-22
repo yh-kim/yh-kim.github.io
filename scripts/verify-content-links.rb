@@ -22,7 +22,8 @@ def source_files
     "_daily/*.{md,markdown}",
     "_layouts/*.html",
     "_includes/**/*.html",
-    "category/*.html"
+    "category/*.html",
+    "p/**/*.html"
   ]
   patterns.flat_map { |pattern| ROOT.glob(pattern) }.uniq.sort
 end
