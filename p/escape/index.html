@@ -706,7 +706,7 @@
       return reservedDay < today ? 2 : 0;
     };
 
-    document.querySelectorAll(".reservation-badge").forEach((badge) => {
+    document.querySelectorAll(".reservation-badge, [data-reserved-badge]").forEach((badge) => {
       badge.hidden = !showReservation;
     });
 
