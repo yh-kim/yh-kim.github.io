@@ -93,7 +93,7 @@
         { name: "닭가슴살샐러드", aliases: ["치킨샐러드"], note: "1주차부터 · 크루통·옥수수·과일은 빼고 드레싱의 설탕·밀가루 확인" },
         { name: "닭구이", aliases: ["구운닭", "로스트치킨"], note: "1주차부터 · 밀가루 튀김옷 없이 굽고 달콤한 양념과 염지액 확인" },
         { name: "두부김치", note: "1주차부터 조건부 · 두부 중심으로 먹고 김치의 설탕·찹쌀풀과 볶을 때 넣는 당류 확인" },
-        { name: "두부부침", aliases: ["두부구이"], note: "1주차부터 · 밀가루를 묻히지 않고 기름을 과하게 쓰지 않기" },
+        { name: "두부부침", aliases: ["두부구이", "두부전"], note: "1주차부터 · 밀가루를 묻히지 않고 기름을 과하게 쓰지 않기" },
         { name: "목살구이", aliases: ["돼지목살구이"], note: "1주차부터 · 양념하지 않은 고기와 채소 중심, 쌈장·볶음밥은 조절" },
         { name: "삼겹살구이", aliases: ["삼겹살", "오겹살구이"], note: "1주차부터 조건부 · 지방이 많아 양을 조절하고 쌈장·냉면·볶음밥은 제외" },
         { name: "생선구이", note: "1주차부터 · 양념구이보다 소금·후추로 단순하게" },
@@ -324,29 +324,29 @@
     "닭강정": { aliases: ["무설탕닭강정", "저당닭강정"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루·설탕·물엿을 모두 빼고 허용 전분과 양을 주차에 맞춘 경우 다시 판단 · 튀김기름과 소스 양 확인" },
     "닭갈비": { aliases: ["무설탕닭갈비", "저당닭갈비"], verdict: "재료에 따라 가능", tone: "conditional", note: "닭고기·채소를 설탕·물엿·밀 없이 볶으면 1주차부터 검토 · 고구마·떡·볶음밥은 주차 확인" },
     "돈가스": { aliases: ["돈까스", "무밀가루돈가스", "글루텐프리돈가스"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루·빵가루 없는 튀김옷과 무설탕 소스라면 다시 판단 · 대체가루의 탄수화물과 기름 양 확인" },
-    "라면": { aliases: ["글루텐프리라면", "쌀라면", "두부면라면"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀면이면 금지 · 무밀가루 면은 원료의 탄수화물 주차와 스프의 당류·전분을 확인" },
-    "만두": { aliases: ["무밀가루만두", "두부피만두", "양배추만두"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀피 없이 두부·계란·채소 등 허용 재료로 만들면 검토 · 당면·전분·양념의 주차 확인" },
+    "라면": { aliases: ["글루텐프리라면", "쌀라면"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀면이면 금지 · 무밀가루 면은 원료의 탄수화물 주차와 스프의 당류·전분을 확인" },
+    "만두": { aliases: ["무밀가루만두", "양배추만두"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀피 없이 두부·계란·채소 등 허용 재료로 만들면 검토 · 당면·전분·양념의 주차 확인" },
     "부침개": { aliases: ["무밀가루부침개", "계란전", "채소전"], verdict: "재료에 따라 가능", tone: "conditional", note: "부침가루 없이 계란과 허용 채소 중심이면 검토 · 대체가루와 기름 양 확인" },
     "불고기": { aliases: ["무설탕불고기", "저당불고기", "소불고기", "돼지불고기"], verdict: "재료에 따라 가능", tone: "conditional", note: "고기 주차를 지키고 설탕·배즙·물엿·맛술·밀을 뺀 양념이면 검토" },
     "빵": { aliases: ["무밀가루빵", "글루텐프리빵", "키토빵"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루가 없어도 쌀가루·전분·견과가루와 유지가 많을 수 있음 · 초반에는 미루고 성분·주차·양 확인" },
     "샌드위치": { aliases: ["빵없는샌드위치", "상추랩", "양배추샌드위치"], verdict: "재료에 따라 가능", tone: "conditional", note: "빵 없이 잎채소·계란·허용 단백질로 만들면 검토 · 치즈·마요네즈·소스 성분 확인" },
-    "소면": { aliases: ["쌀소면", "두부소면", "글루텐프리소면"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 소면은 밀이라 금지 · 무밀가루 제품은 면 원료와 탄수화물 주차를 확인" },
+    "소면": { aliases: ["쌀소면", "글루텐프리소면"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 소면은 밀이라 금지 · 무밀가루 제품은 면 원료와 탄수화물 주차를 확인" },
     "수제비": { aliases: ["무밀가루수제비", "감자수제비"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 반죽은 금지 · 밀 없는 대체 반죽도 전분 식품이므로 후반 주차와 양 확인" },
     "스콘": { aliases: ["무밀가루스콘", "글루텐프리스콘", "키토스콘"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀·설탕이 없어도 견과가루·버터가 농축될 수 있어 초반에는 미루고 후반에 소량 검토" },
     "양념치킨": { aliases: ["무설탕양념치킨", "저당양념치킨"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루 없는 조리와 설탕·물엿 없는 소스라면 다시 판단 · 기름과 소스 양 확인" },
-    "우동": { aliases: ["쌀우동", "글루텐프리우동", "두부면우동"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 우동면은 밀이라 금지 · 무밀가루 면은 원료와 국물의 당류·맛술 확인" },
-    "전": { aliases: ["무밀가루전", "계란전", "두부전", "채소전"], verdict: "재료에 따라 가능", tone: "conditional", note: "부침가루 없이 계란·두부·허용 채소로 부치면 검토 · 전분과 기름 양 확인" },
+    "우동": { aliases: ["쌀우동", "글루텐프리우동"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 우동면은 밀이라 금지 · 무밀가루 면은 원료와 국물의 당류·맛술 확인" },
+    "전": { aliases: ["무밀가루전", "계란전", "채소전"], verdict: "재료에 따라 가능", tone: "conditional", note: "부침가루 없이 계란·두부·허용 채소로 부치면 검토 · 전분과 기름 양 확인" },
     "제육볶음": { aliases: ["무설탕제육볶음", "저당제육볶음"], verdict: "재료에 따라 가능", tone: "conditional", note: "설탕·물엿·맛술·밀 없는 양념과 살코기 위주면 검토 · 고추장 성분과 양 확인" },
     "족발": { aliases: ["무설탕족발", "저당족발"], verdict: "재료에 따라 가능", tone: "conditional", note: "직접 조리해 설탕·물엿·맛술·밀을 빼면 검토 · 시판 제품은 양념 확인이 어려워 보수적으로 선택" },
-    "짜장면": { aliases: ["두부면짜장", "곤약면짜장", "무밀가루짜장면"], verdict: "재료에 따라 가능", tone: "conditional", note: "면과 춘장의 밀 여부를 모두 확인 · 무밀가루여도 전분과 당류가 많으면 피하기" },
-    "짬뽕": { aliases: ["두부면짬뽕", "곤약면짬뽕", "무밀가루짬뽕"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀면을 빼고 해산물·채소 중심이면 검토 · 국물의 설탕·전분·나트륨 확인" },
+    "짜장면": { aliases: ["곤약면짜장", "무밀가루짜장면"], verdict: "재료에 따라 가능", tone: "conditional", note: "면과 춘장의 밀 여부를 모두 확인 · 무밀가루여도 전분과 당류가 많으면 피하기" },
+    "짬뽕": { aliases: ["곤약면짬뽕", "무밀가루짬뽕"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀면을 빼고 해산물·채소 중심이면 검토 · 국물의 설탕·전분·나트륨 확인" },
     "치킨": { aliases: ["무밀가루치킨", "글루텐프리치킨", "오븐치킨"], verdict: "재료에 따라 가능", tone: "conditional", note: "닭고기를 밀가루·설탕 없이 굽거나 튀기면 검토 · 튀김가루, 염지액과 기름 양 확인" },
     "케이크": { aliases: ["무밀가루케이크", "글루텐프리케이크", "무설탕케이크"], verdict: "후반부 소량 검토", tone: "conditional", note: "밀·설탕이 없어도 대체가루·유제품·지방이 농축된 디저트 · 초기에는 미루고 유지기에 소량" },
     "쿠키": { aliases: ["무밀가루쿠키", "글루텐프리쿠키", "무설탕쿠키"], verdict: "후반부 소량 검토", tone: "conditional", note: "밀·설탕이 없어도 견과가루·전분·버터가 농축됨 · 초기에는 미루고 유지기에 소량" },
     "타르트": { aliases: ["무밀가루타르트", "글루텐프리타르트", "무설탕타르트"], verdict: "후반부 소량 검토", tone: "conditional", note: "밀·설탕 없는 제품도 대체가루와 지방이 많은 디저트 · 유지기에 소량 검토" },
     "튀김": { aliases: ["무밀가루튀김", "글루텐프리튀김", "에어프라이어튀김"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루 없는 튀김옷과 허용 재료면 다시 판단 · 전분 종류, 주차와 기름 양 확인" },
-    "파스타": { aliases: ["두부면파스타", "콩면파스타", "글루텐프리파스타"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 듀럼밀면은 금지 · 무밀가루 면은 콩·쌀·전분 원료와 소스 당류를 확인" },
-    "피자": { aliases: ["무밀가루피자", "글루텐프리피자", "닭가슴살피자", "두부피자"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀 도우 없이 닭가슴살·두부·채소로 만들면 검토 · 치즈와 소스의 유제품·당류 확인" },
+    "파스타": { aliases: ["콩면파스타", "글루텐프리파스타"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 듀럼밀면은 금지 · 무밀가루 면은 콩·쌀·전분 원료와 소스 당류를 확인" },
+    "피자": { aliases: ["무밀가루피자", "글루텐프리피자", "닭가슴살피자"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀 도우 없이 닭가슴살·두부·채소로 만들면 검토 · 치즈와 소스의 유제품·당류 확인" },
     "핫도그": { aliases: ["빵없는핫도그", "무밀가루핫도그", "글루텐프리핫도그"], verdict: "재료에 따라 가능", tone: "conditional", note: "빵·튀김옷 없이 소시지 원재료가 단순하면 검토 · 가공육의 전분·설탕·나트륨 확인" },
     "햄버거": { aliases: ["번리스버거", "빵없는햄버거", "상추버거"], verdict: "재료에 따라 가능", tone: "conditional", note: "번 없이 밀·설탕 없는 패티와 채소로 구성하면 검토 · 치즈·소스·가공육 성분 확인" },
     "과일주스": { verdict: "가급적 피하기", tone: "avoid", note: "식이섬유가 적고 당을 빠르게 많이 먹기 쉬움 · 생과일과 구분" },
@@ -688,7 +688,8 @@
       var summary = document.createElement("summary");
       var copy = document.createElement("span");
       var list = document.createElement("ul");
-      var groupSearchText = [group.title, group.description].concat(group.keywords || []).join(" ");
+      var groupSearchTitle = group.title.toLocaleLowerCase("ko");
+      var groupSearchKeywords = (group.keywords || []).map(function (keyword) { return keyword.toLocaleLowerCase("ko"); });
       details.className = "ingredient-group ingredient-group-" + group.tone;
       copy.innerHTML = "<strong></strong><small></small>";
       copy.querySelector("strong").textContent = group.title;
@@ -715,7 +716,10 @@
         }
         var item = document.createElement("li");
         item.dataset.name = data.name;
-        item.dataset.search = [data.name].concat(data.aliases || [], groupSearchText).join(" ").toLocaleLowerCase("ko");
+        item.searchName = data.name.toLocaleLowerCase("ko");
+        item.searchAliases = (data.aliases || []).map(function (alias) { return alias.toLocaleLowerCase("ko"); });
+        item.searchGroupTitle = groupSearchTitle;
+        item.searchGroupKeywords = groupSearchKeywords;
         if (data.note) {
           var name = document.createElement("strong");
           var verdict = data.verdict ? document.createElement("em") : null;
@@ -747,7 +751,10 @@
     Array.prototype.forEach.call(ingredientGroupsNode.querySelectorAll(".ingredient-group"), function (group) {
       var groupHasResult = false;
       Array.prototype.forEach.call(group.querySelectorAll("li"), function (item) {
-        var matched = !query || item.dataset.search.indexOf(query) !== -1;
+        var nameMatched = item.searchName.indexOf(query) !== -1;
+        var aliasMatched = item.searchAliases.some(function (alias) { return alias === query; });
+        var groupMatched = (query.length > 1 && item.searchGroupTitle.indexOf(query) !== -1) || item.searchGroupKeywords.indexOf(query) !== -1;
+        var matched = !query || nameMatched || aliasMatched || groupMatched;
         item.hidden = !matched;
         if (matched) { groupHasResult = true; }
       });
