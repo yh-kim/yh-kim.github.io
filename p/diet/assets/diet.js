@@ -78,6 +78,367 @@
     week4: [],
     maintenance: []
   };
+  var ingredientGroups = [
+    {
+      tone: "featured",
+      title: "자주 먹는 메뉴 · 이렇게 선택",
+      description: "주차, 밥과 소스, 지방과 염분까지 한 번에 확인합니다.",
+      keywords: ["메뉴", "요리", "외식", "배달음식", "한식"],
+      items: [
+        { name: "버섯구이", note: "1주차부터 · 밀가루와 달콤한 소스 없이 굽기" },
+        { name: "버섯볶음", note: "1주차부터 · 기름은 적당히, 설탕·굴소스 성분 확인" },
+        { name: "갈비탕", note: "3주차부터 검토 · 갈비의 지방과 국물 양을 조절하고 당면·설탕 든 양념은 제외" },
+        { name: "계란찜", aliases: ["달걀찜"], note: "1주차부터 · 설탕·맛술 없이 만들고 치즈를 넣었다면 유제품 여부 확인" },
+        { name: "곰탕", aliases: ["소머리곰탕"], note: "3주차부터 검토 · 밥 양을 현재 단계에 맞추고 소면은 제외, 국물과 지방은 과하지 않게" },
+        { name: "닭가슴살샐러드", aliases: ["치킨샐러드"], note: "1주차부터 · 크루통·옥수수·과일은 빼고 드레싱의 설탕·밀가루 확인" },
+        { name: "닭구이", aliases: ["구운닭", "로스트치킨"], note: "1주차부터 · 밀가루 튀김옷 없이 굽고 달콤한 양념과 염지액 확인" },
+        { name: "두부김치", note: "1주차부터 조건부 · 두부 중심으로 먹고 김치의 설탕·찹쌀풀과 볶을 때 넣는 당류 확인" },
+        { name: "두부부침", aliases: ["두부구이"], note: "1주차부터 · 밀가루를 묻히지 않고 기름을 과하게 쓰지 않기" },
+        { name: "목살구이", aliases: ["돼지목살구이"], note: "1주차부터 · 양념하지 않은 고기와 채소 중심, 쌈장·볶음밥은 조절" },
+        { name: "삼겹살구이", aliases: ["삼겹살", "오겹살구이"], note: "1주차부터 조건부 · 지방이 많아 양을 조절하고 쌈장·냉면·볶음밥은 제외" },
+        { name: "생선구이", note: "1주차부터 · 양념구이보다 소금·후추로 단순하게" },
+        { name: "생선찜", note: "1주차부터 · 간장·식초 중심으로 조리하고 설탕·맛술·전분을 많이 쓴 소스는 피하기" },
+        { name: "샤브샤브", note: "1주차부터 · 면·만두·죽은 빼고 달콤한 소스는 적게" },
+        { name: "보쌈", aliases: ["돼지보쌈"], note: "1주차부터 · 수육과 채소 중심, 달콤한 보쌈소스·무김치·쌈장 성분 확인" },
+        { name: "수육", note: "1주차부터 · 비계와 쌈장·새우젓 양을 조절" },
+        { name: "아귀간", aliases: ["안키모"], note: "목록 밖 해산물 내장 · 지방이 높아 소량, 폰즈·소스 당류 확인" },
+        { name: "안키모", aliases: ["아귀간"], note: "아귀간 · 지방이 높아 소량, 폰즈·소스 당류 확인" },
+        { name: "오이두부비빔밥", note: "1주차 점심 · 현미·잡곡밥 반 공기, 고추장 대신 간장·식초" },
+        { name: "오리구이", aliases: ["오리로스", "오리로스구이"], note: "1주차부터 조건부 · 무가당 생오리 기준, 훈제오리는 첨가당·전분·나트륨 확인" },
+        { name: "육회", note: "3주차부터 검토 · 배·설탕·물엿·맛술 든 양념을 빼고 살코기 위주로" },
+        { name: "장어구이", aliases: ["민물장어구이", "붕장어구이"], note: "1주차부터 조건부 · 소금구이를 우선하고 설탕 많은 데리야키·장어소스는 제외, 지방이 높아 양 조절" },
+        { name: "포케", note: "1주차 점심부터 · 주차에 맞는 밥 양, 소스·옥수수·과일 확인" },
+        { name: "해물찜", note: "1주차부터 조건부 · 해산물과 채소 중심, 전분으로 걸쭉하게 만든 양념과 설탕 확인" },
+        { name: "회", aliases: ["생선회", "사시미", "Sashimi"], note: "1주차부터 · 초밥밥 없이 간장·고추냉이를 소량 사용" },
+        { name: "회무침", note: "1주차부터 조건부 · 초고추장 대신 설탕 없는 간장·식초 양념을 사용하고 소면은 제외" },
+        { name: "회덮밥", note: "1주차 점심부터 · 밥 종류와 양을 맞추고 초고추장 대신 간장 양념" }
+      ]
+    },
+    {
+      tone: "reset",
+      title: "1–3일차 · 목록 안에서만",
+      description: "일반식은 먹지 않고 쉐이크 중심으로 단순하게 구성합니다.",
+      items: ["단백질쉐이크", "당근", "두부", "마늘", "무", "무가당 플레인요거트", "브로콜리", "양배추", "양파", "연두부", "오이"]
+    },
+    {
+      tone: "week1",
+      title: "1주차부터 · 단백질·비전분성 채소",
+      description: "점심 일반식에 단순 조리한 단백질과 채소를 충분히 먹습니다.",
+      keywords: ["단백질", "고기", "생선", "해산물", "회", "채소", "버섯", "나물", "잎채소"],
+      items: ["가리비", "가지", "갈치", "갑오징어", "간장", "강황", "계란", "고등어", "고사리", "고추", "고추냉이", "고춧가루", "고구마줄기", "곤드레", "골뱅이", "광어", "굴", "근대", "김", "깻잎", "꼬막", "꽃게", "꽁치", "꽈리고추", "낙지", "날계란", "농어", "다시마", "닭가슴살", "닭고기", "닭다리살", "닭안심", "대구", "대파", "도미", "돌나물", "돼지등심", "돼지뒷다리살", "돼지안심", "돼지앞다리살", "들기름", "래디시", "로메인", "루콜라", "마늘종", "말차가루", "멍게", "메추리알", "명태", "목살", "문어", "미나리", "미역", "민어", "무순", "무청", "바지락", "버섯", "배추", "방어회", "방풍나물", "봄동", "부추", "브뤼셀스프라우트", "산낙지", "삼치", "상추", "새송이버섯", "새우", "샐러리", "생굴", "생선", "세발나물", "성게알", "소라", "숙주", "시금치", "시래기", "쑥갓", "아귀", "아보카도", "아스파라거스", "아욱", "알배추", "애호박", "양상추", "열무", "연어", "연어알", "연어회", "오징어", "오크라", "올리브오일", "우거지", "우럭", "잎채소", "잡곡밥", "적양배추", "전복", "조개", "조기", "죽순", "주꾸미", "참나물", "참치회", "청경채", "청양고추", "취나물", "치커리", "케일", "코다리", "콜라비", "콜리플라워", "콩나물", "코코넛오일", "토란대", "파프리카", "팽이버섯", "표고버섯", "풋고추", "현미밥", "해삼", "해산물", "해조류", "허브", "허브티", "홍합", "황태", "후추"]
+    },
+    {
+      tone: "week2",
+      title: "2주차부터 · 견과·씨앗·흰쌀",
+      description: "점심에는 밥 반 공기, 저녁에는 밥과 전분 없이 구성합니다.",
+      items: [
+        { name: "검정깨", aliases: ["검은깨", "흑임자"], note: "2주차부터 · 설탕이나 시럽을 섞지 않은 씨앗 원물 기준" },
+        { name: "볶은검정깨", aliases: ["볶음검정깨", "흑임자"], note: "2주차부터 · 무가당 원물인지 확인하고 견과류처럼 양 조절" },
+        { name: "치아씨드", note: "2주차부터 · 불려 먹거나 음식에 소량 더하고 수분을 충분히" },
+        { name: "흑임자", aliases: ["검정깨", "검은깨"], note: "2주차부터 · 흑임자죽·라떼·분말 제품은 설탕과 곡물가루를 별도 확인" },
+        "견과버터", "견과류", "땅콩", "땅콩버터", "들깨", "마카다미아", "아마씨", "아마씨분말", "아몬드", "잣", "참깨", "캐슈너트", "피스타치오", "해바라기씨", "햄프씨드", "호두", "호박씨", "흰쌀밥"
+      ]
+    },
+    {
+      tone: "week3",
+      title: "3주차부터 · 과일·전분 식품",
+      description: "명시 식품과 목록 밖 과일을 구분하고 한 끼에 탄수화물 한 종류만 둡니다.",
+      keywords: ["3주차", "공식목록", "탄수화물", "전분", "과일"],
+      items: [
+        { name: "고구마", note: "3주차 명시 · 밥이나 다른 과일과 겹치지 않게" },
+        { name: "단호박", note: "3주차 명시 · 밥 대신 탄수화물 한 종류로" },
+        { name: "바나나", note: "3주차 명시 · 활동량과 한 끼 탄수화물을 함께 확인" },
+        { name: "밤", note: "3주차 명시 · 견과류보다 전분 식품으로 판단" },
+        { name: "소고기", note: "3주차부터 · 저지방 부위와 단순 조리를 우선" },
+        { name: "저지방 소고기", note: "3주차 명시 · 기름진 부위와 달콤한 양념은 줄이기" },
+        { name: "토마토", note: "3주차 명시 · 무가당 원물 기준" },
+        "감자", "완두콩", "육사시미", "옥수수"
+      ]
+    },
+    {
+      tone: "check",
+      title: "과일 · 3주차 이후 소량 검토",
+      description: "바나나 외에는 공식 목록 밖 식품입니다. 생과일 한 종류를 다른 탄수화물과 겹치지 않게 봅니다.",
+      keywords: ["과일", "생과일", "후식", "디저트", "과당", "당도"],
+      items: [
+        { name: "감", aliases: ["단감"], verdict: "더 보수적으로", tone: "conditional", note: "3주차 이후 소량 검토 · 단맛과 총당질이 높은 편이므로 밥·고구마·밤과 겹치지 않기" },
+        { name: "골드키위", aliases: ["노란키위", "옐로키위"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 · 그린키위보다 단맛이 강할 수 있어 한 번에 한 종류만" },
+        { name: "구아바", verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 기준 · 주스·넥타 형태는 피하기" },
+        { name: "귤", aliases: ["감귤", "밀감", "만다린", "탠저린"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 · 여러 개를 연달아 먹기 쉬우므로 정한 양만 덜어 먹기" },
+        { name: "대추", aliases: ["생대추"], verdict: "더 보수적으로", tone: "conditional", note: "생대추도 단맛이 농축되기 쉬움 · 3주차 이후 소량, 말린 대추는 진행 중 피하기" },
+        { name: "두리안", verdict: "유지기에 검토", tone: "conditional", note: "탄수화물과 지방이 함께 높은 과일 · 4주 진행 중에는 미루고 유지기에 소량" },
+        { name: "딸기", aliases: ["생딸기", "냉동딸기"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 무가당 원물 기준 · 연유·설탕·요거트 토핑은 별도 확인" },
+        { name: "라임", verdict: "조미용 가능", tone: "okay", note: "즙을 소량 조미에 쓰는 것은 과일 한 회분과 구분 · 라임청·가당주스는 피하기" },
+        { name: "라즈베리", aliases: ["산딸기"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 무가당 생과일·냉동 원물 기준" },
+        { name: "레몬", verdict: "조미용 가능", tone: "okay", note: "레몬즙을 소량 조미에 쓰는 것은 과일 한 회분과 구분 · 레몬청은 피하기" },
+        { name: "리치", aliases: ["여지"], verdict: "더 보수적으로", tone: "conditional", note: "단맛이 강하고 여러 개 먹기 쉬움 · 3주차 이후 소량, 시럽 통조림은 피하기" },
+        { name: "망고", aliases: ["애플망고"], verdict: "더 보수적으로", tone: "conditional", note: "3주차 이후 소량 · 단맛이 강해 밥이나 다른 과일과 같은 끼니에 겹치지 않기" },
+        { name: "멜론", aliases: ["머스크멜론", "허니듀"], verdict: "더 보수적으로", tone: "conditional", note: "수분이 많아도 당질이 없는 것은 아님 · 3주차 이후 정한 양만" },
+        { name: "무화과", aliases: ["생무화과"], verdict: "더 보수적으로", tone: "conditional", note: "3주차 이후 생과일 소량 · 말린 무화과는 농축 과일로 피하기" },
+        { name: "배", aliases: ["한국배", "서양배"], verdict: "더 보수적으로", tone: "conditional", note: "3주차 이후 소량 · 육회·불고기 양념의 배즙은 첨가당처럼 양을 확인" },
+        { name: "복숭아", aliases: ["백도", "황도"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 기준 · 황도 통조림은 시럽 여부 확인" },
+        { name: "블랙베리", aliases: ["검은산딸기"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 무가당 원물 기준" },
+        { name: "블루베리", aliases: ["생블루베리", "냉동블루베리"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 · 한 줌씩 계속 집어 먹기보다 먹을 양을 먼저 덜기" },
+        { name: "사과", aliases: ["풋사과", "아오리사과"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 소량 · 사과즙·농축액·말린 사과와 구분" },
+        { name: "살구", aliases: ["생살구"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 기준 · 건살구와 잼은 피하기" },
+        { name: "샤인머스캣", aliases: ["청포도", "머스캣"], verdict: "더 보수적으로", tone: "conditional", note: "알이 크고 단맛이 강해 과식하기 쉬움 · 3주차 이후 소량만 덜어 먹기" },
+        { name: "석류", aliases: ["석류알"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 알맹이 원물 기준 · 석류즙·농축액은 피하기" },
+        { name: "수박", verdict: "더 보수적으로", tone: "conditional", note: "수분이 많지만 큰 양을 먹기 쉬움 · 3주차 이후 작은 양을 덜어 다른 탄수화물과 겹치지 않기" },
+        { name: "오렌지", aliases: ["네이블오렌지"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 기준 · 오렌지주스와 구분" },
+        { name: "용과", aliases: ["드래곤프루트"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 한 종류로 계산" },
+        { name: "자두", aliases: ["플럼"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 기준 · 자두청·말린 자두와 구분" },
+        { name: "자몽", aliases: ["그레이프프루트"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 · 일부 약물과 상호작용할 수 있어 복용 중이면 확인" },
+        { name: "참외", verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 · 한 번에 큰 양을 먹지 않고 다른 탄수화물과 겹치지 않기" },
+        { name: "천도복숭아", aliases: ["넥타린"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 기준" },
+        { name: "천혜향", aliases: ["감귤류"], verdict: "더 보수적으로", tone: "conditional", note: "단맛이 강한 감귤류 · 3주차 이후 소량" },
+        { name: "체리", aliases: ["생체리"], verdict: "더 보수적으로", tone: "conditional", note: "여러 알을 연속으로 먹기 쉬움 · 3주차 이후 먹을 양을 먼저 덜기" },
+        { name: "키위", aliases: ["그린키위"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 한 종류로 계산" },
+        { name: "파인애플", aliases: ["생파인애플"], verdict: "더 보수적으로", tone: "conditional", note: "3주차 이후 소량 · 시럽 통조림과 가당 주스는 피하기" },
+        { name: "파파야", verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 생과일 기준 · 말린 제품과 주스는 피하기" },
+        { name: "패션후르츠", aliases: ["백향과"], verdict: "소량 조건부", tone: "conditional", note: "3주차 이후 과육 원물 기준 · 청·시럽 제품은 피하기" },
+        { name: "포도", aliases: ["적포도", "거봉"], verdict: "더 보수적으로", tone: "conditional", note: "작은 알을 계속 먹기 쉬워 총량이 커질 수 있음 · 3주차 이후 소량" },
+        { name: "한라봉", aliases: ["데코폰"], verdict: "더 보수적으로", tone: "conditional", note: "단맛이 강한 감귤류 · 3주차 이후 소량, 주스와 청은 피하기" },
+        { name: "홍시", aliases: ["연시"], verdict: "진행 중 미루기", tone: "avoid", note: "매우 무르고 단맛이 강해 섭취량 조절이 어려움 · 4주 진행 중에는 단감보다 더 보수적으로" }
+      ]
+    },
+    {
+      tone: "check",
+      title: "성분·양·주차 확인",
+      description: "자동 허용이나 금지가 아닙니다. 제품 전체와 실제 먹는 양을 봅니다.",
+      items: [
+        { name: "볶음검정쌀분말", aliases: ["볶은검정쌀분말", "검정쌀분말", "흑미분말"], note: "검정쌀을 분말화한 탄수화물 원료 · 제품 속 함량과 한 끼의 밥·과일 중복 확인" },
+        "가공버터", "가공유크림", "가수분해단백", "간", "감자전분", "고구마전분", "고추장", "곤약면", "곱창", "귀리", "그래놀라", "그릭요거트", "기버터", "김밥", "김치", "난백", "난백분말", "내장탕", "냉면", "농축대두단백", "농축유청단백", "닭강정", "닭갈비", "대두단백", "대창", "덱스트린", "도라지", "돈가스", "돼지간", "된장", "된장찌개", "두부면", "라면", "락티톨", "렌틸콩", "마요네즈", "막창", "말티톨", "맛술", "만두", "매운탕", "메밀", "메밀가루", "메밀면", "명란", "물회", "미네랄코어믹스", "미림", "미역국", "버터", "베이컨", "변성전분", "병아리콩", "보리", "부침개", "불고기", "분리대두단백", "분리우유단백", "분리유청단백", "분유", "비트", "비빔밥", "빵", "사워크림", "산양유", "삼겹살", "생크림", "샌드위치", "설렁탕", "소간", "소면", "소시지", "솔비톨", "수제비", "순두부찌개", "순메밀", "스콘", "쌀", "쌀가루", "쌈밥", "쌈장", "알룰로스", "양고기", "양념치킨", "에리스리톨", "연근", "오리고기", "옥수수가루", "옥수수전분", "올리브", "완두단백", "우동", "우엉", "우유", "우유단백", "유당", "유청", "유청단백", "유크림", "자일리톨", "전", "전분", "전지분유", "제육볶음", "족발", "주정", "짜장면", "짬뽕", "참치캔", "채종유", "청주", "초밥", "치즈", "치킨", "카제인", "카제인나트륨", "케이크", "코코넛", "코코넛밀크분말", "크림치즈", "쿠키", "타르트", "타피오카전분", "탈지분유", "튀김", "파스타", "팜유", "피자", "한천", "핫도그", "햄", "햄버거", "현미", "현미분말", "혼합분유", "휘핑크림", "훈제오리", "환원유청", "효모추출물"
+      ]
+    },
+    {
+      tone: "fiber",
+      title: "식이섬유 원료 · 당류와 구분",
+      description: "이름이 비슷해도 설탕이나 일반 말토덱스트린과 다릅니다. 제품 전체와 내 소화 반응을 봅니다.",
+      keywords: ["식이섬유", "프리바이오틱스", "섬유질", "원재료"],
+      items: [
+        { name: "난소화성말토덱스트린", aliases: ["난소화성덱스트린", "저항성말토덱스트린", "저항성덱스트린"], note: "식이섬유 원료 · 일반 말토덱스트린과 구분하고 1회 식이섬유·총탄수화물 확인" },
+        { name: "아가베이눌린", aliases: ["아가베인눌린", "아가베식이섬유"], note: "이눌린 계열 식이섬유 · 아가베시럽과 다르며 복부 팽만이 생기면 양 조절" },
+        { name: "차전자피분말", aliases: ["차전자피", "질경이씨껍질분말"], note: "식이섬유 원료 · 충분한 물과 함께 먹고 제품의 첨가당을 별도 확인" },
+        { name: "치커리식이섬유", aliases: ["치커리뿌리식이섬유", "치커리뿌리추출물", "이눌린"], note: "이눌린 계열 식이섬유 · 당류가 아니지만 한 번에 많으면 가스·복부 팽만 가능" },
+        "갈락토올리고당", "귀리베타글루칸", "귀리식이섬유", "난소화성덱스트린", "베타글루칸", "수용성옥수수식이섬유", "아카시아식이섬유", "이눌린", "이소말토덱스트린", "저항성덱스트린", "저항성전분", "차전자피", "치커리뿌리식이섬유", "폴리덱스트로스"
+      ]
+    },
+    {
+      tone: "avoid",
+      title: "과일이어도 진행 중 피하기 · 농축·액상 형태",
+      description: "생과일보다 빠르고 많은 당을 먹기 쉬운 형태입니다. 무가당 문구가 있어도 진행 중에는 원물을 우선합니다.",
+      keywords: ["과일", "과일가공품", "주스", "스무디", "건과일", "말린과일", "청", "잼"],
+      items: [
+        { name: "건과일", aliases: ["말린과일", "드라이푸르츠"], verdict: "진행 중 피하기", tone: "avoid", note: "수분이 빠져 당과 섭취량이 농축됨 · 생과일과 같은 양으로 보지 않기" },
+        { name: "건대추", aliases: ["말린대추", "대추말랭이"], verdict: "진행 중 피하기", tone: "avoid", note: "생대추보다 당이 농축된 건과일" },
+        { name: "건무화과", aliases: ["말린무화과"], verdict: "진행 중 피하기", tone: "avoid", note: "작은 양에도 당질이 농축되고 여러 개 먹기 쉬움" },
+        { name: "건자두", aliases: ["푸룬", "말린자두"], verdict: "진행 중 피하기", tone: "avoid", note: "건과일 형태 · 변비용 제품도 첨가당과 실제 양을 확인" },
+        { name: "건포도", aliases: ["레이즌", "말린포도"], verdict: "진행 중 피하기", tone: "avoid", note: "포도의 당이 작은 부피에 농축되어 토핑으로도 많이 먹기 쉬움" },
+        { name: "곶감", aliases: ["건시", "말린감"], verdict: "진행 중 피하기", tone: "avoid", note: "감의 당이 농축된 건과일 · 무가당이어도 생과일과 구분" },
+        { name: "과일스무디", aliases: ["스무디", "과일블렌드", "블렌디드주스"], verdict: "진행 중 피하기", tone: "avoid", note: "여러 과일을 빠르게 많이 먹기 쉽고 시럽·요거트가 추가될 수 있음" },
+        { name: "과일즙", aliases: ["사과즙", "배즙", "포도즙", "석류즙"], verdict: "진행 중 피하기", tone: "avoid", note: "원물보다 섬유질과 씹는 과정이 적어 짧은 시간에 많은 당을 섭취하기 쉬움" },
+        { name: "과일주스", aliases: ["100%과일주스", "NFC주스", "착즙주스", "농축환원주스"], verdict: "진행 중 피하기", tone: "avoid", note: "첨가당이 없어도 생과일보다 섬유질이 적고 여러 개 분량을 마시기 쉬움" },
+        { name: "과일청", aliases: ["레몬청", "유자청", "자몽청", "매실청"], verdict: "진행 중 피하기", tone: "avoid", note: "과일보다 설탕·시럽이 중심인 경우가 많음" },
+        { name: "과일칩", aliases: ["동결건조과일", "동결건조과일칩"], verdict: "진행 중 피하기", tone: "avoid", note: "무첨가 제품도 수분이 적고 간식처럼 많은 양을 먹기 쉬움" },
+        { name: "과일퓨레", aliases: ["과일페이스트", "과일펄프"], verdict: "진행 중 피하기", tone: "avoid", note: "농축과즙·설탕이 섞일 수 있고 씹는 원물보다 섭취 속도가 빠름" },
+        { name: "과일통조림", aliases: ["시럽과일통조림", "후르츠칵테일", "황도통조림"], verdict: "진행 중 피하기", tone: "avoid", note: "시럽에 담긴 제품은 첨가당이 큼 · 물에 든 무가당 제품도 생과일을 우선" },
+        { name: "대추야자", aliases: ["데이트", "Dates"], verdict: "진행 중 피하기", tone: "avoid", note: "작은 부피에 당질이 높은 건과일 · 에너지바의 결착·감미 원료도 확인" },
+        { name: "말린망고", aliases: ["건망고", "망고말랭이"], verdict: "진행 중 피하기", tone: "avoid", note: "무가당이어도 망고의 당이 농축되며 설탕을 추가한 제품도 많음" },
+        { name: "잼", aliases: ["과일잼", "무설탕잼", "저당잼"], verdict: "진행 중 피하기", tone: "avoid", note: "무설탕이어도 농축 과일·시럽·감미료가 중심일 수 있어 생과일과 구분" },
+        { name: "후르츠시럽", aliases: ["과일시럽", "프루트시럽"], verdict: "진행 중 피하기", tone: "avoid", note: "과일 향보다 설탕·시럽이 중심인 감미 재료" }
+      ]
+    },
+    {
+      tone: "avoid",
+      title: "진행 중 피하기 · 음식과 메뉴",
+      description: "단맛·술·과도한 가공이 중심이거나 현재 단계의 식사 구조와 맞지 않습니다.",
+      keywords: ["금지", "피하기", "술", "음료", "간식", "디저트", "가공식품"],
+      items: ["가당두유", "가당요거트", "달고나", "달콤한 불고기", "떡", "떡볶이", "라떼", "막걸리", "맥주", "밀크티", "사탕", "설탕커피", "소주", "술", "시리얼", "아메리카노", "아이스크림", "에너지드링크", "와인", "음료수", "장어소스", "젤리", "초고추장", "초콜릿", "칵테일", "커피", "탄산음료", "프로틴바", "하이볼"]
+    },
+    {
+      tone: "avoid",
+      title: "표시성분 · 첨가당·인공감미료",
+      description: "더 단순한 대안이 있으면 피하고, 인공감미료가 여러 개 섞인 제품은 더 낮게 봅니다.",
+      keywords: ["감미료", "인공감미료", "대체당", "설탕대체", "첨가당", "당류", "원재료"],
+      items: ["가당연유", "결정과당", "경화유", "과당", "기타과당", "네오탐", "농축과즙", "당류가공품", "덱스트로스", "마가린", "말토덱스트린", "맥아당", "맥아엑기스", "매실청", "메이플시럽", "물엿", "부분경화유", "벌꿀", "사과청징농축액", "사카린", "사카린나트륨", "사탕수수당", "설탕", "쇼트닝", "수크랄로스", "시럽", "쌀조청", "아가베시럽", "아세설팜칼륨", "아스파탐", "아스파탐-아세설팜염", "액상과당", "어드반탐", "올리고당", "올리고당시럽", "원당", "인버트시럽", "전화당", "조청", "카라멜시럽", "코코넛슈가", "포도당", "포도당시럽", "포도당시럽분말", "프락토올리고당", "혼합시럽", "흑설탕"]
+    },
+    {
+      tone: "natural",
+      title: "천연 유래 감미료 · 무감미 다음 선택",
+      description: "실제 설탕·시럽이 함께 들어 있는지는 별도로 확인합니다.",
+      keywords: ["감미료", "천연감미료", "대체당", "설탕대체", "무설탕", "무가당"],
+      items: ["나한과", "나한과추출물", "스테비아", "스테비올배당체", "효소처리스테비아"]
+    },
+    {
+      tone: "ban",
+      title: "밀·밀가루 원료 · 들어 있으면 금지",
+      description: "메뉴 이름이 아니라 실제 원재료 기준입니다. 밀가루를 완전히 쓰지 않은 음식은 남은 재료와 주차로 다시 봅니다.",
+      items: ["강력분", "글루텐", "듀럼밀", "밀", "밀가루", "밀글루텐", "밀단백", "밀배아", "밀전분", "박력분", "부침가루", "빵가루", "소맥", "소맥글루텐", "소맥분", "중력분", "통밀", "튀김가루"]
+    },
+    {
+      tone: "neutral",
+      title: "보조·강화 성분 · 이것만으로 탈락 아님",
+      description: "산도·질감·보존·영양 강화를 위한 성분입니다. 주원료와 당류, 밀가루를 먼저 봅니다.",
+      items: [
+        { name: "예스티뮨", aliases: ["Yestimun", "효모베타글루칸", "효모 베타글루칸"], note: "맥주효모 유래 1,3/1,6 베타글루칸 원료명 · 제품 전체의 당류·단백질을 먼저 확인" },
+        { name: "이노시톨", aliases: ["미오이노시톨", "Myo-inositol"], note: "보충·강화 성분 · 이것만으로 허용 식품이 되지는 않으며 제품 전체를 판단" },
+        { name: "뽕나무잎추출분말", aliases: ["뽕잎추출분말", "뽕잎추출물"], note: "식물 추출 원료 · 효능 문구보다 첨가당과 제품의 주원료를 먼저 확인" },
+        { name: "L-글루타민", aliases: ["엘글루타민"], note: "아미노산 강화 성분 · 단백질 함량을 대신하지 않으므로 제품 전체 확인" },
+        { name: "L-아르지닌", aliases: ["엘아르지닌"], note: "아미노산 강화 성분 · 단맛 원료와 1회 섭취량을 함께 확인" },
+        "BCAA", "CMC", "DL-사과산", "L-글루탐산나트륨", "L-로이신", "L-발린", "L-이소류신", "구아검", "구연산", "구연산마그네슘", "구연산삼나트륨", "구연산아연", "글리세린", "글리세린지방산에스테르", "글루코노델타락톤", "글루콘산마그네슘", "글루콘산아연", "글루콘산철", "글루콘산칼슘", "글리신", "니코틴산아미드", "대두레시틴", "디엘알파토코페롤", "레시틴", "로커스트콩검", "로즈마리추출물", "리보플라빈", "무수구연산", "베타글루칸", "비오틴", "비타민혼합제제", "산도조절제", "산화마그네슘", "산화아연", "셀룰로스검", "소브산칼륨", "아라비아검", "아스코르빈산", "아질산나트륨", "안식향산나트륨", "염산피리독신", "염산티아민", "염화마그네슘", "염화칼륨", "유화제", "이산화규소", "인산염", "잔탄검", "제이인산K", "제이인산칼륨", "젤란검", "젖산칼슘", "정제소금", "정제수", "증점제", "카라기난", "카라멜색소", "카복시메틸셀룰로스나트륨", "크레아틴", "크레아틴모노하이드레이트", "타우린", "탄산마그네슘", "탄산수소나트륨", "탄산칼슘", "천연향료", "푸마르산제일철", "폴리인산나트륨", "피로인산나트륨", "피로인산제이철", "합성향료", "향료", "혼합제제", "효모베타글루칸"
+      ]
+    }
+  ];
+
+  var ingredientNotes = {
+    "가당두유": { verdict: "가급적 피하기", tone: "avoid", note: "첨가당이 중심 · 무가당 두유로 교체" },
+    "가당요거트": { aliases: ["과일요거트", "과일요구르트", "가당요구르트"], verdict: "가급적 피하기", tone: "avoid", note: "무가당 플레인요거트를 우선하고 과일·시럽 첨가 여부 확인" },
+    "가공버터": { aliases: ["버터가공품"], verdict: "덜 추천", tone: "conditional", note: "유지·유화제 등이 섞인 제품 · 버터 자체도 기본 제한 유제품이므로 프로그램 허용 여부와 소량 사용을 확인" },
+    "가공유크림": { aliases: ["가공크림", "컴파운드크림"], verdict: "덜 추천", tone: "conditional", note: "유크림에 식물성유지·유화제 등이 섞일 수 있음 · 무가당 순수 유크림보다 성분이 복잡" },
+    "간장": { aliases: ["양조간장", "진간장", "국간장"], verdict: "먹을 만함", tone: "okay", note: "1주차부터 소량 · 첨가당과 밀 함유 여부, 나트륨 확인" },
+    "견과버터": { verdict: "조건부 선택", tone: "conditional", note: "2주차부터 · 견과 100%에 가까운 제품, 설탕·시럽·경화유 없는 제품 우선" },
+    "견과류": { verdict: "먹을 만함", tone: "okay", note: "2주차부터 · 무가당·무밀가루 원물 기준, 한 줌보다 많이 먹지 않도록 양 조절" },
+    "고사리": { verdict: "먹을 만함", tone: "okay", note: "충분히 삶아 조리하고 양념의 설탕·들깨가루 시기를 확인" },
+    "고추냉이": { aliases: ["와사비", "연와사비"], verdict: "조건부 선택", tone: "conditional", note: "소량 사용 · 시판 연와사비는 전분·설탕·밀 성분 확인" },
+    "그래놀라": { aliases: ["무설탕그래놀라", "무가당그래놀라", "Granola", "그라놀라"], verdict: "2주차 점심부터 조건부", tone: "conditional", note: "밀·시럽·건과일 없이 귀리·견과·씨앗으로 만든 제품을 소량 · 밥·고구마·과일 대신 한 끼 탄수화물 한 종류로" },
+    "간": { aliases: ["동물간", "내장간"], verdict: "양 조절", tone: "conditional", note: "목록 밖 내장 부위 · 종류와 현재 주차, 양념을 확인하고 소량" },
+    "곱창": { aliases: ["소곱창", "돼지곱창"], verdict: "조건부 선택", tone: "conditional", note: "지방이 높은 내장 · 밀가루 세척·양념과 볶음밥을 빼고 양 조절" },
+    "날계란": { aliases: ["생계란"], verdict: "1주차부터", tone: "okay", note: "계란과 같은 단계 · 간장·소스의 첨가당과 함께 먹는 밥만 확인" },
+    "내장탕": { aliases: ["곱창전골", "내장전골"], verdict: "조건부 선택", tone: "conditional", note: "내장 지방, 국물 나트륨과 양념의 밀·설탕·맛술 확인" },
+    "대창": { aliases: ["소대창"], verdict: "소량 조건부", tone: "conditional", note: "지방이 매우 높은 내장 · 달콤한 양념과 볶음밥 없이 소량" },
+    "돼지간": { aliases: ["돈간"], verdict: "조건부 선택", tone: "conditional", note: "목록 밖 내장 부위 · 양념과 양을 확인" },
+    "막창": { aliases: ["돼지막창", "소막창"], verdict: "조건부 선택", tone: "conditional", note: "내장 지방과 소스의 설탕·밀 성분을 확인하고 양 조절" },
+    "말차가루": { aliases: ["말차", "녹차가루", "Matcha", "Matcha powder", "Green tea powder"], verdict: "1주차부터", tone: "okay", note: "100% 무가당 말차 분말 기준 · 말차라떼·프리믹스는 설탕·우유·크리머를 별도 확인" },
+    "명란": { aliases: ["명란젓", "명태알"], verdict: "소량 가능", tone: "conditional", note: "해산물 계열이지만 염분이 높아 조미료처럼 소량 · 양념의 당류 확인" },
+    "물회": { aliases: ["회물회"], verdict: "재료에 따라 가능", tone: "conditional", note: "회는 1주차부터 가능하지만 육수의 설탕·고추장과 면을 빼거나 성분을 확인" },
+    "방어회": { aliases: ["방어", "대방어회"], verdict: "1주차부터", tone: "okay", note: "지방이 높은 생선 · 밥 없이 간장과 고추냉이를 소량 사용하고 양 조절" },
+    "산낙지": { aliases: ["낙지회"], verdict: "1주차부터", tone: "okay", note: "해산물 원물 기준 · 기름장과 양념을 소량 사용" },
+    "생굴": { aliases: ["굴회", "석화"], verdict: "1주차부터", tone: "okay", note: "해산물 원물 기준 · 초장 대신 간장·식초 양념을 소량" },
+    "성게알": { aliases: ["우니", "성게소", "Uni"], verdict: "1주차부터", tone: "okay", note: "해산물 계열 · 밥 없이 먹고 간장과 양을 조절" },
+    "소간": { aliases: ["소고기간", "우간"], verdict: "3주차 이후 조건부", tone: "conditional", note: "소고기 내장 · 현재 주차와 양념을 확인하고 소량" },
+    "연어알": { aliases: ["이쿠라", "Ikura"], verdict: "1주차부터 소량", tone: "conditional", note: "해산물 계열이지만 염분이 높아 소량 · 밥과 달콤한 소스 제외" },
+    "연어회": { aliases: ["연어사시미", "Salmon sashimi"], verdict: "1주차부터", tone: "okay", note: "밥 없이 먹고 간장·고추냉이를 소량 · 지방이 높은 편이라 양 조절" },
+    "육사시미": { aliases: ["소고기사시미", "생고기"], verdict: "3주차부터 조건부", tone: "conditional", note: "저지방 소고기 단계부터 · 설탕·배·물엿 든 양념 없이 살코기 위주" },
+    "참치회": { aliases: ["참치사시미", "Tuna sashimi"], verdict: "1주차부터", tone: "okay", note: "밥 없이 먹고 간장·고추냉이를 소량 · 기름진 부위는 양 조절" },
+    "초밥": { aliases: ["스시", "Sushi", "니기리", "초대리", "배합초", "스시초"], verdict: "보통은 피하기", tone: "avoid", note: "일반 초밥밥에는 설탕 든 초대리·배합초를 사용 · 회만 먹거나, 2주차 점심부터 설탕 없는 식초밥을 총 반 공기 안에서만 조건부 선택" },
+    "닭강정": { aliases: ["무설탕닭강정", "저당닭강정"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루·설탕·물엿을 모두 빼고 허용 전분과 양을 주차에 맞춘 경우 다시 판단 · 튀김기름과 소스 양 확인" },
+    "닭갈비": { aliases: ["무설탕닭갈비", "저당닭갈비"], verdict: "재료에 따라 가능", tone: "conditional", note: "닭고기·채소를 설탕·물엿·밀 없이 볶으면 1주차부터 검토 · 고구마·떡·볶음밥은 주차 확인" },
+    "돈가스": { aliases: ["돈까스", "무밀가루돈가스", "글루텐프리돈가스"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루·빵가루 없는 튀김옷과 무설탕 소스라면 다시 판단 · 대체가루의 탄수화물과 기름 양 확인" },
+    "라면": { aliases: ["글루텐프리라면", "쌀라면", "두부면라면"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀면이면 금지 · 무밀가루 면은 원료의 탄수화물 주차와 스프의 당류·전분을 확인" },
+    "만두": { aliases: ["무밀가루만두", "두부피만두", "양배추만두"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀피 없이 두부·계란·채소 등 허용 재료로 만들면 검토 · 당면·전분·양념의 주차 확인" },
+    "부침개": { aliases: ["무밀가루부침개", "계란전", "채소전"], verdict: "재료에 따라 가능", tone: "conditional", note: "부침가루 없이 계란과 허용 채소 중심이면 검토 · 대체가루와 기름 양 확인" },
+    "불고기": { aliases: ["무설탕불고기", "저당불고기", "소불고기", "돼지불고기"], verdict: "재료에 따라 가능", tone: "conditional", note: "고기 주차를 지키고 설탕·배즙·물엿·맛술·밀을 뺀 양념이면 검토" },
+    "빵": { aliases: ["무밀가루빵", "글루텐프리빵", "키토빵"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루가 없어도 쌀가루·전분·견과가루와 유지가 많을 수 있음 · 초반에는 미루고 성분·주차·양 확인" },
+    "샌드위치": { aliases: ["빵없는샌드위치", "상추랩", "양배추샌드위치"], verdict: "재료에 따라 가능", tone: "conditional", note: "빵 없이 잎채소·계란·허용 단백질로 만들면 검토 · 치즈·마요네즈·소스 성분 확인" },
+    "소면": { aliases: ["쌀소면", "두부소면", "글루텐프리소면"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 소면은 밀이라 금지 · 무밀가루 제품은 면 원료와 탄수화물 주차를 확인" },
+    "수제비": { aliases: ["무밀가루수제비", "감자수제비"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 반죽은 금지 · 밀 없는 대체 반죽도 전분 식품이므로 후반 주차와 양 확인" },
+    "스콘": { aliases: ["무밀가루스콘", "글루텐프리스콘", "키토스콘"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀·설탕이 없어도 견과가루·버터가 농축될 수 있어 초반에는 미루고 후반에 소량 검토" },
+    "양념치킨": { aliases: ["무설탕양념치킨", "저당양념치킨"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루 없는 조리와 설탕·물엿 없는 소스라면 다시 판단 · 기름과 소스 양 확인" },
+    "우동": { aliases: ["쌀우동", "글루텐프리우동", "두부면우동"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 우동면은 밀이라 금지 · 무밀가루 면은 원료와 국물의 당류·맛술 확인" },
+    "전": { aliases: ["무밀가루전", "계란전", "두부전", "채소전"], verdict: "재료에 따라 가능", tone: "conditional", note: "부침가루 없이 계란·두부·허용 채소로 부치면 검토 · 전분과 기름 양 확인" },
+    "제육볶음": { aliases: ["무설탕제육볶음", "저당제육볶음"], verdict: "재료에 따라 가능", tone: "conditional", note: "설탕·물엿·맛술·밀 없는 양념과 살코기 위주면 검토 · 고추장 성분과 양 확인" },
+    "족발": { aliases: ["무설탕족발", "저당족발"], verdict: "재료에 따라 가능", tone: "conditional", note: "직접 조리해 설탕·물엿·맛술·밀을 빼면 검토 · 시판 제품은 양념 확인이 어려워 보수적으로 선택" },
+    "짜장면": { aliases: ["두부면짜장", "곤약면짜장", "무밀가루짜장면"], verdict: "재료에 따라 가능", tone: "conditional", note: "면과 춘장의 밀 여부를 모두 확인 · 무밀가루여도 전분과 당류가 많으면 피하기" },
+    "짬뽕": { aliases: ["두부면짬뽕", "곤약면짬뽕", "무밀가루짬뽕"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀면을 빼고 해산물·채소 중심이면 검토 · 국물의 설탕·전분·나트륨 확인" },
+    "치킨": { aliases: ["무밀가루치킨", "글루텐프리치킨", "오븐치킨"], verdict: "재료에 따라 가능", tone: "conditional", note: "닭고기를 밀가루·설탕 없이 굽거나 튀기면 검토 · 튀김가루, 염지액과 기름 양 확인" },
+    "케이크": { aliases: ["무밀가루케이크", "글루텐프리케이크", "무설탕케이크"], verdict: "후반부 소량 검토", tone: "conditional", note: "밀·설탕이 없어도 대체가루·유제품·지방이 농축된 디저트 · 초기에는 미루고 유지기에 소량" },
+    "쿠키": { aliases: ["무밀가루쿠키", "글루텐프리쿠키", "무설탕쿠키"], verdict: "후반부 소량 검토", tone: "conditional", note: "밀·설탕이 없어도 견과가루·전분·버터가 농축됨 · 초기에는 미루고 유지기에 소량" },
+    "타르트": { aliases: ["무밀가루타르트", "글루텐프리타르트", "무설탕타르트"], verdict: "후반부 소량 검토", tone: "conditional", note: "밀·설탕 없는 제품도 대체가루와 지방이 많은 디저트 · 유지기에 소량 검토" },
+    "튀김": { aliases: ["무밀가루튀김", "글루텐프리튀김", "에어프라이어튀김"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀가루 없는 튀김옷과 허용 재료면 다시 판단 · 전분 종류, 주차와 기름 양 확인" },
+    "파스타": { aliases: ["두부면파스타", "콩면파스타", "글루텐프리파스타"], verdict: "재료에 따라 가능", tone: "conditional", note: "일반 듀럼밀면은 금지 · 무밀가루 면은 콩·쌀·전분 원료와 소스 당류를 확인" },
+    "피자": { aliases: ["무밀가루피자", "글루텐프리피자", "닭가슴살피자", "두부피자"], verdict: "재료에 따라 가능", tone: "conditional", note: "밀 도우 없이 닭가슴살·두부·채소로 만들면 검토 · 치즈와 소스의 유제품·당류 확인" },
+    "핫도그": { aliases: ["빵없는핫도그", "무밀가루핫도그", "글루텐프리핫도그"], verdict: "재료에 따라 가능", tone: "conditional", note: "빵·튀김옷 없이 소시지 원재료가 단순하면 검토 · 가공육의 전분·설탕·나트륨 확인" },
+    "햄버거": { aliases: ["번리스버거", "빵없는햄버거", "상추버거"], verdict: "재료에 따라 가능", tone: "conditional", note: "번 없이 밀·설탕 없는 패티와 채소로 구성하면 검토 · 치즈·소스·가공육 성분 확인" },
+    "과일주스": { verdict: "가급적 피하기", tone: "avoid", note: "식이섬유가 적고 당을 빠르게 많이 먹기 쉬움 · 생과일과 구분" },
+    "김치": { verdict: "조건부 선택", tone: "conditional", note: "설탕·찹쌀풀과 나트륨 확인 · 소량 반찬으로" },
+    "그릭요거트": { aliases: ["그리스식요거트", "그릭요구르트"], verdict: "조건부 선택", tone: "conditional", note: "유제품 예외는 무가당 플레인 기준 · 당류와 유지방, 향료·과일시럽 확인" },
+    "기버터": { aliases: ["기", "Ghee", "정제버터"], verdict: "조건부 선택", tone: "conditional", note: "버터에서 수분·유고형분을 줄인 유지방 · 자동 금지는 아니지만 기본 제한 유제품이므로 소량, 프로그램 지침 우선" },
+    "단백질쉐이크": { aliases: ["프로틴쉐이크", "프로틴", "단백질보충제"], verdict: "먹을 만함", tone: "okay", note: "단계별 횟수를 지키고 1회 단백질 약 20g, 밀·첨가당·감미료 확인" },
+    "된장": { verdict: "조건부 선택", tone: "conditional", note: "소량 조미용 · 밀, 물엿과 나트륨 확인" },
+    "땅콩버터": { verdict: "조건부 선택", tone: "conditional", note: "2주차부터 · 땅콩 100% 제품을 우선하고 설탕·경화유 확인" },
+    "마요네즈": { aliases: ["마요", "Mayonnaise"], verdict: "조건부 선택", tone: "conditional", note: "당류·전분·사용한 기름을 보고 소량 사용" },
+    "맛술": { verdict: "가급적 피하기", tone: "avoid", note: "술과 당류가 함께 든 조미료 · 가능하면 식초나 무가당 양념으로 대체" },
+    "메밀면": { verdict: "조건부 선택", tone: "conditional", note: "밀가루 혼합 제품이 많음 · 순메밀 여부와 소스의 당류 확인" },
+    "미림": { verdict: "가급적 피하기", tone: "avoid", note: "조리용 술과 당류가 들어갈 수 있어 원재료와 사용량 확인" },
+    "버터": { aliases: ["무염버터", "가염버터", "천연버터", "Butter"], verdict: "조건부 선택", tone: "conditional", note: "유당·단백질보다 유지방이 중심이라 자동 금지는 아님 · 기본 제한 유제품이므로 올리브오일 등 명시 지방을 우선하고 허용 시 소량" },
+    "베이컨": { aliases: ["Bacon"], verdict: "조건부 선택", tone: "conditional", note: "가공육 · 설탕·전분·아질산나트륨과 나트륨 확인" },
+    "사워크림": { aliases: ["사워 크림", "Sour cream"], verdict: "조건부 선택", tone: "conditional", note: "발효 유크림이지만 기본 제한 유제품 · 무가당 원재료인지 확인하고 허용되는 방식에서 소량" },
+    "삼겹살": { aliases: ["오겹살", "돼지삼겹살"], verdict: "조건부 선택", tone: "conditional", note: "지방이 높은 부위 · 양을 줄이고 쌈장·볶음밥 없이 채소와 구성" },
+    "생크림": { aliases: ["동물성생크림", "Fresh cream", "Heavy cream"], verdict: "조건부 선택", tone: "conditional", note: "무가당 100% 유크림이면 자동 금지는 아니지만 기본 제한 유제품 · 디저트·라떼보다 요리에 소량, 프로그램 지침 우선" },
+    "소시지": { verdict: "조건부 선택", tone: "conditional", note: "밀가루·전분·설탕이 숨어 있을 수 있는 가공육 · 원재료 확인" },
+    "쌈장": { verdict: "조건부 선택", tone: "conditional", note: "설탕·물엿·밀과 나트륨을 확인하고 소량만 사용" },
+    "아메리카노": { verdict: "진행 중 피하기", tone: "avoid", note: "프로그램에서 커피를 제한한다면 무가당이어도 진행 기간에는 제외" },
+    "자몽": { verdict: "조건부 선택", tone: "conditional", note: "3주차 이후 소량 검토 · 일부 약물과 상호작용할 수 있어 복용 중이면 확인" },
+    "족발": { verdict: "가급적 피하기", tone: "avoid", note: "삶는 양념의 설탕·물엿·맛술과 높은 나트륨을 피하기 어려움" },
+    "주정": { verdict: "성분 확인", tone: "check", note: "음용 술과 구분 · 소량 조리·추출 용도인지, 최종 제품과 현재 단계를 함께 판단" },
+    "참치캔": { verdict: "조건부 선택", tone: "conditional", note: "기름·나트륨·채소육수 성분 확인 · 물 담금이나 단순 원재료 우선" },
+    "청주": { verdict: "가급적 피하기", tone: "avoid", note: "조리용 술 · 사용량과 가열 여부를 확인하고 가능하면 대체" },
+    "우유": { aliases: ["일반우유", "저지방우유", "무지방우유", "Milk"], verdict: "프로그램 확인", tone: "check", note: "기본 제한 유제품 · 쉐이크에 타는 방식 등 구체 지침에서 허용된 경우만 사용" },
+    "유당": { aliases: ["락토스", "Lactose"], verdict: "성분 확인", tone: "check", note: "우유의 당 · 첨가당과는 다르지만 유제품 제한과 소화 불편 여부 확인" },
+    "유청단백": { aliases: ["웨이프로틴", "Whey protein", "WPC", "WPI"], verdict: "조건부 선택", tone: "conditional", note: "유제품 유래 단백질 · 단백질 양의 이익과 유제품 지침, 당류·감미료·소화 반응 확인" },
+    "농축유청단백": { aliases: ["WPC", "유청단백농축물", "웨이프로틴콘센트레이트"], verdict: "조건부 선택", tone: "conditional", note: "유제품 유래 단백질 · 유당에 민감하면 소화 반응을 확인하고 제품 전체 판단" },
+    "분리유청단백": { aliases: ["WPI", "유청단백분리물", "웨이프로틴아이솔레이트"], verdict: "조건부 선택", tone: "conditional", note: "유제품 유래 단백질 · 보통 유당이 적지만 제품의 당류·감미료와 구체 식단 지침 확인" },
+    "유크림": { aliases: ["크림", "동물성크림", "Milk cream"], verdict: "조건부 선택", tone: "conditional", note: "우유에서 분리한 유지방 · 무가당이어도 기본 제한 유제품이므로 허용 시 소량" },
+    "치즈": { aliases: ["자연치즈", "가공치즈", "Cheese"], verdict: "조건부 선택", tone: "conditional", note: "유제품 제한과 현재 단계 확인 · 가공치즈는 전분·당류도 확인" },
+    "크림치즈": { aliases: ["크림 치즈", "Cream cheese"], verdict: "조건부 선택", tone: "conditional", note: "지방이 높은 유제품 · 무가당이어도 기본 제한 대상이며 빵 없이, 허용되는 방식에서 소량" },
+    "휘핑크림": { aliases: ["휘프드크림", "Whipping cream", "식물성휘핑크림"], verdict: "성분 확인", tone: "check", note: "동물성 유크림인지 식물성유지 혼합인지 다름 · 설탕이 든 완제품은 피하고 무가당 제품도 유제품 지침 우선" },
+    "커피": { verdict: "진행 중 피하기", tone: "avoid", note: "프로그램에서 제한한다면 디카페인·무가당 여부와 관계없이 진행 중 제외" },
+    "프로틴바": { verdict: "가급적 피하기", tone: "avoid", note: "시럽·당알코올·곡물·밀가루가 복합적으로 들어가기 쉬워 쉐이크보다 선택이 어려움" },
+    "햄": { verdict: "조건부 선택", tone: "conditional", note: "가공육 · 밀·전분·설탕·아질산나트륨과 나트륨 확인" },
+    "현미밥": { verdict: "먹을 만함", tone: "okay", note: "1주차 점심부터 반 공기 · 다른 탄수화물과 겹치지 않게" },
+    "잡곡밥": { verdict: "먹을 만함", tone: "okay", note: "1주차 점심부터 반 공기 · 콩·옥수수 등 혼합 재료 확인" },
+    "흰쌀밥": { verdict: "먹을 만함", tone: "okay", note: "2주차 점심부터 반 공기 · 저녁에는 제외" },
+    "알룰로스": { aliases: ["Allulose", "D-알룰로스", "D-사이코스"], verdict: "조건부로 먹을 만함", tone: "conditional", note: "실제 설탕·시럽 동반 여부와 복부 팽만·설사 같은 개인 반응 확인" },
+    "에리스리톨": { aliases: ["Erythritol"], verdict: "조건부로 먹을 만함", tone: "conditional", note: "무감미 대안이 우선 · 많이 먹을 때 소화 불편이 생기는지 확인" },
+    "자일리톨": { aliases: ["Xylitol"], verdict: "조건부로 먹을 만함", tone: "conditional", note: "제품의 총탄수화물과 다른 당류, 소화 반응 확인" },
+    "락티톨": { verdict: "덜 추천", tone: "conditional", note: "당알코올 · 총탄수화물과 복부 팽만·설사 가능성을 확인" },
+    "말티톨": { verdict: "덜 추천", tone: "conditional", note: "당알코올이지만 혈당·총탄수화물과 소화 반응을 확인하고 자주 먹지 않기" },
+    "솔비톨": { verdict: "덜 추천", tone: "conditional", note: "당알코올 · 많은 양은 소화 불편을 만들 수 있어 섭취량 확인" },
+    "나한과": { verdict: "먹을 만함", tone: "okay", note: "천연 유래 감미료 · 설탕·에리스리톨 등 혼합 원료를 함께 확인" },
+    "나한과추출물": { verdict: "먹을 만함", tone: "okay", note: "무감미 다음 선택 · 실제 설탕이나 시럽이 섞였는지 확인" },
+    "스테비아": { verdict: "먹을 만함", tone: "okay", note: "무감미 다음 선택 · 다른 감미료와 첨가당 혼합 여부 확인" },
+    "스테비올배당체": { verdict: "먹을 만함", tone: "okay", note: "천연 유래 고감미 원료 · 강한 단맛과 혼합 감미료 여부 확인" },
+    "효소처리스테비아": { verdict: "먹을 만함", tone: "okay", note: "무감미 다음 선택 · 제품 전체의 당류와 감미료 혼합 여부 확인" },
+    "수크랄로스": { aliases: ["Sucralose", "Splenda", "스플렌다"], verdict: "가급적 피하기", tone: "avoid", note: "무감미·천연 유래 대안 우선 · 대안 없는 고단백 제품은 당류·밀이 없을 때 가끔 조건부 선택" },
+    "아세설팜K": { aliases: ["Ace-K", "Acesulfame K", "아세설팜칼륨"], verdict: "가급적 피하기", tone: "avoid", note: "아세설팜칼륨과 같은 성분 · 다른 인공감미료와 함께 쓰였는지 확인" },
+    "아세설팜칼륨": { aliases: ["Ace-K", "Acesulfame potassium", "아세설팜K"], verdict: "가급적 피하기", tone: "avoid", note: "무감미 대안 우선 · 수크랄로스 등과 혼합된 제품은 더 피하기" },
+    "아스파탐": { aliases: ["Aspartame", "페닐알라닌 함유"], verdict: "가급적 피하기", tone: "avoid", note: "페닐케톤뇨증은 반드시 피하기 · 그 외에도 무감미 대안과 섭취 빈도 우선" },
+    "아스파탐-아세설팜염": { verdict: "가급적 피하기", tone: "avoid", note: "두 인공감미료가 결합된 원료 · 무감미 또는 더 단순한 제품 우선" },
+    "사카린": { aliases: ["Saccharin"], verdict: "가급적 피하기", tone: "avoid", note: "단맛 노출을 줄이는 목적상 무감미·천연 유래 대안 우선" },
+    "사카린나트륨": { verdict: "가급적 피하기", tone: "avoid", note: "사카린 계열 인공감미료 · 다른 감미료와 혼합 여부 확인" },
+    "네오탐": { verdict: "가급적 피하기", tone: "avoid", note: "고감도 인공감미료 · 무감미 대안이 있으면 교체" },
+    "어드반탐": { verdict: "가급적 피하기", tone: "avoid", note: "고감도 인공감미료 · 제품의 목적과 섭취 빈도를 보고 드물게 조건부 선택" },
+    "설탕": { verdict: "피하기", tone: "avoid", note: "첨가당 · 진행 중에는 설탕 없는 대안을 우선" },
+    "액상과당": { verdict: "피하기", tone: "avoid", note: "첨가당이므로 제품 선택에서 제외" },
+    "말토덱스트린": { aliases: ["Maltodextrin", "덱스트린분말"], verdict: "가급적 피하기", tone: "avoid", note: "일반 말토덱스트린 · 난소화성말토덱스트린과 구분하고 원재료 순서 확인" },
+    "농축과즙": { verdict: "가급적 피하기", tone: "avoid", note: "감미 목적으로 쓰였다면 첨가당처럼 판단 · 생과일과 구분" },
+    "부분경화유": { verdict: "피하기", tone: "avoid", note: "트랜스지방 가능성이 있는 가공 유지 · 다른 제품 선택" },
+    "경화유": { verdict: "가급적 피하기", tone: "avoid", note: "가공 유지 · 부분경화 여부와 포화·트랜스지방 표시 확인" },
+    "밀가루": { verdict: "금지", tone: "ban", note: "진행 주차와 양에 관계없이 제외" },
+    "밀전분": { verdict: "금지", tone: "ban", note: "밀 유래 원료 · 진행 중 제외" },
+    "밀단백": { verdict: "금지", tone: "ban", note: "밀 유래 원료 · 단백질 함량과 관계없이 제외" },
+    "글루텐": { verdict: "금지", tone: "ban", note: "밀 유래 여부를 확인하고 진행 중 제외" },
+    "아질산나트륨": { verdict: "성분 확인", tone: "check", note: "가공육 보존 성분 · 이것만으로 금지하지 말고 가공육 빈도와 나트륨을 함께 확인" },
+    "카라멜색소": { verdict: "먹을 수 있음", tone: "check", note: "착색료 · 이것만으로 탈락시키지 않고 주원료와 첨가당을 먼저 확인" },
+    "CMC": { aliases: ["cmc", "카복시메틸셀룰로스", "카복시메틸셀룰로스나트륨", "셀룰로스검"], verdict: "먹을 수 있음", tone: "check", note: "증점제인 카복시메틸셀룰로스 · 이것만으로 제품을 금지하지 않음" },
+    "DL-사과산": { aliases: ["디엘사과산", "디엘-사과산", "DL-Malic acid", "Malic acid"], verdict: "먹을 수 있음", tone: "check", note: "신맛·향과 산도를 조절하는 성분 · 이것만으로 제품을 피하지 않고 함께 든 당류를 확인" },
+    "구연산": { aliases: ["Citric acid"], verdict: "먹을 수 있음", tone: "check", note: "산미·산도 조절 성분 · 제품의 단맛 원료와 주원료를 먼저 판단" },
+    "글루콘산철": { aliases: ["Ferrous gluconate", "철글루콘산염"], verdict: "먹을 수 있음", tone: "check", note: "철분 강화 원료 · 존재만으로 탈락시키지 않고 제품 전체와 1회 철분량 확인" },
+    "니코틴산아미드": { aliases: ["니아신아미드", "나이아신아마이드", "니코틴아미드", "Niacinamide", "Nicotinamide", "비타민B3", "Vitamin B3"], verdict: "먹을 수 있음", tone: "check", note: "비타민 B3 강화 원료 · 니코틴과 다른 영양성분이며 이것만으로 제품을 피하지 않음" },
+    "디엘알파토코페롤": { aliases: ["DL-알파토코페롤", "DL-α-토코페롤", "dl-alpha-tocopherol", "합성비타민E", "비타민E", "Vitamin E"], verdict: "먹을 수 있음", tone: "check", note: "비타민 E 강화·산화 방지 성분 · 제품의 주원료와 당류를 먼저 확인" },
+    "리보플라빈": { aliases: ["비타민B2", "Vitamin B2", "Riboflavin"], verdict: "먹을 수 있음", tone: "check", note: "비타민 B2 강화 원료 · 색이 노랗게 보일 수 있으나 식단 금지 성분은 아님" },
+    "무수구연산": { aliases: ["무수 구연산", "Anhydrous citric acid", "Citric acid anhydrous"], verdict: "먹을 수 있음", tone: "check", note: "수분이 없는 형태의 구연산 · 산미·산도 조절용이며 일반 구연산처럼 자동 금지하지 않음" },
+    "비오틴": { aliases: ["비타민B7", "Vitamin B7", "Biotin"], verdict: "먹을 수 있음", tone: "check", note: "비타민 강화 원료 · 이것만으로 제품의 식단 적합성이 달라지지 않음" },
+    "아스코르빈산": { aliases: ["비타민C", "Vitamin C", "Ascorbic acid"], verdict: "먹을 수 있음", tone: "check", note: "비타민 C 또는 산화 방지용 성분 · 첨가당과 제품 전체를 먼저 판단" },
+    "염산피리독신": { aliases: ["피리독신염산염", "비타민B6", "Vitamin B6", "Pyridoxine hydrochloride"], verdict: "먹을 수 있음", tone: "check", note: "비타민 B6 강화 원료 · 이것만으로 제품을 피하지 않음" },
+    "염산티아민": { aliases: ["티아민염산염", "비타민B1", "Vitamin B1", "Thiamine hydrochloride"], verdict: "먹을 수 있음", tone: "check", note: "비타민 B1 강화 원료 · 제품의 주원료·당류 판단과 분리" },
+    "탄산수소나트륨": { aliases: ["중탄산나트륨", "중조", "베이킹소다", "Sodium bicarbonate", "Baking soda"], verdict: "먹을 수 있음", tone: "check", note: "산도 조절·팽창에 쓰는 성분 · 밀가루 자체는 아니며 나트륨과 제품의 주원료를 함께 확인" },
+    "푸마르산제일철": { aliases: ["푸마르산철", "Ferrous fumarate", "철푸마르산염"], verdict: "먹을 수 있음", tone: "check", note: "철분 강화 원료 · 이것만으로 제품을 피하지 않고 1회 철분량과 다른 보충제 중복을 확인" },
+    "푸마르산철": { aliases: ["푸마르산제일철", "Ferrous fumarate"], verdict: "먹을 수 있음", tone: "check", note: "푸마르산제일철과 같은 철분 원료 표기 · 제품 전체를 먼저 판단" },
+    "피로인산제이철": { aliases: ["Ferric pyrophosphate", "피로인산철"], verdict: "먹을 수 있음", tone: "check", note: "철분 강화 원료 · 식단 금지 첨가물로 보지 않고 표시된 철분량 확인" },
+    "천연향료": { verdict: "먹을 수 있음", tone: "check", note: "향을 위한 소량 성분 · 주원료와 당류를 먼저 판단" },
+    "합성향료": { verdict: "성분 확인", tone: "check", note: "자동 금지는 아니지만 향료가 많은 고가공 제품인지 전체 원재료 확인" }
+  };
 
   var plan = null;
   var storedPlan = null;
@@ -98,6 +459,8 @@
   var adoptPlanButton = document.getElementById("adopt-plan");
   var newPlanButton = document.getElementById("new-plan");
   var schedule = document.getElementById("schedule");
+  var headingActions = document.querySelector(".heading-actions");
+  var scheduleEditSlot = document.getElementById("schedule-edit-slot");
   var calendar = document.getElementById("calendar");
   var calendarHint = document.getElementById("calendar-hint");
   var schedulePeriod = document.getElementById("schedule-period");
@@ -122,6 +485,14 @@
   var newFoodList = document.getElementById("new-food-list");
   var foodList = document.getElementById("food-list");
   var mealLine = document.getElementById("meal-line");
+  var ingredientGroupsNode = document.getElementById("ingredient-groups");
+  var ingredientSearch = document.getElementById("ingredient-search");
+  var ingredientNoResult = document.getElementById("ingredient-no-result");
+  var foodSearchOpen = document.getElementById("food-search-open");
+  var foodSearchLayer = document.getElementById("food-search-layer");
+  var foodSearchClose = document.getElementById("food-search-close");
+  var foodSearchContent = document.getElementById("food-search-content");
+  var foodSearchPreviousFocus = null;
 
   function pad(value) { return String(value).padStart(2, "0"); }
 
@@ -309,6 +680,120 @@
     commonBasis.innerHTML = "<strong>이 단계의 기준</strong> " + basisGuides[stage].note;
   }
 
+  function renderIngredientGroups() {
+    if (!ingredientGroupsNode) { return; }
+    ingredientGroupsNode.innerHTML = "";
+    ingredientGroups.forEach(function (group) {
+      var details = document.createElement("details");
+      var summary = document.createElement("summary");
+      var copy = document.createElement("span");
+      var list = document.createElement("ul");
+      var groupSearchText = [group.title, group.description].concat(group.keywords || []).join(" ");
+      details.className = "ingredient-group ingredient-group-" + group.tone;
+      copy.innerHTML = "<strong></strong><small></small>";
+      copy.querySelector("strong").textContent = group.title;
+      copy.querySelector("small").textContent = group.description;
+      summary.appendChild(copy);
+      group.items.slice().sort(function (left, right) {
+        var leftName = typeof left === "string" ? left : left.name;
+        var rightName = typeof right === "string" ? right : right.name;
+        return collator ? collator.compare(leftName, rightName) : leftName.localeCompare(rightName, "ko");
+      }).forEach(function (entry) {
+        var data = typeof entry === "string" ? { name: entry } : {
+          name: entry.name,
+          aliases: entry.aliases ? entry.aliases.slice() : [],
+          note: entry.note,
+          verdict: entry.verdict,
+          tone: entry.tone
+        };
+        var extra = ingredientNotes[data.name];
+        if (extra) {
+          data.aliases = (data.aliases || []).concat(extra.aliases || []);
+          data.note = data.note || extra.note;
+          data.verdict = data.verdict || extra.verdict;
+          data.tone = data.tone || extra.tone;
+        }
+        var item = document.createElement("li");
+        item.dataset.name = data.name;
+        item.dataset.search = [data.name].concat(data.aliases || [], groupSearchText).join(" ").toLocaleLowerCase("ko");
+        if (data.note) {
+          var name = document.createElement("strong");
+          var verdict = data.verdict ? document.createElement("em") : null;
+          var note = document.createElement("small");
+          item.className = "has-note";
+          name.textContent = data.name;
+          if (verdict) {
+            verdict.className = "ingredient-verdict ingredient-verdict-" + (data.tone || "check");
+            verdict.textContent = data.verdict;
+          }
+          note.textContent = data.note;
+          item.appendChild(name);
+          if (verdict) { item.appendChild(verdict); }
+          item.appendChild(note);
+        } else {
+          item.textContent = data.name;
+        }
+        list.appendChild(item);
+      });
+      details.appendChild(summary);
+      details.appendChild(list);
+      ingredientGroupsNode.appendChild(details);
+    });
+  }
+
+  function filterIngredientGroups() {
+    var query = ingredientSearch.value.trim().toLocaleLowerCase("ko");
+    var hasResult = false;
+    Array.prototype.forEach.call(ingredientGroupsNode.querySelectorAll(".ingredient-group"), function (group) {
+      var groupHasResult = false;
+      Array.prototype.forEach.call(group.querySelectorAll("li"), function (item) {
+        var matched = !query || item.dataset.search.indexOf(query) !== -1;
+        item.hidden = !matched;
+        if (matched) { groupHasResult = true; }
+      });
+      group.hidden = Boolean(query) && !groupHasResult;
+      if (query && groupHasResult) { group.open = true; }
+      if (!query) { group.open = false; }
+      if (groupHasResult) { hasResult = true; }
+    });
+    ingredientNoResult.hidden = !query || hasResult;
+  }
+
+  function focusFoodSearch(scrollBehavior) {
+    foodSearchContent.scrollTo({ top: 0, behavior: scrollBehavior || "auto" });
+    try {
+      ingredientSearch.focus({ preventScroll: true });
+    } catch (error) {
+      ingredientSearch.focus();
+    }
+  }
+
+  function resetFoodSearch() {
+    ingredientSearch.value = "";
+    filterIngredientGroups();
+    foodSearchContent.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  function openFoodSearch() {
+    foodSearchPreviousFocus = document.activeElement;
+    foodSearchLayer.hidden = false;
+    document.body.classList.add("has-food-search");
+    resetFoodSearch();
+    window.requestAnimationFrame(function () {
+      focusFoodSearch("auto");
+    });
+  }
+
+  function closeFoodSearch() {
+    if (foodSearchLayer.hidden) { return; }
+    resetFoodSearch();
+    foodSearchLayer.hidden = true;
+    document.body.classList.remove("has-food-search");
+    if (foodSearchPreviousFocus && typeof foodSearchPreviousFocus.focus === "function") {
+      foodSearchPreviousFocus.focus();
+    }
+  }
+
   function getTimelineState() {
     if (!plan) { return null; }
     var start = parseDate(plan.start);
@@ -483,6 +968,11 @@
   function updateOwnerControls() {
     var hasPlan = Boolean(plan);
     var isSharedPlan = hasPlan && !isOwner;
+    if (hasPlan && isOwner) {
+      scheduleEditSlot.appendChild(startButton);
+    } else {
+      headingActions.insertBefore(startButton, foodSearchOpen);
+    }
     startButton.hidden = isSharedPlan;
     sharedActions.hidden = !isSharedPlan;
     if (!hasPlan) {
@@ -660,6 +1150,11 @@
     if (event.target === confirmLayer) { closeConfirm(false); }
   });
   document.addEventListener("keydown", function (event) {
+    if (!foodSearchLayer.hidden && event.key === "Escape") {
+      event.preventDefault();
+      closeFoodSearch();
+      return;
+    }
     if (confirmLayer.hidden) { return; }
     if (event.key === "Escape") {
       event.preventDefault();
@@ -710,11 +1205,16 @@
     renderCalendar();
   });
   shareButton.addEventListener("click", copyShareUrl);
+  foodSearchOpen.addEventListener("click", openFoodSearch);
+  foodSearchClose.addEventListener("click", closeFoodSearch);
+  ingredientSearch.addEventListener("input", filterIngredientGroups);
+  ingredientSearch.addEventListener("search", filterIngredientGroups);
 
   storedPlan = readStoredPlan();
   var urlPlan = readUrlPlan();
   plan = urlPlan || storedPlan;
   isOwner = Boolean(storedPlan && (!urlPlan || plansEqual(urlPlan, storedPlan)));
   if (plan) { viewStage = getTimelineState().stage; }
+  renderIngredientGroups();
   renderPlanner();
 }());
