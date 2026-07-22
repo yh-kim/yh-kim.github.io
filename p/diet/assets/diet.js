@@ -274,7 +274,6 @@
     var half = document.createElement("i");
     node.classList.add("has-fast-half");
     half.className = "fast-half fast-half-" + position;
-    half.dataset.label = position === "start" ? "오후" : "오전";
     half.setAttribute("aria-hidden", "true");
     node.appendChild(half);
   }
@@ -343,7 +342,7 @@
       return;
     }
     var days = plan.fasting.map(function (dateKey) { return dayDifference(parseDate(dateKey), start) + 1; });
-    calendarHint.textContent = "24시간 단식 · " + days.map(function (day) { return day + "일째 오후 → " + (day + 1) + "일째 오전"; }).join(" · ");
+    calendarHint.innerHTML = "<i aria-hidden=\"true\"></i>24시간 단식 · " + days.map(function (day) { return day + "일째 오후 → " + (day + 1) + "일째 오전"; }).join(" · ");
   }
 
   function renderReadCalendar(start, todayKey) {
@@ -355,6 +354,7 @@
       { key: "week4", start: 21, end: 27 }
     ];
     var weekdayNames = ["일", "월", "화", "수", "목", "금", "토"];
+    var today = parseDate(todayKey);
     var phaseKey = document.createElement("div");
     var weekdayRow = document.createElement("div");
     var monthGrid = document.createElement("div");
@@ -367,6 +367,10 @@
       var dates = document.createElement("span");
       var item = document.createElement("div");
       item.className = "calendar-phase stage-" + range.key;
+      if (today >= rangeStart && today <= rangeEnd) {
+        item.classList.add("is-current");
+        item.setAttribute("aria-current", "step");
+      }
       name.textContent = range.key === "reset" ? "1–3일" : stageMeta[range.key].name.replace("차", "");
       dates.textContent = (rangeStart.getMonth() + 1) + "." + rangeStart.getDate() + "–" + (rangeEnd.getMonth() + 1) + "." + rangeEnd.getDate();
       item.appendChild(name);

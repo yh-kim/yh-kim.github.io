@@ -65,41 +65,48 @@ a { color: inherit; }
 .calendar.is-editing { gap: 3px; background: #eeeeF7; }
 .calendar.is-reading { display: block; padding: 8px; background: #f8f8fc; }
 .calendar-phase-key { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; margin-bottom: 9px; }
-.calendar-phase { min-width: 0; padding: 6px 2px 5px; border-radius: 9px; background: #f0eff8; text-align: center; }
+.calendar-phase { min-width: 0; padding: 6px 2px 5px; border: 1px solid transparent; border-radius: 9px; text-align: center; }
 .calendar-phase strong, .calendar-phase span { display: block; overflow: hidden; text-overflow: clip; white-space: nowrap; }
-.calendar-phase strong { color: #5d55a9; font-size: 10px; font-weight: 950; line-height: 1.1; }
+.calendar-phase strong { font-size: 10px; font-weight: 950; line-height: 1.1; }
 .calendar-phase span { margin-top: 3px; color: #858597; font-size: 9px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-.calendar-phase.stage-reset { background: #f4f2ff; }
-.calendar-phase.stage-week1 { background: #f0eeff; }
-.calendar-phase.stage-week2 { background: #ebe8ff; }
-.calendar-phase.stage-week3 { background: #e5e1fc; }
-.calendar-phase.stage-week4 { background: #ddd8f8; }
+.calendar-phase.stage-reset { border-color: #dddbea; background: #f1f0f8; }
+.calendar-phase.stage-reset strong { color: #69657f; }
+.calendar-phase.stage-week1 { border-color: #cdc9e9; background: #e5e2f6; }
+.calendar-phase.stage-week1 strong { color: #5d54a4; }
+.calendar-phase.stage-week2 { border-color: #c4d8ee; background: #dce9f8; }
+.calendar-phase.stage-week2 strong { color: #416c98; }
+.calendar-phase.stage-week3 { border-color: #b8ded8; background: #d9efeb; }
+.calendar-phase.stage-week3 strong { color: #277267; }
+.calendar-phase.stage-week4 { border-color: #e2d39e; background: #f4edcf; }
+.calendar-phase.stage-week4 strong { color: #826516; }
+.calendar-phase.is-current { position: relative; z-index: 2; border-width: 2px; border-color: #565169; box-shadow: 0 3px 8px rgba(58, 54, 76, .12); }
 .calendar-read-weekdays, .calendar-read-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
 .calendar-read-weekdays { margin-bottom: 3px; }
 .calendar-read-weekdays span { color: #8d8e9f; font-size: 10px; font-weight: 900; text-align: center; }
 .calendar-month-day, .calendar-month-blank { min-width: 0; min-height: 39px; }
 .calendar-month-day { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border: 1px solid transparent; border-radius: 10px; color: #414254; font-variant-numeric: tabular-nums; }
-.calendar-month-day.stage-reset { background: #f4f2ff; }
-.calendar-month-day.stage-week1 { background: #f0eeff; }
-.calendar-month-day.stage-week2 { background: #ebe8ff; }
-.calendar-month-day.stage-week3 { background: #e5e1fc; }
-.calendar-month-day.stage-week4 { background: #ddd8f8; }
+.calendar-month-day.stage-reset { border-color: #e1dfeb; background: #f1f0f8; }
+.calendar-month-day.stage-week1 { border-color: #d2ceeb; background: #e5e2f6; }
+.calendar-month-day.stage-week2 { border-color: #c8dbef; background: #dce9f8; }
+.calendar-month-day.stage-week3 { border-color: #bfdfda; background: #d9efeb; }
+.calendar-month-day.stage-week4 { border-color: #e5d7a5; background: #f4edcf; }
 .calendar-month-day small { position: absolute; top: 3px; z-index: 2; color: #7c7892; font-size: 9px; font-weight: 900; line-height: 1; }
 .calendar-month-day strong { position: relative; z-index: 2; margin-top: 2px; font-size: 14px; font-weight: 900; line-height: 1; }
 .calendar-month-day.is-today { border-color: #6559d2; box-shadow: inset 0 0 0 1px #6559d2; color: #4f44bb; }
 .calendar-month-day.has-fast-half strong { display: grid; place-items: center; width: 25px; height: 25px; margin-top: 1px; border-radius: 50%; background: rgba(255,255,255,.9); color: #4b4055; box-shadow: 0 2px 6px rgba(83,55,71,.12); }
-.fast-half { position: absolute; top: 0; bottom: 0; z-index: 1; width: 50%; overflow: hidden; background: linear-gradient(145deg, #ff8b91, #ec6977); box-shadow: inset 0 0 0 1px rgba(211,75,94,.08); pointer-events: none; }
+.fast-half { position: absolute; top: 0; bottom: 0; z-index: 1; width: 50%; overflow: hidden; background: linear-gradient(145deg, #ff7f8b, #df5567); box-shadow: inset 0 0 0 1px rgba(187,52,72,.14); pointer-events: none; }
 .fast-half-start { right: 0; border-radius: 0 9px 9px 0; }
 .fast-half-end { left: 0; border-radius: 9px 0 0 9px; }
-.fast-half::after { content: attr(data-label); position: absolute; bottom: 2px; width: 100%; color: #fff7f8; font-size: 8px; font-style: normal; font-weight: 950; line-height: 1; text-align: center; }
 .weekday { padding-bottom: 4px; color: #848d87; font-size: 10px; font-weight: 850; text-align: center; }
 .calendar-day, .calendar-blank { min-width: 0; min-height: 43px; }
 .calendar.is-editing .calendar-day, .calendar.is-editing .calendar-blank { min-height: 49px; }
 .calendar-day { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 9px 0 2px; border: 1px solid transparent; border-radius: 11px; background: transparent; color: #3d4b43; cursor: default; opacity: 1; -webkit-text-fill-color: currentColor; transition: background .16s ease, box-shadow .16s ease; }
 .calendar.is-editing .calendar-day { border-color: #e0e0eb; background: #fff; cursor: pointer; box-shadow: 0 3px 9px rgba(49,50,78,.05); }
-.calendar-day::before { content: ""; position: absolute; top: 5px; z-index: 3; width: 12px; height: 2px; border-radius: 99px; background: #d3d1ee; }
-.calendar-day.stage-week2::before, .calendar-day.stage-week3::before { background: #aba5e9; }
-.calendar-day.stage-week4::before { background: #766bd4; }
+.calendar-day::before { content: ""; position: absolute; top: 5px; z-index: 3; width: 12px; height: 2px; border-radius: 99px; background: #8d889f; }
+.calendar-day.stage-week1::before { background: #7168b8; }
+.calendar-day.stage-week2::before { background: #5682b1; }
+.calendar-day.stage-week3::before { background: #319184; }
+.calendar-day.stage-week4::before { background: #b18b25; }
 .calendar-day strong { position: relative; z-index: 2; display: grid; place-items: center; width: 29px; height: 29px; border-radius: 50%; font-size: 13px; line-height: 1; font-variant-numeric: tabular-nums; }
 .calendar-day span { position: relative; z-index: 2; margin-top: 1px; color: #7e8882; font-size: 9px; font-weight: 800; }
 .calendar-day small { position: absolute; top: 3px; left: 2px; z-index: 3; max-width: calc(100% - 4px); overflow: hidden; color: #66756e; font-size: 8px; font-weight: 900; line-height: 1; white-space: nowrap; }
