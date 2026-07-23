@@ -899,7 +899,7 @@
         return { verdict: "1–3일차 보조 식품", tone: "okay", note: "설탕·과일·시럽 없는 플레인 제품만. 단백질 쉐이크를 대체하는 일반식으로 늘리지 않기" };
       }
       if (name === "두부" || name === "연두부") {
-        return { verdict: "1–3일차 보조 식품", tone: "okay", note: "콩·응고제 중심의 단순한 제품을 양념 없이 먹고 일반식 한 끼로 확대하지 않기" };
+        return { verdict: "1–3일차 보조 식품", tone: "okay", note: "콩·응고제 중심의 단순한 제품 기준. 이 단계의 일반식 한 끼를 대체하는 식품은 아님" };
       }
       return null;
     }
@@ -912,7 +912,7 @@
         return null;
       }
       if (nameIn(name, ["들기름", "올리브오일", "코코넛오일", "아보카도"])) {
-        return { verdict: "1주차부터 소량", tone: "conditional", note: "허용 지방이어도 음식에 더하는 양이므로 한 끼에 과하게 겹치지 않도록 조리용으로만 사용" };
+        return { verdict: "1주차부터 소량", tone: "conditional", note: "허용 지방이어도 한 끼에 여러 지방 식품과 과하게 겹치지 않도록 양을 확인" };
       }
       if (nameIn(name, ["강황", "고추", "고춧가루", "꽈리고추", "대파", "마늘종", "청양고추", "풋고추", "허브", "허브티", "후추"])) {
         return null;
@@ -925,7 +925,7 @@
 
     if (title.indexOf("기름·유지") === 0) {
       if (nameIn(name, ["올리브오일", "엑스트라버진올리브오일", "들기름", "코코넛오일"])) {
-        return { verdict: "1주차부터 소량", tone: "okay", note: "목록에 있는 지방. 한 끼에 여러 기름을 겹치지 말고 볶음·무침에 필요한 만큼만 사용" };
+        return { verdict: "1주차부터 소량", tone: "okay", note: "목록에 있는 지방. 한 끼에 여러 기름을 겹치지 않도록 전체 사용량을 확인" };
       }
       if (nameIn(name, ["참기름", "땅콩기름", "아마씨유", "호두유", "햄프씨드오일", "아몬드오일"])) {
         return { verdict: "2주차부터 소량", tone: "conditional", note: "원료 견과·씨앗이 추가되는 2주차부터 향을 내는 정도만 사용. 밥·견과류·다른 기름과 과하게 겹치지 않기" };
@@ -936,7 +936,7 @@
       if (name === "MCT오일") {
         return { verdict: "허용 지방을 먼저", tone: "conditional", note: "코코넛 유래라도 목록에 따로 명시된 식품은 아님. 올리브오일·들기름·코코넛오일을 우선하고 사용한다면 소량부터" };
       }
-      return { verdict: "조리용 소량 조건부", tone: "conditional", note: "자동 금지 기름은 아니지만 목록에 있는 올리브오일·들기름·코코넛오일을 우선. 튀김보다 볶음·구이에 소량만 사용" };
+      return { verdict: "소량 조건부", tone: "conditional", note: "자동 금지 기름은 아니지만 목록에 있는 올리브오일·들기름·코코넛오일을 우선하고 전체 사용량을 확인" };
     }
 
     if (title.indexOf("육수·조미료·허브") === 0) {
@@ -989,15 +989,18 @@
     }
 
     if (title.indexOf("2주차부터") === 0) {
-      return { verdict: "2주차부터 소량", tone: "conditional", note: "첨가당이나 반죽 코팅이 없는 원물 기준. 한 번 먹을 양을 먼저 덜고 밥·과일·고구마와 한 끼에 과하게 겹치지 않기" };
+      if (name === "견과버터" || name === "땅콩버터") {
+        return ingredientNotes[name];
+      }
+      return null;
     }
 
     if (title.indexOf("3주차부터") === 0) {
       if (name === "소고기" || name === "저지방 소고기") {
-        return { verdict: "3주차부터", tone: "okay", note: "안심·우둔·홍두깨처럼 비교적 기름기 적은 부위를 굽거나 삶고 달콤한 양념은 제외" };
+        return null;
       }
       if (name === "고구마" || name === "단호박" || name === "감자" || name === "완두콩" || name === "옥수수") {
-        return { verdict: "3주차 점심부터", tone: "conditional", note: "밥·과일 대신 한 끼의 탄수화물 한 종류로 소량. 튀김·샐러드 소스·버터·설탕은 더하지 않기" };
+        return { verdict: "3주차 점심부터", tone: "conditional", note: "밥·과일과 같은 탄수화물 식품이므로 한 끼에 한 종류만 소량" };
       }
       return { verdict: "3주차부터 소량", tone: "conditional", note: "간식이나 후식으로 더하지 말고 밥·고구마와 겹치지 않는 한 끼 탄수화물로 계산" };
     }
