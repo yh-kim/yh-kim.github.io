@@ -157,10 +157,13 @@ a { color: inherit; }
 .ingredient-search { position: relative; display: block; margin-bottom: 7px; }
 .ingredient-search-icon { position: absolute; top: 50%; left: 13px; width: 13px; height: 13px; border: 2px solid #77768a; border-radius: 50%; transform: translateY(-58%); pointer-events: none; }
 .ingredient-search-icon::after { content: ""; position: absolute; right: -5px; bottom: -3px; width: 6px; height: 2px; border-radius: 99px; background: #77768a; transform: rotate(45deg); }
-.ingredient-search input { width: 100%; min-height: 43px; padding: 9px 34px 9px 39px; border: 1px solid #dcdbe7; border-radius: 13px; outline: none; background: rgba(255,255,255,.9); color: #353648; font: inherit; font-size: 12px; font-weight: 750; -webkit-appearance: none; appearance: none; }
+.ingredient-search input { width: 100%; min-height: 43px; padding: 9px 76px 9px 39px; border: 1px solid #dcdbe7; border-radius: 13px; outline: none; background: rgba(255,255,255,.9); color: #353648; font: inherit; font-size: 12px; font-weight: 750; -webkit-appearance: none; appearance: none; }
 .ingredient-search input::placeholder { color: #9292a1; font-weight: 700; }
 .ingredient-search input:focus { border-color: #786ed0; box-shadow: 0 0 0 3px rgba(101,89,203,.12); }
-.ingredient-search input::-webkit-search-cancel-button { opacity: .7; }
+.ingredient-search input::-webkit-search-cancel-button { display: none; }
+.ingredient-search-reset { position: absolute; top: 50%; right: 6px; min-width: 58px; min-height: 34px; padding: 0 10px; border: 0; border-radius: 11px; background: #efedf8; color: #5f55b7; font: inherit; font-size: 12px; font-weight: 900; transform: translateY(-50%); cursor: pointer; }
+.ingredient-search-reset:disabled { background: #f4f3f7; color: #aaa8b4; cursor: default; }
+.ingredient-search-reset:focus-visible { outline: 3px solid rgba(101,89,203,.2); outline-offset: 1px; }
 .ingredient-groups { display: grid; gap: 5px; }
 .ingredient-group { overflow: hidden; border: 1px solid #e1e0e9; border-radius: 12px; background: rgba(255,255,255,.72); }
 .ingredient-group summary { position: relative; display: flex; align-items: center; min-height: 52px; padding: 8px 33px 8px 29px; cursor: pointer; list-style: none; }
