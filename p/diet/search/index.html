@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>스위치온 식품검색</title>
+  <meta name="description" content="스위치온 다이어트 단계에 맞춰 음식과 원재료를 검색하는 가이드">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="스위치온 식품검색">
+  <meta property="og:description" content="음식과 원재료의 단계별 선택 기준을 검색하세요">
+  <meta property="og:url" content="https://blog.pickth.com/p/diet/search/">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Pimi's Blog space icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="스위치온 식품검색">
+  <meta name="twitter:description" content="음식과 원재료의 단계별 선택 기준을 검색하세요">
+  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+  <link rel="stylesheet" href="/p/diet/assets/diet.css?v=20260723-46">
+</head>
+<body class="diet-search-page">
+  <header class="search-page-header">
+    <div class="search-page-header-inner">
+      <a class="search-page-back" href="/p/diet/" aria-label="다이어트 플래너로 돌아가기">←</a>
+      <div>
+        <p>음식 · 원재료</p>
+        <h1>식품검색</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="food-search-page">
+    <div class="food-search-sticky">
+      <label class="ingredient-search" for="ingredient-search">
+        <span class="ingredient-search-icon" aria-hidden="true"></span>
+        <input id="ingredient-search" type="search" inputmode="search" autocomplete="off" aria-label="음식 또는 원재료 검색" placeholder="음식 또는 원재료 검색 · 예: 육회">
+      </label>
+      <p>음식명, 별칭 또는 과일·감미료 같은 분류명으로 검색하세요.</p>
+    </div>
+    <div class="ingredient-groups" id="ingredient-groups"></div>
+    <p class="ingredient-no-result" id="ingredient-no-result" role="status" hidden>일치하는 음식이나 원재료가 없습니다. 다른 이름 또는 복합원재료의 괄호 안 이름으로 확인해보세요.</p>
+  </main>
+
+  <script src="/p/diet/assets/diet.js?v=20260723-53"></script>
+</body>
+</html>

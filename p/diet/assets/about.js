@@ -50,7 +50,7 @@
 
   buttons.forEach(function (button) { button.addEventListener("click", copyPrompt); });
 
-  fetch("/p/diet/prompt.txt")
+  fetch("/p/diet/prompt.txt?v=20260723-53")
     .then(function (response) {
       if (!response.ok) { throw new Error("prompt load failed"); }
       return response.text();

@@ -41,10 +41,9 @@ a { color: inherit; }
 .app-heading p { margin: 0 0 1px; color: var(--green); font-size: 10px; font-weight: 950; letter-spacing: .17em; }
 .app-heading h1 { margin: 0; font-size: 23px; line-height: 1.08; letter-spacing: -.055em; }
 .heading-actions { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
-.heading-actions a { color: #77788d; font-size: 12px; font-weight: 850; text-decoration: none; }
 .start-button { min-height: 37px; padding: 7px 13px; border: 0; border-radius: 999px; background: #25263a; color: #fff; font-size: 11px; font-weight: 900; cursor: pointer; box-shadow: 0 9px 20px rgba(35, 36, 58, .19); }
 .start-button[aria-pressed="true"] { background: #e9e7ff; color: #5146bd; box-shadow: none; }
-.food-search-open { min-height: 37px; padding: 7px 11px; border: 1px solid #d8d5f2; border-radius: 999px; background: #f0eeff; color: #574bc2; font-size: 11px; font-weight: 950; cursor: pointer; }
+.food-search-open { display: inline-flex; align-items: center; justify-content: center; min-height: 37px; padding: 7px 11px; border: 1px solid #d8d5f2; border-radius: 999px; background: #f0eeff; color: #574bc2; font-size: 11px; font-weight: 950; text-decoration: none; cursor: pointer; }
 .food-search-open:focus-visible { outline: 3px solid rgba(101,89,203,.2); outline-offset: 2px; }
 
 .start-setup { position: fixed; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; z-index: 50; padding: 17px; border: 1px solid rgba(255,255,255,.8); border-radius: 22px; background: rgba(249, 249, 253, .97); box-shadow: 0 22px 60px rgba(34, 35, 65, .24); backdrop-filter: blur(18px); }
@@ -208,18 +207,18 @@ a { color: inherit; }
 .ingredient-group-check li { background: #faf4df; color: #796125; }
 .ingredient-group-fiber li { background: #e8f6f5; color: #286f6d; }
 .ingredient-no-result { margin: 0; padding: 13px 10px; border: 1px dashed #d8d6e4; border-radius: 11px; color: #737486; font-size: 10.5px; line-height: 1.5; text-align: center; }
-.food-search-layer { position: fixed; inset: 0; z-index: 80; background: #f5f4fa; }
-.food-search-dialog { position: relative; display: flex; flex-direction: column; width: min(100%, 760px); height: 100vh; height: 100dvh; margin: 0 auto; overflow: hidden; background: linear-gradient(180deg, #f9f8fd 0%, #f4f3f9 100%); }
-.food-search-header { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; min-height: 72px; padding: max(14px, env(safe-area-inset-top)) 16px 12px; border-bottom: 1px solid rgba(220,218,232,.9); background: rgba(249,248,253,.92); backdrop-filter: blur(16px); }
-.food-search-header p { margin: 0 0 1px; color: #665acb; font-size: 10px; font-weight: 950; letter-spacing: .08em; }
-.food-search-header h2 { margin: 0; color: #292a3d; font-size: 22px; line-height: 1.15; letter-spacing: -.045em; }
-.food-search-close { min-width: 54px; min-height: 40px; padding: 8px 13px; border: 1px solid #dddae9; border-radius: 999px; background: #fff; color: #555668; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 14px rgba(50,50,76,.06); }
-.food-search-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 14px calc(28px + env(safe-area-inset-bottom)); scroll-behavior: smooth; }
+.diet-search-page { min-height: 100vh; min-height: 100dvh; background: linear-gradient(180deg, #f9f8fd 0%, #f4f3f9 100%); }
+.search-page-header { width: 100%; border-bottom: 1px solid rgba(220,218,232,.88); background: rgba(250,249,253,.92); }
+.search-page-header-inner { display: flex; align-items: center; gap: 11px; width: min(100% - 28px, 760px); min-height: 74px; margin: 0 auto; padding: max(13px, env(safe-area-inset-top)) 0 11px; }
+.search-page-header p { margin: 0 0 1px; color: #665acb; font-size: 10px; font-weight: 950; letter-spacing: .08em; }
+.search-page-header h1 { margin: 0; color: #292a3d; font-size: 22px; line-height: 1.15; letter-spacing: -.045em; }
+.search-page-back { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #dddae9; border-radius: 50%; background: #fff; color: #4f5062; font-size: 20px; font-weight: 800; line-height: 1; text-decoration: none; box-shadow: 0 5px 14px rgba(50,50,76,.06); }
+.food-search-page { width: min(100%, 760px); min-height: calc(100vh - 75px); min-height: calc(100dvh - 75px); margin: 0 auto; padding: 0 14px calc(30px + env(safe-area-inset-bottom)); }
 .food-search-sticky { position: sticky; top: 0; z-index: 2; margin: 0 -14px 9px; padding: 13px 14px 10px; border-bottom: 1px solid rgba(224,222,234,.82); background: rgba(247,246,251,.94); backdrop-filter: blur(14px); }
 .food-search-sticky .ingredient-search { margin: 0; }
 .food-search-sticky .ingredient-search input { min-height: 48px; border-color: #d5d1e8; border-radius: 16px; background: #fff; font-size: 16px; box-shadow: 0 8px 24px rgba(55,51,88,.07); }
 .food-search-sticky > p { margin: 7px 2px 0; color: #777889; font-size: 10.5px; line-height: 1.45; }
-.food-search-close:focus-visible { outline: 3px solid rgba(101,89,203,.24); outline-offset: 3px; }
+.search-page-back:focus-visible { outline: 3px solid rgba(101,89,203,.24); outline-offset: 3px; }
 .maintenance-guide { margin-top: 2px; }
 .maintenance-intro { padding: 18px; border: 1px solid #ddd9ff; border-radius: 19px; background: linear-gradient(135deg, #eeebff, #f9f7ff); }
 .maintenance-intro p { margin: 0 0 2px; color: #695ed1; font-size: 10px; font-weight: 950; }
@@ -247,7 +246,7 @@ a { color: inherit; }
 .confirm-actions .confirm-accept { border-color: #6155d0; background: linear-gradient(145deg, #6f63e0, #584cc6); color: #fff; box-shadow: 0 8px 18px rgba(91,79,200,.2); }
 .confirm-actions .confirm-accept.is-danger { border-color: #dc6674; background: linear-gradient(145deg, #ef7d89, #d95969); box-shadow: 0 8px 18px rgba(205,77,95,.18); }
 .confirm-actions button:focus-visible { outline: 3px solid rgba(101,89,210,.24); outline-offset: 2px; }
-body.has-confirm, body.has-food-search { overflow: hidden; }
+body.has-confirm { overflow: hidden; }
 .medical-note { margin: 17px auto 0; color: #7d847f; font-size: 11px; text-align: center; }
 body:not(.has-plan) .medical-note { display: none; }
 .diet-footer { margin-top: 22px; padding: 18px 0 4px; border-top: 1px solid rgba(218,217,230,.9); text-align: center; }
@@ -275,8 +274,7 @@ body:not(.has-plan) .medical-note { display: none; }
   .food-list li { font-size: 12px; }
   .basis-checklist, .maintenance-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .basis-checklist li:last-child { grid-column: 1 / -1; }
-  .food-search-dialog { border-inline: 1px solid #e0deea; box-shadow: 0 0 60px rgba(40,39,65,.12); }
-  .food-search-content { padding-inline: 18px; }
+  .food-search-page { padding-inline: 18px; }
   .food-search-sticky { margin-inline: -18px; padding-inline: 18px; }
   .copy-plan-button { right: max(20px, calc((100vw - 760px) / 2)); bottom: 20px; }
   .snackbar { right: max(78px, calc((100vw - 650px) / 2)); bottom: 21px; }
