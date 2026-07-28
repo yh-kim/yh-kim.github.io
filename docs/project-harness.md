@@ -292,7 +292,65 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
 
 ### How to Collect Data from 빠방
 
-Use this order. Fast web search is allowed for name resolution, but 빠방 remains the primary source for the card data and poster.
+빠방 remains the primary source for the card data and poster. Use the fast path first and open the rendered UI or a general search engine only when the fast path cannot identify one record confidently.
+
+#### Fast Path
+
+The normal case should take one 빠방 query plus a poster download and one Naver Booking lookup. Do not begin with several general web searches.
+
+1. Parse the user's query and reservation date/time, then find `N = highest existing card number + 1`.
+2. Download `main.dart.js` only once per task and extract the public Meilisearch token from it. Reuse the scratch copy and token for every 빠방 query in the same task.
+3. Query `qrooms` with the raw user text first. Request a small result set, then sort the returned hits locally by `recommendTotalRating` descending so this works even if the remote index does not allow sort parameters.
+4. Project only the fields needed to identify the record. Compare exact `title`, `nicknames`, `store_name`, and `location`; do not read the full raw response repeatedly.
+5. Once one record is confirmed, use that same record for card data, poster path, store address, and `store_homepage`. Query `qstores` only when a store field needed for the card or map is missing.
+6. If `store_homepage` is a Naver Booking URL, fetch it directly and extract `placeId`, store name, and address. Skip Naver web/blog searches when these values agree with the 빠방 record.
+7. After the record is confirmed, download the poster and inspect the Naver Booking page in parallel when the available tools support parallel calls.
+8. Use the 빠방 UI or general web search only for ambiguity, missing genre/price semantics, a missing Naver place ID, or a failed public-index query.
+
+Quick lookup shape:
+
+```bash
+curl -L https://bbabang.net/main.dart.js -o /tmp/bbabang-main.dart.js
+rg -o 'W:"[A-Za-z0-9]{60,}"' /tmp/bbabang-main.dart.js | head -1
+
+curl -L -s 'https://q.keigon.net/indexes/qrooms/search' \
+  -H 'Authorization: Bearer <public token from main.dart.js>' \
+  -H 'Content-Type: application/json' \
+  --data '{"q":"<raw user query>","limit":10}' \
+  | jq '.hits
+    | sort_by(.recommendTotalRating // 0)
+    | reverse
+    | map({
+        title,
+        nicknames,
+        store_name,
+        location,
+        recommendTotalRating,
+        playtime,
+        price,
+        description,
+        poster_loc,
+        special_tags,
+        store_homepage,
+        address
+      })'
+```
+
+The public token is lookup-only scratch data. Never write it to repository files, documentation, logs intended for the user, or shell history that will be committed.
+
+Fast Naver place extraction:
+
+```bash
+curl -L -s '<store_homepage Naver Booking URL>' -o /tmp/naver-booking.html
+rg -o '"placeId":"[0-9]+"' /tmp/naver-booking.html | sort -u
+rg -n '"name":"<exact store name>"|roadAddr|jibun|address' /tmp/naver-booking.html
+```
+
+If the booking HTML contains several place IDs, use the one attached to the `Business:<business id>` object for the exact store, then cross-check its address. Do not select the first number blindly.
+
+#### Detailed Fallback
+
+Use this order when the fast path is ambiguous or incomplete.
 
 1. Preserve the user's raw query.
    - Example: user says `머머부`; keep `머머부` as the first search query.
@@ -316,11 +374,13 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
      4. Distinctive title words.
      5. Known nickname, Korean initials, or English alias.
    - If multiple plausible 빠방 records remain, ask the user to choose instead of guessing.
-3. Prefer 빠방's rendered UI when it is easy to operate.
+3. Use 빠방's rendered UI to resolve ambiguity or confirm a visual mismatch.
    - Open `https://bbabang.net/`.
    - Search by the raw query and then by the resolved official title.
+   - Set the result order to `추천도 높은 순`. Do not substitute `추천수 많은 순`; the percentage-based recommendation score is the default signal for identifying the well-regarded theme the user likely means.
+   - Confirm the exact theme title on the result card before collecting any fields. Similar titles, nicknames, and poster text are supporting clues, not replacements for the 빠방 record's `title`.
    - Confirm the matching card by title, store/branch, and area.
-4. If the rendered UI is hard to inspect, use 빠방's public search index from the web bundle.
+4. Use 빠방's public search index from the web bundle when the fast-path scratch data is unavailable or must be refreshed.
    - 빠방 is a Flutter web app; the HTML may show only the splash screen in text tools.
    - Download or inspect the app bundle in scratch space:
 
@@ -333,13 +393,14 @@ Use this order. Fast web search is allowed for name resolution, but 빠방 remai
      - `qrooms`: theme/room records.
      - `qstores`: store records.
    - Use the public Meilisearch token found in `main.dart.js` only for the lookup command. Do not paste that token into repository files or documentation.
-   - Query shape:
+   - Query a small result set and sort the response locally by recommendation percentage:
 
      ```bash
      curl -L -s 'https://q.keigon.net/indexes/qrooms/search' \
        -H 'Authorization: Bearer <public token from main.dart.js>' \
        -H 'Content-Type: application/json' \
-       --data '{"q":"<raw or resolved query>","limit":5}'
+       --data '{"q":"<raw or resolved query>","limit":10}' \
+       | jq '.hits | sort_by(.recommendTotalRating // 0) | reverse'
      ```
 
    - If normal sandboxed network access fails with DNS or connection errors, retry the same lookup with explicit user approval for network access.
