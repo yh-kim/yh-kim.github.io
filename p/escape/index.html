@@ -289,6 +289,23 @@
       </header>
 
       <section class="card-list" aria-label="방탈출 카드 목록">
+        <a class="escape-card-link" href="/p/escape/26" data-reserved-date="2026-08-15" data-difficulty="쉬움" data-fear="매우 높음" data-activity="보통">
+          <span class="poster square">
+            <img src="/p/escape/assets/poster-26.jpg" alt="INSANE 포스터">
+          </span>
+          <span class="summary">
+            <span>
+              <h2>INSANE</h2>
+              <p class="store">로드 유미플레이 1</p>
+            </span>
+            <span class="badges" aria-label="요약 정보">
+              <span class="badge area">홍대</span>
+              <span class="badge reservation-badge" hidden>8월 15일 토요일</span>
+              <span class="badge time reservation-badge" hidden>14:30 - 15:45</span>
+            </span>
+          </span>
+        </a>
+
         <a class="escape-card-link" href="/p/escape/25" data-reserved-date="2026-08-01" data-difficulty="쉬움" data-fear="높음" data-activity="보통">
           <span class="poster">
             <img src="/p/escape/assets/poster-25.png" alt="BLACK MUSE 포스터">
@@ -676,7 +693,8 @@
       "22.html": "j7p4",
       "23.html": "e5t9",
       "24.html": "h6r2",
-      "25.html": "a7u4"
+      "25.html": "a7u4",
+      "26.html": "m4y7"
     };
     const showReservation = new URLSearchParams(window.location.search).get(reservationQueryKey) === listReservationQueryValue;
     const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());

@@ -53,7 +53,8 @@
       "22.html": "j7p4",
       "23.html": "e5t9",
       "24.html": "h6r2",
-      "25.html": "a7u4"
+      "25.html": "a7u4",
+      "26.html": "m4y7"
     };
     const normalizeCardFileName = (path) => {
       const lastSegment = String(path || "")
