@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.5
+// @version         3.6
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
-// @match           *://*.xn--2e0b040a4xj.com/reservation/create*
-// @match           *://*.play33.kr/reservation/create*
-// @match           *://*.clevertown.co.kr/layout/res/home.php*
-// @match           *://*.doomescape.com/layout/res/home.php*
-// @match           *://*.keyescape.com/reservation2.php*
-// @match           *://*.nabijam.com/layout/res/home.php*
-// @match           *://*.seoul-escape.com/reservation/create*
+// @match           *://*.xn--2e0b040a4xj.com/*
+// @match           *://*.play33.kr/*
+// @match           *://*.clevertown.co.kr/*
+// @match           *://*.doomescape.com/*
+// @match           *://*.keyescape.com/*
+// @match           *://*.nabijam.com/*
+// @match           *://*.seoul-escape.com/*
 // @run-at          document-idle
 // @grant           none
 // ==/UserScript==
@@ -452,10 +452,14 @@
 
   async function run() {
     const url = new URL(location.href);
+    const siteProfile = PROFILES.find(candidate => hostnameMatches(url.hostname, candidate.domain));
+    if (!siteProfile) return;
+
+    showAutoSubmitStatus(siteProfile);
+
     const profile = PROFILES.find(candidate => matchesProfile(candidate, url));
     if (!profile) return;
 
-    showAutoSubmitStatus(profile);
     console.info('[' + profile.label + '] 자동 입력 스크립트 시작:', location.href);
 
     try {
