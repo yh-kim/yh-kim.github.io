@@ -206,11 +206,6 @@
 
     .privacy-note::before { content: "●"; color: #4fba83; font-size: 8px; margin-top: 3px; }
 
-    .site-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
-    .fact { padding: 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-subtle); }
-    .fact span { display: block; color: #9698a4; font-size: 10px; }
-    .fact strong { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
-
     .site-support { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
     .site-support > strong { display: block; margin-bottom: 10px; font-size: 11px; }
     .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
@@ -272,7 +267,7 @@
       .memo-grid, .workspace { grid-template-columns: 1fr; }
       .memo-card { min-height: 190px; }
       .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-      .settings .panel-title, .settings .panel-note, .settings .privacy-note, .settings .site-facts, .settings .site-support { grid-column: 1 / -1; }
+      .settings .panel-title, .settings .panel-note, .settings .privacy-note, .settings .site-support { grid-column: 1 / -1; }
       pre { max-height: 580px; }
     }
 
@@ -290,4 +285,3 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
     }
-

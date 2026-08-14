@@ -88,7 +88,7 @@
         <div class="workspace">
           <section class="panel settings" aria-labelledby="settings-title">
             <h2 class="panel-title" id="settings-title">코드 설정</h2>
-            <p class="panel-note">모바일 예약에 사용할 기본값을 입력하세요.</p>
+            <p class="panel-note">이름과 전화번호만 입력하세요. 예약 인원은 각 사이트의 최소 인원으로 선택됩니다.</p>
 
             <label class="field">
               <span>이름</span>
@@ -101,23 +101,14 @@
             </label>
 
             <label class="field">
-              <span>예약 인원</span>
-              <select id="guest-people" aria-label="예약 인원">
-                <option value="1">1명</option>
-                <option value="2" selected>2명</option>
-                <option value="3">3명</option>
-                <option value="4">4명</option>
-                <option value="5">5명</option>
-                <option value="6">6명</option>
+              <span>예약 버튼</span>
+              <select id="auto-submit" aria-label="예약 버튼 자동 클릭 여부">
+                <option value="false" selected>직접 누르기</option>
+                <option value="true">입력 후 자동 클릭</option>
               </select>
             </label>
 
             <div class="privacy-note">입력한 이름과 전화번호는 저장하거나 전송하지 않고, 현재 화면의 코드에만 반영됩니다.</div>
-
-            <div class="site-facts" aria-label="현재 코드 설정 요약">
-              <div class="fact"><span>실행 범위</span><strong>7개 사이트</strong></div>
-              <div class="fact"><span>예약 제출</span><strong>자동 실행 안 함</strong></div>
-            </div>
 
             <div class="site-support" aria-label="지원 사이트">
               <strong>지원 사이트</strong>
@@ -133,7 +124,7 @@
             </div>
           </section>
 
-          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/escape-reservation.user.js" data-generator="escape" aria-labelledby="escape-code-title">
+          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/escape-reservation.user.js?v=3.1" data-generator="escape" aria-labelledby="escape-code-title">
             <header class="code-toolbar">
               <div class="code-identity">
                 <strong id="escape-code-title">escape-reservation.user.js</strong>
@@ -200,6 +191,6 @@
     </main>
   </div>
 
-  <script src="/p/hidden-memo/assets/memo.js"></script>
+  <script src="/p/hidden-memo/assets/memo.js?v=3.0"></script>
 </body>
 </html>

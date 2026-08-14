@@ -62,13 +62,16 @@
     var name = state.nameInput.value.trim();
     var phone = state.phoneInput.value.trim();
     var phoneDigits = phone.replace(/\D/g, '');
-    var people = state.peopleInput.value;
+    var autoSubmit = state.autoSubmitInput.value;
     var validPhone = phoneDigits.length === 10 || phoneDigits.length === 11;
 
     state.currentCode = state.template
       .replace('__GUEST_NAME__', JSON.stringify(name))
       .replace('__GUEST_PHONE__', JSON.stringify(phone))
-      .replace('__GUEST_PEOPLE__', JSON.stringify(people));
+      .replace(
+        /const IS_USING_AUTO_SUBMIT = (?:true|false|__AUTO_SUBMIT__);/,
+        'const IS_USING_AUTO_SUBMIT = ' + autoSubmit + ';'
+      );
 
     state.output.textContent = state.currentCode;
     state.copyButton.disabled = !name || !validPhone;
@@ -91,7 +94,7 @@
       help: panel.querySelector('[data-copy-help]'),
       nameInput: document.getElementById('guest-name'),
       phoneInput: document.getElementById('guest-phone'),
-      peopleInput: document.getElementById('guest-people')
+      autoSubmitInput: document.getElementById('auto-submit')
     };
     panelStates.set(panel, state);
 
@@ -106,7 +109,7 @@
     if (panel.dataset.generator === 'escape') {
       state.nameInput.addEventListener('input', function () { buildPanel(panel); });
       state.phoneInput.addEventListener('input', function () { buildPanel(panel); });
-      state.peopleInput.addEventListener('change', function () { buildPanel(panel); });
+      state.autoSubmitInput.addEventListener('change', function () { buildPanel(panel); });
     }
 
     fetch(panel.dataset.scriptSource, { cache: 'no-store' })
