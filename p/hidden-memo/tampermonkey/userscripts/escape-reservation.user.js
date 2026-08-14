@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.1
+// @version         3.2
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
 // @match           *://*.xn--2e0b040a4xj.com/reservation/create*
 // @match           *://*.play33.kr/reservation/create*
@@ -275,44 +275,50 @@
   function showResultToast(success) {
     document.getElementById('tm-reservation-result-toast')?.remove();
 
+    const message = success ? '예약 정보 입력 완료' : '예약 정보 입력 실패';
     const toast = document.createElement('div');
     toast.id = 'tm-reservation-result-toast';
     toast.setAttribute('role', 'status');
-    toast.textContent = success ? '예약 정보 입력 완료' : '예약 정보 입력 실패';
+    toast.setAttribute('aria-label', message);
+    toast.title = message;
+    toast.textContent = success ? '✓' : '!';
     Object.assign(toast.style, {
       position: 'fixed',
-      left: '50%',
-      bottom: 'calc(22px + env(safe-area-inset-bottom))',
-      transform: 'translate(-50%, 8px)',
+      left: 'calc(16px + env(safe-area-inset-left))',
+      bottom: 'calc(16px + env(safe-area-inset-bottom))',
+      width: '36px',
+      height: '36px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transform: 'translateY(10px) scale(.94)',
       zIndex: '2147483647',
-      minWidth: '180px',
-      maxWidth: 'calc(100vw - 32px)',
-      padding: '12px 18px',
-      borderRadius: '12px',
+      padding: '0',
+      borderRadius: '50%',
       background: success ? '#19724b' : '#b83b3b',
-      boxShadow: '0 10px 28px rgba(0, 0, 0, .24)',
+      boxShadow: '0 6px 18px rgba(0, 0, 0, .22)',
       color: '#fff',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      fontSize: '14px',
+      fontSize: '18px',
       fontWeight: '700',
-      lineHeight: '1.4',
+      lineHeight: '1',
       textAlign: 'center',
       opacity: '0',
       pointerEvents: 'none',
-      transition: 'opacity .18s ease, transform .18s ease'
+      transition: 'opacity .14s ease, transform .14s ease'
     });
 
     document.documentElement.appendChild(toast);
     requestAnimationFrame(() => {
       toast.style.opacity = '1';
-      toast.style.transform = 'translate(-50%, 0)';
+      toast.style.transform = 'translateY(0) scale(1)';
     });
 
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translate(-50%, 8px)';
-      setTimeout(() => toast.remove(), 200);
-    }, 2_400);
+      toast.style.transform = 'translateY(-4px) scale(.96)';
+      setTimeout(() => toast.remove(), 160);
+    }, 900);
   }
 
   function waitFor(selector, { root = document, timeout = 30_000, pollMs = 200 } = {}) {
