@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.2
+// @version         3.5
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
 // @match           *://*.xn--2e0b040a4xj.com/reservation/create*
 // @match           *://*.play33.kr/reservation/create*
@@ -285,7 +285,7 @@
     Object.assign(toast.style, {
       position: 'fixed',
       left: 'calc(16px + env(safe-area-inset-left))',
-      bottom: 'calc(16px + env(safe-area-inset-bottom))',
+      bottom: 'calc(58px + env(safe-area-inset-bottom))',
       width: '36px',
       height: '36px',
       display: 'flex',
@@ -319,6 +319,62 @@
       toast.style.transform = 'translateY(-4px) scale(.96)';
       setTimeout(() => toast.remove(), 160);
     }, 900);
+  }
+
+  function showAutoSubmitStatus(profile) {
+    document.getElementById('tm-auto-submit-status')?.remove();
+
+    const enabled = IS_USING_AUTO_SUBMIT
+      && !profile.manualInputSelector
+      && Boolean(profile.autoSubmitSelector);
+    const message = enabled ? '자동 제출 켜짐' : '자동 제출 꺼짐';
+    const status = document.createElement('div');
+    const dot = document.createElement('span');
+    const label = document.createElement('span');
+    status.id = 'tm-auto-submit-status';
+    status.setAttribute('role', 'status');
+    status.title = message;
+    dot.setAttribute('aria-hidden', 'true');
+    label.textContent = message;
+    Object.assign(status.style, {
+      position: 'fixed',
+      left: 'calc(16px + env(safe-area-inset-left))',
+      bottom: 'calc(16px + env(safe-area-inset-bottom))',
+      zIndex: '2147483646',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px',
+      minHeight: '28px',
+      boxSizing: 'border-box',
+      padding: '7px 11px 7px 9px',
+      borderRadius: '999px',
+      border: '1px solid rgba(255, 255, 255, .24)',
+      background: enabled
+        ? 'linear-gradient(135deg, #ef4444, #c81e1e)'
+        : 'linear-gradient(135deg, #30343a, #111315)',
+      boxShadow: enabled
+        ? '0 5px 16px rgba(185, 28, 28, .28), 0 1px 2px rgba(0, 0, 0, .18)'
+        : '0 5px 16px rgba(0, 0, 0, .24), 0 1px 2px rgba(0, 0, 0, .18)',
+      color: '#fff',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      fontSize: '11px',
+      fontWeight: '700',
+      lineHeight: '1',
+      letterSpacing: '-.015em',
+      whiteSpace: 'nowrap',
+      pointerEvents: 'none'
+    });
+    Object.assign(dot.style, {
+      width: '6px',
+      height: '6px',
+      flex: '0 0 6px',
+      borderRadius: '50%',
+      background: enabled ? '#fff' : 'rgba(255, 255, 255, .72)',
+      boxShadow: enabled ? '0 0 0 3px rgba(255, 255, 255, .16)' : 'none'
+    });
+
+    status.append(dot, label);
+    document.documentElement.appendChild(status);
   }
 
   function waitFor(selector, { root = document, timeout = 30_000, pollMs = 200 } = {}) {
@@ -399,6 +455,7 @@
     const profile = PROFILES.find(candidate => matchesProfile(candidate, url));
     if (!profile) return;
 
+    showAutoSubmitStatus(profile);
     console.info('[' + profile.label + '] 자동 입력 스크립트 시작:', location.href);
 
     try {
