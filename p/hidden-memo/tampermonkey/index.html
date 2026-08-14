@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="html-document-listing" content="hidden">
+  <meta name="description" content="Tampermonkey UserScript 메모">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="TAMPERMONKEY · Memo">
+  <meta property="og:description" content="Tampermonkey UserScript 메모">
+  <meta property="og:url" content="https://blog.pickth.com/p/hidden-memo/tampermonkey/">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Pimi's Blog space icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="TAMPERMONKEY · Memo">
+  <meta name="twitter:description" content="Tampermonkey UserScript 메모">
+  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+  <title>TAMPERMONKEY · Memo</title>
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <link rel="stylesheet" href="/p/hidden-memo/assets/memo.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/p/hidden-memo/" aria-label="메모로 이동">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>PIMI / MEMO</span>
+      </a>
+      <a class="home-link" href="/">홈으로 <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <section id="tampermonkey-list" aria-labelledby="tampermonkey-list-title">
+        <header class="detail-head">
+          <a class="back-button" href="/p/hidden-memo/"><span aria-hidden="true">←</span> 메모</a>
+          <p class="eyebrow">Script collection</p>
+          <h1 id="tampermonkey-list-title">TAMPERMONKEY</h1>
+          <p class="detail-copy">필요한 스크립트를 선택해 내용을 확인하고 바로 복사할 수 있습니다.</p>
+        </header>
+
+        <div class="summary" aria-label="Tampermonkey 메모 요약">
+          <span><strong>3</strong> 스크립트</span>
+          <span><strong>7</strong> 예약 사이트</span>
+        </div>
+
+        <div class="memo-grid category-grid">
+          <button class="memo-card" type="button" data-open-note="escape">
+            <span class="card-top"><span class="badge">자동 입력</span><span class="arrow" aria-hidden="true">→</span></span>
+            <h2>방탈출 예약 자동 입력</h2>
+            <p>예약자 정보를 한 번 입력해 일곱 예약 사이트에서 사용하는 통합 코드입니다.</p>
+            <span class="card-meta"><span>통합 UserScript</span><i aria-hidden="true"></i><span>7개 사이트</span></span>
+          </button>
+
+          <button class="memo-card" type="button" data-open-note="naver">
+            <span class="card-top"><span class="badge">화면 정리</span><span class="arrow" aria-hidden="true">→</span></span>
+            <h2>모바일 네이버 메인</h2>
+            <p>모바일 네이버 메인에서 home 클래스가 포함된 피드 요소를 숨깁니다.</p>
+            <span class="card-meta"><span>m.naver.com</span><i aria-hidden="true"></i><span>정적 코드</span></span>
+          </button>
+
+          <button class="memo-card" type="button" data-open-note="blackscreen">
+            <span class="card-top"><span class="badge">시계 · 메모</span><span class="arrow" aria-hidden="true">→</span></span>
+            <h2>검정화면 시계 · 메모</h2>
+            <p>검정 화면에 현재 시각과 로컬 저장 메모를 함께 표시합니다.</p>
+            <span class="card-meta"><span>blackscreen.app</span><i aria-hidden="true"></i><span>정적 코드</span></span>
+          </button>
+        </div>
+      </section>
+
+      <section id="escape-detail" data-note-view="escape" hidden aria-labelledby="escape-detail-title">
+        <header class="detail-head">
+          <button class="back-button" type="button" data-back-to-category><span aria-hidden="true">←</span> TAMPERMONKEY</button>
+          <div class="detail-title-row">
+            <div>
+              <p class="eyebrow">Tampermonkey</p>
+              <h1 id="escape-detail-title">방탈출 예약 자동 입력</h1>
+            </div>
+          </div>
+          <p class="detail-copy">예약자 정보를 한 번 입력하면 일곱 사이트에서 동작하는 통합 UserScript 코드가 완성됩니다.</p>
+        </header>
+
+        <div class="workspace">
+          <section class="panel settings" aria-labelledby="settings-title">
+            <h2 class="panel-title" id="settings-title">코드 설정</h2>
+            <p class="panel-note">모바일 예약에 사용할 기본값을 입력하세요.</p>
+
+            <label class="field">
+              <span>이름</span>
+              <input id="guest-name" type="text" autocomplete="off" placeholder="예약자 이름" spellcheck="false">
+            </label>
+
+            <label class="field">
+              <span>전화번호</span>
+              <input id="guest-phone" type="tel" inputmode="tel" autocomplete="off" placeholder="010-0000-0000" spellcheck="false">
+            </label>
+
+            <label class="field">
+              <span>예약 인원</span>
+              <select id="guest-people" aria-label="예약 인원">
+                <option value="1">1명</option>
+                <option value="2" selected>2명</option>
+                <option value="3">3명</option>
+                <option value="4">4명</option>
+                <option value="5">5명</option>
+                <option value="6">6명</option>
+              </select>
+            </label>
+
+            <div class="privacy-note">입력한 이름과 전화번호는 저장하거나 전송하지 않고, 현재 화면의 코드에만 반영됩니다.</div>
+
+            <div class="site-facts" aria-label="현재 코드 설정 요약">
+              <div class="fact"><span>실행 범위</span><strong>7개 사이트</strong></div>
+              <div class="fact"><span>예약 제출</span><strong>자동 실행 안 함</strong></div>
+            </div>
+
+            <div class="site-support" aria-label="지원 사이트">
+              <strong>지원 사이트</strong>
+              <div class="support-grid">
+                <span class="support-item">지구별</span>
+                <span class="support-item">play33</span>
+                <span class="support-item">클레버타운</span>
+                <span class="support-item">둠이스케이프</span>
+                <span class="support-item">키이스케이프</span>
+                <span class="support-item">나비잠</span>
+                <span class="support-item">서울이스케이프룸</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/escape-reservation.user.js" data-generator="escape" aria-labelledby="escape-code-title">
+            <header class="code-toolbar">
+              <div class="code-identity">
+                <strong id="escape-code-title">escape-reservation.user.js</strong>
+                <span data-copy-help>코드를 불러오는 중입니다.</span>
+              </div>
+              <button class="copy-button" type="button" data-copy-button disabled>코드 복사</button>
+            </header>
+            <pre aria-live="polite"><code data-code-output></code></pre>
+          </section>
+        </div>
+      </section>
+
+      <section id="naver-detail" data-note-view="naver" hidden aria-labelledby="naver-detail-title">
+        <header class="detail-head">
+          <button class="back-button" type="button" data-back-to-category><span aria-hidden="true">←</span> TAMPERMONKEY</button>
+          <div class="detail-title-row">
+            <div>
+              <p class="eyebrow">Tampermonkey</p>
+              <h1 id="naver-detail-title">모바일 네이버 메인</h1>
+            </div>
+          </div>
+          <p class="detail-copy">모바일 네이버 메인에서 피드 영역을 숨기고, 화면 변경 후에도 다시 적용하는 UserScript입니다.</p>
+        </header>
+
+        <div class="workspace static-workspace">
+          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/mobile-naver.user.js" aria-labelledby="naver-code-title">
+            <header class="code-toolbar">
+              <div class="code-identity">
+                <strong id="naver-code-title">mobile-naver.user.js</strong>
+                <span data-copy-help>코드를 불러오는 중입니다.</span>
+              </div>
+              <button class="copy-button" type="button" data-copy-button disabled>코드 복사</button>
+            </header>
+            <pre><code data-code-output></code></pre>
+          </section>
+        </div>
+      </section>
+
+      <section id="blackscreen-detail" data-note-view="blackscreen" hidden aria-labelledby="blackscreen-detail-title">
+        <header class="detail-head">
+          <button class="back-button" type="button" data-back-to-category><span aria-hidden="true">←</span> TAMPERMONKEY</button>
+          <div class="detail-title-row">
+            <div>
+              <p class="eyebrow">Tampermonkey</p>
+              <h1 id="blackscreen-detail-title">검정화면 시계 · 메모</h1>
+            </div>
+          </div>
+          <p class="detail-copy">검정 화면 위에 시계와 메모를 배치하고, 메모를 브라우저 로컬 저장소에 보관하는 UserScript입니다.</p>
+        </header>
+
+        <div class="workspace static-workspace">
+          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/blackscreen-clock.user.js" aria-labelledby="blackscreen-code-title">
+            <header class="code-toolbar">
+              <div class="code-identity">
+                <strong id="blackscreen-code-title">blackscreen-clock.user.js</strong>
+                <span data-copy-help>코드를 불러오는 중입니다.</span>
+              </div>
+              <button class="copy-button" type="button" data-copy-button disabled>코드 복사</button>
+            </header>
+            <pre><code data-code-output></code></pre>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/p/hidden-memo/assets/memo.js"></script>
+</body>
+</html>

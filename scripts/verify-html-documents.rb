@@ -120,6 +120,17 @@ ROOT.join("p").glob("**/*.html").sort.each do |asset|
   end
 end
 
+hidden_document_paths = ROOT.join("p").glob("*/index.html").select do |asset|
+  asset.read.match?(%r{<meta\s+name=["']html-document-listing["']\s+content=["']hidden["'][^>]*>}i)
+end.map do |asset|
+  relative_path = asset.relative_path_from(ROOT.join("p")).to_s
+  "/p/#{relative_path.delete_suffix("index.html")}"
+end
+
+hidden_document_paths.each do |path|
+  fail_with("hidden HTML document must stay out of _data/html_documents.yml: #{path}") if seen_paths.key?(path)
+end
+
 if RECIPE_DATA_FILE.file?
   recipe_data = RECIPE_DATA_FILE.read
   banned_recipe_tags = %w[요리 다이어트 집밥 한그릇 밥반찬 돼지고기 묵은지 마늘쫑 오이 김치찜 비빔밥 부타노가쿠니 삼겹김치찜]

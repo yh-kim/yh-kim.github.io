@@ -78,6 +78,10 @@ def description_from_html(path)
   match && match[1].gsub(/\s+/, " ").strip
 end
 
+def hidden_from_document_list?(path)
+  path.read.match?(%r{<meta\s+name=["']html-document-listing["']\s+content=["']hidden["'][^>]*>}i)
+end
+
 def ensure_link_preview_metadata(path, public_path, title:, description:)
   text = path.read
   return unless text.match?(%r{</head>}i)
@@ -153,7 +157,7 @@ def sync_documents
     index[path] = document if path.start_with?("/p/") && (path.end_with?(".html") || path.end_with?("/"))
   end
 
-  document_files = TARGET_DIR.glob("*/index.html").sort
+  document_files = TARGET_DIR.glob("*/index.html").sort.reject { |file| hidden_from_document_list?(file) }
   documents = document_files.map do |file|
     relative_path = file.relative_path_from(TARGET_DIR).to_s
     path = relative_path.end_with?("/index.html") ? "/p/#{relative_path.delete_suffix("index.html")}" : "/p/#{relative_path}"

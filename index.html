@@ -59,18 +59,37 @@ layout: home
   }
 
   .home-ripple-text {
-    position: relative;
-    z-index: 2;
     margin: 0;
     font-family: var(--cosmic-display-font);
     font-size: 30px;
     font-weight: 380;
+    line-height: 1.2;
     letter-spacing: 0;
     color: rgba(248, 250, 255, .94);
     text-shadow:
       0 0 16px rgba(172, 185, 255, .38),
       0 0 44px rgba(91, 98, 202, .22),
       0 10px 34px rgba(0, 0, 0, .38);
+  }
+
+  .home-ripple-copy {
+    position: relative;
+    z-index: 2;
+    width: max-content;
+    text-align: center;
+  }
+
+  .home-memo-trigger {
+    display: block;
+    width: 100%;
+    height: 1.2em;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 30px;
+    cursor: default;
+    touch-action: manipulation;
   }
 
   @media only screen and (max-width: 768px) {
@@ -81,6 +100,10 @@ layout: home
     }
 
     .home-ripple-text {
+      font-size: 28px;
+    }
+
+    .home-memo-trigger {
       font-size: 28px;
     }
   }
@@ -105,8 +128,36 @@ layout: home
 
 <section class="home-ripple" aria-label="welcome">
   <canvas class="home-ripple-canvas" data-ripple-canvas aria-hidden="true"></canvas>
-  <p class="home-ripple-text">hello.</p>
+  <div class="home-ripple-copy">
+    <p class="home-ripple-text">hello.</p>
+    <button class="home-memo-trigger" type="button" data-memo-trigger aria-label="메모 열기"></button>
+  </div>
 </section>
+
+<script>
+(function () {
+  var trigger = document.querySelector('[data-memo-trigger]');
+  if (!trigger) return;
+
+  var clicks = 0;
+  var resetTimer = null;
+
+  trigger.addEventListener('click', function () {
+    clicks += 1;
+    window.clearTimeout(resetTimer);
+
+    if (clicks >= 3) {
+      clicks = 0;
+      window.location.assign('{{ "/p/hidden-memo/" | relative_url }}');
+      return;
+    }
+
+    resetTimer = window.setTimeout(function () {
+      clicks = 0;
+    }, 700);
+  });
+}());
+</script>
 
 <script>
 (function () {

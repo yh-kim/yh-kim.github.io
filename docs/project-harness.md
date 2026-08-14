@@ -118,6 +118,12 @@ Add a standalone HTML document:
 4. Run `scripts/verify-all.sh`.
 5. Open `/daily/p/` and use the generated link to reach the HTML page.
 
+Hidden memo HTML:
+
+- Keep the memo hub at `p/hidden-memo/index.html`.
+- Add `<meta name="html-document-listing" content="hidden">` so the sync command intentionally leaves it out of `_data/html_documents.yml` and `/daily/p/`.
+- Reach it only through the hidden home-page gesture; do not add it to the regular navigation or document list.
+
 자세한 HTML 추가 가이드: `docs/html-documents-guide.md`.
 
 ## Recipe List
