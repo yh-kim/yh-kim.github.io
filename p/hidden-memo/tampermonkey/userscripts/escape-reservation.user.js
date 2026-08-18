@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.6
+// @version         3.7
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
 // @match           *://*.xn--2e0b040a4xj.com/*
 // @match           *://*.play33.kr/*
@@ -22,7 +22,9 @@
     phone: __GUEST_PHONE__
   };
 
-  const IS_USING_AUTO_SUBMIT = false;
+  const DEFAULT_AUTO_SUBMIT_ENABLED = __AUTO_SUBMIT__;
+  const AUTO_SUBMIT_STORAGE_KEY = 'tm-escape-auto-submit';
+  const LONG_PRESS_DURATION_MS = 650;
   const THEME_PEOPLE_OVERRIDES = {
     // '테마명': 4
   };
@@ -321,21 +323,73 @@
     }, 900);
   }
 
+  function supportsAutoSubmit(profile) {
+    return !profile.manualInputSelector && Boolean(profile.autoSubmitSelector);
+  }
+
+  function getAutoSubmitStorageKey(profile) {
+    return AUTO_SUBMIT_STORAGE_KEY + ':' + profile.id;
+  }
+
+  function getAutoSubmitEnabled(profile) {
+    if (!supportsAutoSubmit(profile)) return false;
+
+    try {
+      const savedValue = localStorage.getItem(getAutoSubmitStorageKey(profile));
+      return savedValue === null ? DEFAULT_AUTO_SUBMIT_ENABLED : savedValue === 'true';
+    } catch (error) {
+      console.warn('[' + profile.label + '] 자동 제출 설정을 읽지 못했습니다:', error);
+      return DEFAULT_AUTO_SUBMIT_ENABLED;
+    }
+  }
+
+  function setAutoSubmitEnabled(profile, enabled) {
+    if (!supportsAutoSubmit(profile)) return false;
+
+    try {
+      localStorage.setItem(getAutoSubmitStorageKey(profile), enabled ? 'true' : 'false');
+      return true;
+    } catch (error) {
+      console.warn('[' + profile.label + '] 자동 제출 설정을 저장하지 못했습니다:', error);
+      return false;
+    }
+  }
+
+  function renderAutoSubmitStatus(status, dot, label, profile) {
+    const supported = supportsAutoSubmit(profile);
+    const enabled = getAutoSubmitEnabled(profile);
+    const message = enabled ? '자동 제출 켜짐' : '자동 제출 꺼짐';
+
+    label.textContent = message;
+    status.disabled = !supported;
+    status.setAttribute('aria-pressed', String(enabled));
+    status.setAttribute(
+      'aria-label',
+      supported ? message + '. 길게 눌러 변경' : message + '. 이 사이트는 자동 제출을 지원하지 않음'
+    );
+    status.title = supported ? message + ' · 길게 눌러 변경' : message + ' · 자동 제출 미지원';
+    status.style.cursor = supported ? 'pointer' : 'default';
+    status.style.background = enabled
+      ? 'linear-gradient(135deg, #ef4444, #c81e1e)'
+      : 'linear-gradient(135deg, #30343a, #111315)';
+    status.style.boxShadow = enabled
+      ? '0 5px 16px rgba(185, 28, 28, .28), 0 1px 2px rgba(0, 0, 0, .18)'
+      : '0 5px 16px rgba(0, 0, 0, .24), 0 1px 2px rgba(0, 0, 0, .18)';
+    dot.style.background = enabled ? '#fff' : 'rgba(255, 255, 255, .72)';
+    dot.style.boxShadow = enabled ? '0 0 0 3px rgba(255, 255, 255, .16)' : 'none';
+  }
+
   function showAutoSubmitStatus(profile) {
     document.getElementById('tm-auto-submit-status')?.remove();
 
-    const enabled = IS_USING_AUTO_SUBMIT
-      && !profile.manualInputSelector
-      && Boolean(profile.autoSubmitSelector);
-    const message = enabled ? '자동 제출 켜짐' : '자동 제출 꺼짐';
-    const status = document.createElement('div');
+    const supported = supportsAutoSubmit(profile);
+    const status = document.createElement('button');
     const dot = document.createElement('span');
     const label = document.createElement('span');
     status.id = 'tm-auto-submit-status';
-    status.setAttribute('role', 'status');
-    status.title = message;
+    status.type = 'button';
+    status.setAttribute('aria-live', 'polite');
     dot.setAttribute('aria-hidden', 'true');
-    label.textContent = message;
     Object.assign(status.style, {
       position: 'fixed',
       left: 'calc(16px + env(safe-area-inset-left))',
@@ -349,31 +403,81 @@
       padding: '7px 11px 7px 9px',
       borderRadius: '999px',
       border: '1px solid rgba(255, 255, 255, .24)',
-      background: enabled
-        ? 'linear-gradient(135deg, #ef4444, #c81e1e)'
-        : 'linear-gradient(135deg, #30343a, #111315)',
-      boxShadow: enabled
-        ? '0 5px 16px rgba(185, 28, 28, .28), 0 1px 2px rgba(0, 0, 0, .18)'
-        : '0 5px 16px rgba(0, 0, 0, .24), 0 1px 2px rgba(0, 0, 0, .18)',
       color: '#fff',
+      WebkitTextFillColor: '#fff',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       fontSize: '11px',
       fontWeight: '700',
       lineHeight: '1',
       letterSpacing: '-.015em',
       whiteSpace: 'nowrap',
-      pointerEvents: 'none'
+      appearance: 'none',
+      WebkitAppearance: 'none',
+      opacity: '1',
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      touchAction: 'manipulation',
+      pointerEvents: 'auto',
+      transition: 'transform .14s ease, background .18s ease, box-shadow .18s ease'
     });
     Object.assign(dot.style, {
       width: '6px',
       height: '6px',
       flex: '0 0 6px',
-      borderRadius: '50%',
-      background: enabled ? '#fff' : 'rgba(255, 255, 255, .72)',
-      boxShadow: enabled ? '0 0 0 3px rgba(255, 255, 255, .16)' : 'none'
+      borderRadius: '50%'
     });
 
     status.append(dot, label);
+    renderAutoSubmitStatus(status, dot, label, profile);
+
+    if (supported) {
+      let pressTimer = null;
+      let startX = 0;
+      let startY = 0;
+
+      const cancelPress = () => {
+        if (pressTimer !== null) clearTimeout(pressTimer);
+        pressTimer = null;
+        status.style.transform = 'scale(1)';
+      };
+
+      const startPress = event => {
+        if (event.type === 'pointerdown' && event.button !== undefined && event.button !== 0) return;
+        event.preventDefault();
+        cancelPress();
+        startX = event.clientX || 0;
+        startY = event.clientY || 0;
+        status.style.transform = 'scale(.96)';
+        pressTimer = setTimeout(() => {
+          pressTimer = null;
+          const nextEnabled = !getAutoSubmitEnabled(profile);
+          if (setAutoSubmitEnabled(profile, nextEnabled)) {
+            renderAutoSubmitStatus(status, dot, label, profile);
+            try { navigator.vibrate?.(30); } catch (error) { /* 진동 미지원 */ }
+          }
+          status.style.transform = 'scale(1)';
+        }, LONG_PRESS_DURATION_MS);
+      };
+
+      status.addEventListener('pointerdown', startPress);
+      status.addEventListener('pointermove', event => {
+        if (pressTimer === null) return;
+        if (Math.abs((event.clientX || 0) - startX) > 12 || Math.abs((event.clientY || 0) - startY) > 12) {
+          cancelPress();
+        }
+      });
+      status.addEventListener('pointerup', cancelPress);
+      status.addEventListener('pointercancel', cancelPress);
+      status.addEventListener('keydown', event => {
+        if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) startPress(event);
+      });
+      status.addEventListener('keyup', event => {
+        if (event.key === 'Enter' || event.key === ' ') cancelPress();
+      });
+      status.addEventListener('contextmenu', event => event.preventDefault());
+      status.addEventListener('click', event => event.preventDefault());
+    }
+
     document.documentElement.appendChild(status);
   }
 
@@ -425,17 +529,7 @@
   }
 
   async function submitIfEnabled(profile) {
-    if (!IS_USING_AUTO_SUBMIT) return;
-
-    if (profile.manualInputSelector) {
-      console.info('[' + profile.label + '] 캡차 또는 인증코드는 직접 입력해야 하므로 예약 버튼을 자동 클릭하지 않습니다.');
-      return;
-    }
-
-    if (!profile.autoSubmitSelector) {
-      console.warn('[' + profile.label + '] 자동 클릭할 예약 버튼 셀렉터가 설정되지 않았습니다.');
-      return;
-    }
+    if (!getAutoSubmitEnabled(profile)) return;
 
     await waitForPaint();
 

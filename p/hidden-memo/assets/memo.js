@@ -68,10 +68,7 @@
     state.currentCode = state.template
       .replace('__GUEST_NAME__', JSON.stringify(name))
       .replace('__GUEST_PHONE__', JSON.stringify(phone))
-      .replace(
-        /const IS_USING_AUTO_SUBMIT = (?:true|false|__AUTO_SUBMIT__);/,
-        'const IS_USING_AUTO_SUBMIT = ' + autoSubmit + ';'
-      );
+      .replace('__AUTO_SUBMIT__', autoSubmit);
 
     state.output.textContent = state.currentCode;
     state.copyButton.disabled = !name || !validPhone;
