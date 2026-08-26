@@ -2,6 +2,7 @@
   'use strict';
 
   var MAX_FILE_BYTES = 10 * 1024 * 1024;
+  var MAX_BASE64_LENGTH = Math.ceil(MAX_FILE_BYTES / 3) * 4 + 4;
   var HTML_EXTENSION = /\.html?$/i;
   var RESOURCE_SELECTOR = [
     'link[href]',
@@ -37,7 +38,6 @@
   var sourceButton = document.getElementById('source-button');
   var reloadButton = document.getElementById('reload-button');
   var openFileButton = document.getElementById('open-file-button');
-  var expandButton = document.getElementById('expand-button');
   var closeButton = document.getElementById('close-button');
   var dismissNotice = document.getElementById('dismiss-notice');
   var copyButton = document.getElementById('copy-button');
@@ -47,8 +47,7 @@
     name: '',
     size: 0,
     mode: 'render',
-    monitorToken: '',
-    expanded: false
+    monitorToken: ''
   };
 
   function formatBytes(bytes) {
@@ -187,16 +186,6 @@
     announce(sourceIsActive ? '소스 보기' : '결과 보기');
   }
 
-  function setExpanded(expanded) {
-    state.expanded = expanded;
-    viewerView.classList.toggle('is-expanded', expanded);
-    document.body.classList.toggle('viewer-expanded', expanded);
-    expandButton.classList.toggle('is-active', expanded);
-    expandButton.setAttribute('aria-pressed', String(expanded));
-    expandButton.querySelector('span').textContent = expanded ? '축소' : '넓게';
-    announce(expanded ? '넓게 보기' : '기본 크기 보기');
-  }
-
   function openViewer(file, source) {
     var localResources = findLocalResources(source);
     state.source = source;
@@ -214,6 +203,7 @@
 
     emptyView.hidden = true;
     viewerView.hidden = false;
+    document.body.classList.add('viewer-open');
     setMode('render');
     renderSource();
     document.title = file.name + ' · HTML Viewer';
@@ -229,6 +219,74 @@
       reader.onerror = function () { reject(reader.error || new Error('파일 읽기 실패')); };
       reader.readAsText(file);
     });
+  }
+
+  function decodeBase64Utf8(value) {
+    var binary = window.atob(value);
+    var bytes = new Uint8Array(binary.length);
+
+    for (var index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+
+    if (window.TextDecoder) return new TextDecoder('utf-8').decode(bytes);
+
+    var escaped = '';
+    bytes.forEach(function (byte) {
+      escaped += '%' + byte.toString(16).padStart(2, '0');
+    });
+    return decodeURIComponent(escaped);
+  }
+
+  function clearShortcutFragment() {
+    if (!window.history || !window.history.replaceState) return;
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+
+  function showShortcutError(message) {
+    if (viewerView.hidden) {
+      showEmptyError(message);
+    } else {
+      showNotice(message);
+      announce(message);
+    }
+  }
+
+  function handleShortcutPayload() {
+    if (window.location.hash.indexOf('#shortcut=') !== 0) return false;
+
+    var params = new URLSearchParams(window.location.hash.slice(1));
+    var encodedSource = params.get('data');
+    var name = params.get('name') || 'shortcut.html';
+    clearShortcutFragment();
+
+    if (!encodedSource) {
+      showShortcutError('단축어에서 HTML 내용을 받지 못했습니다. 단축어 설정을 확인해 주세요.');
+      return true;
+    }
+
+    if (encodedSource.length > MAX_BASE64_LENGTH) {
+      showShortcutError('파일이 너무 큽니다. 10MB 이하의 HTML 파일을 사용하세요.');
+      return true;
+    }
+
+    try {
+      var source = decodeBase64Utf8(encodedSource);
+      var size = new Blob([source]).size;
+      if (!HTML_EXTENSION.test(name)) name += '.html';
+
+      if (!source.trim()) {
+        showShortcutError('단축어에서 받은 HTML 파일이 비어 있습니다.');
+      } else if (size > MAX_FILE_BYTES) {
+        showShortcutError('파일이 너무 큽니다. 10MB 이하의 HTML 파일을 사용하세요.');
+      } else {
+        openViewer({ name: name, size: size }, source);
+      }
+    } catch (_) {
+      showShortcutError('단축어에서 받은 HTML을 해석하지 못했습니다. Base64와 URL 인코딩 단계를 확인해 주세요.');
+    }
+
+    return true;
   }
 
   async function handleFile(file) {
@@ -270,7 +328,7 @@
     renderFrame.src = 'about:blank';
     sourceCode.textContent = '';
     clearNotice();
-    setExpanded(false);
+    document.body.classList.remove('viewer-open');
     viewerView.hidden = true;
     emptyView.hidden = false;
     fileInput.value = '';
@@ -315,19 +373,16 @@
   });
   renderButton.addEventListener('click', function () { setMode('render'); });
   sourceButton.addEventListener('click', function () { setMode('source'); });
-  expandButton.addEventListener('click', function () { setExpanded(!state.expanded); });
   closeButton.addEventListener('click', closeViewer);
   dismissNotice.addEventListener('click', clearNotice);
   copyButton.addEventListener('click', copySource);
+
+  window.addEventListener('hashchange', handleShortcutPayload);
 
   window.addEventListener('message', function (event) {
     if (event.source !== renderFrame.contentWindow || !event.data || event.data.type !== 'html-viewer-error') return;
     if (event.data.token !== state.monitorToken) return;
     showNotice('HTML 내부 JavaScript 오류: ' + String(event.data.message || '알 수 없는 오류'));
-  });
-
-  window.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && state.expanded) setExpanded(false);
   });
 
   if ('serviceWorker' in navigator && window.isSecureContext) {
@@ -337,4 +392,6 @@
       });
     });
   }
+
+  handleShortcutPayload();
 }());

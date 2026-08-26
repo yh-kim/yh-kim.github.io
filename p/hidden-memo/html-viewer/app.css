@@ -125,12 +125,17 @@ h1 { margin: 0; font-size: clamp(36px, 11vw, 54px); letter-spacing: -.055em; lin
 .memo-link { display: inline-block; margin-top: 24px; color: #98a2b3; font-size: 12px; text-decoration: none; }
 
 .viewer-view {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: #eef1f5;
 }
+
+body.viewer-open { overflow: hidden; }
 
 .viewer-header {
   position: relative;
@@ -223,19 +228,14 @@ h1 { margin: 0; font-size: clamp(36px, 11vw, 54px); letter-spacing: -.055em; lin
 .syntax-tag { color: #b7a8ff; }
 .syntax-comment { color: #667085; font-style: italic; }
 
-.viewer-view.is-expanded { position: fixed; z-index: 1000; inset: 0; }
-body.viewer-expanded { overflow: hidden; }
-
 [hidden] { display: none !important; }
 .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 
 noscript { display: block; margin: 40px auto; padding: 20px; color: var(--danger); text-align: center; }
 
 @media (min-width: 720px) {
-  .viewer-view { width: min(100% - 32px, 1180px); min-height: calc(100vh - 32px); min-height: calc(100dvh - 32px); margin: 16px auto; overflow: hidden; border: 1px solid #dfe3e8; border-radius: 18px; box-shadow: 0 24px 70px rgba(16, 24, 40, .12); }
-  .viewer-view.is-expanded { width: auto; min-height: 100vh; min-height: 100dvh; margin: 0; border: 0; border-radius: 0; }
   .viewer-header { padding-top: 10px; }
-  .file-row { float: left; width: calc(100% - 510px); }
+  .file-row { float: left; width: calc(100% - 400px); }
   .tool-row { justify-content: flex-end; margin-top: 0; }
   .tool-button { flex: 0 0 auto; min-width: 84px; }
   .content-panel iframe { min-height: 600px; }
