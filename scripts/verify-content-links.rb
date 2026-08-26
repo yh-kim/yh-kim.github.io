@@ -39,17 +39,21 @@ rescue URI::InvalidURIError
   false
 end
 
-def target_exists?(url)
+def target_exists?(url, source_path)
   clean = url.split("#", 2).first.split("?", 2).first
   return true if clean.empty?
 
+  root_relative = clean.start_with?("/")
   clean = clean.delete_prefix("/")
-  without_trailing_slash = clean.delete_suffix("/")
+  base = root_relative ? ROOT : source_path.dirname
+  target = base.join(clean).cleanpath
+  return false unless target == ROOT || target.to_s.start_with?("#{ROOT}#{File::SEPARATOR}")
 
-  return true if ROOT.join(clean).exist?
-  return true if ROOT.join(clean, "index.html").exist?
-  return true if ROOT.join("#{clean}.html").exist?
-  return true if ROOT.join("#{without_trailing_slash}.html").exist?
+  without_trailing_slash = target.to_s.delete_suffix("/")
+  return true if target.exist?
+  return true if target.join("index.html").exist?
+  return true if Pathname.new("#{target}.html").exist?
+  return true if Pathname.new("#{without_trailing_slash}.html").exist?
 
   false
 end
@@ -71,7 +75,7 @@ source_files.each do |path|
     next unless local_target?(url)
 
     checked += 1
-    fail_with("#{relative(path)} links to missing local target: #{url}") unless target_exists?(url)
+    fail_with("#{relative(path)} links to missing local target: #{url}") unless target_exists?(url, path)
   end
 end
 

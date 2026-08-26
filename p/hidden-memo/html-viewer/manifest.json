@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "HTML Viewer",
+  "short_name": "Viewer",
+  "description": "HTML 파일을 업로드하지 않고 브라우저 안에서 바로 확인합니다.",
+  "lang": "ko-KR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#111827",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "../../../pwa/icons/400.jpg",
+      "sizes": "400x400",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../pwa/icons/512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
