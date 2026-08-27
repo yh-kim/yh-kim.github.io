@@ -44,6 +44,7 @@
   var sourceButton = document.getElementById('source-button');
   var reloadButton = document.getElementById('reload-button');
   var openFileButton = document.getElementById('open-file-button');
+  var maximizeButton = document.getElementById('maximize-button');
   var closeButton = document.getElementById('close-button');
   var dismissNotice = document.getElementById('dismiss-notice');
   var copyButton = document.getElementById('copy-button');
@@ -448,6 +449,7 @@
     state.monitorToken = '';
     renderFrame.removeAttribute('srcdoc');
     renderFrame.src = 'about:blank';
+    renderPanel.classList.remove('is-maximized');
     sourceCode.textContent = '';
     clearNotice();
     document.body.classList.remove('viewer-open');
@@ -456,6 +458,24 @@
     fileInput.value = '';
     document.title = 'HTML Viewer';
     announce('초기 화면으로 돌아왔습니다.');
+  }
+
+  async function maximizeRender() {
+    setMode('render');
+
+    var requestFullscreen = renderPanel.requestFullscreen || renderPanel.webkitRequestFullscreen;
+    if (requestFullscreen) {
+      try {
+        await requestFullscreen.call(renderPanel);
+        announce('렌더링 화면을 최대화했습니다.');
+        return;
+      } catch (_) {
+        // Older iPhone versions can expose the API but reject non-video elements.
+      }
+    }
+
+    renderPanel.classList.add('is-maximized');
+    announce('렌더링 화면을 최대화했습니다.');
   }
 
   async function copySource() {
@@ -504,6 +524,7 @@
   });
   renderButton.addEventListener('click', function () { setMode('render'); });
   sourceButton.addEventListener('click', function () { setMode('source'); });
+  maximizeButton.addEventListener('click', maximizeRender);
   closeButton.addEventListener('click', closeViewer);
   dismissNotice.addEventListener('click', clearNotice);
   copyButton.addEventListener('click', copySource);

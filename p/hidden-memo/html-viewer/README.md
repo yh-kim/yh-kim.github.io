@@ -18,6 +18,8 @@ iPhone Safari의 파일 선택 UI로 `.html` 또는 `.htm` 파일을 골라 브�
 
 Safari에서 Viewer를 한 번 연 다음 공유 메뉴의 **홈 화면에 추가**를 선택하면 standalone 앱처럼 실행할 수 있습니다. 전용 Service Worker는 Viewer의 HTML, CSS, JavaScript, manifest, 아이콘만 캐시하며 사용자가 선택한 HTML은 저장하지 않습니다.
 
+HTML을 연 뒤 상단 닫기 버튼 왼쪽의 **최대화** 아이콘을 누르면 렌더링 결과만 화면 전체로 표시합니다. 별도의 복귀 버튼은 두지 않으며, 브라우저나 iOS가 제공하는 전체 화면 종료 동작을 사용합니다.
+
 iPhone/iPad의 홈 화면 웹앱은 Web Share Target API를 지원하지 않으므로 파일 앱의 공유 메뉴에서 Viewer 자체를 선택할 수는 없습니다. 대신 아래 단축어를 공유 시트에 등록하면 HTML 파일을 Viewer로 전달해 바로 열 수 있습니다.
 
 ## iOS 단축어로 열기
