@@ -254,7 +254,7 @@
 
   function clearClipboardPrompt() {
     pendingShortcutName = '';
-    clipboardButton.hidden = true;
+    clipboardButton.hidden = false;
     clipboardHint.hidden = true;
   }
 
@@ -262,7 +262,6 @@
     if (!viewerView.hidden) closeViewer();
     pendingShortcutName = normalizeHtmlName(name);
     clearEmptyError();
-    clipboardButton.hidden = false;
     clipboardHint.hidden = false;
     announce('단축어에서 전달한 HTML을 열려면 버튼을 누르세요.');
   }

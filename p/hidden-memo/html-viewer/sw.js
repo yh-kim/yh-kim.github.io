@@ -1,7 +1,7 @@
 'use strict';
 
 var CACHE_PREFIX = 'html-viewer-';
-var CACHE_NAME = CACHE_PREFIX + 'v7';
+var CACHE_NAME = CACHE_PREFIX + 'v8';
 var APP_ROOT = new URL('./', self.location.href);
 var APP_SHELL = new URL('index.html', APP_ROOT).href;
 var APP_FILES = [
