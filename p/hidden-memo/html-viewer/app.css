@@ -78,6 +78,7 @@ h1 { margin: 0; font-size: clamp(36px, 11vw, 54px); letter-spacing: -.055em; lin
   display: inline-flex;
   width: min(100%, 310px);
   min-height: 54px;
+  border: 0;
   align-items: center;
   justify-content: center;
   gap: 9px;
@@ -93,6 +94,9 @@ h1 { margin: 0; font-size: clamp(36px, 11vw, 54px); letter-spacing: -.055em; lin
 
 .primary-button:active { transform: scale(.985); background: #263244; }
 .primary-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.shortcut-button { margin: 0 auto 12px; background: var(--accent); }
+.shortcut-button:active { background: var(--accent-dark); }
+.shortcut-hint { width: min(100%, 330px); margin: -2px auto 16px; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .file-input { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
 .empty-error {

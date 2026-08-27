@@ -42,6 +42,12 @@
         <h1 id="app-title">HTML Viewer</h1>
         <p class="intro">iPhone의 파일 앱에서 HTML을 골라 웹페이지처럼 바로 확인하세요.</p>
 
+        <button id="clipboard-button" class="primary-button shortcut-button" type="button" hidden>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5h6m-6 0a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 0H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg>
+          단축어 HTML 열기
+        </button>
+        <p id="clipboard-hint" class="shortcut-hint" hidden>Safari의 클립보드 접근 안내가 나오면 허용해 주세요.</p>
+
         <label class="primary-button" for="html-file-input">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m0-12 4 4m-4-4L8 7M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
           HTML 파일 선택
@@ -51,7 +57,7 @@
         <p id="empty-error" class="empty-error" role="alert" hidden></p>
         <div class="privacy-card">
           <span class="privacy-dot" aria-hidden="true"></span>
-          <p><strong>업로드하지 않습니다.</strong> 선택한 파일은 이 기기의 브라우저 메모리에서만 읽습니다.</p>
+          <p><strong>업로드하지 않습니다.</strong> 선택하거나 단축어로 전달한 HTML은 이 기기에서만 읽습니다.</p>
         </div>
         <a class="memo-link" href="../">시크릿 메모로 돌아가기</a>
       </div>

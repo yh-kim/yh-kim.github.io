@@ -24,6 +24,8 @@
   var emptyView = document.getElementById('empty-view');
   var viewerView = document.getElementById('viewer-view');
   var fileInput = document.getElementById('html-file-input');
+  var clipboardButton = document.getElementById('clipboard-button');
+  var clipboardHint = document.getElementById('clipboard-hint');
   var emptyError = document.getElementById('empty-error');
   var fileName = document.getElementById('file-name');
   var fileMeta = document.getElementById('file-meta');
@@ -41,6 +43,7 @@
   var closeButton = document.getElementById('close-button');
   var dismissNotice = document.getElementById('dismiss-notice');
   var copyButton = document.getElementById('copy-button');
+  var pendingShortcutName = '';
 
   var state = {
     source: '',
@@ -194,6 +197,7 @@
     fileName.textContent = file.name;
     fileMeta.textContent = formatBytes(file.size) + ' · 기기에서만 처리';
     sourceCode.innerHTML = highlightSource(source);
+    clearClipboardPrompt();
     clearEmptyError();
     clearNotice();
 
@@ -243,6 +247,26 @@
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
   }
 
+  function normalizeHtmlName(name) {
+    var normalized = String(name || 'shortcut.html');
+    return HTML_EXTENSION.test(normalized) ? normalized : normalized + '.html';
+  }
+
+  function clearClipboardPrompt() {
+    pendingShortcutName = '';
+    clipboardButton.hidden = true;
+    clipboardHint.hidden = true;
+  }
+
+  function showClipboardPrompt(name) {
+    if (!viewerView.hidden) closeViewer();
+    pendingShortcutName = normalizeHtmlName(name);
+    clearEmptyError();
+    clipboardButton.hidden = false;
+    clipboardHint.hidden = false;
+    announce('단축어에서 전달한 HTML을 열려면 버튼을 누르세요.');
+  }
+
   function showShortcutError(message) {
     if (viewerView.hidden) {
       showEmptyError(message);
@@ -255,10 +279,17 @@
   function handleShortcutPayload() {
     if (window.location.hash.indexOf('#shortcut=') !== 0) return false;
 
-    var params = new URLSearchParams(window.location.hash.slice(1));
+    var fragment = window.location.hash.slice(1).replace(/\+/g, '%2B');
+    var params = new URLSearchParams(fragment);
+    var shortcutMode = params.get('shortcut');
     var encodedSource = params.get('data');
     var name = params.get('name') || 'shortcut.html';
     clearShortcutFragment();
+
+    if (shortcutMode === 'clipboard') {
+      showClipboardPrompt(name);
+      return true;
+    }
 
     if (!encodedSource) {
       showShortcutError('단축어에서 HTML 내용을 받지 못했습니다. 단축어 설정을 확인해 주세요.');
@@ -273,7 +304,7 @@
     try {
       var source = decodeBase64Utf8(encodedSource);
       var size = new Blob([source]).size;
-      if (!HTML_EXTENSION.test(name)) name += '.html';
+      name = normalizeHtmlName(name);
 
       if (!source.trim()) {
         showShortcutError('단축어에서 받은 HTML 파일이 비어 있습니다.');
@@ -287,6 +318,30 @@
     }
 
     return true;
+  }
+
+  async function readShortcutClipboard() {
+    clearEmptyError();
+
+    if (!navigator.clipboard || !window.isSecureContext) {
+      showEmptyError('이 브라우저에서는 클립보드를 읽을 수 없습니다. HTML 파일 선택을 사용해 주세요.');
+      return;
+    }
+
+    try {
+      var source = await navigator.clipboard.readText();
+      var size = new Blob([source]).size;
+
+      if (!source.trim()) {
+        showEmptyError('클립보드에 HTML 내용이 없습니다. 단축어를 다시 실행해 주세요.');
+      } else if (size > MAX_FILE_BYTES) {
+        showEmptyError('파일이 너무 큽니다. 10MB 이하의 HTML 파일을 사용하세요.');
+      } else {
+        openViewer({ name: pendingShortcutName || 'shortcut.html', size: size }, source);
+      }
+    } catch (_) {
+      showEmptyError('클립보드를 읽지 못했습니다. 접근을 허용한 뒤 다시 눌러 주세요.');
+    }
   }
 
   async function handleFile(file) {
@@ -363,6 +418,7 @@
     handleFile(fileInput.files && fileInput.files[0]);
   });
   openFileButton.addEventListener('click', function () { fileInput.click(); });
+  clipboardButton.addEventListener('click', readShortcutClipboard);
   reloadButton.addEventListener('click', function () {
     clearNotice();
     var localResources = findLocalResources(state.source);
