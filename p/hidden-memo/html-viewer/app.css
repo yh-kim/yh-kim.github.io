@@ -96,7 +96,13 @@ h1 { margin: 0; font-size: clamp(36px, 11vw, 54px); letter-spacing: -.055em; lin
 .primary-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .shortcut-button { margin: 0 auto 12px; background: var(--accent); }
 .shortcut-button:active { background: var(--accent-dark); }
+.shortcut-button:disabled { cursor: wait; opacity: .72; }
 .shortcut-hint { width: min(100%, 330px); margin: -2px auto 16px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.paste-panel { width: min(100%, 360px); margin: 0 auto 16px; padding: 13px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255, 255, 255, .86); text-align: left; }
+.paste-panel label { display: block; margin-bottom: 9px; color: #475467; font-size: 12px; line-height: 1.5; }
+.paste-panel textarea { display: block; width: 100%; min-height: 112px; resize: vertical; padding: 10px 11px; border: 1px solid #cfd4dc; border-radius: 9px; background: #fff; color: var(--ink); font: 12px/1.55 ui-monospace, "SFMono-Regular", Menlo, monospace; }
+.paste-panel textarea:focus { border-color: var(--accent); outline: 3px solid rgba(99, 91, 255, .14); }
+.paste-panel button { width: 100%; min-height: 42px; margin-top: 9px; border: 0; border-radius: 9px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 750; }
 .file-input { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
 .empty-error {

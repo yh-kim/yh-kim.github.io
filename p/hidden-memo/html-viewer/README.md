@@ -55,7 +55,8 @@ URL로 파일 전체를 전달하는 방식이라 큰 HTML은 iOS 또는 Safari�
    https://blog.pickth.com/p/hidden-memo/html-viewer/#shortcut=clipboard&name=[URL 인코딩된 파일 이름]
    ```
 
-5. **URL 열기**로 Viewer를 연 뒤 **HTML 붙여넣기**를 누릅니다. 클립보드 접근 안내가 나오면 허용합니다.
+5. **URL 열기**로 Viewer를 연 뒤 **HTML 붙여넣기**를 누릅니다.
+6. iPhone이 **붙여넣기** 메뉴를 띄우면 그 메뉴를 선택합니다. 자동 읽기가 차단되면 나타나는 입력칸을 길게 눌러 직접 붙여넣을 수도 있습니다.
 
 클립보드 방식도 Viewer 자체 제한인 10MB까지 처리합니다. 매우 큰 HTML이나 별도 CSS·이미지 파일을 함께 참조하는 HTML은 기존 파일 선택 방식이 더 적합합니다.
 

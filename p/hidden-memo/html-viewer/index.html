@@ -44,9 +44,15 @@
 
         <button id="clipboard-button" class="primary-button shortcut-button" type="button">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5h6m-6 0a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 0H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg>
-          HTML 붙여넣기
+          <span id="clipboard-button-label">HTML 붙여넣기</span>
         </button>
-        <p id="clipboard-hint" class="shortcut-hint" hidden>Safari의 클립보드 접근 안내가 나오면 허용해 주세요.</p>
+        <p id="clipboard-hint" class="shortcut-hint" hidden>iPhone의 붙여넣기 메뉴가 나오면 <strong>붙여넣기</strong>를 선택해 주세요.</p>
+
+        <div id="paste-panel" class="paste-panel" hidden>
+          <label for="paste-input">자동 붙여넣기가 안 되면 아래 칸을 길게 눌러 붙여넣으세요.</label>
+          <textarea id="paste-input" rows="5" placeholder="HTML 소스를 여기에 붙여넣기" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
+          <button id="open-pasted-button" type="button">붙여넣은 내용 열기</button>
+        </div>
 
         <label class="primary-button" for="html-file-input">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m0-12 4 4m-4-4L8 7M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>

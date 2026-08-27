@@ -25,7 +25,11 @@
   var viewerView = document.getElementById('viewer-view');
   var fileInput = document.getElementById('html-file-input');
   var clipboardButton = document.getElementById('clipboard-button');
+  var clipboardButtonLabel = document.getElementById('clipboard-button-label');
   var clipboardHint = document.getElementById('clipboard-hint');
+  var pastePanel = document.getElementById('paste-panel');
+  var pasteInput = document.getElementById('paste-input');
+  var openPastedButton = document.getElementById('open-pasted-button');
   var emptyError = document.getElementById('empty-error');
   var fileName = document.getElementById('file-name');
   var fileMeta = document.getElementById('file-meta');
@@ -255,7 +259,12 @@
   function clearClipboardPrompt() {
     pendingShortcutName = '';
     clipboardButton.hidden = false;
+    clipboardButton.disabled = false;
+    clipboardButtonLabel.textContent = 'HTML 붙여넣기';
     clipboardHint.hidden = true;
+    clipboardHint.innerHTML = 'iPhone의 붙여넣기 메뉴가 나오면 <strong>붙여넣기</strong>를 선택해 주세요.';
+    pastePanel.hidden = true;
+    pasteInput.value = '';
   }
 
   function showClipboardPrompt(name) {
@@ -264,6 +273,13 @@
     clearEmptyError();
     clipboardHint.hidden = false;
     announce('단축어에서 전달한 HTML을 열려면 버튼을 누르세요.');
+  }
+
+  function showManualPaste() {
+    pastePanel.hidden = false;
+    clipboardHint.hidden = false;
+    clipboardHint.innerHTML = '자동 읽기가 막혔습니다. 아래 입력칸을 길게 눌러 <strong>붙여넣기</strong>를 선택하세요.';
+    announce('직접 붙여넣기 입력칸을 열었습니다.');
   }
 
   function showShortcutError(message) {
@@ -319,27 +335,44 @@
     return true;
   }
 
+  function openPastedHtml(source) {
+    var size = new Blob([source]).size;
+
+    if (!source.trim()) {
+      showEmptyError('붙여넣은 HTML 내용이 없습니다. 단축어를 다시 실행해 주세요.');
+      return false;
+    }
+
+    if (size > MAX_FILE_BYTES) {
+      showEmptyError('파일이 너무 큽니다. 10MB 이하의 HTML 파일을 사용하세요.');
+      return false;
+    }
+
+    openViewer({ name: pendingShortcutName || 'clipboard.html', size: size }, source);
+    return true;
+  }
+
   async function readShortcutClipboard() {
     clearEmptyError();
+    clipboardButton.disabled = true;
+    clipboardButtonLabel.textContent = '클립보드 확인 중…';
+    clipboardHint.hidden = false;
 
     if (!navigator.clipboard || !window.isSecureContext) {
-      showEmptyError('이 브라우저에서는 클립보드를 읽을 수 없습니다. HTML 파일 선택을 사용해 주세요.');
+      clipboardButton.disabled = false;
+      clipboardButtonLabel.textContent = 'HTML 붙여넣기';
+      showManualPaste();
       return;
     }
 
     try {
       var source = await navigator.clipboard.readText();
-      var size = new Blob([source]).size;
-
-      if (!source.trim()) {
-        showEmptyError('클립보드에 HTML 내용이 없습니다. 단축어를 다시 실행해 주세요.');
-      } else if (size > MAX_FILE_BYTES) {
-        showEmptyError('파일이 너무 큽니다. 10MB 이하의 HTML 파일을 사용하세요.');
-      } else {
-        openViewer({ name: pendingShortcutName || 'shortcut.html', size: size }, source);
-      }
+      if (!openPastedHtml(source)) showManualPaste();
     } catch (_) {
-      showEmptyError('클립보드를 읽지 못했습니다. 접근을 허용한 뒤 다시 눌러 주세요.');
+      showManualPaste();
+    } finally {
+      clipboardButton.disabled = false;
+      clipboardButtonLabel.textContent = 'HTML 붙여넣기';
     }
   }
 
@@ -418,6 +451,14 @@
   });
   openFileButton.addEventListener('click', function () { fileInput.click(); });
   clipboardButton.addEventListener('click', readShortcutClipboard);
+  openPastedButton.addEventListener('click', function () { openPastedHtml(pasteInput.value); });
+  pasteInput.addEventListener('paste', function (event) {
+    var pasted = event.clipboardData && event.clipboardData.getData('text/plain');
+    if (!pasted) return;
+    event.preventDefault();
+    pasteInput.value = pasted;
+    openPastedHtml(pasted);
+  });
   reloadButton.addEventListener('click', function () {
     clearNotice();
     var localResources = findLocalResources(state.source);
