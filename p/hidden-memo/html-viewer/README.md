@@ -44,21 +44,33 @@ URL로 파일 전체를 전달하는 방식이라 큰 HTML은 iOS 또는 Safari�
 
 ### 큰 파일용 클립보드 방식
 
-파일이 크거나 URL 열기가 실패한다면 Base64 대신 클립보드로 전달합니다. Safari 보안 정책상 자동으로 클립보드를 읽을 수 없어 Viewer에서 **HTML 붙여넣기**를 한 번 눌러야 하지만, HTML 본문을 URL에 넣지 않아 더 안정적입니다.
+파일이 크거나 URL 열기가 실패한다면 HTML 본문을 URL에 넣지 않고 클립보드로 전달합니다. Viewer는 **HTML 원문**과 **Base64** 두 방식을 모두 지원합니다. Safari 보안 정책상 자동으로 클립보드를 읽을 수 없어 Viewer에서 **HTML 붙여넣기**를 한 번 눌러야 합니다.
+
+#### 권장: Base64 복사
 
 1. 파일 이름을 가져와 URL 인코딩하는 1-4단계는 위와 같습니다.
-2. **텍스트 가져오기** 액션으로 `단축어 입력` 파일의 텍스트를 가져옵니다.
-3. **클립보드에 복사** 액션으로 그 텍스트를 복사합니다.
+2. **Base64 인코딩** 액션으로 원본 `단축어 입력` 파일을 인코딩합니다. 파일 이름이나 **텍스트 가져오기** 결과가 아니라 원본 파일을 입력해야 하며, 줄바꿈 옵션이 보이면 **없음**으로 설정합니다.
+3. **클립보드에 복사** 액션으로 Base64 결과를 복사합니다.
 4. **텍스트** 액션에 아래 URL을 만듭니다.
 
    ```text
-   https://blog.pickth.com/p/hidden-memo/html-viewer/#shortcut=clipboard&name=[URL 인코딩된 파일 이름]
+   https://blog.pickth.com/p/hidden-memo/html-viewer/#shortcut=clipboard-base64&name=[URL 인코딩된 파일 이름]
    ```
 
 5. **URL 열기**로 Viewer를 연 뒤 **HTML 붙여넣기**를 누릅니다.
 6. iPhone이 **붙여넣기** 메뉴를 띄우면 그 메뉴를 선택합니다. 자동 읽기가 차단되면 나타나는 입력칸을 길게 눌러 직접 붙여넣을 수도 있습니다.
 
-클립보드 방식도 Viewer 자체 제한인 10MB까지 처리합니다. 매우 큰 HTML이나 별도 CSS·이미지 파일을 함께 참조하는 HTML은 기존 파일 선택 방식이 더 적합합니다.
+이 방식은 `<html>`, CSS, JavaScript와 한글을 원본 그대로 보존합니다. **텍스트 가져오기**를 사용하면 iOS 단축어가 HTML 태그를 제거하고 화면에 보이는 한글만 추출할 수 있으므로 사용하지 않는 것을 권장합니다.
+
+#### HTML 원문 복사
+
+다른 액션이나 앱에서 HTML 원문 전체를 클립보드에 넣을 수 있다면 아래 URL도 사용할 수 있습니다.
+
+```text
+https://blog.pickth.com/p/hidden-memo/html-viewer/#shortcut=clipboard-html&name=[URL 인코딩된 파일 이름]
+```
+
+기존 `#shortcut=clipboard` 주소도 HTML 원문 모드로 계속 동작합니다. 두 클립보드 방식 모두 Viewer 자체 제한인 10MB까지 처리합니다. 매우 큰 HTML이나 별도 CSS·이미지 파일을 함께 참조하는 HTML은 기존 파일 선택 방식이 더 적합합니다.
 
 앱 경로는 현재 위치 기준 상대 URL만 사용하므로 사용자/프로젝트 GitHub Pages의 하위 경로에서도 동작합니다.
 

@@ -48,6 +48,7 @@
   var dismissNotice = document.getElementById('dismiss-notice');
   var copyButton = document.getElementById('copy-button');
   var pendingShortcutName = '';
+  var pendingClipboardEncoding = 'html';
 
   var state = {
     source: '',
@@ -258,6 +259,7 @@
 
   function clearClipboardPrompt() {
     pendingShortcutName = '';
+    pendingClipboardEncoding = 'html';
     clipboardButton.hidden = false;
     clipboardButton.disabled = false;
     clipboardButtonLabel.textContent = 'HTML 붙여넣기';
@@ -267,12 +269,13 @@
     pasteInput.value = '';
   }
 
-  function showClipboardPrompt(name) {
+  function showClipboardPrompt(name, encoding) {
     if (!viewerView.hidden) closeViewer();
     pendingShortcutName = normalizeHtmlName(name);
+    pendingClipboardEncoding = encoding === 'base64' ? 'base64' : 'html';
     clearEmptyError();
     clipboardHint.hidden = false;
-    announce('단축어에서 전달한 HTML을 열려면 버튼을 누르세요.');
+    announce('단축어에서 전달한 ' + (pendingClipboardEncoding === 'base64' ? 'Base64 HTML' : 'HTML') + '을 열려면 버튼을 누르세요.');
   }
 
   function showManualPaste() {
@@ -301,8 +304,13 @@
     var name = params.get('name') || 'shortcut.html';
     clearShortcutFragment();
 
-    if (shortcutMode === 'clipboard') {
-      showClipboardPrompt(name);
+    if (shortcutMode === 'clipboard' || shortcutMode === 'clipboard-html') {
+      showClipboardPrompt(name, 'html');
+      return true;
+    }
+
+    if (shortcutMode === 'clipboard-base64') {
+      showClipboardPrompt(name, 'base64');
       return true;
     }
 
@@ -336,19 +344,42 @@
   }
 
   function openPastedHtml(source) {
-    var size = new Blob([source]).size;
+    var pastedSource = String(source || '');
 
-    if (!source.trim()) {
-      showEmptyError('붙여넣은 HTML 내용이 없습니다. 단축어를 다시 실행해 주세요.');
+    if (!pastedSource.trim()) {
+      showEmptyError('붙여넣은 내용이 없습니다. 단축어를 다시 실행해 주세요.');
       return false;
     }
+
+    if (pendingClipboardEncoding === 'base64') {
+      var encodedSource = pastedSource.replace(/\s/g, '');
+
+      if (encodedSource.length > MAX_BASE64_LENGTH) {
+        showEmptyError('파일이 너무 큽니다. 10MB 이하의 HTML 파일을 사용하세요.');
+        return false;
+      }
+
+      try {
+        pastedSource = decodeBase64Utf8(encodedSource);
+      } catch (_) {
+        showEmptyError('클립보드의 Base64를 해석하지 못했습니다. 단축어의 Base64 인코딩 단계를 확인해 주세요.');
+        return false;
+      }
+
+      if (!pastedSource.trim()) {
+        showEmptyError('Base64로 복원한 HTML 파일이 비어 있습니다.');
+        return false;
+      }
+    }
+
+    var size = new Blob([pastedSource]).size;
 
     if (size > MAX_FILE_BYTES) {
       showEmptyError('파일이 너무 큽니다. 10MB 이하의 HTML 파일을 사용하세요.');
       return false;
     }
 
-    openViewer({ name: pendingShortcutName || 'clipboard.html', size: size }, source);
+    openViewer({ name: pendingShortcutName || 'clipboard.html', size: size }, pastedSource);
     return true;
   }
 
