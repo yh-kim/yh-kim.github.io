@@ -16,10 +16,6 @@
   date: '2026-05-28'
   tags:
   - 방탈출
-- title: PSP 시험 힌트 총정리
-  description: 시험 직전용 핵심 단어, 예상 문답, 오픈북 전략 정리
-  path: "/p/psp/"
-  date: '2026-05-27'
 - title: 레시피 리스트
   description: 집에서 해먹은 요리의 재료, 조리 순서, 출처 링크를 모아두는 레시피 보관함
   path: "/p/recipes/"

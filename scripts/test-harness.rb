@@ -149,9 +149,9 @@ with_temp_repo do |repo|
 
   expect_failure(
     repo,
-    ["ruby", "scripts/verify-html-documents.rb"],
+    ["ruby", "scripts/verify-daily-links.rb"],
     "missing PSP asset check",
-    "points to missing HTML asset"
+    "PSP source HTML is missing"
   )
 end
 
@@ -168,7 +168,7 @@ end
 
 with_temp_repo do |repo|
   data = repo.join("_data/html_documents.yml")
-  text = data.read.sub("/p/psp/", "/psp/")
+  text = data.read.sub("/p/animals/", "/animals/")
   data.write(text)
 
   expect_failure(
