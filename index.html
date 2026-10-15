@@ -49,11 +49,25 @@ layout: home
     z-index: 0;
   }
 
+  .home-starfield-canvas,
   .home-ripple-canvas {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .home-starfield-canvas {
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .home-starfield-canvas[data-starsea-ready] {
+    opacity: 1;
+  }
+
+  .home-ripple-canvas {
     z-index: 1;
     touch-action: none;
   }
@@ -127,6 +141,7 @@ layout: home
 </style>
 
 <section class="home-ripple" aria-label="welcome">
+  <canvas class="home-starfield-canvas" data-starsea-canvas aria-hidden="true"></canvas>
   <canvas class="home-ripple-canvas" data-ripple-canvas aria-hidden="true"></canvas>
   <div class="home-ripple-copy">
     <p class="home-ripple-text">hello.</p>
@@ -162,183 +177,423 @@ layout: home
 <script>
 (function () {
   var canvas = document.querySelector('[data-ripple-canvas]');
-  if (!canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
+  var section = canvas && canvas.closest('.home-ripple');
+  if (!canvas || !section) return;
   var ctx = canvas.getContext('2d');
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (!ctx) return;
+  var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   var target = null;
+  var comet = null;
+  var cometVelocity = { x: 0, y: 0 };
   var tail = [];
+  var tailLength = 256;
+  var headArc = 0;
+  var retiredArc = 0;
+  var eraseFromArc = 0;
+  var eraseToArc = 0;
+  var tailLifetime = 2200;
+  var slowSpeedLimit = 0.025;
+  var drawEnergy = 0.65;
+  var lastPosition = null;
+  var lastMotion = 0;
+  var eraseStartedAt = null;
+  var restingCurve = null;
+  var keys = {};
+  var keyboardVelocity = { x: 0, y: 0 };
   var raf = null;
   var bounds = null;
-  var lastMove = 0;
-  var lastVisibleMove = 0;
-  var velocity = 0;
-  var drawEnergy = 0;
-  var tailLength = 34;
-  var slowSpeedLimit = 0.015;
+  var lastFrame = 0;
 
-  function resize() {
-    bounds = canvas.getBoundingClientRect();
-    canvas.width = Math.max(1, Math.floor(bounds.width * dpr));
-    canvas.height = Math.max(1, Math.floor(bounds.height * dpr));
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  function lerp(from, to, amount) { return from + (to - from) * amount; }
+  function smooth(value) {
+    var t = Math.max(0, Math.min(1, value));
+    return t * t * (3 - 2 * t);
   }
-
-  function seedTail(x, y) {
-    var now = performance.now();
-    target = { x: x, y: y };
-    lastMove = now;
-    lastVisibleMove = now;
-    velocity = 0;
-    drawEnergy = 0;
+  function fadeByAge(age) {
+    return 1 - smooth(age / tailLifetime);
+  }
+  function publish(active) {
+    var point = comet || lastPosition;
+    if (point) section.dispatchEvent(new CustomEvent('home-cursor-move', {
+      detail: { x: point.x, y: point.y, active: active }
+    }));
+  }
+  function schedule() {
+    if (!raf && !motionQuery.matches && !document.hidden) raf = requestAnimationFrame(draw);
+  }
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
     tail = [];
-
-    for (var i = 0; i < tailLength; i += 1) {
-      tail.push({ x: x, y: y });
-    }
-    if (!raf) raf = requestAnimationFrame(draw);
+    target = comet = null;
+    cometVelocity.x = cometVelocity.y = 0;
+    keyboardVelocity.x = keyboardVelocity.y = 0;
+    keys = {};
+    lastFrame = 0;
+    eraseStartedAt = null;
+    restingCurve = null;
+    headArc = retiredArc = eraseFromArc = eraseToArc = 0;
+    if (bounds) ctx.clearRect(0, 0, bounds.width, bounds.height);
+    publish(false);
   }
-
-  function moveTarget(x, y) {
-    var now = performance.now();
-    if (!target || !tail.length) {
-      seedTail(x, y);
+  function resize() {
+    bounds = section.getBoundingClientRect();
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5,
+      Math.sqrt(2200000 / Math.max(1, bounds.width * bounds.height)));
+    canvas.width = Math.max(1, Math.round(bounds.width * dpr));
+    canvas.height = Math.max(1, Math.round(bounds.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stop();
+  }
+  function moveTarget(x, y, time, inputTime) {
+    lastPosition = { x: x, y: y };
+    if (!comet || !target) {
+      comet = { x: x, y: y };
+      target = { x: x, y: y, inputTime: inputTime };
+      cometVelocity.x = cometVelocity.y = 0;
+      tail = [{ x: x, y: y, arc: headArc }];
+      lastMotion = time;
+      eraseStartedAt = null;
       return;
     }
-
-    var dx = x - target.x;
-    var dy = y - target.y;
-    var distance = Math.sqrt(dx * dx + dy * dy);
-    var elapsed = Math.max(16, now - lastMove);
-    var rawSpeed = distance / elapsed;
-
-    target.x = x;
-    target.y = y;
-    lastMove = now;
-
-    if (distance >= 0.8) {
-      var speedEnergy = Math.min(1, rawSpeed / 0.9);
-      var distanceEnergy = Math.min(1, distance / 18);
-      var movementEnergy = Math.max(0.04, (speedEnergy * 0.72) + (distanceEnergy * 0.28));
-      if (rawSpeed < slowSpeedLimit) movementEnergy *= 0.55;
-
-      velocity = lerp(velocity, movementEnergy, 0.32);
-      drawEnergy = Math.min(1, Math.max(drawEnergy * 0.986, 0.08 + velocity * 0.76));
-      lastVisibleMove = now;
-    } else {
-      velocity = lerp(velocity, 0, 0.12);
-      drawEnergy *= 0.982;
+    var distance = Math.hypot(x - target.x, y - target.y);
+    if (distance < 0.35) return;
+    var speed = distance / Math.max(4, inputTime - target.inputTime);
+    var movementEnergy = 1 - Math.exp(-speed * 1.25);
+    if (speed < slowSpeedLimit) movementEnergy *= 0.25;
+    drawEnergy = Math.max(0.45, Math.min(0.9, 0.45 + movementEnergy * 0.45));
+    target = { x: x, y: y, inputTime: inputTime };
+    // Retire the elapsed section before cancelling an idle fade. This boundary
+    // only moves forward, including across stop/resume and direction changes.
+    retireTail(time);
+    lastMotion = time;
+    eraseStartedAt = null;
+    restingCurve = null;
+    if (!tail.length) tail.push({ x: comet.x, y: comet.y, arc: headArc });
+  }
+  function trimTail() {
+    retiredArc = Math.max(retiredArc, headArc - 540);
+    while (tail.length > 1 && tail[tail.length - 2].arc <= retiredArc) tail.pop();
+    var oldest = tail[tail.length - 1];
+    if (oldest && oldest.arc < retiredArc) {
+      var newer = tail[tail.length - 2] || { x: comet.x, y: comet.y, arc: headArc };
+      if (newer.arc <= retiredArc) tail = [];
+      else {
+        var fraction = (retiredArc - oldest.arc) / (newer.arc - oldest.arc);
+        tail[tail.length - 1] = { x: lerp(oldest.x, newer.x, fraction),
+          y: lerp(oldest.y, newer.y, fraction), arc: retiredArc };
+      }
     }
-
-    if (!raf) raf = requestAnimationFrame(draw);
+    if (tail.length > tailLength) {
+      tail.length = tailLength;
+      retiredArc = Math.max(retiredArc, tail[tail.length - 1].arc);
+    }
   }
-
-  function lerp(from, to, amount) {
-    return from + (to - from) * amount;
+  function retireTail(time) {
+    if (eraseStartedAt !== null) {
+      var age = Math.max(0, time - eraseStartedAt);
+      var retreatDistance = (eraseToArc - eraseFromArc) * (1 - fadeByAge(age));
+      retiredArc = Math.max(retiredArc, eraseFromArc + retreatDistance);
+    }
+    trimTail();
   }
-
+  function recordHead() {
+    if (!tail.length || Math.hypot(comet.x - tail[0].x, comet.y - tail[0].y) >= 3) {
+      tail.unshift({ x: comet.x, y: comet.y, arc: headArc });
+    }
+    trimTail();
+  }
+  function advanceKeyboard(dt, now) {
+    var x = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0);
+    var y = (keys.ArrowDown || keys.KeyS ? 1 : 0) - (keys.ArrowUp || keys.KeyW ? 1 : 0);
+    var length = Math.hypot(x, y) || 1;
+    var ease = 1 - Math.exp(-dt * 16);
+    keyboardVelocity.x = lerp(keyboardVelocity.x, x / length * 480, ease);
+    keyboardVelocity.y = lerp(keyboardVelocity.y, y / length * 480, ease);
+    var moving = Math.hypot(keyboardVelocity.x, keyboardVelocity.y) > 1;
+    if (moving && lastPosition) moveTarget(
+      Math.max(10, Math.min(bounds.width - 10, lastPosition.x + keyboardVelocity.x * dt)),
+      Math.max(10, Math.min(bounds.height - 10, lastPosition.y + keyboardVelocity.y * dt)), now, now);
+    return moving || x !== 0 || y !== 0;
+  }
+  function advanceComet(dt) {
+    if (!comet || !target) return false;
+    // A continuous, critically damped follower keeps momentum through a turn.
+    // Integrate at 120 Hz so the curve is independent of display refresh rate.
+    var steps = Math.max(1, Math.ceil(dt * 120));
+    var step = dt / steps;
+    var frequency = 26;
+    var decay = Math.exp(-frequency * step);
+    for (var i = 0; i < steps; i += 1) {
+      var previousX = comet.x, previousY = comet.y;
+      var dx = comet.x - target.x;
+      var dy = comet.y - target.y;
+      var tx = (cometVelocity.x + frequency * dx) * step;
+      var ty = (cometVelocity.y + frequency * dy) * step;
+      comet.x = target.x + (dx + tx) * decay;
+      comet.y = target.y + (dy + ty) * decay;
+      cometVelocity.x = (cometVelocity.x - frequency * tx) * decay;
+      cometVelocity.y = (cometVelocity.y - frequency * ty) * decay;
+      headArc += Math.hypot(comet.x - previousX, comet.y - previousY);
+      recordHead();
+    }
+    if (Math.hypot(comet.x - target.x, comet.y - target.y) < 0.25 &&
+        Math.hypot(cometVelocity.x, cometVelocity.y) < 6) {
+      headArc += Math.hypot(comet.x - target.x, comet.y - target.y);
+      comet.x = target.x;
+      comet.y = target.y;
+      recordHead();
+      cometVelocity.x = cometVelocity.y = 0;
+      return false;
+    }
+    return true;
+  }
+  function centerline() {
+    var points = [{ x: comet.x, y: comet.y, distance: 0 }];
+    var maxTailSegments = Math.min(tail.length, tailLength);
+    for (var i = 0; i < maxTailSegments; i += 1) {
+      if (tail[i].arc < retiredArc) break;
+      var distance = headArc - tail[i].arc;
+      if (distance > points[points.length - 1].distance + 0.01) {
+        points.push({ x: tail[i].x, y: tail[i].y, distance: distance });
+      }
+    }
+    return points;
+  }
+  function sampleCurve(points) {
+    // Use distance, rather than event count, for a consistent bend radius.
+    // This also rounds a corner made by pausing before changing direction.
+    var visibleDistance = points[points.length - 1].distance;
+    var regular = [];
+    var index = 1;
+    for (var at = 0; at < visibleDistance + 4; at += 4) {
+      var distance = Math.min(at, visibleDistance);
+      while (index < points.length - 1 && points[index].distance < distance) index += 1;
+      var a = points[index - 1], b = points[index];
+      var fraction = (distance - a.distance) / Math.max(0.001, b.distance - a.distance);
+      regular.push({ x: lerp(a.x, b.x, fraction), y: lerp(a.y, b.y, fraction), distance: distance });
+      if (distance === visibleDistance) break;
+    }
+    var softened = regular.map(function (point, i) {
+      var x = 0, y = 0, total = 0;
+      for (var offset = -9; offset <= 9; offset += 1) {
+        var neighbor = regular[Math.max(0, Math.min(regular.length - 1, i + offset))];
+        var weight = 10 - Math.abs(offset);
+        x += neighbor.x * weight;
+        y += neighbor.y * weight;
+        total += weight;
+      }
+      // Anchor the live head and the retirement boundary to avoid tip drift.
+      var blend = smooth(Math.min(point.distance, visibleDistance - point.distance) / 28);
+      return { x: lerp(point.x, x / total, blend), y: lerp(point.y, y / total, blend),
+        distance: point.distance };
+    });
+    var rounded = [softened[0]];
+    for (var i = 1; i < softened.length - 1; i += 1) {
+      var control = softened[i];
+      var next = softened[i + 1];
+      var end = { x: (control.x + next.x) / 2, y: (control.y + next.y) / 2,
+        distance: (control.distance + next.distance) / 2 };
+      var start = rounded[rounded.length - 1];
+      var steps = Math.max(1, Math.ceil((end.distance - start.distance) / 3));
+      for (var j = 1; j <= steps; j += 1) {
+        var t = j / steps, u = 1 - t;
+        rounded.push({ x: u * u * start.x + 2 * u * t * control.x + t * t * end.x,
+          y: u * u * start.y + 2 * u * t * control.y + t * t * end.y,
+          distance: u * u * start.distance + 2 * u * t * control.distance + t * t * end.distance });
+      }
+    }
+    rounded.push(softened[softened.length - 1]);
+    return rounded;
+  }
+  function clipCurve(points, visibleDistance) {
+    var clipped = [points[0]];
+    for (var i = 1; i < points.length; i += 1) {
+      var a = points[i - 1], b = points[i];
+      if (b.distance < visibleDistance) clipped.push(b);
+      else {
+        var fraction = (visibleDistance - a.distance) / Math.max(0.001, b.distance - a.distance);
+        clipped.push({ x: lerp(a.x, b.x, fraction), y: lerp(a.y, b.y, fraction),
+          distance: visibleDistance });
+        break;
+      }
+    }
+    return clipped;
+  }
+  function drawMeteorTail(points, visibleDistance, featherDistance, width, alpha) {
+    if (points.length < 2) return;
+    var left = [], right = [];
+    var normal = { x: 0, y: 1 };
+    for (var i = 0; i < points.length; i += 1) {
+      var previous = points[Math.max(0, i - 1)];
+      var next = points[Math.min(points.length - 1, i + 1)];
+      var dx = next.x - previous.x, dy = next.y - previous.y;
+      var length = Math.hypot(dx, dy);
+      if (length > 0.01) {
+        var nx = -dy / length, ny = dx / length;
+        if (i && nx * normal.x + ny * normal.y < 0) { nx = -nx; ny = -ny; }
+        normal = { x: nx, y: ny };
+      }
+      var tailSegmentFade = smooth((visibleDistance - points[i].distance) / featherDistance);
+      // Dissolve with transparency, rather than squeezing an opaque needle.
+      var radius = width * 0.5 * (0.7 + 0.3 * tailSegmentFade);
+      left.push({ x: points[i].x + normal.x * radius, y: points[i].y + normal.y * radius });
+      right.push({ x: points[i].x - normal.x * radius, y: points[i].y - normal.y * radius });
+    }
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    function colorAt(distance) {
+      var opacity = smooth((visibleDistance - distance) / featherDistance);
+      return 'rgba(180, 214, 255,' + alpha * opacity + ')';
+    }
+    function fillSpan(from, to, feather) {
+      if (feather) {
+        var a = points[from], b = points[to];
+        var gradient = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        gradient.addColorStop(0, colorAt(a.distance));
+        gradient.addColorStop(0.5, colorAt((a.distance + b.distance) / 2));
+        gradient.addColorStop(1, colorAt(b.distance));
+        ctx.fillStyle = gradient;
+      } else ctx.fillStyle = 'rgba(180, 214, 255,' + alpha + ')';
+      ctx.beginPath();
+      ctx.moveTo(left[from].x, left[from].y);
+      for (var j = from + 1; j < to; j += 1) ctx.quadraticCurveTo(left[j].x, left[j].y,
+        (left[j].x + left[j + 1].x) / 2, (left[j].y + left[j + 1].y) / 2);
+      ctx.lineTo(left[to].x, left[to].y);
+      ctx.lineTo(right[to].x, right[to].y);
+      for (var k = to - 1; k > from; k -= 1) ctx.quadraticCurveTo(right[k].x, right[k].y,
+        (right[k].x + right[k - 1].x) / 2, (right[k].y + right[k - 1].y) / 2);
+      ctx.lineTo(right[from].x, right[from].y);
+      ctx.closePath();
+      ctx.fill();
+    }
+    var firstFeather = 0;
+    while (firstFeather < points.length - 1 &&
+      points[firstFeather + 1].distance <= visibleDistance - featherDistance) firstFeather += 1;
+    if (firstFeather) fillSpan(0, firstFeather, false);
+    // Only the dissolving end needs short gradient spans. Shared edges and
+    // additive blending keep the ribbon continuous without round-cap dots.
+    for (var from = firstFeather; from < points.length - 1;) {
+      var to = from + 1;
+      while (to < points.length - 1 && points[to].distance - points[from].distance < 18) to += 1;
+      fillSpan(from, to, true);
+      from = to;
+    }
+    ctx.restore();
+  }
   function draw() {
     raf = null;
-    ctx.clearRect(0, 0, bounds.width, bounds.height);
-    ctx.globalCompositeOperation = 'source-over';
-
     var now = performance.now();
-    var inactive = Math.min(1, Math.max(0, (now - lastVisibleMove - 220) / 1300));
-    var activeAlpha = Math.max(0, 1 - inactive);
-    var visibleMotion = drawEnergy;
-
-    if (target && tail.length) {
-      tail[0].x = lerp(tail[0].x, target.x, 0.54);
-      tail[0].y = lerp(tail[0].y, target.y, 0.54);
-
-      for (var i = 1; i < tail.length; i += 1) {
-        tail[i].x = lerp(tail[i].x, tail[i - 1].x, 0.20);
-        tail[i].y = lerp(tail[i].y, tail[i - 1].y, 0.20);
-      }
+    var dt = lastFrame ? Math.min(0.05, Math.max(0.001, (now - lastFrame) / 1000)) : 1 / 60;
+    lastFrame = now;
+    ctx.clearRect(0, 0, bounds.width, bounds.height);
+    if (motionQuery.matches || document.hidden) { stop(); return; }
+    var keyboardMoving = advanceKeyboard(dt, now);
+    var moving = advanceComet(dt);
+    if (!comet) return;
+    if (moving || keyboardMoving) eraseStartedAt = null;
+    else if (eraseStartedAt === null && now - lastMotion >= 90) {
+      eraseStartedAt = now;
+      eraseFromArc = retiredArc;
+      eraseToArc = headArc;
+      var settled = centerline();
+      restingCurve = settled.length > 1 ? sampleCurve(settled) : null;
     }
-
-    drawEnergy *= 0.982;
-
-    if (tail.length > 2 && activeAlpha > 0.006 && visibleMotion > 0.002) {
-      var meteorAlpha = activeAlpha * Math.pow(visibleMotion, 1.05);
-      var head = tail[0];
-      var maxTailSegments = Math.min(tail.length - 2, 24);
-
-      function drawMeteorTail(width, blur, alphaScale) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.filter = blur ? 'blur(' + blur + 'px)' : 'none';
-
-        for (var j = 0; j < maxTailSegments; j += 1) {
-          var curr = tail[j];
-          var next = tail[j + 1];
-          var after = tail[j + 2] || next;
-          var mid = {
-            x: (next.x + after.x) / 2,
-            y: (next.y + after.y) / 2
-          };
-          var progress = j / maxTailSegments;
-          var tailSegmentFade = Math.pow(1 - progress, 2.35);
-          var alpha = meteorAlpha * alphaScale * tailSegmentFade;
-
-          if (alpha < 0.004) continue;
-
-          var segmentGradient = ctx.createLinearGradient(curr.x, curr.y, mid.x, mid.y);
-          segmentGradient.addColorStop(0, 'rgba(255, 255, 255,' + (0.58 * alpha) + ')');
-          segmentGradient.addColorStop(0.22, 'rgba(210, 221, 255,' + (0.48 * alpha) + ')');
-          segmentGradient.addColorStop(0.58, 'rgba(139, 132, 255,' + (0.28 * alpha) + ')');
-          segmentGradient.addColorStop(1, 'rgba(83, 64, 184, 0)');
-
-          ctx.beginPath();
-          ctx.moveTo(curr.x, curr.y);
-          ctx.quadraticCurveTo(next.x, next.y, mid.x, mid.y);
-          ctx.strokeStyle = segmentGradient;
-          ctx.lineWidth = width * (0.22 + (0.78 * tailSegmentFade));
-          ctx.stroke();
-        }
-        ctx.restore();
+    retireTail(now);
+    var age = eraseStartedAt === null ? 0 : Math.max(0, now - eraseStartedAt);
+    var remaining = fadeByAge(age);
+    if (remaining <= 0) { tail = []; restingCurve = null; }
+    if (tail.length) {
+      var visibleDistance = Math.max(0, headArc - retiredArc);
+      var curve = restingCurve || centerline();
+      var featherDistance = 180;
+      if (curve.length > 1 && visibleDistance > 0.01) {
+        var points = restingCurve ? clipCurve(restingCurve, visibleDistance) : sampleCurve(curve);
+        drawMeteorTail(points, visibleDistance, featherDistance, 10, 0.055);
+        drawMeteorTail(points, visibleDistance, featherDistance, 3.2, 0.68);
       }
-
-      drawMeteorTail(16, 10, 0.46);
-      drawMeteorTail(5, 2, 0.88);
-
+      var headFade = eraseStartedAt === null ? 1 :
+        eraseToArc - eraseFromArc < 0.5 ? remaining :
+        smooth(visibleDistance / Math.min(140, eraseToArc - eraseFromArc));
+      var meteorAlpha = Math.max(0.55, drawEnergy) * headFade;
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-      var headGlow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 18 + (20 * meteorAlpha));
-      headGlow.addColorStop(0, 'rgba(255, 255, 255,' + (0.95 * meteorAlpha) + ')');
-      headGlow.addColorStop(0.14, 'rgba(219, 229, 255,' + (0.78 * meteorAlpha) + ')');
-      headGlow.addColorStop(0.42, 'rgba(132, 149, 255,' + (0.34 * meteorAlpha) + ')');
-      headGlow.addColorStop(1, 'rgba(112, 79, 255, 0)');
+      var headGlow = ctx.createRadialGradient(comet.x, comet.y, 0, comet.x, comet.y, 20);
+      headGlow.addColorStop(0, 'rgba(242, 250, 255,' + meteorAlpha * 0.7 + ')');
+      headGlow.addColorStop(0.12, 'rgba(191, 224, 255,' + meteorAlpha * 0.36 + ')');
+      headGlow.addColorStop(0.42, 'rgba(123, 176, 255,' + meteorAlpha * 0.08 + ')');
+      headGlow.addColorStop(1, 'rgba(112, 155, 255, 0)');
       ctx.fillStyle = headGlow;
+      ctx.fillRect(comet.x - 20, comet.y - 20, 40, 40);
+      ctx.fillStyle = 'rgba(239, 249, 255,' + meteorAlpha * 0.85 + ')';
       ctx.beginPath();
-      ctx.arc(head.x, head.y, 18 + (20 * meteorAlpha), 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = 'rgba(255, 255, 255,' + (0.9 * meteorAlpha) + ')';
-      ctx.beginPath();
-      ctx.arc(head.x, head.y, 1.5 + (1.8 * meteorAlpha), 0, Math.PI * 2);
+      ctx.arc(comet.x, comet.y, 2.1, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
-
-    if (activeAlpha > 0.006 || visibleMotion > 0.002 || (target && tail.length && Math.abs(tail[0].x - target.x) > 0.5)) {
-      raf = requestAnimationFrame(draw);
-    }
+    if (moving || keyboardMoving) publish(true);
+    if (tail.length || moving || keyboardMoving) schedule();
+    else lastFrame = 0;
   }
-
   function handleMove(event) {
-    if (!bounds) resize();
-    var point = event.touches ? event.touches[0] : event;
-    moveTarget(point.clientX - bounds.left, point.clientY - bounds.top);
+    if (motionQuery.matches || document.hidden || event.isPrimary === false) return;
+    keys = {};
+    keyboardVelocity.x = keyboardVelocity.y = 0;
+    var samples = event.getCoalescedEvents ? event.getCoalescedEvents() : [];
+    samples = samples.length ? samples.concat([event]) : [event];
+    var now = performance.now();
+    for (var i = 0; i < samples.length; i += 1) {
+      var point = samples[i].touches ? samples[i].touches[0] : samples[i];
+      if (point) moveTarget(point.clientX - bounds.left, point.clientY - bounds.top, now,
+        isFinite(samples[i].timeStamp) ? samples[i].timeStamp : now);
+    }
+    publish(true);
+    schedule();
   }
-
+  function leave() {
+    if (!Object.keys(keys).length) publish(false);
+  }
+  function interactiveTarget(element) {
+    return element && element.closest && element.closest('a, button, input, textarea, select, [contenteditable="true"]');
+  }
+  window.addEventListener('keydown', function (event) {
+    if (event.altKey || event.ctrlKey || event.metaKey || interactiveTarget(event.target) || motionQuery.matches) return;
+    var key = event.code || event.key;
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].indexOf(key) !== -1) {
+      event.preventDefault();
+      if (!lastPosition) lastPosition = { x: bounds.width / 2, y: bounds.height / 2 };
+      keys[key] = true;
+      schedule();
+    } else if (key === 'Space' && !event.repeat) {
+      event.preventDefault();
+      var point = comet || lastPosition || { x: bounds.width / 2, y: bounds.height / 2 };
+      publish(true);
+      section.dispatchEvent(new CustomEvent('home-cursor-burst', { detail: { x: point.x, y: point.y } }));
+    }
+  });
+  window.addEventListener('keyup', function (event) {
+    delete keys[event.code || event.key];
+    if (Object.keys(keys).length) schedule();
+  });
   resize();
-  window.addEventListener('resize', resize);
-  canvas.addEventListener('pointermove', handleMove);
-  canvas.addEventListener('pointerdown', handleMove);
-  canvas.addEventListener('touchmove', handleMove, { passive: true });
-  canvas.addEventListener('touchstart', handleMove, { passive: true });
+  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('blur', stop);
+  if ('PointerEvent' in window) {
+    section.addEventListener('pointermove', handleMove, { passive: true });
+    section.addEventListener('pointerdown', handleMove, { passive: true });
+    section.addEventListener('pointerleave', leave, { passive: true });
+    section.addEventListener('pointerup', function (event) { if (event.pointerType === 'touch') leave(); }, { passive: true });
+  } else {
+    section.addEventListener('touchmove', handleMove, { passive: true });
+    section.addEventListener('touchstart', handleMove, { passive: true });
+    section.addEventListener('touchend', leave, { passive: true });
+  }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
+  window.addEventListener('pagehide', stop);
+  window.addEventListener('pageshow', resize);
+  if (motionQuery.addEventListener) motionQuery.addEventListener('change', stop);
+  else if (motionQuery.addListener) motionQuery.addListener(stop);
 }());
 </script>
+
+<script src="{{ '/js/home-starsea.js' | relative_url }}"></script>
