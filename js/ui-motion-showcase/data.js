@@ -1,64 +1,170 @@
 import {themes as originalThemes, elementsFor, colorLabels} from '../ui-motion-guide/themes.js?v=20261016-r2';
-import {aiTokens} from './ai-scene.js?v=20261016-pages3';
-import {projectTokens} from './project-scene.js?v=20261016-pages3';
+import {aiTokens} from './ai-scene.js?v=20261016-foundation2';
+import {projectTokens} from './project-scene.js?v=20261016-foundation2';
 export const themes=structuredClone(originalThemes);
-Object.assign(themes[0],{scene:aiTokens,composition:'상단 56px 내비게이션 → 중앙 64px 제목과 560px 입력 패널 → 수평 블루 광원 앞 1160px 작업실. 작업실은 186px 컨텍스트 / 유동 프리뷰 / 244px 제어부. 원작 CSS 금속 리본이 조명과 프리셋에 반응한다. 760px 이하 컨텍스트를 접고 프리뷰 → 제어부 순서로 재배치한다.'});
-Object.assign(themes[0].layout,{breakpoint:aiTokens.breakpoint,max:1440,columns:'186px minmax(0,1fr) 244px',gap:14});
-Object.assign(themes[0].type,{title:64,mobileTitle:38});
-Object.assign(themes[0].colors,{background:'#060D19',surface:'#0F1D31',border:'#344663'});
-Object.assign(themes[1],{scene:projectTokens,composition:'56px 가로 내비게이션 → 작은 프로젝트 제목 → 3개 낮은 지표. 1.42:.84:1.02 열에 마감일 차트 / 완료 통계 / 주간 일정, 아래 왼쪽 2열 작업 목록과 선택 상세, 오른쪽 리뷰. 같은 6개 샘플 작업으로 지표·축·차트·일정을 계산. 1000px 이하 2열, 680px 이하 차트 → 업무 → 일정 → 진척 → 리뷰 1열.'});
-Object.assign(themes[1].layout,{max:projectTokens.sceneMax,padding:projectTokens.scenePadding,gap:projectTokens.sceneGap,columns:'1.42fr .84fr 1.02fr'});
+Object.assign(themes[0],{scene:aiTokens,intent:'ARC 제품 캠페인을 위한 로컬 창작 작업 화면. 후보 선택·프롬프트·속성 조정·생성 상태가 중앙 결과에 연결됩니다.',composition:`${aiTokens.navHeight}px 내비게이션과 ARC Campaign 작업 제목 아래 폭 최대 ${aiTokens.studioMax}px·높이 ${aiTokens.studioHeight+aiTokens.stageExtra}px 장면. 중앙 ${aiTokens.previewHeight}px 결과(좌우 여백 ${aiTokens.canvasLeft}/${aiTokens.canvasRight}px), 왼쪽 ${aiTokens.choiceCount}개 수직 후보(각 ${aiTokens.choiceHeight}px), 오른쪽 ${aiTokens.inspectorWidth}px 속성 패널, 중앙 아래 최대 ${aiTokens.composerWidth}px 떠 있는 프롬프트. ${aiTokens.breakpoint}px 이하에서는 ${aiTokens.mobileTitle}px 제목 → 프리뷰 → 가로 후보 → 프롬프트 → 속성 순서. 제품 이미지는 자체 제작 ARC 스피커 SVG.`});
+Object.assign(themes[0].layout,{breakpoint:aiTokens.breakpoint,max:aiTokens.studioMax,columns:`${aiTokens.railWidth}px minmax(0,1fr) ${aiTokens.inspectorWidth}px`,gap:aiTokens.gap});
+Object.assign(themes[0].type,{title:aiTokens.title,mobileTitle:aiTokens.mobileTitle});
+Object.assign(themes[0].colors,{background:'#060D19',surface:aiTokens.panelSurface,accent:aiTokens.blue,border:aiTokens.panelBorder});
+themes[0].motion.records.controls.duration=aiTokens.selectionDuration;
+Object.assign(themes[1],{scene:projectTokens,composition:`${projectTokens.navHeight}px 가로 내비게이션 → 프로젝트 제목 → 높이 ${projectTokens.kpiHeight}px의 지표 스트립. 최대 ${projectTokens.sceneMax}px/바깥 ${projectTokens.scenePadding}px/간격 ${projectTokens.sceneGap}px. 위 ${projectTokens.columns} 그리드는 마감 분포 차트(플롯 ${projectTokens.chartHeight}px), 진행 통계, 어두운 다음 리뷰. 아래는 왼쪽 두 열의 5열 작업 표와 오른쪽 선택일 일정·최근 파일. 같은 6개 샘플 작업이 필터·차트·일정·정렬에 연결된다. ${projectTokens.tabletBreakpoint}px 이하 2열, ${projectTokens.mobileBreakpoint}px 이하 차트 → 작업 표 → 일정 → 진척 → 리뷰 1열.`});
+Object.assign(themes[1].layout,{max:projectTokens.sceneMax,padding:projectTokens.scenePadding,gap:projectTokens.sceneGap,columns:projectTokens.columns,breakpoint:projectTokens.mobileBreakpoint});
+Object.assign(themes[1].colors,{background:projectTokens.material.canvas,surface:projectTokens.material.surface,text:projectTokens.material.ink,muted:projectTokens.material.muted,border:projectTokens.material.line,accent:projectTokens.material.accent,success:projectTokens.material.green});
+themes[1].motion.records.chart.duration=projectTokens.chartMorphDuration;
+themes[1].motion.records.chart.delay=projectTokens.chartMorphDelay;
 export const presentation={compact:{height:380,padding:16}};
 export const kinds={all:'전체',screen:'완성 화면',panel:'패널',selection:'선택·전환',feedback:'처리·피드백',data:'목록·차트',calendar:'일정',form:'입력'};
 const descriptions={
- 'dark-ai/hero':['Dark AI Workspace','빛과 겹친 레이어 안에서 아이디어를 생성하세요.','screen','scene'],
- 'light-project/hero':['Light Project Dashboard','같은 업무 데이터로 연결된 지표와 일정.','screen','scene'],
- 'dark-ai/process':['생성 중에서 결과까지','단계가 채워지고, 결과가 선명해지는 순간.','feedback','process'],
- 'dark-ai/layers':['앞뒤를 지키는 패널','뒤 레이어부터 차례로 자리 잡는 작업 공간.','panel','depth'],
- 'light-project/chart':['주간에서 누적으로','같은 작업의 분포를 막대와 수치로 비교하세요.','data','bars'],
- 'dark-ai/controls':['고르면 바뀌는 프리뷰','오브젝트와 포스터, 하나의 형태가 다른 장면으로.','selection','tilt'],
- 'light-project/tasks':['업무를 열어보는 흐름','선택한 행 옆으로 나타나는 작업 상세.','panel','slide'],
- 'light-project/filters':['필터와 함께 다시 정렬','목록, 개수와 완료율이 함께 바뀝니다.','data','reflow'],
- 'light-project/calendar':['날짜에서 업무로','선택 날짜의 일정이 한 장씩 펼쳐집니다.','calendar','clip'],
- 'dark-ai/beam':['선택한 곳에만 빛','잠깐의 광원으로 현재 위치를 짚어주세요.','selection','beam'],
- 'dark-ai/prompt':['지시를 확인하는 입력','짧은 오류, 명확한 성공. 전송 없는 입력 체험.','form','feedback'],
- 'light-project/quick-add':['작업 하나를 더하면','추가한 업무가 목록과 지표에 바로 반영됩니다.','form','insert']
+ 'dark-ai/hero':['Dark AI Workspace','ARC 제품 후보·프롬프트·속성을 조정합니다.','screen','scene'],
+ 'light-project/hero':['Light Project Dashboard','같은 샘플 업무의 지표·차트·표·일정.','screen','scene'],
+ 'dark-ai/process':['생성 상태','진행률과 완료 결과를 확인합니다.','feedback','process'],
+ 'dark-ai/layers':['레이어 패널','작업 패널의 앞뒤 관계를 재생합니다.','panel','depth'],
+ 'light-project/chart':['막대 차트','같은 작업의 일별·누적 분포를 비교합니다.','data','bars'],
+ 'dark-ai/controls':['프리셋','오브젝트와 포스터 구성을 전환합니다.','selection','tilt'],
+ 'light-project/tasks':['작업 상세','작업을 선택해 세부 정보를 봅니다.','panel','slide'],
+ 'light-project/filters':['작업 필터','목록과 지표가 함께 바뀝니다.','data','reflow'],
+ 'light-project/calendar':['캘린더','날짜에 맞는 업무를 확인합니다.','calendar','clip'],
+ 'dark-ai/beam':['선택 강조','선택한 제어부에만 빛을 표시합니다.','selection','beam'],
+ 'dark-ai/prompt':['프롬프트 입력','작업 지시의 오류·성공 상태를 확인합니다.','form','feedback'],
+ 'light-project/quick-add':['작업 추가','새 업무를 목록과 지표에 반영합니다.','form','insert']
 };
 const motionText={
- scene:['대표 화면 조작·다시 재생','선택한 화면의 프리뷰·차트','각 기능의 최종 상태','동작별 상태로 전환'],
- process:['생성 시작','진행 막대 → 단계 → 결과','scaleX(0), 결과 blur(8px)/scale(.98)','scaleX(1), 결과 blur(0)/scale(1)'],
+ scene:['대표 화면의 조작·다시 재생','선택 상태, 프리뷰 또는 차트와 관련 정보','기존 선택·데이터·결과','새 선택·데이터·결과로 연결'],
+ process:['생성 시작','진행 막대·완료 결과','진행률 0, 완료 결과 숨김·blur(8px)/scale(.98)','진행률 100%, 완료 결과 표시·blur(0)/scale(1)'],
  depth:['재생·화면 진입 1회','뒤 정보 패널 → 프리뷰 → 앞 제어부','translateY(18px), scale(.97), opacity 0','원래 회전·배치, scale(1), opacity 1'],
- bars:['주간/누적 탭 변경','마감일별 차트 막대','scaleY(0)','scaleY(1), 데이터별 높이'],
- tilt:['오브젝트/포스터 선택','결과 프리뷰','rotate(-3deg) scale(.96)','rotate(0deg) scale(1)'],
+ bars:['일별/누적 탭 또는 상태 필터 변경','차트 막대·축·값','새 막대 scaleY(0), 축·값은 새 데이터로 갱신','막대 scaleY(1), 새 축·값을 유지'],
+ tilt:['오브젝트/포스터 선택','결과 프리뷰','rotate(-3deg) scale(.96)','기본 회전·배치로 복귀, scale(1); 최신 모드 선택'],
  slide:['작업 행 선택','선택 작업 상세 패널','translateX(24px)','translateX(0)'],
- reflow:['상태 필터 선택','목록 높이와 남은 행','기존 목록 높이, 행 translateY(12px)','새 목록 높이, 행 translateY(0)'],
+ reflow:['상태 필터 선택','목록 높이·행·연결 지표','기존 목록 높이, 새 행 translateY(12px)','새 목록 높이, 새 행 translateY(0); 지표·차트·일정은 같은 필터 데이터'],
  clip:['날짜 선택','해당 날짜 일정','clip-path inset(0 0 100% 0)','clip-path inset(0 0 0 0)'],
  beam:['제어 타일 선택','선택 경계 광원','그림자 0px','그림자 28px → 0px, 선택 경계 유지'],
  feedback:['유효/오류 입력 제출','성공 메시지 / 오류 입력','성공 clip-path inset(0 100% 0 0) / 오류 X 0','성공 inset(0) / 오류 X -4→4→0px'],
- insert:['유효한 작업 추가','갱신 목록','translateY(-12px)','translateY(0), 선택한 새 행 강조']
+ insert:['유효한 작업 추가','갱신 목록','translateY(-12px)','원래 위치로 복귀, 선택한 새 행 강조']
 };
 const ordered=Object.entries(descriptions).map(([id,[name,description,kind,technique]],i)=>{
  const [themeId,key]=id.split('/'),theme=themes.find(t=>t.id===themeId),element=elementsFor(theme).find(e=>e.id===key),base=theme.motion.records[key];
- const [trigger,target,from,to]=motionText[technique];
- return {id:id.replace('/','--'),number:String(i+1).padStart(2,'0'),themeId,key,name,description,kind,use:element?.use||theme.intent,behavior:key==='filters'?'목록과 지표가 같은 필터를 적용합니다. 선택한 작업이 사라지면 첫 결과를 선택합니다. 대표 화면에서는 같은 필터가 차트와 일정에도 연결됩니다.':element?.behavior||theme.composition,
- motion:{technique,trigger,target,from,to,duration:base?.duration||theme.motion.duration,ease:theme.motion.ease,delay:['depth','bars'].includes(technique)?theme.motion.stagger:technique==='reflow'?30:0,resultDuration:theme.motion.duration,errorDuration:theme.motion.close},
+ let [trigger,target,from,to]=motionText[technique];
+ const ai=themeId==='dark-ai',scene=theme.scene;
+ if(key==='hero'){
+  if(ai){from=`오브젝트·후보 01·광원 ${scene.lightDefault}%·생성 대기`;to='선택한 모드·후보·광원, 생성 중 진행률과 완료 결과가 같은 프리뷰에 반영';}
+  else{from=`전체 ${theme.data.tasks.length}개 작업·일별 차트·10월 ${theme.data.dates[0]}일`;to='필터·기간·작업·날짜 선택에 맞춰 지표·차트·상세·일정 갱신';}
+ }
+ const duration=ai&&['scene','tilt'].includes(technique)?scene.selectionDuration:base?.duration||theme.motion.duration;
+ const delay=!ai&&technique==='bars'?(scene.chartMorphDelay??base?.delay??theme.motion.stagger):technique==='depth'?base?.delay??theme.motion.stagger:technique==='reflow'?30:0;
+ return {id:id.replace('/','--'),number:String(i+1).padStart(2,'0'),themeId,key,name,description,kind,use:element?.use||theme.intent,behavior:key==='filters'?'목록과 지표가 같은 필터를 적용합니다. 선택한 작업이 사라지면 첫 결과를 선택합니다. 대표 화면에서는 작업 표·차트·일정에도 연결됩니다.':element?.behavior||theme.composition,
+ motion:{technique,trigger,target,from,to,duration,ease:theme.motion.ease,delay,resultDuration:ai?scene.revealDuration:theme.motion.duration,errorDuration:theme.motion.close,interrupt:ai&&key==='hero'?'생성 중 중복 시작·후보 선택을 무시합니다. 출력 구성 변경은 최신 선택으로 전환합니다.':base?.reverse||'새 입력에서 진행 중 전환을 취소하고 최신 상태로 갱신',reset:'진행 중 작업을 취소하고 기본 샘플 상태로 복귀',reduced:'이동·노이즈를 생략하고 계산한 최종 상태를 즉시 표시'},
  auto:technique==='process'?[{at:300,action:'generate'}]:technique==='scene'?themeId==='dark-ai'?[{at:300,selector:'[data-mode="poster"]'},{at:1300,selector:'[data-mode="object"]'}]:[{at:300,selector:'[data-period="cumulative"]'},{at:1300,selector:'[data-period="week"]'}]:technique==='depth'?[{at:300,action:'play'}]:technique==='bars'?[{at:300,selector:'[data-period="cumulative"]'},{at:1300,selector:'[data-period="week"]'}]:technique==='tilt'?[{at:300,selector:'[data-mode="poster"]'},{at:1300,selector:'[data-mode="object"]'}]:technique==='slide'?[{at:300,selector:'[data-task="T-03"]'}]:technique==='reflow'?[{at:300,selector:'[data-filter="done"]'},{at:1500,selector:'[data-filter="all"]'}]:technique==='clip'?[{at:300,selector:'[data-date="18"]'}]:technique==='beam'?[{at:300,selector:'[data-beam="1"]'}]:[]};
 });
 // Ordered after the three-example layout and visual review.
 export const catalog=ordered;
 export const fullCatalog=ordered;
 export const themeFor=item=>themes.find(t=>t.id===item.themeId);
-export function detailRules(item){const t=themeFor(item),m=item.motion;return [
- ['대표 화면 배치',t.composition],
- ['이 예시의 동작',item.behavior+(item.key==='quick-add'?' 다시 재생은 중복되지 않는 체험 작업을 하나 추가하며 초기화는 최초 6개 업무로 되돌립니다.':'')],
- ['색과 표면',Object.entries(t.colors).map(([k,v])=>`${colorLabels[k]} ${v}`).join(' · ')],
- ['재료와 레이어',item.key==='hero'?(t.id==='dark-ai'?`대표 화면에서는 scene 값이 공통 element/material보다 우선합니다. 프레임 ${t.scene.frameSurface}, 경계 1px ${t.scene.frameBorder}, radius ${t.scene.frameRadius}px, shadow ${t.scene.frameShadow}. 패널 ${t.scene.panelSurface}, 경계 1px ${t.scene.panelBorder}, radius ${t.scene.panelRadius}px, padding ${t.scene.panelPadding}px. 격자 ${t.scene.grid}px / blur ${t.scene.blur}px. 입력 표면 ${t.scene.composerSurface}, 글자 ${t.scene.composerText}.`: `대표 화면에서는 scene.material 값이 공통 element/material보다 우선합니다. 표면 ${t.scene.material.surface} / 배경 ${t.scene.material.canvas}, 경계 1px ${t.scene.material.line}, 일반 모듈 padding ${t.scene.material.panelPadding}px, radius ${t.scene.material.panelRadius}px, shadow ${t.scene.material.panelShadow}. 차트 모듈은 세로 padding 10px, 좌우 ${t.scene.material.panelPadding}px입니다. 선택 ${t.scene.material.accent}, 진행 ${t.scene.material.green}.`):`패널 padding ${t.element.panelPadding}px, radius ${t.element.radius}px, 경계 ${t.element.border}px, shadow ${t.element.shadow}. ${Object.entries(t.material).map(([key,value])=>key+': '+value).join(' · ')}. ${t.id==='dark-ai'?`대표 화면 격자 ${t.scene.grid}px, 반투명 패널 blur ${t.scene.blur}px. 컨텍스트 → 결과 → 제어부. 개별 요소는 14px 격자와 18px blur.`:'표면·모듈 경계·선택선으로 깊이를 구분합니다. 민트는 선택·진척에 사용합니다.'}`],
- ['타이포',item.key==='hero'?(t.id==='dark-ai'?`${t.type.body}. 제목 ${t.scene.title}px/500/1.04/-0.06em, 모바일 ${t.scene.mobileTitle}px/1.12. 입력 12px, 조작 11–12px, 읽기용 보조 라벨 10–12px. 외부 폰트 요청 없이 설치된 폰트 순서대로 사용. 한글 keep-all + anywhere.`:`${t.type.body}. 제목 clamp(22px,2.6cqw,30px)/720/1.16/-0.055em. KPI 27px/680, 작업 제목·조작 12px, 보조 정보·축 11px. 모바일 제목 23px. 한글 keep-all + anywhere.`):`${t.type.body}. 본문 ${t.type.size}px/${t.type.line}, 제목 ${t.type.title}px/${t.type.weight}/${t.type.titleLine}, 자간 ${t.type.tracking}. 한글 keep-all + anywhere. 카드에서 전체 화면을 축소하지 않고 핵심 영역만 보입니다.`],
- ['크기와 반응형',`${item.key==='hero'?(t.id==='dark-ai'?`대표 화면 외곽 최대 ${t.layout.max}px. 내비게이션 높이 ${t.scene.navHeight}px/좌우 30px, 히어로 좌우 20px, 작업실 최대 ${t.scene.studioMax}px. 작업실은 ${t.scene.railWidth}px / 유동 프리뷰 / ${t.scene.inspectorWidth}px, grid padding·gap ${t.scene.gap}px. 1050px 이하 레일 150px/제어부 210px, ${t.scene.breakpoint}px 이하 한 열·작업실 바깥 여백 12px/내부 padding 10px. compact ${presentation.compact.height}px에서는 프레임 여백 12px/내부 padding 8px로 핵심 프리뷰에 집중합니다.`:`대표 화면 최대 ${t.scene.sceneMax}px. 내비게이션 높이 ${t.scene.navHeight}px, 대시보드 바깥 padding ${t.scene.scenePadding}px/gap ${t.scene.sceneGap}px. 1.42:.84:1.02 열 구성은 ${t.scene.tabletBreakpoint}px 이하 두 열, ${t.scene.mobileBreakpoint}px 이하 한 열로 전환하고 모바일 대시보드 padding ${t.layout.mobilePadding}px입니다. compact ${presentation.compact.height}px에서는 대시보드 padding 10px와 핵심 차트·작업만 보여줍니다.`):`요소 full 최대 ${t.layout.max}px, padding ${t.layout.padding}px(작은 화면 ${t.layout.mobilePadding}px), gap ${t.layout.gap}px. 컨테이너 ${t.layout.breakpoint}px 이하 한 열. 카드 compact 높이 ${presentation.compact.height}px/padding ${presentation.compact.padding}px, 조작 목표 ${t.element.height}px.`} 갤러리는 1100px부터 3열/680px부터 2열/그 미만 1열. 상세는 800px부터 데모+320px 설명, 그 미만 한 열·설명 접힘.`],
- ['요소와 상태',item.key==='hero'?`대표 화면 제어는 데스크톱 ${t.id==='dark-ai'?t.scene.controlHeight:36}px 이상, 모바일 44px. 기본 버튼·입력의 focus 3px ${t.colors.focus}/offset 3px, disabled ${t.colors.disabled}/${t.colors.onDisabled}, 오류 ${t.colors.error}/성공 ${t.colors.success}. 입력 오류/성공은 색뿐 아니라 문구·aria-invalid를 함께 사용. 탭/행 선택은 aria-selected/aria-pressed.`:`표준 버튼 높이 ${t.element.height}px, padding 10px ${t.element.padding}px, radius ${t.element.controlRadius}px, 1px ${t.colors.border}. focus 3px ${t.colors.focus}/offset 3px. disabled ${t.colors.disabled}/${t.colors.onDisabled}. 입력은 라벨·오류/성공 문구·aria-invalid. Hover ${t.colors.hover}, active translateY(1px).`],
- ['모션 사양',`${item.key==='hero'?(t.id==='dark-ai'?`복합 화면: 모드 전환 ${t.motion.duration}ms, 생성 ${t.motion.records.process.duration}ms + 결과 ${t.motion.duration}ms, 검토 열기 ${t.motion.records.dialog.duration}ms / 닫기 ${t.motion.close}ms.\n`:`복합 화면: 차트 ${t.motion.records.chart.duration}ms / 지연 ${t.motion.records.chart.delay}ms, 선택·필터·일정 ${t.motion.duration}ms, 검토 닫기 ${t.motion.close}ms.\n`):''}trigger: ${m.trigger}\n대상: ${m.target}\n시작: ${m.from}\n종료: ${m.to}\nduration: ${m.duration}ms${m.technique==='process'?` + 결과 ${m.resultDuration}ms`:''}${m.technique==='feedback'?` / 오류 ${m.errorDuration}ms`:''}\neasing: ${m.ease}\ndelay: ${m.delay}ms(순서별)\n반복 없음. ${['hero','chart','controls','tasks','filters','calendar'].includes(item.key)&&!(item.key==='hero'&&t.id==='dark-ai')?'다시 재생은 다음 선택으로 전환하며 이전 애니메이션을 취소합니다.':'다시 재생은 기존 실행을 취소하고 처음부터 실행합니다.'} 정지 중 새 선택은 최종 상태. 0.25× 관찰은 duration/delay 4배이며 기본 사양과 다릅니다.`],
- ['자동 시연과 접근성','보이는 비입력 카드만 1회 시연하며 400ms 간격으로 시연을 시작하고 무한 반복하지 않습니다. 입력 예시는 직접 제출합니다. 첫 pointer/keyboard/input 조작 후 해당 카드의 자동 시연은 종료됩니다. 화면 밖·문서 숨김에서는 정지합니다. 동작 줄이기는 이동 없이 최종 상태. 탭은 화살표/Home/End, native dialog는 Esc·초점 가두기·복귀. 상세 열기 시 배경 스크롤 잠금과 원래 목록 위치 복원.'],
- ['장면 토큰 원본',JSON.stringify(t.scene,null,2)],
- ['출처와 전제',`${t.source} A/B 모션은 정지 이미지에서 미확인. 이 디자인에 맞춰 설계한 구현 예시이며 원본 복원이 아닙니다. 로컬 샘플 데이터·현재 브라우저 ES modules/Shadow DOM/dialog/WAAPI/IntersectionObserver. 서버·외부 라이브러리·API키·웹폰트 요청 없음.`]
- ];}
-export function promptFor(item){const t=themeFor(item);return `기존 프로젝트의 프레임워크·라우팅·데이터와 이벤트를 확인하고 유지하면서 ${item.name}을 구현하세요. ${item.use}\n\n${detailRules(item).map(([h,v])=>`## ${h}\n${v}`).join('\n\n')}\n\n## 화면 구성\n${t.composition}\n\n## 토큰과 적용 우선순위\n대표 화면은 scene(및 scene.material)의 전용 배치·재질 수치가 공통 layout·element·material보다 우선합니다. 개별 구성요소에는 공통 colors·material·element 값을 적용하고, 해당 요소의 실제 상태·모션 명세를 따르세요. 같은 이름의 공통 토큰을 대표 화면의 패널에 기계적으로 적용하지 마세요.\n${JSON.stringify({colors:t.colors,material:t.material,type:t.type,layout:t.layout,scene:t.scene,presentation,element:t.element,motion:item.motion},null,2)}\n\n${t.data?'## 샘플 데이터\n'+JSON.stringify(t.data,null,2):'FRAME / 로컬 창작 실험실. 접힌 금속 리본 CSS 미리보기, 오브젝트/포스터 선택, 20–100% 광원 슬라이더(기본 68%), 8–120자 입력, 로컬 생성과 검토. 슬라이더는 미리보기 재질 밝기에 반영되고 새 지시는 컨텍스트에 표시된다.'}\n\n금지: 원본 로고/문구/이미지/소스 복제, 외부 URL 자동 분석, 로그인·서버 요청, 무한 자동재생, 사용자 조작 후 자동 개입, 전역 CSS 오염, 축소만 한 모바일. 390×844/1024×768/1440×900px, 키보드·빠른 반복·초기화·reduced-motion을 검증하고 미확인 사항은 명시하세요. 코드는 필수 토큰·스타일·동작을 포함한 단일 HTML로 제공하세요.`;}
+export function detailRules(item){
+ const t=themeFor(item),m=item.motion,s=t.scene,ai=t.id==='dark-ai',hero=item.key==='hero';
+ const rows=entries=>entries.map(([key,value])=>key+': '+value).join('\n');
+ const motionRows=[
+  ['trigger',m.trigger],['대상',m.target],['시작',m.from],['종료',m.to],
+  ['duration',m.duration+'ms'],['easing',m.ease],['delay',m.delay+'ms'],
+  ['중단·역방향',m.interrupt],['초기화',m.reset],['reduced-motion',m.reduced]
+ ];
+ const sourceRows=rows([
+  ['원본 A/B 모션','정지 이미지에서 미확인. 아래 시간·이동 값은 새로 설계'],
+  ['C',ai?'#280의 MIT 노이즈 표면을 조정해 사용':'#095 차트·키보드, #273 선택 행·상세 패턴을 참고해 자체 구현'],
+  ['원본','https://lucianlabs.dev/uxui-prompt/#'+(ai?'280':'095')],
+  ['라이선스','https://github.com/Seokwoooo/lucian-uxui-prompt/blob/036fe0a67048bc135115ae2ed283130567a15357/LICENSE'],
+  ['실행','ES modules·Shadow DOM·dialog·WAAPI·IntersectionObserver; 서버/API/웹폰트 요청 없음']
+ ]);
+ if(hero){
+  const layout=ai?rows([
+   ['시선','ARC Campaign 작업 제목 → 중앙 결과 → 후보·속성·프롬프트'],
+   ['장면',s.studioMax+'px 최대 폭 / '+(s.studioHeight+s.stageExtra)+'px 높이'],
+   ['프리뷰',s.previewHeight+'px 높이 / 좌·우 '+s.canvasLeft+'·'+s.canvasRight+'px'],
+   ['전경','왼쪽 '+s.choiceCount+'개 후보(각 '+s.choiceHeight+'px) / 오른쪽 속성 '+s.inspectorWidth+'px'],
+   ['프롬프트','중앙 하단에 최대 '+s.composerWidth+'px 폭으로 겹침']
+  ]):rows([
+   ['시선','프로젝트·지표 → 마감 분포 → 작업 표·일정'],
+   ['컨테이너',s.sceneMax+'px 최대 폭 / 바깥 '+s.scenePadding+'px / 모듈 간 '+s.sceneGap+'px'],
+   ['상단',s.columns+'; 차트·진척·어두운 리뷰'],
+   ['하단','작업 표 좌 2열 + 선택일 일정·최근 파일 우 1열'],
+   ['표','작업/담당자/마감/상태/검토 = '+Object.values(s.tableWidths).join('/')+'%'],
+   ['크기','내비게이션 '+s.navHeight+'px / 지표 '+s.kpiHeight+'px / 차트 '+s.chartHeight+'px / 표 머리 '+s.tableHeaderHeight+'px / 행 '+s.taskRowHeight+'px']
+  ]);
+  const typeSurface=ai?rows([
+   ['제목',t.type.body+' / clamp(32px,3.8cqw,'+s.title+'px) / 500 / '+s.headingLine+' / '+s.headingTracking],
+   ['설명·라벨',s.text+'px / 1.7 · '+s.label+'px / 소형 mono'],
+   ['배경·캔버스',t.colors.background+' · '+s.frameSurface],
+   ['표면','후보 '+s.candidateSurface+' / 프롬프트 '+s.panelSurface+' / 속성 '+s.refineSurface],
+   ['모서리·깊이','캔버스 '+s.frameRadius+'px / 후보 '+s.candidateRadius+'px / 프롬프트 '+s.composerRadius+'px / 속성 '+s.inspectorRadius+'px; 그림자 '+s.frameShadow],
+   ['강조·버튼·초점',s.blue+' · '+s.actionBlue+' / 흰 글자 대비 5.22:1 · '+t.colors.focus]
+  ]):rows([
+   ['폰트',s.fontBody],
+   ['제목·본문','clamp(24px,2.35cqw,29px)/740 · '+s.type.body+'px'],
+   ['지표·라벨',s.type.metricValue+'px/730 · '+s.type.caption+'px'],
+   ['배경·표면',s.material.canvas+' · '+s.material.surface+' · 1px '+s.material.line],
+   ['본문·민트',s.material.ink+' · '+s.material.accent+' (선택·진척)'],
+   ['표면 반경','지표 '+s.material.metricRadius+'px / 업무 모듈 '+s.material.panelRadius+'px / 표 '+s.material.tableRadius+'px / 리뷰 '+s.material.meetingRadius+'px'],
+   ['모듈',s.material.panelPadding+'px padding / '+s.material.panelShadow]
+  ]);
+  const responsive=ai?rows([
+   ['태블릿',s.tabletBreakpoint+'px 이하 후보 '+s.tabletCandidateWidth+'px / 속성 '+s.tabletPropertyWidth+'px / 제목 36px'],
+   ['모바일',s.breakpoint+'px 이하 제목 '+s.mobileTitle+'px / 프레임 '+s.mobileFrame+'px / 프리뷰 '+s.mobilePreview+'px'],
+   ['순서','프리뷰 → 가로 후보 '+s.mobileChoiceHeight+'px → 프롬프트 → 속성']
+  ]):rows([
+   ['태블릿',s.tabletBreakpoint+'px 이하 2열'],
+   ['모바일',s.mobileBreakpoint+'px 이하 1열 / 바깥 '+s.mobilePadding+'px'],
+   ['순서','차트 → 작업 표 → 일정·최근 파일 → 진척 → 리뷰'],
+   ['모바일 높이','지표 '+s.mobileKpiHeight+'px / 차트 '+s.mobileChartHeight+'px / 작업 행 최소 '+s.mobileRowHeight+'px']
+  ]);
+  const states=ai?rows([
+   ['입력','8–120자; 오류 aria-invalid·문구; 유효한 지시는 현재 방향에 반영'],
+   ['선택','오브젝트·포스터 aria-selected / 후보 '+s.choiceCount+'개 aria-pressed'],
+   ['광원',s.lightMin+'–'+s.lightMax+'%; 기본 '+s.lightDefault+'%'],
+   ['처리','대기 → 진행 → 완료; 진행 중 중복 실행·후보 선택 차단'],
+   ['검토','native dialog / Escape / 초점 복귀']
+  ]):rows([
+   ['데이터',t.data.tasks.length+'개 샘플 업무를 필터·차트·목록·일정에 공통 적용'],
+   ['선택','기간 aria-selected / 작업·날짜·필터 aria-pressed'],
+   ['차트','막대 hover·focus·touch·click; 방향키·Home·End / Escape 해제'],
+   ['표','5열; 작업 행 선택→하단 '+s.taskDetailHeight+'px 요약, 검토 버튼→dialog'],
+   ['정렬','마감일순·상태순; 유효한 작업 선택 유지'],
+   ['파일','최근 파일은 로컬 고정 샘플; 필터 집계 대상 아님'],
+   ['검토','native dialog / Escape / 초점 복귀']
+  ]);
+  const extraMotion=ai?rows([
+   ['생성',t.motion.records.process.duration+'ms 진행 후 제품 blur('+s.revealBlur+'px)→0 / scale('+s.revealScale+')→1 / '+s.revealDuration+'ms'],
+   ['후보',s.revealDelay+'ms 순차; 변형은 선택 후보 유지'],
+   ['선택','후보·모드 '+s.selectionDuration+'ms / y 8→0; 중복 생성 무시']
+  ]):rows([
+   ['차트','기존 막대 높이→새 높이 / '+s.chartMorphDuration+'ms / 막대별 '+s.chartMorphDelay+'ms'],
+   ['동기화','축·건수·툴팁 갱신; 중간 입력은 이전 전환 취소']
+  ]);
+  return [
+   ['구획·정렬',layout],
+   ['타이포·표면',typeSurface],
+   ['반응형',responsive],
+   ['상태·접근성',states],
+   ['모션 사양',extraMotion+'\n'+rows(motionRows)+'\n관찰 속도 0.25×는 기본 시간의 4배'],
+   ['토큰 원본',JSON.stringify(s,null,2)],
+   ['출처·전제',sourceRows]
+  ];
+ }
+ return [
+  ['구성',rows([['용도',item.use],['동작',item.behavior]])],
+  ['규격·표면',rows([
+   ['컨테이너',t.layout.max+'px 최대 / '+t.layout.padding+'px 바깥 / '+t.layout.gap+'px 간격'],
+   ['요소',t.element.height+'px 제어 / '+t.element.padding+'px 좌우 / '+t.element.controlRadius+'px 반경'],
+   ['색',t.colors.surface+' 표면 / '+t.colors.text+' 본문 / '+t.colors.accent+' 강조 / 1px '+t.colors.border+' 경계'],
+   ['상태',t.colors.focus+' 초점 / '+t.colors.disabled+' 비활성']
+  ])],
+  ['반응형·접근성',rows([
+   ['모바일',t.layout.breakpoint+'px 이하 1열 / 바깥 '+t.layout.mobilePadding+'px'],
+   ['카드·상세','compact '+presentation.compact.height+'px; 전체는 실제 폭으로 재배치'],
+   ['키보드','Tab·화살표·Home·End / focus 3px / dialog Escape·초점 복귀'],
+   ['자동 시연','보이는 비입력 카드 1회; 사용자 조작·화면 숨김 시 정지']
+  ])],
+  ['모션 사양',rows(motionRows)+'\n관찰 속도 0.25×는 기본 시간의 4배; 반복 없음'],
+  ['토큰 원본',JSON.stringify(s,null,2)],
+  ['출처·전제',sourceRows]
+ ];
+}
+export function promptFor(item){const t=themeFor(item);return `기존 프로젝트의 프레임워크·라우팅·데이터와 이벤트를 확인하고 유지하면서 ${item.name}을 구현하세요. ${item.use}\n\n${detailRules(item).map(([h,v])=>`## ${h}\n${v}`).join('\n\n')}\n\n## 화면 구성\n${t.composition}\n\n## 토큰과 적용 우선순위\n대표 화면은 scene(및 scene.material)의 전용 배치·재질 수치가 공통 layout·element·material보다 우선합니다. 개별 구성요소에는 공통 colors·material·element 값을 적용하고, 해당 요소의 실제 상태·모션 명세를 따르세요. 같은 이름의 공통 토큰을 대표 화면의 패널에 기계적으로 적용하지 마세요.\n${JSON.stringify({colors:t.colors,material:t.material,type:t.type,layout:t.layout,scene:t.scene,presentation,element:t.element,motion:item.motion},null,2)}\n\n${t.data?'## 샘플 데이터\n'+JSON.stringify(t.data,null,2):`ARC 휴대용 스피커의 자체 제작 SVG. 후보 ${t.scene.choiceCount}개, 오브젝트/포스터 선택, 광원 ${t.scene.lightMin}–${t.scene.lightMax}%(기본 ${t.scene.lightDefault}%), 8–120자 지시, ${t.motion.records.process.duration}ms 로컬 생성과 검토. 후보 선택은 미리보기의 색상·위치를 바꾸고 변형은 선택한 후보를 유지한다.`}\n\n금지: A/B 원본 로고·문구·이미지 무단 복제, 가져온 C MIT 코드의 출처/허가문 제거, 외부 URL 자동 분석, 로그인·서버 요청, 무한 자동재생, 사용자 조작 후 자동 개입, 전역 CSS 오염, 축소만 한 모바일. 390×844/1024×768/1440×900px, 키보드·빠른 반복·초기화·reduced-motion을 검증하고 미확인 사항은 명시하세요. 코드는 필수 토큰·스타일·동작을 포함한 단일 HTML로 제공하고, 제3자 MIT 코드가 포함되면 저작권·허가문도 함께 제공하세요.`;}

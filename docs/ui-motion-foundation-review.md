@@ -1,0 +1,54 @@
+# UI·모션 대표 화면 설계·검수 기록
+
+2026-10-16. 이번 단계는 기존 두 독립 페이지의 대표 화면과 핵심 상호작용을 재설계했다. 예제 수는 늘리지 않았다. 아래의 **관찰**은 브라우저로 연 참고 자료에서 확인한 내용이다. 픽셀·색·시간 값은 원본 CSS의 실측이 아니라 **이 저장소에서 새로 정한 구현값**이다. [A 장면 토큰](../js/ui-motion-showcase/ai-scene.js)과 [B 장면 토큰](../js/ui-motion-showcase/project-scene.js)이 원본이며 [data.js](../js/ui-motion-showcase/data.js)는 상세 가이드와 복사 프롬프트에 이를 반영한다.
+
+## 참고 이미지: 관찰과 재설계
+
+| 영역 | 실제 관찰 | 이전 결과와 차이 | 현재 적용값·확인 수준 |
+| --- | --- | --- | --- |
+| [A · AI Agent Website Design](https://dribbble.com/shots/27748221-AI-Agent-Website-Design) | [3200×2400 이미지](https://cdn.dribbble.com/userupload/49084878/file/d5f9030ac5a0b33326021600efb957f3.png)에서 큰 제목·작은 도구 UI의 크기 대비, 강한 명암·블루 광원, 결과와 전경 제어면의 층위를 확인했다. 이미지 크기는 웹 CSS 치수가 아니다. | 이전에는 큰 마케팅 제목·상단 입력창과 평평한 3분할 패널이 먼저 보였다. | ARC Campaign 작업 제목 아래 중앙 결과, 왼쪽 후보, 오른쪽 속성, 하단 프롬프트를 한 작업 흐름으로 연결했다. 화면 치수는 새 설계다. |
+| A · 표면 | 얇은 경계와 용도별 표면, 밀도 높은 작은 컨트롤, 국소적인 빛의 방향이 보였다. | 금속 리본과 같은 높이·반경의 패널 반복에 시선이 분산됐다. | 자체 제작 ARC 스피커 SVG를 결과와 후보에 쓰고 캔버스·후보·프롬프트·속성의 표면을 다르게 했다. 원본 로고·사진·문구는 사용하지 않았다. |
+| [B · PlanIQ Dashboard](https://www.behance.net/gallery/251693759/PlanIQ-SaaS-Project-Management-Dashboard-UIUX) | [확대 이미지](https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/b39c9f251693759.6a3cbe64c5aa1.png)에서 내비게이션→지표→차트·업무·일정의 흐름, 밝은 표면 단계, 제한된 민트와 작은 라벨·상태·축을 확인했다. 2800×3814는 이미지 파일 크기다. | 이전 결과는 비슷하게 둥근 KPI와 업무 카드가 반복되고 작업이 화면 아래로 밀렸다. | 56px 내비게이션·64px 지표 다음 차트/진척/어두운 리뷰를 1.65fr .8fr 1fr로 놓고, 아래 5열 작업 표·일정·파일을 잇는다. |
+| B · 데이터 | 축·단위·범례, 담당자·상태·마감일이 정보 밀도를 만든다. | 막대·큰 숫자·일정 카드의 반복으로 작업 간 관계가 약했다. | 6개 로컬 샘플 업무와 4일 마감 분포를 필터·기간·표·일정·검토에 연결했다. 최근 파일은 고정 샘플이다. |
+
+A·B는 정지 이미지이므로 원본의 클릭 결과, duration, easing은 확인하지 못했다. 아래 모션은 **이 디자인에 맞춰 새로 설계한 구현 예시**다. 추가 관찰 위치는 [참고 분석](ui-motion-guide-reference-analysis.md)에 기록했다.
+
+## C에서 열고 조작한 요소
+
+[C · UX/UI Prompt](https://lucianlabs.dev/uxui-prompt/)는 카드 목록뿐 아니라 개별 예제의 구도·상태·움직임·복사 결과를 확인하는 기준으로 사용했다.
+
+| 번호·주소 | 실제 브라우저 확인 | 우리 화면에 적용 |
+| --- | --- | --- |
+| [#280 · AI 이미지 생성](https://lucianlabs.dev/uxui-prompt/#280) | 생성하자 노이즈가 걷히며 네 SVG 결과가 나타났다. 두 번째 결과를 선택하고 변형해도 선택 결과는 남고 다른 결과가 바뀌었다. 프롬프트 13,481자에 실행 코드·MIT 고지가 있었다. | 생성→선택→변형의 상태 관계. **노이즈 SVG 표면만** 출처·허가문과 함께 조정해 사용했다. 제품 SVG·구도·상태 로직은 자체 제작이다. |
+| [#095 · 막대 차트](https://lucianlabs.dev/uxui-prompt/#095) | 기간 변경에 막대·축·평균선·합계가 반응했다. 두 번째 막대 선택 뒤 ArrowRight로 툴팁을 세 번째로 옮겼다. 프롬프트 16,662자에 코드·MIT 고지가 있었다. | 데이터·축·툴팁·키보드가 연결되는 동작 원리만 참고해 업무 데이터로 독립 구현했다. 코드 복사는 없다. |
+| [#273 · 행 선택·상세](https://lucianlabs.dev/uxui-prompt/#273) | 김서연 행을 선택하자 오른쪽 상세가 1/5, 누적 1,284,000, 팀원 3명과 활동 내역으로 바뀌었다. 프롬프트 13,503자에 실행 코드·MIT 고지가 있었다. | 행 선택을 유지하며 관련 상세를 갱신하는 정보 위계만 참고했다. 코드 재사용은 없다. |
+
+공개 코드 확인 시점은 [커밋 036fe0a](https://github.com/Seokwoooo/lucian-uxui-prompt/commit/036fe0a67048bc135115ae2ed283130567a15357)이다. [LICENSE](https://github.com/Seokwoooo/lucian-uxui-prompt/blob/036fe0a67048bc135115ae2ed283130567a15357/LICENSE)는 MIT © 2026 Seokwoooo이며 소프트웨어 복사·수정·배포 시 저작권과 허가문을 포함하도록 한다. [README](https://github.com/Seokwoooo/lucian-uxui-prompt/blob/036fe0a67048bc135115ae2ed283130567a15357/README.md)도 복사 코드의 출처/MIT 주석 유지를 안내한다. #280·#095 원본은 저장소 밖 임시 HTML로 조립해 로컬 브라우저에서 원래 동작을 재현한 뒤 적용 범위를 정했다. 이 코드의 MIT 허락이 별도 사진·타 작품·웹폰트까지 허락하는 것은 아니다.
+
+## 대표 화면에 적용한 값
+
+| 사양 | A · Dark AI Workspace | B · Light Project Dashboard |
+| --- | --- | --- |
+| 첫 시선→행동 | 최대 48px 작업 제목 → 400px 결과 → 후보·속성 → 하단 프롬프트·생성 | 프로젝트·지표 → 차트 → 작업 표·일정 → 필터·기간·행 선택 |
+| 구획 | 최대 1240px, 장면 458+144=602px. 결과 좌/우 여백 190/204px, 180px 후보 레일, 220px 속성, 최대 600px 하단 프롬프트 | 최대 1384px, 바깥 16px/간격 8px. 상단 1.65fr .8fr 1fr, 하단 표 좌 2열·일정/파일 우 1열 |
+| 글자 | 제목 clamp(32px,3.8cqw,48px)/500/1.1/-.045em; 설명 13px·라벨 11px | Manrope→Inter→시스템·한글 폴백, 제목 clamp(24px,2.35cqw,29px)/740, 지표 25px/730, 본문 13px·라벨 11px |
+| 색·표면 | 배경 #060D19, 캔버스 #091526, 후보 #0B1728, 프롬프트 #15263BEF, 속성 #0D1A2DE8, 강조 #387CFF. 캔버스/후보/프롬프트/속성 반경 5/4/7/4px, 캔버스 그림자 0 24px 60px #00000050 | 캔버스 #F4F6F4, 표면 #FFFFFF, 글자 #17291E, 선 #DDE6DF, 민트 #C9F4D8. 모듈 padding 14px, 지표/업무/표/리뷰 반경 3/4/3/5px |
+| 데이터·제어 | 자체 SVG 제품·후보 3개, 오브젝트/포스터, 광원 20–100%(기본 68%), 8–120자 지시, 로컬 처리 | 차트 플롯 120px·축·건수·범례·툴팁; 표 5열 작업/담당자/마감/상태/검토 = 43/18/13/14/12%, 머리 29px·행 40px·상세 40px |
+| 모바일 | 1050px 이하 후보 142px/속성 192px·제목 36px. 760px 이하 제목 28px, 프레임 344px·결과 286px, 결과→64px 가로 후보→프롬프트→속성 | 1040px 이하 2열, 700px 이하 차트→표→일정·파일→진척→리뷰 1열. 바깥 12px·지표 67px·차트 154px·행 최소 52px |
+
+실제 모션은 [engine.js](../js/ui-motion-showcase/engine.js)에서 제어한다. A: 생성 1800ms 후 새 결과를 blur(14px)→0·scale(1.12)→1로 620ms 동안 드러내고 비선택 후보는 90ms 간격으로 갱신한다. 변형은 선택 후보를 보존한다. 후보·모드 선택은 320ms와 translateY(8px)→0이다. 중복 생성은 무시하고 초기화는 실행 중 작업을 취소한다. B: 기간·필터 변경 시 **현재 막대 높이→새 높이**를 240ms, 막대별 35ms 지연으로 전환하고 축·값·툴팁도 같은 데이터로 갱신한다. 연속 입력은 이전 전환을 취소한다. reduced-motion에서는 이동을 생략하고 최종 상태를 표시한다. 관찰용 0.25× 속도는 기본 duration이 아니다.
+
+데모 상세는 실제 예시 다음에 구획·정렬, 타이포·표면, 반응형, 상태·접근성, 모션을 짧은 키·값 명세표로 보여 준다. 토큰 원본·프롬프트·코드는 필요할 때 연다. 블로그 다른 글·전역 스타일, 기존 두 독립 경로와 예제 12개는 유지했다.
+
+## 시각 자료와 검증 범위
+
+| 화면 | 데스크톱 1440×900 | 모바일 390×844 |
+| --- | --- | --- |
+| A | [수정 전후](assets/ui-motion-foundation/a-before-after.jpg) · [첫 화면](assets/ui-motion-foundation/a-desktop.jpg) · [상세](assets/ui-motion-foundation/a-detail.jpg) | [첫 화면](assets/ui-motion-foundation/a-mobile.jpg) · [상세](assets/ui-motion-foundation/a-mobile-detail.jpg) |
+| B | [수정 전후](assets/ui-motion-foundation/b-before-after.jpg) · [첫 화면](assets/ui-motion-foundation/b-desktop.jpg) · [상세](assets/ui-motion-foundation/b-detail.jpg) | [첫 화면](assets/ui-motion-foundation/b-mobile.jpg) · [상세](assets/ui-motion-foundation/b-mobile-detail.jpg) |
+
+[모바일 두 화면 비교](assets/ui-motion-foundation/mobile-pair.jpg). A는 작업 대상과 제어부의 관계가 뚜렷해졌지만 원본의 사진·광원 밀도를 자체 SVG 하나로 대체한 차이가 남는다. B는 표와 데이터 밀도를 첫 화면으로 올렸지만 샘플은 6개 업무·4일에 한정된다.
+
+로컬 브라우저에서 A 입력 오류/성공, 후보 선택 뒤 변형 시 선택 보존, 일시정지·초기화·reduced-motion을 조작했다. B에서는 진행 필터(4건), 마감/상태 정렬, 일별→누적(1·2·3·4건), 작업 행·검토 dialog를 조작했다. 표의 검토 버튼을 Enter로 열고 Escape로 닫아 같은 버튼으로 초점이 돌아오는 것을 확인했다. 복사 완료 상태와 수동 선택 복사를 확인했고, 내려받은 A/B 완성 HTML을 별도로 열어 후보 변형·작업 검토를 다시 실행했다. 1440×900·390×844 첫 화면과 상세를 재촬영했다. 모바일 가로 넘침, 상세 진입 시 배경 스크롤 잠금, 닫기 후 복귀도 확인했다. OS 수준 reduced-motion과 실기기 터치는 미확인이다.
+
+검증: UI 가이드 71개·쇼케이스 33개 테스트, 프로젝트 구조·Daily URL·HTML 목록·본문 링크·개인정보·하네스 검사, Jekyll build와 빌드 결과 검사가 통과했다. 문서에 명시된 `scripts/verify-all.sh`는 현재 저장소에 없어 개별 진입점을 실행했다. 배포는 기존 master/root GitHub Pages 경로를 유지한다. 공개 배포 결과는 커밋 이후 별도로 확인한다.

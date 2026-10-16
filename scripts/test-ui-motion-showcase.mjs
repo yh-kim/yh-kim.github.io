@@ -129,7 +129,7 @@ check('compact and full share the same runtime', () => {
   globalThis.requestAnimationFrame = () => 1;
   globalThis.cancelAnimationFrame = () => {};
   const makeHost = () => {
-    const root = {dataset: {demoKey: 'hero'}, querySelector: () => null, querySelectorAll: () => [], addEventListener() {}};
+    const root = {style:{setProperty(){}},dataset: {demoKey: 'hero'}, querySelector: () => null, querySelectorAll: () => [], addEventListener() {}};
     const shadow = {innerHTML: '', querySelector(selector) {
       if (selector !== '.demo') return null;
       root.dataset.presentation = this.innerHTML.includes('data-presentation="full"') ? 'full' : 'compact';
