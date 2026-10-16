@@ -1,63 +1,57 @@
-# UI·모션 가이드 구현 및 검증
+# UI·모션 가이드 개편 검증 기록
 
-## 위치와 격리
+2026-10-16. [참고 화면 분석](ui-motion-guide-reference-analysis.md)에 A·B의 정지 이미지 관찰과 C의 브라우저 조작 범위를 기록했다. A·B 원본 이미지는 임시 비교 폴더에만 저장했고 배포 자산에 포함하지 않았다.
 
-- 글 원본: `p/hidden-memo/ui-motion-guide/index.md`.
-- 주소: `/p/hidden-memo/ui-motion-guide/`.
-- 진입점: 기존 히든메모 목록의 카드. 일반 note/dev/HTML 문서 목록에는 등록하지 않는다.
-- 기존 Jekyll `post` 레이아웃·헤더·내비게이션을 그대로 사용한다. 새 사이트나 레이아웃을 만들지 않는다.
-- 본문 호스트 `#ui-motion-guide`의 Shadow DOM 안에만 UI CSS와 데모를 렌더한다. 기존 글과 전역 자산은 수정하지 않는다.
-- 네 테마와 7개 요소를 하나의 글에서 전환한다. 대표 화면은 공간 선택·안내 dialog·공간/일정 탭을 제공한다.
+## 변경 범위와 구현 근거
 
-## 재사용 데이터
+- 기존 히든메모 글 `p/hidden-memo/ui-motion-guide/index.md`의 URL `/p/hidden-memo/ui-motion-guide/`와 frontmatter를 바이트 단위로 유지했다. Jekyll `post` 레이아웃, 내비게이션, 다른 글, 전역 스타일은 변경하지 않았다. 기존 메타데이터의 옛 네 테마 표현도 보존되므로 새 본문의 두 장면과 문구가 다를 수 있다.
+- **Dark AI Workspace**는 창작 입력·제어부·결과 미리보기·처리 상태를 큰 화면에 결합한다. **Light Project Dashboard**는 같은 여섯 샘플 업무에서 지표·차트·목록·일정을 파생한다. 각각 대표 화면과 조작 가능한 요소 여섯 개를 갖는다.
+- `themes.js`가 색상·재료·타이포·배치·모션·샘플 데이터의 원본이다. `engine.js`는 데모·독립 HTML, `index.js`는 설명·프롬프트·DESIGN.md·토큰 JSON을 생성한다. A·B는 정지 이미지이므로 애니메이션은 원본 복원이 아닌 **새로 설계한 모션**이다.
+- 체험 UI는 `#ui-motion-guide`의 Shadow DOM과 데모 전용 CSS 안에 격리한다. 서버·DB·API 키가 없는 로컬 시뮬레이션이다.
 
-- `js/ui-motion-guide/themes.js`: 직접 설계한 색상, 폰트, 간격, 열, 요소와 모션 수치.
-- `engine.js`: 실제 화면과 내보낸 HTML이 함께 쓰는 마크업·CSS·동작 함수.
-- `index.js`: 같은 데이터에서 규칙, 전체/개별 프롬프트, DESIGN.md, 토큰 JSON 생성.
-- HTML 내보내기는 공통 스타일과 토큰, SVG, 이벤트 함수를 모두 포함한 독립 문서다. 외부 라이브러리·폰트·서버·API 키가 필요 없다.
-- 카드 관찰용 0.25× 옵션만 duration/delay를 4배로 재생한다. 기본 테마 수치는 변하지 않는다.
+## 수정 전후 화면
 
-## 작업 순서
+![기존 MORI 예제와 새 Dark AI·Light Project 장면 비교](assets/ui-motion-guide-review/comparison.jpg)
 
-Warm Minimal 1개를 먼저 완성했다. 실제 브라우저에서 폼 오류/성공, 모달, 키보드 탭, 카드 일시정지, 복사와 HTML 다운로드를 확인하고 첫 33개 계약 검사를 통과한 뒤 Editorial/Technical/Bold Graphic을 추가했다.
+1440px 뷰포트의 실제 브라우저 캡처: [기존 글](assets/ui-motion-guide-review/before.jpg), [Dark AI Workspace](assets/ui-motion-guide-review/after-dark.jpg), [Light Project Dashboard](assets/ui-motion-guide-review/after-light.jpg). 모바일 360px 캡처: [Dark AI](assets/ui-motion-guide-review/mobile-dark.jpg), [Light Project](assets/ui-motion-guide-review/mobile-light.jpg). AFTER는 확장 보기, BEFORE는 이전 글 기본 상태이므로 카드 크기의 절대 비교가 아닌 화면 구조 변화 확인용이다.
 
-## 참고 사이트 확인
+비공개 원본 대비 이미지는 `/tmp/ui-guide-review/reference-a-vs-dark.jpg`, `/tmp/ui-guide-review/reference-b-vs-light.jpg`에 만들었다. A는 원본 히어로 웹 화면을, B는 커버의 노트북 UI 영역을 잘라 구현 화면과 비슷한 표시 폭에 놓았다. A의 광원·점 질감·큰 제목·입력부 위계는 반영됐지만 비스듬한 전체 웹 화면과 흰색으로 번지는 넓은 광원은 복제하지 않고 세로 분할 작업실로 재설계했다. B의 지표·차트·목록·우측 영역 관계는 반영됐고, 구현의 글자와 조작 영역은 원본 축소 목업보다 크며 정보 밀도는 낮다. 이 비교는 픽셀 일치나 원본 제품의 동작 증명이 아니다.
 
-2026-10-16에 실제 브라우저로 `https://lucianlabs.dev/uxui-prompt/`를 열었다. 분류별 갤러리, 요소 확대 탐색, 201번 데모의 실행/완료, 프롬프트·코드 탭, 실제 클립보드 복사와 완료 알림을 확인했다. 전체 요소나 모든 모션은 확인하지 않았다. 이 가이드의 화면, 문구, 일러스트와 수치는 독립 설계이며 원본 모션 복원 또는 실측이라고 주장하지 않는다.
-
-## 브라우저 확인
-
-Codex 내장 Chromium 브라우저에서 Jekyll 빌드 결과의 실제 경로를 사용했다.
-
-- 360/768/1440px에서 네 테마의 대표 화면을 각각 확인했다. 좁은 화면은 실제 1열로 재배치되고 Bold는 포스터 구도를 유지한다. 각 너비에서 페이지와 데모의 가로 넘침이 없었다.
-- 네 테마 모두 버튼 저장과 비활성, hover/focus/active 상태 선택, 이메일 오류/성공과 Enter 제출, 탭 화살표/Home/End, 아코디언, dialog 확인/취소/Esc를 조작했다.
-- 모바일 dialog의 하단 시트, 키보드 Tab 이동과 닫기, 카드 재생/일시정지/재개/다시 보기/초기화, 내부 목록 스크롤 및 초기화를 확인했다.
-- 네 테마 전체 프롬프트와 개별 실행 HTML을 실제 클립보드에서 읽어 확인했다. 수동 전체 선택 도구도 확인했다.
-- 네 테마의 DESIGN.md·토큰 JSON 다운로드 버튼을 조작했다. 대표 파일인 Warm Minimal 토큰 JSON과 Editorial DESIGN.md의 실제 저장을 확인했다. JSON 전체가 테마 원본과 같고, DESIGN.md의 모든 색상/모션 수치가 원본과 일치했다. 나머지 테마 파일은 브라우저 다운로드 처리 도구의 제한으로 디스크 저장 완료까지 별도 확인하지 못했다.
-- 내려받은 Warm Minimal 버튼 HTML을 별도 문서로 열어 저장/비활성을 조작했다.
-- `#ui-editorial-tabs`로 새로고침해 테마·요소 직접 접근을 확인했다.
-- 기존 `/start-docker/` 글에 가이드 호스트나 가이드 자산이 로드되지 않음을 확인했다. 기존 글의 헤더와 본문을 시각적으로 확인했다.
+| 출처에서 확인한 요소 | 구현 반영 | 확인 한계 |
+| --- | --- | --- |
+| A의 파란 광원·어두운 점 그리드·비대칭 제어/미리보기 패널 | 큰 제목, 제한된 광원, CSS 조형 결과, 얇은 경계와 겹친 제어 레이어, 작업 종류별 미리보기·처리 상태 | 정지 이미지 확대 관찰. 원본 애니메이션과 CSS 수치는 미확인. |
+| B의 가로 내비게이션·지표·차트·작업 목록·오른쪽 일정/보조 모듈 | 여섯 샘플 업무에서 지표·차트·목록·달력을 파생하고 필터·작업·날짜 선택에 반응 | 정지 이미지 확대 관찰. 선택/필터 동작은 새로 설계. |
+| C의 갤러리 → 확대 데모 → 실행 → 프롬프트·코드 복사 | 한 글의 장면 선택·확장, 요소별 재생·초기화, 규칙·프롬프트·독립 HTML 복사 | 201번 데모와 탭·클립보드를 브라우저 조작으로 확인. 전체 항목 미확인. |
 
 ## 자동 검사
 
 ```text
-node scripts/test-ui-motion-guide.mjs --require-four
-ruby scripts/test-harness.rb
-ruby scripts/verify-project-structure.rb
-ruby scripts/verify-daily-links.rb
-ruby scripts/verify-html-documents.rb
-ruby scripts/verify-content-links.rb
-ruby scripts/verify-privacy.rb
-jekyll build
-ruby scripts/verify-built-site.rb
-git diff --check
+node scripts/test-ui-motion-guide.mjs
+→ 71개 검사 통과 (두 장면의 대표 화면 및 요소 보기 6개씩)
 ```
 
-가이드 계약 검사 129개 통과. 네 테마 × 8개 화면의 내보내기 문법, 전체 갤러리 고유 ID/ARIA 참조, 토큰과 CSS, 대비, 숨김 경로를 검사한다. 추가로 동작 줄이기, 복사 거부 시 수동 선택, 모션 초기화의 비동기 경합, 화면 밖 재생 중단과 cleanup을 모의 DOM에서 검사한다. 본문/보조/성공/오류/버튼 대비 4.5:1 이상, 초점 대비 3:1 이상이다.
+같은 데이터에서 나온 CSS 변수·가이드·프롬프트, 레이아웃 토큰 변경 전파, 독립 HTML의 문법·고유 ID·외부 의존성 없음, 샘플 데이터의 초기 지표·날짜, 상태 색 대비, 기존 frontmatter·경로, 전역 파일 미수정을 검사했다. 자동 검사만으로 시각 품질이나 실제 입력을 증명하지 않으므로 브라우저 결과를 별도로 기록한다.
 
-기존 전체 하네스 진입점 `scripts/verify-all.sh`는 저장소에 없어 실행할 수 없다. 위 개별 검사와 Jekyll 빌드로 대체했다. 문서 동기화 명령이 만든 기존 HTML의 공백 변경은 되돌렸으며, 기존 파일 수정은 히든메모 카드 추가뿐이다.
+저장소 지침의 `scripts/verify-all.sh`는 이 checkout에 원래 존재하지 않아 실행 시 **127 (파일 없음)**이었다. 대신 `ruby scripts/verify-project-structure.rb`, `verify-daily-links.rb`, `verify-html-documents.rb`, `verify-content-links.rb`, `verify-privacy.rb`, Jekyll 3.10 build, `verify-built-site.rb`, `ruby scripts/test-harness.rb`, `git diff --check`를 개별 실행했고 모두 통과했다. 링크 검사는 260개 대상을 확인했다. 누락된 집계 스크립트를 임의로 추가하지 않았다.
 
-## 확인하지 않은 범위
+## 브라우저 검증
 
-- 실제 OS의 ‘동작 줄이기’ 설정 전환, Safari/Firefox 실기기, 스크린리더 낭독은 확인하지 않았다. 동작 줄이기와 클립보드 권한 거부는 계약 시뮬레이션으로 확인했다.
-- 입력과 예약은 로컬 데모이며 실제 예약·메일 전송·결제·영구 저장을 구현하지 않는다.
+| 폭 | 직접 확인한 결과 |
+| --- | --- |
+| 360px | 두 장면의 대표 화면과 각 여섯 요소 보기에서 의도하지 않은 가로 넘침 없음. 확장 보기의 실제 스크롤 폭 358px. 모달 상단 닫기, Enter, Esc와 초점 복귀 동작. 모바일 캡처 두 장 저장. |
+| 768px | 두 장면 가로 넘침 없이 재배치. 본문 속 데모 폭 약 736px에서 A 작업실과 B 업무 모듈이 2열이며 단순 축소가 아닌 배치 변화 확인. |
+| 1440px | 두 장면 가로 넘침 없음. 확장 B 주요 열 너비 약 412/412/350px, A 약 657/597px. 수정 전후·원본 대비 이미지 저장. |
+
+360px에서 A의 폼 오류·성공, ArrowRight 탭, hover/focus/active/disabled 상태 선택, 광원 대상 변경, 패널 느린 재생·일시정지·재개·초기화, 동작 줄이기를 켠 상태의 즉시 처리 완료, 다이얼로그 확인을 조작했다. B는 완료 필터의 `2/2/100%/0` 목록·지표 동시 갱신, T-03 상세, 차트 End 키의 누적 `2,3,5,6`, 19일 일정 한 건을 확인했다. 로컬 작업 추가는 오류 → `7/2/29%/5` → 중복 오류 → 초기화 `6/2/33%/4` 순서로 확인했다. 차트 일시정지 중 재선택해도 최종 상태가 꼬이지 않았고, 다이얼로그 Esc 후 초점 복귀를 확인했다.
+
+화면 밖 처리 진행률은 규칙 영역으로 스크롤하기 전후 모두 `0.13024`로 유지돼 정지 조건을 확인했다. 768px에서 A 입력 요소 프롬프트 9,433자를 클립보드에서 다시 읽었고, 수동 복사를 위한 전체 선택도 9,433자를 확인했다. B 전체 프롬프트 9,331자에는 T-06 업무와 모션 `240ms`가 포함됐다. A의 `dark-ai-controls.html`을 실제 다운로드해 별도 탭에서 열고 Home 키 동작을 확인했다. B 독립 전체 HTML도 별도 URL에서 일곱 보기를 열고 완료 필터 및 17일 일정 전환을 확인했다.
+
+기존 다른 글 `/start-docker/`를 브라우저에서 열어 화면을 확인했고 가이드 호스트와 전용 자산이 나타나지 않았다(`guideHost=false`, `guideAssets=0`). 이는 Shadow DOM 격리 및 변경 파일 범위 검사와 함께 다른 글에 대한 스타일 영향이 없음을 뒷받침한다.
+
+## 재현 경로와 남은 한계
+
+Jekyll build 후 `/p/hidden-memo/ui-motion-guide/`를 열고 `#ui-dark-ai-hero`, `#ui-light-project-hero` 등 해시로 장면·요소에 직접 접근한다. 독립 실행 HTML의 빌드 테스트 파일 `_site/__guide-check/hero-ai.html`과 `hero-project.html`은 임시 생성물이다. 원본 참고 사이트의 로그인 뒤 화면, 반응형 구현 코드, 모션 시간·easing은 확인하지 못했다. A·B 원본 이미지 자체는 배포하지 않는다.
+
+DESIGN.md와 토큰 JSON 다운로드 버튼은 실제 브라우저에서 클릭했다. 다운로드 이벤트 대기가 시간 초과되어 디스크 저장·파일 내용 비교는 확인하지 못했다. 실제 HTML 파일은 저장 후 독립 실행까지 확인했다. OS의 prefers-reduced-motion 설정 직접 전환, Safari/Firefox·실기기, 스크린리더 낭독은 검증하지 않았다. 동작 줄이기는 동일한 실행 분기를 쓰는 체험 체크박스로 확인했다.
+
+로컬 재현: Jekyll로 빌드한 뒤 `python3 -m http.server 8074 --bind 127.0.0.1 --directory _site`를 실행하고 `http://127.0.0.1:8074/p/hidden-memo/ui-motion-guide/`를 연다. 기존 `scripts/serve-site.sh`도 누락된 verify-all.sh를 호출하므로 이 검증에서는 직접 서버를 사용했다.
