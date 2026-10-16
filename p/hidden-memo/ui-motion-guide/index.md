@@ -14,7 +14,7 @@ tags:       []
 ---
 
 <p><a href="{{ '/p/hidden-memo/' | relative_url }}">← 히든메모 목록</a></p>
-<p><strong>독립 쇼케이스:</strong> 화면 전체를 쓰는 갤러리와 확대 체험은 <a href="{{ '/p/ui-motion/' | relative_url }}">UI·모션 쇼케이스</a>에서 이용하세요. 이 글의 기존 데모와 제작 기록도 아래에 보존했습니다.</p>
+<p><strong>독립 쇼케이스:</strong> A와 B를 각각의 독립 화면으로 탐색하려면 <a href="{{ '/p/ui-motion/' | relative_url }}">UI·모션 쇼케이스</a>에서 선택하세요. <a href="{{ '/p/ui-motion/ai-workspace/' | relative_url }}">Dark AI Workspace</a> · <a href="{{ '/p/ui-motion/project-dashboard/' | relative_url }}">Light Project Dashboard</a>. 이 글의 기존 데모와 제작 기록도 아래에 보존했습니다.</p>
 <p>어두운 AI 작업실과 밝은 프로젝트 대시보드. <strong>화면 선택 → 직접 조작 → 모션 다시 보기 → 규칙과 코드 가져가기</strong> 순서로 체험하세요. 모든 데이터는 로컬 샘플입니다.</p>
 <div id="ui-motion-guide" lang="ko" aria-label="테마별 UI와 모션 체험"><p>인터랙티브 가이드를 불러오는 중입니다. JavaScript가 필요합니다.</p></div>
 <noscript><p>JavaScript를 켜면 두 대표 화면과 12개 인터랙션, 프롬프트·실행 HTML 복사와 다운로드를 사용할 수 있습니다.</p></noscript>

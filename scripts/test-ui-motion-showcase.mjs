@@ -13,16 +13,26 @@ const themesURL = asModule(themesSource);
 const oldEngineSource = (await source('../js/ui-motion-guide/engine.js'))
   .replace(/from ['"]\.\/themes\.js(?:\?[^'"]*)?['"]/, `from '${themesURL}'`);
 const oldEngineURL = asModule(oldEngineSource);
+const aiSceneURL = asModule(await source('../js/ui-motion-showcase/ai-scene.js'));
+const projectSceneURL = asModule(await source('../js/ui-motion-showcase/project-scene.js'));
 const dataSource = (await source('../js/ui-motion-showcase/data.js'))
-  .replace(/from ['"]\.\.\/ui-motion-guide\/themes\.js(?:\?[^'"]*)?['"]/, `from '${themesURL}'`);
+  .replace(/from ['"]\.\.\/ui-motion-guide\/themes\.js(?:\?[^'"]*)?['"]/, `from '${themesURL}'`)
+  .replace(/from ['"]\.\/ai-scene\.js(?:\?[^'"]*)?['"]/, `from '${aiSceneURL}'`)
+  .replace(/from ['"]\.\/project-scene\.js(?:\?[^'"]*)?['"]/, `from '${projectSceneURL}'`);
 const dataURL = asModule(dataSource);
 const engineSource = (await source('../js/ui-motion-showcase/engine.js'))
   .replace(/from ['"]\.\.\/ui-motion-guide\/engine\.js(?:\?[^'"]*)?['"]/, `from '${oldEngineURL}'`)
-  .replace(/from ['"]\.\/data\.js(?:\?[^'"]*)?['"]/, `from '${dataURL}'`);
+  .replace(/from ['"]\.\/data\.js(?:\?[^'"]*)?['"]/, `from '${dataURL}'`)
+  .replace(/from ['"]\.\/ai-scene\.js(?:\?[^'"]*)?['"]/, `from '${aiSceneURL}'`)
+  .replace(/from ['"]\.\/project-scene\.js(?:\?[^'"]*)?['"]/, `from '${projectSceneURL}'`);
 const engineURL = asModule(engineSource);
+const {aiTokens} = await import(aiSceneURL);
+const {projectTokens} = await import(projectSceneURL);
 const {themes, kinds, catalog, fullCatalog, themeFor, detailRules, promptFor} = await import(dataURL);
 const {markup, demoCSS, wire, mount, standalone} = await import(engineURL);
 const page = await source('../p/ui-motion/index.html');
+const aiPage = await source('../p/ui-motion/ai-workspace/index.html');
+const projectPage = await source('../p/ui-motion/project-dashboard/index.html');
 const archived = await source('../p/hidden-memo/ui-motion-guide/index.md');
 const hub = await source('../p/hidden-memo/index.html');
 const registry = await source('../_data/html_documents.yml');
@@ -37,12 +47,37 @@ function check(name, run) {
 }
 
 check('independent HTML has no blog layout or article shell', () => {
-  assert.match(page, /^<!doctype html>/i);
-  assert.match(page, /<meta name="html-document-listing" content="hidden">/);
-  assert.match(page, /<div id="ui-showcase"/);
-  assert.match(page, /js\/ui-motion-showcase\/index\.js/);
-  assert.doesNotMatch(page, /^(?:---|layout:)|post-container|post-heading|header-img|article max-width/im);
+  for (const html of [page, aiPage, projectPage]) {
+    assert.match(html, /^<!doctype html>/i);
+    assert.match(html, /<meta name="html-document-listing" content="hidden">/);
+    assert.match(html, /<div id="ui-showcase"/);
+    assert.match(html, /js\/ui-motion-showcase\/index\.js/);
+    assert.doesNotMatch(html, /^(?:---|layout:)|post-container|post-heading|header-img|article max-width/im);
+  }
   assert.doesNotMatch(registry, /\/p\/ui-motion\//);
+});
+check('hub and themes have direct, refreshable pathnames and correct assets', () => {
+  const routes = [
+    ['hub', '/p/ui-motion/', page, '../../js/ui-motion-showcase/index.js'],
+    ['ai-workspace', '/p/ui-motion/ai-workspace/', aiPage, '../../../js/ui-motion-showcase/index.js'],
+    ['project-dashboard', '/p/ui-motion/project-dashboard/', projectPage, '../../../js/ui-motion-showcase/index.js']
+  ];
+  for (const [name, path, html, asset] of routes) {
+    assert.match(html, new RegExp(`<body data-showcase-page="${name}">`));
+    assert.ok(html.includes(`content="https://blog.pickth.com${path}"`), `${name} OG URL`);
+    assert.ok(html.includes(`src="${asset}?`), `${name} module path`);
+    assert.equal(new URL(asset, `https://blog.pickth.com${path}`).pathname, '/js/ui-motion-showcase/index.js');
+  }
+  assert.equal(new Set(routes.map(([,path]) => path)).size, 3);
+  assert.match(controller, /pageTheme=page==='ai-workspace'\?'dark-ai':page==='project-dashboard'\?'light-project':null/);
+  assert.match(controller, /catalog=allCatalog\.filter\(item=>pageTheme\?item\.themeId===pageTheme:item\.key==='hero'\)/);
+  assert.match(controller, /x\.key!=='hero'/);
+  assert.match(controller, /mount\(shadow\.querySelector\('\.hero-demo'\),hero,'full'\)/);
+  assert.match(controller, /themeHref\(item\.themeId==='dark-ai'\?'ai-workspace':'project-dashboard'\)/);
+  assert.match(controller, /function detailList\(\)\{return pageTheme\?\[hero,\.\.\.matching\(\)\]:catalog;\}/);
+  assert.match(controller, /const list=detailList\(\),index=list\.findIndex/);
+  assert.match(controller, /if\(e\.target===dialog\)\{e\.preventDefault\(\);close\(\);\}/);
+  assert.match(engineSource, /listen\(dialog,'cancel',e=>\{e\.preventDefault\(\);close\(\);\}\)/);
 });
 check('archived guide and hidden memo route are preserved', () => {
   assert.match(archived, /^title:\s*"테마별 인터랙티브 UI·모션 디자인 가이드"\s*$/m);
@@ -67,6 +102,23 @@ check('twelve unique real examples', () => {
 check('published catalog is complete', () => {
   if (process.argv.includes('--require-full')) assert.equal(catalog.length, fullCatalog.length);
   else assert.ok(catalog.length >= 3 && catalog.length <= fullCatalog.length);
+});
+check('scene tokens reach CSS, rules and independent prompts', () => {
+  assert.deepEqual(themes[0].scene, aiTokens);
+  assert.deepEqual(themes[1].scene, projectTokens);
+  const ai = catalog.find(x => x.id === 'dark-ai--hero');
+  const project = catalog.find(x => x.id === 'light-project--hero');
+  const aiChanged = structuredClone(themes[0]);
+  aiChanged.scene.studioMax = 997;
+  assert.ok(demoCSS(aiChanged).includes('--studio-max:997px'), 'AI scene max token is disconnected from CSS');
+  const projectChanged = structuredClone(themes[1]);
+  projectChanged.scene.navHeight = 61;
+  assert.ok(demoCSS(projectChanged).includes('.project-nav{height:61px'), 'Project nav height token is disconnected from CSS');
+  for (const [item, token] of [[ai,aiTokens.studioMax], [project,projectTokens.sceneMax]]) {
+    assert.ok(detailRules(item).some(([,value]) => value.includes(String(token))));
+    assert.ok(promptFor(item).includes(String(token)));
+    assert.ok(standalone(item).includes(String(token)));
+  }
 });
 check('compact and full share the same runtime', () => {
   for (const fn of [markup, demoCSS, wire, mount, standalone]) assert.equal(typeof fn, 'function');
@@ -107,9 +159,11 @@ check('compact and full share the same runtime', () => {
   assert.ok(/\[data-presentation=compact\]/.test(demoCSS(themes[0])), 'Compact CSS missing');
   assert.ok(/\[data-presentation=full\]/.test(demoCSS(themes[0])), 'Full CSS missing');
 });
-check('search/filter/detail/copy controls exist', () => {
-  for (const marker of ['type="search"', 'data-theme="all"', 'data-kind=', 'data-open=', 'data-prev', 'data-next', 'data-close', 'data-replay', 'data-reset', 'data-copy=', 'data-select=', 'data-save='])
+check('theme-local search/filter/detail/copy controls exist', () => {
+  for (const marker of ['type="search"', 'data-kind=', 'data-open=', 'data-prev', 'data-next', 'data-close', 'data-replay', 'data-reset', 'data-copy=', 'data-select=', 'data-save='])
     assert.ok(controller.includes(marker), `Missing ${marker}`);
+  assert.ok(controller.includes('heroCard.remove()'), 'Theme hero must be outside gallery cards');
+  assert.ok(controller.includes('filterBar.querySelector'), 'Theme filter group must be removed');
   assert.ok(/savedScroll=window\.scrollY/.test(controller), 'Scroll position save missing');
   assert.ok(/opener\?\.focus\(\{preventScroll:true\}\)/.test(controller), 'Focus return missing');
   assert.ok(/document\.body\.style\.overflow='hidden'/.test(controller), 'Body scroll lock missing');
