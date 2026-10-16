@@ -1,8 +1,8 @@
 ---
 layout:     post
 title:      "테마별 인터랙티브 UI·모션 디자인 가이드"
-subtitle:   "네 가지 디자인 언어를 조작하고, 수치와 코드까지 가져가는 작은 실험실"
-description: "Warm Minimal, Editorial, Technical, Bold Graphic의 대표 화면과 일곱 가지 UI·모션 데모, 디자인 토큰과 재사용 코드를 한 글에서 비교합니다."
+subtitle:   "두 디자인 화면을 조작하고, 수치와 코드까지 가져가는 작은 실험실"
+description: "Dark AI Workspace와 Light Project Dashboard의 대표 화면과 12개 UI·모션 데모, 디자인 토큰과 재사용 코드를 비교합니다."
 date:       2026-10-16 00:00:00 +0900
 author:     "Pimi"
 header-img: "img/home-bg.jpg"
@@ -14,6 +14,7 @@ tags:       []
 ---
 
 <p><a href="{{ '/p/hidden-memo/' | relative_url }}">← 히든메모 목록</a></p>
+<p><strong>독립 쇼케이스:</strong> 화면 전체를 쓰는 갤러리와 확대 체험은 <a href="{{ '/p/ui-motion/' | relative_url }}">UI·모션 쇼케이스</a>에서 이용하세요. 이 글의 기존 데모와 제작 기록도 아래에 보존했습니다.</p>
 <p>어두운 AI 작업실과 밝은 프로젝트 대시보드. <strong>화면 선택 → 직접 조작 → 모션 다시 보기 → 규칙과 코드 가져가기</strong> 순서로 체험하세요. 모든 데이터는 로컬 샘플입니다.</p>
 <div id="ui-motion-guide" lang="ko" aria-label="테마별 UI와 모션 체험"><p>인터랙티브 가이드를 불러오는 중입니다. JavaScript가 필요합니다.</p></div>
 <noscript><p>JavaScript를 켜면 두 대표 화면과 12개 인터랙션, 프롬프트·실행 HTML 복사와 다운로드를 사용할 수 있습니다.</p></noscript>

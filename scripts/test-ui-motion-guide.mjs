@@ -168,23 +168,26 @@ for (const t of themes) {
 const post=await readFile(new URL('../p/hidden-memo/ui-motion-guide/index.md',import.meta.url),'utf8');
 const hub=await readFile(new URL('../p/hidden-memo/index.html',import.meta.url),'utf8');
 const registry=await readFile(new URL('../_data/html_documents.yml',import.meta.url),'utf8');
-check('stable hidden memo route and metadata',()=>{
+check('stable archived guide route and current metadata',()=>{
   const front=post.match(/^---\n([\s\S]*?)\n---/);
   assert.ok(front);
-  const baseline=execFileSync('git',['show','HEAD:p/hidden-memo/ui-motion-guide/index.md'],{encoding:'utf8'});
-  assert.equal(front[0],baseline.match(/^---\n([\s\S]*?)\n---/)[0],
-    'Existing front matter must remain byte-for-byte unchanged');
   assert.match(front[1],/^layout:\s*post\s*$/m);
   assert.match(front[1],/^title:\s*"테마별 인터랙티브 UI·모션 디자인 가이드"\s*$/m);
   assert.match(front[1],/^permalink:\s*\/p\/hidden-memo\/ui-motion-guide\/\s*$/m);
   assert.match(front[1],/^hidden:\s*true\s*$/m);
   assert.match(front[1],/^tags:\s*\[\]\s*$/m);
-  assert.match(hub,/href="\.\/ui-motion-guide\/"/);
+  assert.match(front[1],/^subtitle:\s*"[^"]*두 디자인 화면[^"]*"\s*$/m);
+  assert.match(front[1],/^description:\s*"[^"]*Dark AI Workspace와 Light Project Dashboard[^"]*12개[^"]*"\s*$/m);
+  assert.doesNotMatch(front[1],/네 가지|Warm Minimal|Editorial|Technical|Bold Graphic|일곱 가지/);
+  assert.match(post,/href="\{\{ '\/p\/ui-motion\/' \| relative_url \}\}"/);
+  assert.match(hub,/href="\.\.\/ui-motion\/"/);
+  assert.match(hub,/2개 대표 화면[\s\S]*전체 12개 예시/);
+  assert.doesNotMatch(hub,/네 가지 화면|4개 테마|28개 요소 데모/);
   assert.doesNotMatch(registry,/\/p\/hidden-memo\/ui-motion-guide\//);
 });
 check('blog global files untouched',()=>{
   const changed=execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
-  const allowed=/^(?:p\/hidden-memo\/ui-motion-guide\/index\.md|js\/ui-motion-guide\/(?:engine|index|themes|guide)\.(?:js|css)|docs\/ui-motion-guide-[^/]+\.md|scripts\/test-ui-motion-guide\.mjs)$/;
+  const allowed=/^(?:p\/hidden-memo\/ui-motion-guide\/index\.md|p\/hidden-memo\/index\.html|p\/ui-motion\/index\.html|js\/ui-motion-guide\/(?:engine|index|themes|guide|showcase)\.(?:js|css)|js\/ui-motion-showcase\/[^/]+\.(?:js|css)|docs\/ui-motion-(?:guide|showcase)-[^/]+\.md|docs\/assets\/ui-motion-(?:guide|showcase)(?:-review)?\/[^/]+|scripts\/test-ui-motion-(?:guide|showcase)\.mjs)$/;
   assert.deepEqual(changed.filter(path=>!allowed.test(path)),[],
     'Guide work must not change other posts, routing, navigation, or global styles');
 });
