@@ -17,6 +17,9 @@ const {markup,demoCSS,standalone}=await load('engine');
 const {siteOrder,websiteItems}=await load('site-catalog');
 const {mountSite,wireSite,siteMarkup,siteCSS}=await load('site-runtime');
 const {inputsWire}=await load('site-inputs');const {contentWire}=await load('site-content');
+const {concepts,conceptById,conceptForItem}=await load('site-concepts');
+const {collectionMarkup}=await load('collection-home');
+const {designMarkup}=await load('gallery-design');
 const main=await source('../p/ui-motion/index.html'),alias=await source('../p/ui-motion/components/index.html');
 const guide=await source('../p/hidden-memo/ui-motion-guide/index.md');
 const gallery=await source('../js/ui-motion-showcase/gallery.js'),oldController=await source('../js/ui-motion-showcase/index.js');
@@ -45,5 +48,13 @@ for(const item of catalog){
 }
 check('main gallery avoids the large preserved scene modules',()=>{assert.doesNotMatch(gallery,/from ['"]\.\/(?:engine|data|ai-scene|project-scene)\.js/);for(const item of websiteItems)assert.deepEqual(catalog.find(x=>x.id===item.id),item);});
 check('all twelve website studies are distinct',()=>assert.equal(new Set(signatures).size,12));
+check('concepts cover every website component exactly once',()=>{assert.deepEqual(concepts.map(c=>c.id),['paper','object','frame']);const ids=concepts.flatMap(c=>c.componentIds);assert.equal(ids.length,12);assert.equal(new Set(ids).size,12);assert.deepEqual(new Set(ids),new Set(siteOrder));for(const item of websiteItems){assert.equal(conceptForItem(item).id,item.conceptId);assert.equal(conceptForItem(item.id).id,item.conceptId);}assert.equal(conceptById('missing'),null);});
+check('collection home renders future registry entries without concealing them',()=>{const extra={...concepts[0],id:'future',name:'새 컨셉'};const html=collectionMarkup([...concepts,extra],(id,view)=>`/${id}/${view}`);assert.match(html,/home-future/);assert.match(html,/\/future\/components/);assert.match(html,/\/future\/design/);assert.equal((html.match(/data-home-demo=/g)||[]).length,4);assert.doesNotMatch(html,/<a\s[^>]*class="home-card(?: |")/);assert.match(main,/data-gallery-home="true"/);});
+check('each design guide uses its own tokens and has an operable motion example',()=>{for(const c of concepts){const html=designMarkup(c);assert.match(html,new RegExp('data-concept="'+c.id+'"'));assert.ok(html.includes(c.colors.accent));assert.ok(html.includes(c.type.scale));assert.ok(html.includes(c.motion));assert.match(html,/data-guide-play aria-pressed="false"/);assert.match(html,/data-guide-reduced/);}});
+check('legacy component links route to the matching concept and hero paths survive',()=>{assert.match(gallery,/conceptForItem\(item\)\.id\+'\/#'\+item.id/);assert.match(gallery,/location\.replace/);assert.match(gallery,/'ai-workspace\/':'project-dashboard\/'/);});
+check('headings avoid repeated explanatory subtitles',()=>{assert.doesNotMatch(gallery,/<p>\$\{esc\(item.description\)\}<\/p>/);assert.doesNotMatch(gallery,/detail-description/);for(const item of websiteItems)assert.doesNotMatch(siteMarkup(item),/class="si-head"|data-pane-copy|<h3>[^<]+<\/h3><p>/);});
+check('visible gallery omits provenance and old-example navigation',()=>{assert.doesNotMatch(gallery,/기존 화면 예제|출처·전제|page-footer/);assert.doesNotMatch(oldController,/<footer class="page-footer"/);assert.match(standalone(catalog[0]),/MIT License/);});
+check('all website exports carry their matching concept and complete styles',()=>{for(const item of websiteItems){const html=standalone(item);assert.ok(html.includes('data-concept="'+item.conceptId+'"'));assert.ok(html.includes(conceptForItem(item).colors.accent));assert.match(html,/<style>[\s\S]+<\/style>/);}});
+for(const c of concepts){const html=await source('../p/ui-motion/'+c.id+'/index.html');check(c.id+' has a stable hidden HTML entry point',()=>{assert.match(html,new RegExp('data-gallery-concept="'+c.id+'"'));assert.match(html,/data-gallery-base="\.\.\/"/);assert.ok(html.includes('https://blog.pickth.com/p/ui-motion/'+c.id+'/'));assert.match(html,/html-document-listing" content="hidden"/);});}
 if(process.argv.includes('--export-previews')){await mkdir('/tmp/ui-motion-export-qa',{recursive:true});for(const item of catalog.filter(x=>x.key!=='hero'))await writeFile('/tmp/ui-motion-export-qa/'+item.id+'.html',standalone(item));}
 if(failures.length){console.error(failures.join('\n'));process.exitCode=1;}else console.log(`PASS: ${count} UI gallery contracts (browser verification remains separate).`);

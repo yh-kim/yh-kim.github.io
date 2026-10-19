@@ -1,81 +1,23 @@
-/** The visual reference is intentionally static: every live control lives in the gallery. */
-export function designMarkup() {
-  return `
-    <div class="design-system">
-      <header class="design-lead">
-        <div>
-          <p class="eyebrow">VISUAL SYSTEM / 01</p>
-          <h1>화면을 읽고, 조작하고,<br>다시 가져가기 위한 기준</h1>
-        </div>
-        <p>갤러리는 컴포넌트의 작업 공간입니다. 바깥 구조는 조용하게 유지하고, 제품마다 필요한 밀도와 색은 실제 미리보기 안에서 결정합니다.</p>
-      </header>
-
-      <section class="design-chapter" aria-labelledby="design-type">
-        <div class="design-heading">
-          <p class="design-index">01 / TYPE</p>
-          <div><h2 id="design-type">문장은 먼저 읽혀야 합니다</h2><p>시스템 글꼴 한 벌로 제목, 본문, 보조 정보를 구분합니다. 긴 한국어 제목과 작업명은 자연스럽게 줄바꿈합니다.</p></div>
-        </div>
-        <div class="design-content type-samples">
-          <div class="type-sample"><span class="type-label">페이지 제목</span><strong class="type-display">컴포넌트 갤러리</strong><span class="type-measure">32 / 1.3</span></div>
-          <div class="type-sample"><span class="type-label">목록 제목</span><strong class="type-title">주문 내역과 현재 상태</strong><span class="type-measure">20 / 1.4</span></div>
-          <div class="type-sample"><span class="type-label">본문</span><span class="type-body">현재 상태와 결과를 가까이 두어, 선택한 동작이 무엇을 바꿨는지 바로 확인합니다.</span><span class="type-measure">14 / 1.6</span></div>
-          <div class="type-sample"><span class="type-label">보조 정보</span><span class="type-caption">선택 결과 · 마지막 업데이트 · 사용 방법</span><span class="type-measure">12 / 1.6</span></div>
-        </div>
-      </section>
-
-      <section class="design-chapter" aria-labelledby="design-color">
-        <div class="design-heading">
-          <p class="design-index">02 / COLOR</p>
-          <div><h2 id="design-color">분류와 행동에만 강조색을 씁니다</h2><p>종이색, 잉크, 경계선이 기본 구조를 만듭니다. 인디고는 현재 위치와 명시적인 행동에 사용합니다.</p></div>
-        </div>
-        <div class="design-content">
-          <div class="color-list" aria-label="갤러리 색상 토큰">
-            <div class="color-chip"><div class="color-swatch" style="--sample:#fffefa"></div><div class="color-desc"><b>표면</b><span>#FFFEFA</span></div></div>
-            <div class="color-chip"><div class="color-swatch" style="--sample:#232632"></div><div class="color-desc"><b>본문</b><span>#232632</span></div></div>
-            <div class="color-chip"><div class="color-swatch" style="--sample:#e0e0dc"></div><div class="color-desc"><b>경계</b><span>#E0E0DC</span></div></div>
-            <div class="color-chip"><div class="color-swatch" style="--sample:#454da4"></div><div class="color-desc"><b>선택·행동</b><span>#454DA4</span></div></div>
-          </div>
-          <p class="design-caption">이 색은 탐색 화면의 바탕입니다. 차트, 캘린더, 검토창처럼 목적이 다른 컴포넌트에는 각자의 상태 색과 표면을 둡니다.</p>
-        </div>
-      </section>
-
-      <section class="design-chapter" aria-labelledby="design-space">
-        <div class="design-heading">
-          <p class="design-index">03 / SPACE</p>
-          <div><h2 id="design-space">공간으로 정보의 관계를 만듭니다</h2><p>작은 간격은 같은 제어 안에서, 큰 간격은 제목과 실제 작업 영역 사이에서 사용합니다.</p></div>
-        </div>
-        <div class="design-content spacing-list" aria-label="간격 기준">
-          <div class="spacing-row"><code>08</code><span class="spacing-bar" style="--sample-width:8px"></span><span>아이콘과 라벨</span></div>
-          <div class="spacing-row"><code>12</code><span class="spacing-bar" style="--sample-width:12px"></span><span>연관된 정보</span></div>
-          <div class="spacing-row"><code>16</code><span class="spacing-bar" style="--sample-width:16px"></span><span>입력과 결과</span></div>
-          <div class="spacing-row"><code>24</code><span class="spacing-bar" style="--sample-width:24px"></span><span>카드 안의 구획</span></div>
-          <div class="spacing-row"><code>36</code><span class="spacing-bar" style="--sample-width:36px"></span><span>독립된 섹션</span></div>
-        </div>
-      </section>
-
-      <section class="design-chapter" aria-labelledby="design-usage">
-        <div class="design-heading">
-          <p class="design-index">04 / APPLICATION</p>
-          <div><h2 id="design-usage">같은 원칙, 서로 다른 제품</h2><p>모션은 장식보다 상태의 연결에 사용합니다. 컴포넌트 목록의 미리보기에서 아래 행동을 실제로 확인할 수 있습니다.</p></div>
-        </div>
-        <div class="design-content">
-          <div class="application-list">
-            <article class="application"><p class="eyebrow">CONTENT / FAQ</p><h3>질문과 답을 한 흐름에서 읽기</h3><p>자주 묻는 질문은 항목을 열어 답을 확인하고 다시 접을 수 있습니다. 긴 답도 잘리지 않고 주변 내용이 자연스럽게 이동합니다.</p></article>
-            <article class="application"><p class="eyebrow">DATA / ORDERS</p><h3>필터와 주문 결과를 연결</h3><p>고객·주문 검색, 상태 필터, 정렬이 같은 주문 목록에 적용됩니다. 선택한 주문은 한 번에 배송 완료로 바꿀 수 있습니다.</p></article>
-            <article class="application"><p class="eyebrow">FORM / NEWSLETTER</p><h3>입력 바로 곁에서 결과 알리기</h3><p>구독 폼은 이름·이메일·동의를 확인하고 오류를 입력 곁에 설명합니다. 올바른 제출 뒤에는 성공 상태를 같은 영역에 보여 줍니다.</p></article>
-            <article class="application"><p class="eyebrow">INPUT / TAGS</p><h3>입력과 선택을 한곳에 모으기</h3><p>태그는 입력, 추천, 칩 삭제로 편집합니다. 중복·글자 수·최대 개수 오류를 알리고 현재 태그를 미리보기에도 반영합니다.</p></article>
-            <article class="application"><p class="eyebrow">COMMERCE / CART</p><h3>수량과 소계를 함께 계산</h3><p>장바구니 드로어에서 상품을 추가하거나 수량을 바꾸면 소계가 곧바로 갱신됩니다. 삭제한 상품도 목록에서 다시 담을 수 있습니다.</p></article>
-            <article class="application"><p class="eyebrow">OVERLAY / DELETE</p><h3>대상을 확인한 뒤 삭제</h3><p>파일 삭제창은 정확한 파일명을 입력해야 완료할 수 있습니다. 닫으면 초점이 돌아오고, 완료 뒤에는 실행 취소가 나타납니다.</p></article>
-          </div>
-          <div class="design-details">
-            <details><summary>동작 시간과 접근성 기준</summary><p>대부분의 상태 변화는 약 140–280ms, 차트 수치 전환은 약 300ms를 기준으로 합니다. 주요 제어는 44px 이상이며 키보드 초점을 분명하게 표시합니다. 동작 줄이기를 선택하면 중간 이동을 건너뛰고 최종 데이터와 결과는 그대로 보여 줍니다.</p></details>
-            <details><summary>반응형 구성 기준</summary><p>넓은 화면의 갤러리는 두 열입니다. 좁은 화면에서는 한 열로 바뀌며, 미리보기의 모든 주요 제어가 보입니다. 컴포넌트 내부도 자신의 사용 가능한 폭을 기준으로 다시 배치합니다.</p></details>
-          </div>
-        </div>
-      </section>
-    </div>`;
+import {concepts} from './site-concepts.js?v=20261019-concepts4';
+const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function designMarkup(concept=concepts[0]){
+ const c=concept,palette=[['바탕',c.colors.paper],['표면',c.colors.surface],['본문',c.colors.ink],['보조',c.colors.muted],['행동',c.colors.accent],['경계',c.colors.line]],spacing=c.id==='frame'?[6,10,16,20,28]:c.id==='paper'?[8,12,18,24,32]:[8,12,16,24,32];
+ return `<div class="design-system concept-sheet" data-concept="${c.id}" style="--guide-paper:${c.colors.paper};--guide-ink:${c.colors.ink};--guide-accent:${c.colors.accent};--guide-line:${c.colors.line};--guide-display:${c.type.display}">
+ <style>
+ .concept-sheet{color:var(--guide-ink);max-width:1160px;margin:auto}.concept-sheet .sheet-head{padding:30px 0 28px;display:flex;align-items:end;justify-content:space-between;border-bottom:2px solid var(--guide-ink);gap:20px}.concept-sheet .sheet-head h1{font:750 32px/1.25 var(--guide-display);letter-spacing:-1.1px;margin:8px 0 0}.concept-sheet .sheet-head small{font-size:11px;letter-spacing:.08em}.concept-sheet .sheet-head span{font-size:12px}.concept-sheet .sheet-row{display:grid;grid-template-columns:170px minmax(0,1fr);gap:30px;padding:30px 0;border-bottom:1px solid var(--guide-line)}.concept-sheet .sheet-row h2{font-size:15px;line-height:1.5;margin:0}.concept-sheet .sheet-row h2 small{display:block;font-size:10px;color:var(--muted);letter-spacing:.08em;font-weight:500;margin-bottom:7px}.concept-sheet .sheet-principles{display:grid;gap:12px;margin:0;padding:0;list-style:none}.concept-sheet .sheet-principles li{font-size:14px;line-height:1.65;display:flex;gap:18px}.concept-sheet .sheet-principles b{color:var(--guide-accent);font:500 11px/2 ui-monospace,monospace}.concept-sheet .sheet-type strong{font:740 28px/1.35 var(--guide-display);letter-spacing:-.8px}.concept-sheet .sheet-type p{font-size:14px;line-height:1.65;max-width:540px;margin:15px 0}.concept-sheet .sheet-note{font-size:11px;line-height:1.7;color:var(--muted);margin:14px 0 0}.concept-sheet .sheet-colors{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.concept-sheet .sheet-swatch{height:65px;background:var(--sample);border:1px solid #00000012}.concept-sheet .sheet-color b,.concept-sheet .sheet-color code{display:block;font-size:11px;margin-top:9px}.concept-sheet .sheet-color code{font-size:10px;color:var(--muted);margin-top:4px}.concept-sheet .sheet-surface{display:grid;grid-template-columns:1fr 1fr;gap:28px}.concept-sheet .sheet-surface dl{margin:0;font-size:12px;line-height:1.7}.concept-sheet .sheet-surface dt{font-weight:700;margin-bottom:4px}.concept-sheet .sheet-surface dd{margin:0 0 16px;color:var(--muted)}.concept-sheet .sheet-space{display:flex;align-items:end;gap:12px;min-height:100px}.concept-sheet .sheet-space span{display:flex;flex-direction:column;align-items:center;gap:10px;font:11px ui-monospace,monospace}.concept-sheet .sheet-space i{display:block;width:24px;height:var(--size);background:var(--guide-accent);opacity:.75}.concept-sheet .guide-motion-track{position:relative;width:min(100%,380px);height:64px;background:var(--guide-paper);overflow:hidden;border-bottom:1px solid var(--guide-line)}.concept-sheet .guide-motion-marker{position:absolute;left:8px;top:8px;width:48px;height:48px;display:grid;place-items:center;background:var(--guide-accent);color:#fff;font-size:20px;border-radius:${c.id==='paper'?'0':c.id==='object'?'50%':'6px'};transform:translateX(0)}.concept-sheet .guide-motion[data-selected=true] .guide-motion-marker{transform:translateX(240px)}.concept-sheet .guide-motion-copy{font-size:12px;line-height:1.6;margin:15px 0;min-height:20px}.concept-sheet .guide-motion-actions{display:flex;align-items:center;flex-wrap:wrap;gap:20px}.concept-sheet .guide-motion-actions label{font-size:12px;display:flex;align-items:center;gap:8px;min-height:44px}.concept-sheet .guide-motion-actions input{width:17px;height:17px;accent-color:var(--guide-accent)}.concept-sheet .guide-motion-actions button{background:var(--guide-accent);border-color:var(--guide-accent);color:#fff;border-radius:${c.id==='paper'?'0':c.id==='object'?'24px':'6px'}}
+ @media(max-width:699px){.concept-sheet .sheet-head{padding:20px 0}.concept-sheet .sheet-head h1{font-size:26px}.concept-sheet .sheet-row{grid-template-columns:1fr;gap:20px;padding:24px 0}.concept-sheet .sheet-colors{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}.concept-sheet .sheet-surface{grid-template-columns:1fr}.concept-sheet .sheet-head>span{display:none}.concept-sheet .guide-motion[data-selected=true] .guide-motion-marker{transform:translateX(170px)}}
+ </style>
+ <header class="sheet-head"><div><small>${esc(c.name)} / DESIGN</small><h1>디자인 기준</h1></div><span>${c.count}개 컴포넌트에 적용</span></header>
+ <section class="sheet-row"><h2><small>01 / PRINCIPLES</small>구성 원칙</h2><ul class="sheet-principles">${c.principles.map((text,i)=>`<li><b>0${i+1}</b><span>${esc(text)}</span></li>`).join('')}</ul></section>
+ <section class="sheet-row"><h2><small>02 / TYPE</small>타이포그래피</h2><div class="sheet-type"><strong>${esc(c.sampleTitle)}</strong><p>${esc(c.sampleText)}</p><p class="sheet-note">${esc(c.type.scale)}<br>본문 ${esc(c.type.body)} · 시스템 글꼴 · 한글 어절 단위 줄바꿈</p></div></section>
+ <section class="sheet-row"><h2><small>03 / COLOR</small>색상</h2><div><div class="sheet-colors">${palette.map(([label,color])=>`<div class="sheet-color"><div class="sheet-swatch" style="--sample:${color}"></div><b>${label}</b><code>${color.toUpperCase()}</code></div>`).join('')}</div><p class="sheet-note">행동과 선택에 강조색을 사용합니다. 오류와 성공은 문구를 함께 표시합니다.</p></div></section>
+ <section class="sheet-row"><h2><small>04 / SPACE</small>간격과 표면</h2><div class="sheet-surface"><div class="sheet-space">${spacing.map(n=>`<span><i style="--size:${n*2}px"></i>${n}px</span>`).join('')}</div><dl><dt>모서리</dt><dd>${esc(c.radius)}</dd><dt>깊이</dt><dd>${esc(c.shadow)}</dd></dl></div></section>
+ <section class="sheet-row"><h2><small>05 / MOTION</small>상태 전환</h2><div><div class="guide-motion" data-selected="false" data-duration="${c.id==='paper'?220:c.id==='object'?240:180}"><div class="guide-motion-track" aria-hidden="true"><span class="guide-motion-marker">✓</span></div><p class="guide-motion-copy" data-guide-result role="status">선택 전</p><div class="guide-motion-actions"><button type="button" class="button" data-guide-play aria-pressed="false">선택 상태 체험</button><label><input type="checkbox" data-guide-reduced>모션 줄이기</label></div></div><p class="sheet-note">${esc(c.motion)}<br>연속 입력 시 현재 위치에서 전환합니다. 모션을 줄이면 결과를 바로 표시합니다.</p></div></section>
+ </div>`;
 }
-
-export function designWire() {
-  return () => {};
+export function designWire(root){
+ const active=new Map(),media=matchMedia('(prefers-reduced-motion: reduce)');
+ const listener=event=>{const button=event.target.closest('[data-guide-play]');if(!button)return;const box=button.closest('.guide-motion'),marker=box.querySelector('.guide-motion-marker'),from=getComputedStyle(marker).transform;active.get(marker)?.cancel();const selected=box.dataset.selected!=='true';box.dataset.selected=String(selected);button.setAttribute('aria-pressed',String(selected));box.querySelector('[data-guide-result]').textContent=selected?'선택됨 · 새로운 상태가 반영되었습니다.':'선택 전 · 기본 상태로 돌아왔습니다.';const to=getComputedStyle(marker).transform;if(media.matches||box.querySelector('[data-guide-reduced]').checked)return;const animation=marker.animate([{transform:from},{transform:to}],{duration:Number(box.dataset.duration),easing:'cubic-bezier(.22,1,.36,1)'});active.set(marker,animation);animation.finished.then(()=>active.delete(marker),()=>{});};
+ const change=event=>{if(event.target.matches('[data-guide-reduced]')&&event.target.checked){const marker=event.target.closest('.guide-motion').querySelector('.guide-motion-marker');active.get(marker)?.finish();}};
+ root.addEventListener('click',listener);root.addEventListener('change',change);return ()=>{root.removeEventListener('click',listener);root.removeEventListener('change',change);active.forEach(a=>a.cancel());};
 }

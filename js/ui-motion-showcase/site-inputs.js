@@ -1,5 +1,4 @@
 // Reusable website controls. Each study owns its own local, restorable state.
-const head = (eyebrow, title, copy) => `<header class="si-head"><span class="si-eyebrow">${eyebrow}</span><h3>${title}</h3><p>${copy}</p></header>`;
 const icon = name => {
   const paths={upload:'<path d="M12 16V4m-4 4 4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>',duplicate:'<rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',edit:'<path d="m4 16 11-11 4 4-11 11-5 1 1-5Zm9-9 4 4"/>',archive:'<rect x="4" y="4" width="16" height="4" rx="1"/><path d="M6 8v11a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8m-9 4h6"/>',menu:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',star:'<path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.7l6.2-.9L12 3Z"/>',plus:'<path d="M12 5v14M5 12h14"/>',empty:'<path d="M4 12h4l2-4 4 8 2-4h4"/>',account:'<circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/>',security:'<path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/>'};
   return `<svg class="si-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||''}</svg>`;
@@ -8,34 +7,28 @@ const icon = name => {
 export function inputsMarkup(item) {
   switch (item.id) {
     case 'dark-ai--process': return `<section class="site-study study-process si-upload">
-      ${head('FILE INPUT / 01','파일 업로드','파일을 선택하거나 샘플 파일로 업로드 흐름을 체험하세요.')}
-      <div class="si-workspace"><label class="si-drop" data-drop><span class="si-upload-glyph" aria-hidden="true">${icon('upload')}</span><strong>파일을 여기에 놓으세요</strong><span>또는 눌러 파일 선택 · PNG, JPG, PDF · 최대 5MB</span><input type="file" accept="image/png,image/jpeg,application/pdf" data-file aria-label="업로드할 파일 선택"></label>
-      <div class="si-upload-inline"><span>브라우저 안에서 진행하는 시뮬레이션</span><button type="button" class="si-link" data-action="sample">샘플 파일 사용</button></div>
-      <div class="si-queue" data-queue aria-live="polite"><span class="si-empty-icon" aria-hidden="true">${icon('empty')}</span><strong>대기 중인 파일이 없습니다</strong><small>파일을 고르면 검증 후 업로드가 시작됩니다.</small></div>
+      <div class="si-workspace"><div class="si-utility-heading"><span class="si-overline">자료실</span><strong>파일 업로드</strong></div><label class="si-drop" data-drop><span class="si-upload-glyph" aria-hidden="true">${icon('upload')}</span><strong>파일을 이곳에 놓으세요</strong><span>또는 눌러 파일 선택 · PNG, JPG, PDF · 최대 5MB</span><input type="file" accept="image/png,image/jpeg,application/pdf" data-file aria-label="업로드할 파일 선택"></label>
+      <div class="si-upload-inline"><button type="button" class="si-link" data-action="sample">샘플 파일 사용</button></div>
+      <div class="si-queue-wrap"><div class="si-queue-title"><strong>업로드 목록</strong></div><div class="si-queue" data-queue aria-live="polite"><span class="si-empty-icon" aria-hidden="true">${icon('empty')}</span><strong>대기 중인 파일이 없습니다</strong><small>파일을 고르면 검증 후 업로드가 시작됩니다.</small></div></div>
       <p class="si-message" data-message role="status">업로드 파일은 서버에 전송되지 않습니다.</p></div></section>`;
     case 'dark-ai--layers': return `<section class="site-study study-layers si-menu">
-      ${head('ACTION MENU / 02','프로젝트 메뉴','자주 쓰는 작업을 한곳에 모은 접근 가능한 메뉴입니다.')}
-      <div class="si-workspace"><div class="si-project-head"><span class="si-project-mark" aria-hidden="true">N</span><div><span class="si-overline">WORKSPACE / PROJECT</span><strong data-title>노바 웹사이트</strong><small data-subtitle>최근 수정 · 오늘</small></div><button class="si-menu-trigger" type="button" data-menu-trigger aria-haspopup="menu" aria-expanded="false" aria-label="프로젝트 메뉴 열기">${icon('menu')}</button></div>
-      <div class="si-action-menu" data-menu role="menu" aria-label="프로젝트 작업" hidden><button role="menuitem" type="button" data-menu-action="duplicate">${icon('duplicate')}<span><strong>복제하기</strong><small>사본을 작업 공간에 추가</small></span></button><button role="menuitem" type="button" data-menu-action="rename">${icon('edit')}<span><strong>이름 바꾸기</strong><small>프로젝트 표시 이름 수정</small></span></button><button role="menuitem" type="button" data-menu-action="archive">${icon('archive')}<span><strong>보관하기</strong><small>보관함으로 이동</small></span></button></div>
+      <div class="si-workspace"><div class="si-project-head"><span class="si-project-mark" aria-hidden="true">N</span><div><span class="si-overline">웹사이트 프로젝트</span><strong data-title>노바 웹사이트</strong><small data-subtitle>최근 수정 · 오늘</small></div><button class="si-menu-trigger" type="button" data-menu-trigger aria-haspopup="menu" aria-expanded="false" aria-label="프로젝트 메뉴 열기">${icon('menu')}</button></div>
+      <div class="si-action-menu" data-menu role="menu" aria-label="프로젝트 작업" hidden><button role="menuitem" type="button" data-menu-action="duplicate">${icon('duplicate')}<span><strong>복제하기</strong></span></button><button role="menuitem" type="button" data-menu-action="rename">${icon('edit')}<span><strong>이름 바꾸기</strong></span></button><button role="menuitem" type="button" data-menu-action="archive">${icon('archive')}<span><strong>보관하기</strong></span></button></div>
       <div class="si-menu-result"><div class="si-result-head"><span>프로젝트 상태</span><b data-count>1개</b></div><div data-project-list></div></div><p class="si-message" data-message role="status">메뉴를 열어 프로젝트를 관리해 보세요.</p></div></section>`;
     case 'dark-ai--controls': return `<section class="site-study study-controls si-settings">
-      ${head('SETTINGS TABS / 03','환경 설정','탭마다 다른 설정을 바꾸고 저장 상태를 확인하세요.')}
-      <div class="si-workspace"><div class="si-tabbar" role="tablist" aria-label="설정 카테고리"><button type="button" role="tab" data-tab="account" aria-selected="true" tabindex="0">계정</button><button type="button" role="tab" data-tab="notify" aria-selected="false" tabindex="-1">알림</button><button type="button" role="tab" data-tab="security" aria-selected="false" tabindex="-1">보안</button></div>
-      <div class="si-settings-pane" role="tabpanel" data-panel><div class="si-setting-top"><div><span class="si-overline" data-pane-index>01 / ACCOUNT</span><h4 data-pane-title>계정 환경</h4><p data-pane-copy>프로필에 표시할 설정을 선택하세요.</p></div><span class="si-setting-glyph" aria-hidden="true" data-pane-glyph>${icon('account')}</span></div><label class="si-setting-row"><span><strong data-setting-label>프로필 공개</strong><small data-setting-copy>내 프로필을 팀원에게 표시합니다.</small></span><input type="checkbox" data-setting checked><i aria-hidden="true"></i></label></div>
+      <div class="si-workspace"><div class="si-utility-heading"><span class="si-overline">워크스페이스</span><strong>환경 설정</strong></div><div class="si-tabbar" role="tablist" aria-label="설정 카테고리"><button type="button" role="tab" data-tab="account" aria-selected="true" tabindex="0">계정</button><button type="button" role="tab" data-tab="notify" aria-selected="false" tabindex="-1">알림</button><button type="button" role="tab" data-tab="security" aria-selected="false" tabindex="-1">보안</button></div>
+      <div class="si-settings-pane" role="tabpanel" data-panel><div class="si-setting-top"><div><span class="si-overline" data-pane-index>01 / ACCOUNT</span><h4 data-pane-title>계정 환경</h4></div><span class="si-setting-glyph" aria-hidden="true" data-pane-glyph>${icon('account')}</span></div><label class="si-setting-row"><span><strong data-setting-label>프로필 공개</strong><small data-setting-copy>내 프로필을 팀원에게 표시합니다.</small></span><input type="checkbox" data-setting checked><i aria-hidden="true"></i></label></div>
       <div class="si-settings-foot"><span data-save-state>저장된 상태입니다.</span><button class="si-solid" type="button" data-save>변경 사항 저장</button></div><p class="si-message" data-message role="status">설정 변경은 이 화면에만 적용됩니다.</p></div></section>`;
     case 'dark-ai--beam': return `<section class="site-study study-beam si-actions">
-      ${head('BUTTON STATES / 04','행동 버튼','저장, 선택, 비활성 상태의 반응을 직접 확인하세요.')}
-      <div class="si-workspace"><div class="si-save-panel"><div><span class="si-overline">PAGE SETTINGS</span><strong>게시 페이지</strong><small>수정 사항을 저장하고 계속 작업하세요.</small></div><span class="si-save-indicator" data-save-indicator>저장 전</span></div>
+      <div class="si-workspace"><div class="si-object-edition"><span>내 컬렉션</span><span>상품 보관함</span></div><div class="si-save-panel"><div><span class="si-overline">상품 선택</span><strong>보관함에 담은 물건</strong></div><span class="si-save-indicator" data-save-indicator>저장 전</span></div>
       <div class="si-action-row"><button type="button" class="si-solid si-save-button" data-action="save">변경 사항 저장</button><button type="button" class="si-outline" data-action="fail">오류 상태 보기</button></div>
-      <div class="si-divider"></div><div class="si-secondary-actions"><button type="button" class="si-toggle" data-action="bookmark" aria-pressed="false">${icon('star')} 북마크</button><button type="button" class="si-toggle" data-action="follow" aria-pressed="false">${icon('plus')} 팔로우</button><button type="button" class="si-toggle" disabled aria-disabled="true">권한 없음</button></div><p class="si-message" data-message role="status">버튼 상태는 로컬 시뮬레이션입니다.</p></div></section>`;
+      <div class="si-divider"></div><span class="si-actions-label">빠른 작업</span><div class="si-secondary-actions"><button type="button" class="si-toggle" data-action="bookmark" aria-pressed="false">${icon('star')} 북마크</button><button type="button" class="si-toggle" data-action="follow" aria-pressed="false">${icon('plus')} 팔로우</button><button type="button" class="si-toggle" disabled aria-disabled="true">권한 없음</button></div><p class="si-message" data-message role="status">버튼 상태는 로컬 시뮬레이션입니다.</p></div></section>`;
     case 'dark-ai--prompt': return `<section class="site-study study-prompt si-signup">
-      ${head('SIGNUP FORM / 05','뉴스레터 구독','이름과 이메일을 입력하고 구독을 신청해 보세요.')}
-      <form class="si-workspace si-signup-form" data-form novalidate><div class="si-form-top"><span class="si-mail-glyph" aria-hidden="true">${icon('mail')}</span><div><strong>좋은 웹 경험을 만드는 이야기</strong><small>격주 수요일, 디자인과 개발 인사이트를 보내드립니다.</small></div></div>
+      <form class="si-workspace si-signup-form" data-form novalidate><div class="si-publication-masthead"><span>디자인 노트</span><span>격주 수요일 발행</span></div><div class="si-form-top"><div><strong>다음 호를 받아보세요</strong></div></div>
       <div class="si-form-fields"><label>이름<input data-name type="text" name="name" autocomplete="name" aria-label="이름" aria-describedby="si-name-error" placeholder="홍길동" maxlength="30" required><small id="si-name-error" data-error="name"></small></label><label>이메일<input data-email type="email" name="email" autocomplete="email" aria-label="이메일" aria-describedby="si-email-error" placeholder="hello@example.com" required><small id="si-email-error" data-error="email"></small></label></div>
       <label class="si-consent"><input data-consent type="checkbox" aria-label="이메일 수신 동의" aria-describedby="si-consent-error" required><span>이메일 수신에 동의합니다. 언제든 구독을 취소할 수 있습니다.</span></label><p class="si-inline-error" id="si-consent-error" data-error="consent"></p><div class="si-form-actions"><button class="si-solid" type="submit" data-submit>구독 신청</button><button class="si-link" type="reset">초기화</button></div><p class="si-message" data-message role="status">실제 이메일은 발송되지 않습니다.</p></form></section>`;
     case 'light-project--quick-add': return `<section class="site-study study-quick-add si-tags">
-      ${head('TAG INPUT / 06','태그 입력','키워드를 추가해 콘텐츠를 분류해 보세요.')}
-      <div class="si-workspace"><div class="si-tag-heading"><div><span class="si-overline">CONTENT / TAXONOMY</span><h4>게시물 태그</h4></div><span data-count>2 / 6</span></div><div class="si-chip-editor" data-chip-editor><div class="si-chips" data-chips></div><input data-tag-input type="text" maxlength="24" aria-label="새 태그 입력" placeholder="태그 입력 후 Enter" autocomplete="off"></div><p class="si-tag-hint">Enter 또는 쉼표로 추가 · 비어 있을 때 Backspace로 마지막 태그 삭제</p><div class="si-suggestions"><span>추천 태그</span><div><button type="button" data-suggest="접근성">+ 접근성</button><button type="button" data-suggest="컴포넌트">+ 컴포넌트</button><button type="button" data-suggest="반응형">+ 반응형</button></div></div><div class="si-tag-preview"><span>미리보기</span><strong>새로운 인터페이스를 만드는 방법</strong><div data-preview></div></div><p class="si-message" data-message role="status">최대 6개까지 추가할 수 있습니다.</p></div></section>`;
+      <div class="si-workspace"><div class="si-tag-heading"><div><h4>이 글의 키워드</h4></div><span data-count>2 / 6</span></div><div class="si-chip-editor" data-chip-editor><div class="si-chips" data-chips></div><input data-tag-input type="text" maxlength="24" aria-label="새 태그 입력" placeholder="태그 입력 후 Enter" autocomplete="off"></div><p class="si-tag-hint">Enter 또는 쉼표로 추가 · 비어 있을 때 Backspace로 마지막 태그 삭제</p><div class="si-suggestions"><span>추천 태그</span><div><button type="button" data-suggest="접근성">+ 접근성</button><button type="button" data-suggest="컴포넌트">+ 컴포넌트</button><button type="button" data-suggest="반응형">+ 반응형</button></div></div><div class="si-tag-preview"><span>글 미리보기</span><strong>새로운 인터페이스를 만드는 방법</strong><div data-preview></div></div><p class="si-message" data-message role="status">최대 6개까지 추가할 수 있습니다.</p></div></section>`;
     default: return null;
   }
 }
@@ -88,12 +81,12 @@ export function inputsWire(root,item,helpers={}) {
     state={open:false,projects:[{name:'노바 웹사이트',archived:false}],active:0};const trigger=$('[data-menu-trigger]'),menu=$('[data-menu]');
     const close=()=>{state.open=false;render();};
     render=()=>{trigger.setAttribute('aria-expanded',String(state.open));menu.hidden=!state.open;const current=state.projects[state.active];$('[data-title]').textContent=current.name;$('[data-subtitle]').textContent=current.archived?'보관함에 있음':'최근 수정 · 오늘';$('[data-count]').textContent=`${state.projects.length}개`;$('[data-project-list]').innerHTML='';state.projects.forEach((p,i)=>{const row=document.createElement('div');row.className='si-project-row';row.innerHTML=`<span class="si-project-dot"></span><strong></strong><small>${p.archived?'보관됨':'활성'}</small>`;row.querySelector('strong').textContent=p.name;if(i===state.active)row.dataset.active='true';$('[data-project-list]').append(row);});};
-    listen(trigger,'click',()=>{state.open=!state.open;render();if(state.open)menu.querySelector('button')?.focus();});listen(menu,'click',e=>{const action=e.target.closest('[data-menu-action]')?.dataset.menuAction;if(!action)return;const current=state.projects[state.active];if(action==='duplicate'){state.projects.push({name:`${current.name} 사본`,archived:false});state.active=state.projects.length-1;message('프로젝트 사본을 목록에 추가했습니다.','success');}if(action==='rename'){current.name=current.name.endsWith(' · 수정됨')?current.name.replace(' · 수정됨',''):current.name+' · 수정됨';message('프로젝트 이름을 변경했습니다.','success');}if(action==='archive'){current.archived=!current.archived;message(current.archived?'프로젝트를 보관함으로 옮겼습니다.':'프로젝트를 활성화했습니다.','success');}close();trigger.focus();});listen(menu,'keydown',e=>{const buttons=$$('[data-menu-action]');const n=buttons.indexOf(root.getRootNode().activeElement);if(e.key==='Escape'){e.preventDefault();close();trigger.focus();}if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const index=e.key==='Home'?0:e.key==='End'?buttons.length-1:(n+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[index].focus();}});listen(document,'pointerdown',e=>{if(state.open&&!e.composedPath().includes(root))close();});listen(root,'keydown',e=>{if(e.key==='Escape'&&state.open){close();trigger.focus();}});
+    listen(trigger,'click',()=>{state.open=!state.open;render();if(state.open){animate(menu,[{opacity:0,transform:'translateY(-7px)'},{opacity:1,transform:'translateY(0)'}],170);menu.querySelector('button')?.focus();}});listen(menu,'click',e=>{const action=e.target.closest('[data-menu-action]')?.dataset.menuAction;if(!action)return;const current=state.projects[state.active];if(action==='duplicate'){state.projects.push({name:`${current.name} 사본`,archived:false});state.active=state.projects.length-1;message('프로젝트 사본을 목록에 추가했습니다.','success');}if(action==='rename'){current.name=current.name.endsWith(' · 수정됨')?current.name.replace(' · 수정됨',''):current.name+' · 수정됨';message('프로젝트 이름을 변경했습니다.','success');}if(action==='archive'){current.archived=!current.archived;message(current.archived?'프로젝트를 보관함으로 옮겼습니다.':'프로젝트를 활성화했습니다.','success');}close();trigger.focus();});listen(menu,'keydown',e=>{const buttons=$$('[data-menu-action]');const n=buttons.indexOf(root.getRootNode().activeElement);if(e.key==='Escape'){e.preventDefault();close();trigger.focus();}if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const index=e.key==='Home'?0:e.key==='End'?buttons.length-1:(n+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[index].focus();}});listen(document,'pointerdown',e=>{if(state.open&&!e.composedPath().includes(root))close();});listen(root,'keydown',e=>{if(e.key==='Escape'&&state.open){close();trigger.focus();}});
     reset=()=>{state={open:false,projects:[{name:'노바 웹사이트',archived:false}],active:0};render();message('메뉴를 열어 프로젝트를 관리해 보세요.');};replay=()=>{state.open=true;render();menu.querySelector('button')?.focus();};render();
   }
   if(item.id==='dark-ai--controls'){
     const tabs=['account','notify','security'];const content={account:['01 / ACCOUNT','계정 환경','프로필에 표시할 설정을 선택하세요.','프로필 공개','내 프로필을 팀원에게 표시합니다.','account'],notify:['02 / NOTIFICATIONS','알림 관리','업데이트를 받을 방법을 선택하세요.','이메일 알림','중요한 활동을 이메일로 받습니다.','notify'],security:['03 / SECURITY','보안 설정','계정 접근을 안전하게 관리하세요.','로그인 알림','새 기기의 로그인을 알려드립니다.','security']};state={tab:'account',values:{account:true,notify:false,security:true},saved:{account:true,notify:false,security:true}};
-    render=()=>{const d=content[state.tab];$$('[data-tab]').forEach(b=>{const active=b.dataset.tab===state.tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});$('[data-pane-index]').textContent=d[0];$('[data-pane-title]').textContent=d[1];$('[data-pane-copy]').textContent=d[2];$('[data-setting-label]').textContent=d[3];$('[data-setting-copy]').textContent=d[4];$('[data-pane-glyph]').innerHTML=wireIcon(d[5]);$('[data-setting]').checked=state.values[state.tab];const dirty=tabs.some(k=>state.values[k]!==state.saved[k]);$('[data-save-state]').textContent=dirty?'저장되지 않은 변경 사항':'저장된 상태입니다.';$('[data-save]').textContent=dirty?'변경 사항 저장':'저장됨 ✓';};
+    render=()=>{const d=content[state.tab];$$('[data-tab]').forEach(b=>{const active=b.dataset.tab===state.tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});$('[data-pane-index]').textContent=d[0];$('[data-pane-title]').textContent=d[1];$('[data-setting-label]').textContent=d[3];$('[data-setting-copy]').textContent=d[4];$('[data-pane-glyph]').innerHTML=wireIcon(d[5]);$('[data-setting]').checked=state.values[state.tab];const dirty=tabs.some(k=>state.values[k]!==state.saved[k]);$('[data-save-state]').textContent=dirty?'저장되지 않은 변경 사항':'저장된 상태입니다.';$('[data-save]').textContent=dirty?'변경 사항 저장':'저장됨 ✓';};
     listen(root,'click',e=>{const tab=e.target.closest('[data-tab]');if(tab){state.tab=tab.dataset.tab;render();animate($('[data-panel]'),[{opacity:.45,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}]);}if(e.target.closest('[data-save]')){const dirty=tabs.some(k=>state.values[k]!==state.saved[k]);if(dirty){state.saved={...state.values};render();message('설정을 저장했습니다 · 이 화면에서만 유지됩니다.','success');}else message('이미 저장된 상태입니다.','success');}});listen(root,'change',e=>{if(e.target.matches('[data-setting]')){state.values[state.tab]=e.target.checked;render();message('변경 사항을 저장해 주세요.');}});listen($('[role=tablist]'),'keydown',e=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;e.preventDefault();const i=tabs.indexOf(state.tab);state.tab=tabs[e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowRight'?1:2))%3];render();$(`[data-tab=${state.tab}]`).focus();});reset=()=>{state={tab:'account',values:{account:true,notify:false,security:true},saved:{account:true,notify:false,security:true}};render();message('설정 변경은 이 화면에만 적용됩니다.');};replay=()=>{$('[data-tab=notify]').click();};render();
   }
   if(item.id==='dark-ai--beam'){
@@ -127,4 +120,253 @@ export function inputsCSS(){return `
 /* The gallery supplies the title; the usable component begins immediately. */
 .site-study .si-head{display:none}.site-study{padding:18px;background:#fff}.si-workspace{border:0;border-radius:0;box-shadow:none;padding:0;background:transparent}.si-icon{display:inline-block;vertical-align:middle;flex:none}.si-menu-trigger{display:grid;place-items:center}.si-action-menu button>.si-icon{color:#5b63ce}.si-toggle{display:inline-flex;align-items:center;justify-content:center;gap:6px}.si-toggle[aria-pressed=true] .si-icon{fill:#d9dcfa}.si-empty-icon{display:grid;place-items:center}.si-solid{background:#454da4;border-color:#454da4;box-shadow:none}.si-solid:not(:disabled):hover{background:#353d91}.si-signup .si-solid{background:#252b38;border-color:#252b38}.si-actions .si-solid{background:#303b50;border-color:#303b50}.si-upload .si-drop{background:#f7f8fc}.si-menu .si-workspace{border-top:2px solid #e5e7ee;padding-top:10px}.si-settings .si-workspace{border-top:2px solid #e5e7ee}.si-tag-preview{background:#f7f8fa}
 @container (max-width:390px){.site-study{padding:17px;gap:13px}.si-workspace{padding:0}.si-form-fields{grid-template-columns:1fr}.si-upload-inline{align-items:flex-start}.si-settings-foot{align-items:flex-start;flex-direction:column}.si-settings-foot .si-solid{width:100%}}@media(max-width:500px){.site-study{padding:17px}.si-workspace{padding:0}.si-form-fields{grid-template-columns:1fr}.si-action-row{flex-direction:column}.si-action-row button{width:100%}}
+/* Purpose-built visual languages for the six complete controls. */
+.site-study{gap:18px;padding:24px;line-height:1.5}
+.site-study .si-workspace{gap:18px}
+.site-study .si-message{font-size:11px;line-height:1.5;min-height:0;margin:0}
+.site-study .si-overline{font-size:10px;letter-spacing:.14em;color:var(--si-accent)}
+.site-study :is(button,input,label):focus-visible{outline-color:var(--si-accent);outline-offset:3px}
+.site-study .si-icon{width:17px;height:17px}
+.study-process,.study-controls{--si-ink:#172d44;--si-muted:#607289;--si-line:#cfd9e5;--si-accent:#3e62db;background:#edf2f7;color:var(--si-ink)}
+.study-layers,.study-prompt,.study-quick-add{--si-ink:#302820;--si-muted:#786d5f;--si-line:#d6c8b5;--si-accent:#b54d36;background:#f6efe5;color:var(--si-ink)}
+.study-beam{--si-ink:#183c32;--si-muted:#5c7065;--si-line:#bdc9b8;--si-accent:#235548;background:#eff2e8;color:var(--si-ink)}
+.site-study .si-solid{background:var(--si-accent);border-color:var(--si-accent);color:#fff;border-radius:3px;box-shadow:none;font-size:12px}
+.site-study .si-solid:not(:disabled):hover{background:var(--si-ink);border-color:var(--si-ink)}
+.site-study .si-outline,.site-study .si-toggle{border-radius:3px;color:var(--si-ink);border-color:var(--si-line);background:transparent;font-size:12px}
+.site-study .si-link{color:var(--si-accent);text-decoration:underline;text-underline-offset:3px}
+.site-study .si-message[data-tone=success]{color:#17634b}
+.site-study .si-message[data-tone=error],.site-study .si-inline-error,.site-study .si-form-fields small:not(:empty){color:#a63632}
+.si-utility-heading{display:flex;flex-direction:column;gap:2px;padding-bottom:16px;border-bottom:1px solid var(--si-line)}
+.si-utility-heading strong{font-size:21px;letter-spacing:-.045em;line-height:1.25}
+.si-utility-heading small{font-size:12px;color:var(--si-muted)}
+/* Frame: asset intake and settings have clear work rails. */
+.study-process .si-workspace,.study-controls .si-workspace{background:#fff;border:1px solid var(--si-line);padding:24px;box-shadow:0 5px 22px #172d440b}
+.study-process .si-drop{border:1.5px dashed #8ba6ca;background:#f4f7fb;border-radius:4px;min-height:162px;gap:7px}
+.study-process .si-drop[data-over=true],.study-process .si-drop:focus-within{background:#e8efff;border-color:var(--si-accent)}
+.study-process .si-drop strong{font-size:15px}
+.study-process .si-drop>span:last-of-type{font-size:11px;color:var(--si-muted)}
+.study-process .si-upload-glyph{width:42px;height:42px;border:1px solid #c3d1e9;background:#fff;border-radius:50%;color:var(--si-accent)}
+.study-process .si-upload-inline{font-size:11px;border-bottom:1px solid var(--si-line);padding-bottom:10px}
+.si-queue-wrap{display:grid;gap:9px}
+.si-queue-title{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.si-queue-title strong{font-size:12px}
+.si-queue-title span{font-size:10px;color:var(--si-muted)}
+.study-process .si-queue{border:1px solid #e0e7ef;background:#fafcfe;padding:13px;min-height:90px}
+.study-process .si-queue>strong{font-size:12px}
+.study-process .si-queue>small{font-size:10px}
+.study-process .si-file-icon{background:#e7edff;color:#314eb3;border-radius:2px}
+.study-process .si-file-row button{color:var(--si-accent);text-decoration:underline;text-underline-offset:3px}
+.study-process .si-progress{height:4px;border-radius:0;background:#dce5f5}
+.study-process .si-progress span{background:var(--si-accent);border-radius:0}
+.study-controls .si-workspace{gap:0}
+.study-controls .si-utility-heading{margin-bottom:18px}
+.study-controls .si-tabbar{gap:0;border-bottom:1px solid var(--si-line)}
+.study-controls .si-tabbar button{font-size:12px;font-weight:650;transition:color .16s,border-color .16s}
+.study-controls .si-tabbar button[aria-selected=true]{color:var(--si-accent);border-bottom-color:var(--si-accent)}
+.study-controls .si-settings-pane{padding:21px 0 5px;gap:20px}
+.study-controls .si-setting-top h4{font-size:20px}
+.study-controls .si-setting-top p{line-height:1.6}
+.study-controls .si-setting-glyph{background:#e9efff;color:var(--si-accent);border-radius:4px;width:45px;height:45px}
+.study-controls .si-setting-row{border:1px solid #dce5ef;background:#f7f9fc;padding:13px 15px;min-height:69px}
+.study-controls .si-setting-row input:checked+i{background:var(--si-accent)}
+.study-controls .si-settings-foot{margin-top:20px;padding:17px 0 12px}
+/* Paper: a project desk with a deliberate action menu. */
+.study-layers .si-workspace{position:relative;background:#fffaf1;border:1px solid #d7cab9;box-shadow:7px 7px 0 #dfd4c2;padding:20px 22px 16px;gap:15px}
+.si-project-context,.si-editor-bar,.si-publication-masthead,.si-object-edition{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:10px;letter-spacing:.13em;font-weight:700}
+.si-project-context{color:#766755;border-bottom:1px solid var(--si-line);padding-bottom:11px}
+.study-layers .si-project-head{border:0;padding:2px 0 10px;align-items:flex-start}
+.study-layers .si-project-mark{width:46px;height:46px;background:var(--si-ink);border-radius:0;font:700 26px Georgia,serif}
+.study-layers .si-project-head strong{font:normal 25px/1.2 Georgia,"AppleMyungjo","Batang",serif;letter-spacing:-.035em;margin:3px 0}
+.study-layers .si-project-head small{font-size:11px}
+.study-layers .si-menu-trigger{background:transparent;border-color:var(--si-line);border-radius:50%;flex:none;color:var(--si-ink)}
+.study-layers .si-menu-trigger[aria-expanded=true]{background:var(--si-ink);color:#fff}
+.study-layers .si-action-menu{top:103px;right:21px;width:min(275px,calc(100% - 42px));border:1px solid #b8a891;border-radius:2px;box-shadow:7px 7px 0 #30282020;padding:7px;background:#fffaf1}
+.study-layers .si-action-menu button{background:transparent;border-radius:0;border-bottom:1px solid #e8dfd3;min-height:58px;padding:7px 11px}
+.study-layers .si-action-menu button:last-child{border-bottom:0}
+.study-layers .si-action-menu button:hover,.study-layers .si-action-menu button:focus-visible{background:#f3e7d9}
+.study-layers .si-action-menu button>.si-icon{color:var(--si-accent)}
+.study-layers .si-action-menu strong{font-size:12px}
+.study-layers .si-action-menu small{font-size:10px}
+.study-layers .si-menu-result{border-top:2px solid var(--si-ink);padding-top:11px}
+.study-layers .si-result-head{font-size:10px;letter-spacing:.08em}
+.study-layers .si-project-row{font-size:11px;border-color:#e9e0d4}
+.study-layers .si-project-dot{background:#a79883;border-radius:0}
+.study-layers .si-project-row[data-active=true] .si-project-dot{background:var(--si-accent)}
+/* Object: collection controls use product label and brass detail. */
+.study-beam .si-workspace{background:#f8faf3;border:1px solid var(--si-line);padding:0;gap:0;box-shadow:7px 7px 0 #b9a26a36}
+.si-object-edition{padding:10px 20px;background:#183c32;color:#ecf2e8;font-size:9px}
+.study-beam .si-save-panel{margin:0 20px;padding:25px 0 22px;align-items:flex-start;border-color:var(--si-line)}
+.study-beam .si-save-panel strong{font:normal 27px/1.22 Georgia,"AppleMyungjo","Batang",serif;letter-spacing:-.04em;margin:4px 0 7px}
+.study-beam .si-save-panel small{font-size:11px;line-height:1.5}
+.study-beam .si-save-indicator{background:#e7ece1;color:#426151;border-radius:0;font-size:10px;padding:6px 8px;margin-top:4px}
+.study-beam .si-save-indicator[data-status=success]{background:#d5e8dc;color:#1a6147}
+.study-beam .si-save-indicator[data-status=error]{background:#f9e4df;color:#a1322a}
+.study-beam .si-action-row{padding:18px 20px;gap:9px}
+.study-beam .si-action-row .si-solid{background:var(--si-ink);border-color:var(--si-ink)}
+.study-beam .si-outline{background:#f8faf3;border-color:#91aa98}
+.study-beam .si-divider{border-color:var(--si-line)}
+.si-actions-label{color:#6a786a;font-size:9px;letter-spacing:.13em;font-weight:750;padding:17px 20px 8px}
+.study-beam .si-secondary-actions{padding:0 20px 15px;gap:7px}
+.study-beam .si-toggle{border-color:#aec0b0;background:transparent}
+.study-beam .si-toggle[aria-pressed=true]{background:#dce7d9;border-color:#235548;color:#183c32}
+.study-beam .si-toggle[aria-pressed=true] .si-icon{fill:#b9a26a}
+.study-beam .si-message{padding:11px 20px;background:#e6ecdf;border-top:1px solid var(--si-line)}
+/* Paper: the letter has a masthead and generous type. */
+.study-prompt .si-workspace{background:#fffaf1;border:1px solid #d6c7b3;padding:0 25px 20px;gap:17px;box-shadow:7px 7px 0 #e0d5c4}
+.si-publication-masthead{border-bottom:2px solid var(--si-ink);padding:15px 0 11px;font-family:Georgia,serif;font-size:10px;color:var(--si-ink)}
+.si-publication-masthead span:first-child{font-size:13px;letter-spacing:.09em}
+.study-prompt .si-form-top{padding:16px 0 21px;border-color:var(--si-line);align-items:flex-start;gap:16px}
+.study-prompt .si-mail-glyph{width:37px;height:37px;border:1px solid var(--si-accent);border-radius:50%;background:transparent;color:var(--si-accent);flex:none}
+.study-prompt .si-form-top>div{gap:4px}
+.study-prompt .si-form-top strong{font:normal 32px/1.13 Georgia,"AppleMyungjo","Batang",serif;letter-spacing:-.045em;color:var(--si-ink)}
+.study-prompt .si-form-top small{font-size:11px;line-height:1.6;margin-top:7px;max-width:260px}
+.study-prompt .si-form-fields{gap:14px}
+.study-prompt .si-form-fields label{font-size:11px;letter-spacing:.03em}
+.study-prompt .si-form-fields input{border:0;border-bottom:1px solid #9d8c77;background:transparent;border-radius:0;padding:10px 1px;font-size:13px}
+.study-prompt .si-form-fields input:focus{border-color:var(--si-accent);outline:0}
+.study-prompt .si-form-fields input::placeholder{color:#968d83}
+.study-prompt .si-consent{font-size:11px;line-height:1.5}
+.study-prompt .si-consent input{accent-color:var(--si-accent)}
+.study-prompt .si-form-actions{gap:20px}
+.study-prompt .si-form-actions .si-solid{font-size:12px;background:var(--si-ink);border-color:var(--si-ink)}
+.study-prompt .si-form-actions .si-solid:hover{background:var(--si-accent)}
+/* Paper: article taxonomy is an editor, with the result always in view. */
+.study-quick-add .si-workspace{background:#fffaf1;border:1px solid #d6c7b3;padding:20px 23px;gap:15px}
+.si-editor-bar{border-bottom:1px solid var(--si-ink);padding-bottom:11px;color:#7d705e;font-size:9px}
+.study-quick-add .si-tag-heading h4{font:normal 24px/1.25 Georgia,"AppleMyungjo","Batang",serif;letter-spacing:-.04em;margin-top:4px}
+.study-quick-add .si-tag-heading>span{font-size:10px;color:#8a7b69}
+.study-quick-add .si-chip-editor{border:1px solid #bda990;border-radius:0;background:#fffdf8;min-height:100px;padding:9px;gap:4px}
+.study-quick-add .si-chip{background:#ead8c7;color:#633f32;border:1px solid #d1b69f;border-radius:0;padding:1px 2px 1px 9px;font-size:11px}
+.study-quick-add .si-chip button{color:#734b3b}
+.study-quick-add .si-chip-editor:focus-within{outline-color:var(--si-accent)}
+.study-quick-add .si-tag-hint{font-size:10px;margin:-7px 0 0}
+.study-quick-add .si-suggestions{align-items:flex-start}
+.study-quick-add .si-suggestions>span{font-size:10px;min-width:50px;padding-top:11px}
+.study-quick-add .si-suggestions button{background:transparent;border-color:#c9b7a0;border-radius:0;color:#794833}
+.study-quick-add .si-suggestions button:not(:disabled):hover{background:#f1e5d5}
+.study-quick-add .si-tag-preview{background:transparent;border-left:0;border-top:1px solid var(--si-ink);padding:14px 0 2px;gap:7px}
+.study-quick-add .si-tag-preview>span{font-size:9px;letter-spacing:.15em}
+.study-quick-add .si-tag-preview strong{font:normal 18px/1.35 Georgia,"AppleMyungjo","Batang",serif}
+.study-quick-add .si-tag-preview>div{color:#a44834;flex-wrap:wrap}
+@container (max-width:390px){
+  .site-study{padding:14px}
+  .study-process .si-workspace,.study-controls .si-workspace{padding:17px}
+  .study-layers .si-workspace,.study-quick-add .si-workspace{padding:16px}
+  .study-prompt .si-workspace{padding:0 17px 17px}
+  .study-prompt .si-form-top strong{font-size:27px}
+  .study-beam .si-save-panel{flex-wrap:wrap}
+  .study-beam .si-action-row{flex-direction:column}
+  .study-beam .si-action-row button{width:100%}
+}
+@media(max-width:500px){
+  .site-study{padding:15px}
+  .study-process .si-workspace,.study-controls .si-workspace{padding:17px}
+  .study-layers .si-workspace,.study-quick-add .si-workspace{padding:16px}
+  .study-prompt .si-workspace{padding:0 17px 17px}
+  .study-prompt .si-form-top strong{font-size:27px}
+  .study-beam .si-save-panel{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.site-study *{transition-duration:0s!important;animation-duration:0s!important}}
+.site-study.study-prompt .si-form-fields input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]){border:0;border-bottom:1px solid #9d8c77;background:transparent;border-radius:0;padding:10px 1px;font-size:13px;color:var(--si-ink)}
+.site-study.study-prompt .si-form-fields input[aria-invalid=true]{border-bottom-color:#a63632}
+.site-study.study-prompt .si-form-fields input:focus{border-bottom-color:var(--si-accent);outline:0}
+/* Paper refinement: real editorial controls on one clean surface. */
+.study-layers .si-workspace,.study-quick-add .si-workspace{background:#fff;border:0;box-shadow:none}
+.study-prompt .si-workspace{background:#fff;border:0;box-shadow:none;padding:20px 24px 22px;gap:0}
+.study-beam .si-workspace{box-shadow:none}
+.study-layers .si-project-head strong{font:650 19px/1.3 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;letter-spacing:-.035em}
+.study-layers .si-project-mark{width:42px;height:42px;font:700 20px/1 Georgia,serif;border-radius:3px}
+.study-layers .si-action-menu{box-shadow:0 10px 28px #3028201c}
+.study-prompt .si-publication-masthead{font-family:inherit;font-size:10px;letter-spacing:0;padding:0 0 13px;border-bottom:2px solid var(--si-ink)}
+.study-prompt .si-publication-masthead span:first-child{font-size:15px;letter-spacing:-.035em;font-weight:800}
+.study-prompt .si-publication-masthead span:last-child{color:var(--si-muted);font-weight:500;letter-spacing:0}
+.study-prompt .si-form-top{padding:26px 0 21px;border-bottom:1px solid var(--si-line)}
+.study-prompt .si-form-top>div{gap:6px}
+.study-prompt .si-form-top strong{font:750 27px/1.22 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;letter-spacing:-.055em}
+.study-prompt .si-form-top small{max-width:none;font-size:12px;line-height:1.6;margin-top:2px}
+.study-prompt .si-form-fields{padding-top:17px;margin-bottom:15px;gap:18px}
+.study-prompt .si-form-fields label{font-size:11px;gap:1px}
+.study-prompt .si-form-fields input{font-size:13px}
+.study-prompt .si-consent{margin:0;line-height:1.6}
+.study-prompt .si-inline-error{margin:0}
+.study-prompt .si-form-actions{margin-top:17px;gap:19px}
+.study-prompt .si-form-actions .si-solid{flex:0 1 180px;background:var(--si-accent);border-color:var(--si-accent)}
+.study-prompt .si-form-actions .si-solid:hover{background:var(--si-ink);border-color:var(--si-ink)}
+.study-prompt .si-message{margin-top:19px;padding-top:11px;border-top:1px solid var(--si-line)}
+.study-quick-add .si-tag-heading h4{font:650 20px/1.3 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;letter-spacing:-.045em}
+.study-quick-add .si-tag-preview strong{font:650 14px/1.45 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif}
+.study-quick-add .si-tag-preview{border-top-color:var(--si-line)}
+.study-quick-add .si-editor-bar{border-bottom-color:var(--si-line);letter-spacing:0}
+.study-quick-add .si-chip{background:#f2e6d9}
+.study-quick-add .si-chip-editor{background:#fff;border-color:#c9bdaf}
+.study-beam .si-save-panel strong{font:650 23px/1.3 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;letter-spacing:-.05em}
+.study-beam .si-object-edition{letter-spacing:.01em;font-size:10px}
+.study-beam .si-actions-label{letter-spacing:0;font-size:10px}
+@container (max-width:390px){.study-prompt .si-workspace{padding:18px}.study-prompt .si-form-top strong{font-size:23px}.study-beam .si-save-panel strong{font-size:21px}}
+@media(max-width:500px){.study-prompt .si-workspace{padding:18px}.study-prompt .si-form-top strong{font-size:23px}.study-beam .si-save-panel strong{font-size:21px}}
+/* Distinct silhouettes for the three product contexts. */
+.study-layers,.study-prompt,.study-quick-add{--si-ink:#171717;--si-muted:#66645f;--si-line:#deded8;--si-accent:#be3c2d;background:#fff;color:var(--si-ink)}
+.study-layers .si-workspace,.study-prompt .si-workspace,.study-quick-add .si-workspace{background:#fff;border:0;box-shadow:none}
+.study-layers .si-workspace{padding:23px 24px;gap:15px}
+.study-layers .si-project-head{border-bottom:2px solid var(--si-ink);padding:0 0 16px;align-items:center}
+.study-layers .si-project-mark{background:var(--si-ink);color:#fff;border-radius:0}
+.study-layers .si-project-head strong{font-size:19px;font-weight:750}
+.study-layers .si-menu-trigger{border-radius:0;border:1px solid var(--si-ink);width:44px;height:44px}
+.study-layers .si-action-menu{top:74px;right:24px;background:#fff;border:1px solid var(--si-ink);border-radius:0;box-shadow:5px 5px 0 #17171717}
+.study-layers .si-action-menu button{border-radius:0}
+.study-layers .si-menu-result{border-top:0;padding-top:0}
+.study-layers .si-project-row{border-color:var(--si-line)}
+.study-layers .si-project-row[data-active=true] .si-project-dot{background:var(--si-accent)}
+.study-prompt .si-workspace{padding:24px 26px 22px}
+.study-prompt .si-publication-masthead{border-bottom:2px solid var(--si-ink);padding:0 0 13px}
+.study-prompt .si-publication-masthead span:first-child{font-size:16px}
+.study-prompt .si-publication-masthead span:last-child{font-size:10px}
+.study-prompt .si-form-top{padding:31px 0 25px;border:0}
+.study-prompt .si-form-top strong{font-size:29px;line-height:1.15;letter-spacing:-.06em}
+.study-prompt .si-form-fields{padding-top:0;margin-bottom:20px;gap:20px}
+.study-prompt .si-form-fields label{font-size:11px;color:var(--si-ink)}
+.site-study.study-prompt .si-form-fields input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]){border:0;border-bottom:1px solid #aaa9a3;border-radius:0;background:#fff;padding:11px 0;color:var(--si-ink)}
+.site-study.study-prompt .si-form-fields input:focus{border-bottom-color:var(--si-accent)}
+.study-prompt .si-consent input{accent-color:var(--si-accent)}
+.study-prompt .si-form-actions .si-solid{background:var(--si-accent);border-color:var(--si-accent);border-radius:0;flex:0 1 154px}
+.study-prompt .si-form-actions .si-solid:hover{background:var(--si-ink);border-color:var(--si-ink)}
+.study-prompt .si-form-actions .si-link{color:var(--si-muted)}
+.study-prompt .si-message{border-color:var(--si-line)}
+.study-quick-add .si-workspace{padding:23px 24px;gap:15px}
+.study-quick-add .si-tag-heading{border-bottom:2px solid var(--si-ink);padding-bottom:14px}
+.study-quick-add .si-tag-heading h4{font-size:21px}
+.study-quick-add .si-chip-editor{border:1px solid #aaa9a3;border-radius:0;background:#fff}
+.study-quick-add .si-chip{background:#f1efea;color:var(--si-ink);border:1px solid #deded8;border-radius:0}
+.study-quick-add .si-chip button{color:var(--si-ink)}
+.study-quick-add .si-suggestions button{border:1px solid #a5a39e;border-radius:0;color:var(--si-ink);background:#fff}
+.study-quick-add .si-suggestions button:not(:disabled):hover{background:#f5f5f2}
+.study-quick-add .si-tag-preview{border-top:1px solid var(--si-line)}
+.study-quick-add .si-tag-preview>div{color:var(--si-accent)}
+.study-beam{--si-ink:#26231f;--si-muted:#716a61;--si-line:#ded9d0;--si-accent:#40382f;background:#f5f3ef;color:var(--si-ink)}
+.study-beam .si-workspace{background:#fff;border:1px solid var(--si-line);border-radius:14px;overflow:hidden}
+.study-beam .si-object-edition{background:var(--si-accent);color:#fff;font-size:10px;letter-spacing:.01em;padding:12px 21px}
+.study-beam .si-save-panel{margin:0 21px;padding:24px 0 19px}
+.study-beam .si-save-panel strong{font-size:22px;margin:4px 0 0}
+.study-beam .si-save-indicator{border-radius:999px;background:#f0eee9;color:#555049;padding:6px 11px}
+.study-beam .si-save-indicator[data-status=success]{background:#e1e9df;color:#235b42}
+.study-beam .si-save-indicator[data-status=error]{background:#f6e2dc;color:#a1322a}
+.study-beam .si-action-row{padding:18px 21px;gap:8px}
+.study-beam .si-action-row .si-solid,.study-beam .si-action-row .si-outline,.study-beam .si-toggle{border-radius:999px;min-height:44px;padding:10px 17px}
+.study-beam .si-action-row .si-solid{background:var(--si-accent);border-color:var(--si-accent)}
+.study-beam .si-action-row .si-outline{border-color:#bbb3a8;color:var(--si-ink);background:#fff}
+.study-beam .si-actions-label{color:var(--si-muted);padding:15px 21px 8px}
+.study-beam .si-secondary-actions{padding:0 21px 17px}
+.study-beam .si-toggle{border-color:#bbb3a8;background:#fff;color:var(--si-ink)}
+.study-beam .si-toggle[aria-pressed=true]{background:#ece8e1;border-color:var(--si-accent);color:var(--si-ink)}
+.study-beam .si-toggle[aria-pressed=true] .si-icon{fill:#bda77e}
+.study-beam .si-message{background:#f8f6f2;border-color:var(--si-line)}
+.study-process,.study-controls{--si-ink:#17243a;--si-muted:#617087;--si-line:#d4dce8;--si-accent:#2558d9;background:#f3f5f9;color:var(--si-ink)}
+.study-process .si-workspace,.study-controls .si-workspace{border-radius:6px;border-color:var(--si-line);box-shadow:none}
+.study-process .si-upload-inline{justify-content:flex-end}
+.study-process .si-drop,.study-controls .si-setting-row,.study-controls .si-setting-glyph,.study-process .si-upload-glyph{border-radius:6px}
+.study-process .si-solid,.study-controls .si-solid{border-radius:6px;background:var(--si-accent);border-color:var(--si-accent)}
+.study-process .si-progress span{background:var(--si-accent)}
+.study-controls .si-setting-row input:checked+i{background:var(--si-accent)}
+@container (max-width:390px){.study-prompt .si-workspace,.study-layers .si-workspace,.study-quick-add .si-workspace{padding:18px}.study-prompt .si-form-top strong{font-size:25px}}
+@media(max-width:500px){.study-prompt .si-workspace,.study-layers .si-workspace,.study-quick-add .si-workspace{padding:18px}.study-prompt .si-form-top strong{font-size:25px}}
 `;}

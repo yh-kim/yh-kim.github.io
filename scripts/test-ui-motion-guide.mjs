@@ -187,7 +187,7 @@ check('stable archived guide route and current metadata',()=>{
 });
 check('blog global files untouched',()=>{
   const changed=execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
-  const allowed=/^(?:p\/hidden-memo\/ui-motion-guide\/index\.md|p\/hidden-memo\/index\.html|p\/ui-motion\/(?:index\.html|ai-workspace\/index\.html|project-dashboard\/index\.html|components\/index\.html|DESIGN\.md)|js\/ui-motion-guide\/(?:engine|index|themes|guide|showcase)\.(?:js|css)|js\/ui-motion-showcase\/[^/]+\.(?:js|css)|docs\/ui-motion-(?:guide|showcase|gallery|resource|reference)-[^/]+\.md|docs\/assets\/ui-motion-(?:guide|showcase|gallery)(?:-review)?\/[^/]+|scripts\/test-ui-motion-(?:guide|showcase)\.mjs)$/;
+  const allowed=/^(?:p\/hidden-memo\/ui-motion-guide\/index\.md|p\/hidden-memo\/index\.html|p\/ui-motion\/(?:index\.html|ai-workspace\/index\.html|project-dashboard\/index\.html|(?:components|paper|object|frame)\/index\.html|DESIGN\.md)|js\/ui-motion-guide\/(?:engine|index|themes|guide|showcase)\.(?:js|css)|js\/ui-motion-showcase\/[^/]+\.(?:js|css)|docs\/ui-motion-(?:guide|showcase|gallery|resource|reference)-[^/]+\.md|docs\/assets\/ui-motion-(?:guide|showcase|gallery)(?:-review)?\/[^/]+|scripts\/test-ui-motion-(?:guide|showcase)\.mjs)$/;
   assert.deepEqual(changed.filter(path=>!allowed.test(path)),[],
     'Guide work must not change other posts, routing, navigation, or global styles');
 });

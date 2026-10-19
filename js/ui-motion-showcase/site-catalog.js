@@ -1,3 +1,4 @@
+import {conceptForItem} from './site-concepts.js?v=20261019-concepts4';
 // Stable IDs retain existing deep links; names describe the current website pattern.
 const row=(name,description,kind,use,behavior,hint,keyboard,duration=220)=>({name,description,kind,use,behavior,hint,keyboard,duration});
 export const siteCatalog={
@@ -15,15 +16,17 @@ export const siteCatalog={
 'light-project--dialog':row('삭제 확인 다이얼로그','이름 확인·삭제·실행 취소로 이어지는 확인창.','overlay','파일처럼 삭제 전에 대상과 결과를 확인해야 하는 행동에 사용합니다.','파일 이름이 일치해야 삭제할 수 있습니다. 삭제 후 목록과 건수가 바뀌고 실행 취소로 복구합니다.','파일을 삭제한 뒤 실행 취소해 보세요.','열리면 확인 입력에 초점이 갑니다. Escape·취소로 닫고 열었던 버튼으로 돌아옵니다.',180)
 };
 export const siteOrder=Object.keys(siteCatalog);
-export function siteRules(item){return [
+export function siteRules(item){const concept=conceptForItem(item);return [
+['컨셉',`${concept.name} · ${concept.label}. ${concept.summary}`],
 ['사용 맥락',item.use],['직접 체험',item.behavior],['키보드',item.keyboard],
-['구조·스타일','목록·상세·실행 HTML은 같은 마크업과 상태 함수를 사용합니다. 높이는 내용에 맞추며 주요 제어는 44px 이상입니다. 시스템 글꼴, 본문 14px/1.55, 내부 여백 18–26px, 초점 3px를 기본으로 합니다.'],
-['모션',`${item.motion.duration}ms / ${item.motion.ease}. 화면 진입 자동 재생 없이 사용자의 상태 변경에만 반응합니다. 모션 줄이기에서는 중간 이동을 생략합니다.`],
-['서비스 연결','브라우저 내부의 예시 데이터입니다. 실제 서비스에서는 제출·저장·주문·예약 함수를 서버 API와 연결하고 권한·검증·실패 처리를 추가하세요. 외부 라이브러리·폰트·이미지 없이 실행됩니다.']
+['구조·스타일',`${concept.type.scale}. ${concept.type.body}. 간격 ${concept.spacing}. 모서리 ${concept.radius}. 바탕 ${concept.colors.paper}, 표면 ${concept.colors.surface}, 본문 ${concept.colors.ink}, 강조 ${concept.colors.accent}. 목록·상세·실행 HTML은 같은 구현을 사용합니다.`],
+['모션',`${item.motion.duration}ms / ${item.motion.ease}. ${concept.motion}. 모션 줄이기에서는 중간 이동을 생략하고 결과를 표시합니다.`],
+['서비스 연결','브라우저 안에서 체험하는 예시 데이터입니다. 실제 서비스에서는 저장·제출·주문·예약을 해당 서비스의 API와 연결하세요.']
 ];}
+
 const legacy={
 'dark-ai--process':[3,'처리 상태'],'dark-ai--layers':[4,'레이어 패널'],'light-project--chart':[5,'막대 차트'],'dark-ai--controls':[6,'프리셋'],'light-project--tasks':[7,'작업 상세'],'light-project--filters':[8,'작업 필터'],'light-project--calendar':[9,'캘린더'],'dark-ai--beam':[10,'선택 상태'],'dark-ai--prompt':[11,'프롬프트 입력'],'light-project--quick-add':[12,'작업 추가'],'dark-ai--dialog':[13,'결과 검토'],'light-project--dialog':[14,'작업 검토']
 };
 export const siteKinds={all:'전체',panel:'콘텐츠',selection:'탐색·설정',feedback:'피드백',data:'데이터',calendar:'예약',form:'입력',overlay:'확인창'};
-export const websiteItems=siteOrder.map(id=>{const spec=siteCatalog[id],[themeId,key]=id.split('--');return {id,themeId,key,number:String(legacy[id][0]).padStart(2,'0'),legacyName:legacy[id][1],...spec,motion:{duration:spec.duration,ease:key==='process'?'linear':key==='chart'?'cubic-bezier(.2,0,.2,1)':key==='dialog'?'cubic-bezier(.22,1,.36,1)':'cubic-bezier(.2,.8,.2,1)',trigger:spec.hint,target:spec.name,from:'이전 상태',to:'사용자가 선택한 새 상태',delay:0},auto:[]};});
+export const websiteItems=siteOrder.map(id=>{const spec=siteCatalog[id],[themeId,key]=id.split('--');return {id,themeId,key,conceptId:conceptForItem(id)?.id,number:String(legacy[id][0]).padStart(2,'0'),legacyName:legacy[id][1],...spec,motion:{duration:spec.duration,ease:key==='process'?'linear':key==='chart'?'cubic-bezier(.2,0,.2,1)':key==='dialog'?'cubic-bezier(.22,1,.36,1)':'cubic-bezier(.2,.8,.2,1)',trigger:spec.hint,target:spec.name,from:'이전 상태',to:'사용자가 선택한 새 상태',delay:0},auto:[]};});
 export function sitePrompt(item){return `${item.name}을 현재 프로젝트의 데이터와 이벤트에 맞게 구현하세요. 기존 ID ${item.id}와 경로를 보존하세요.\n\n${siteRules(item).map(([heading,value])=>`## ${heading}\n${value}`).join('\n\n')}\n\n목록에서 모든 핵심 동작을 사용할 수 있어야 하며 상세 이동은 명시적인 자세히 보기 버튼만 담당합니다. 입력한 내용을 서버에 전송하지 않는 로컬 예제라는 사실을 표시하세요. 실행 HTML에는 스타일과 동작을 모두 포함하고 필요한 상태와 키보드·터치·reduced-motion을 확인하세요.`;}

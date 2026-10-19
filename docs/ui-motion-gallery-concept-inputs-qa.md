@@ -1,0 +1,18 @@
+# 콘셉트 입력·제어 컴포넌트 확인
+
+2026-10-19, 로컬 미리보기에서 1440px와 390px 뷰포트로 확인했다. 아래 화면은 각각 Frame의 전체 목록과 Paper 메뉴의 조작 후 상태다.
+
+![1440px Frame 설정·업로드 화면](assets/ui-motion-gallery/concept-inputs-1440.png)
+
+![390px Paper 프로젝트 메뉴 상태](assets/ui-motion-gallery/concept-inputs-390.png)
+
+| 컴포넌트 | 브라우저에서 확인한 동작 |
+| --- | --- |
+| Paper 뉴스레터 | 빈 폼 오류, 유효한 이름·이메일·동의 후 완료, 초기화 |
+| Paper 태그 | Enter 추가, 추천 태그 추가, 삭제, 미리보기와 개수 갱신 |
+| Paper 프로젝트 메뉴 | 열기, 복제, 이름 변경, 보관, Escape 닫기 |
+| Object 저장 버튼 | 실패 표시, 재시도 후 완료, 북마크 토글 |
+| Frame 설정 | 탭 전환, 토글 변경, 미저장 표시, 저장 완료 |
+| Frame 업로드 | 샘플 시작, 취소, 재시도, 진행률 100%와 완료 표시 |
+
+`node --check js/ui-motion-showcase/site-inputs.js`와 `node scripts/test-ui-motion-showcase.mjs`가 통과했다. 갤러리의 폼 제출·저장·업로드는 서버 전송 없이 화면 안에서 동작하는 시뮬레이션이다.
