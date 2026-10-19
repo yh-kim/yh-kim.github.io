@@ -104,3 +104,7 @@
 
 /* Text controls keep their rendered type at 16px or larger on iOS, including landscape. */
 :is(input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=hidden]),textarea,select,[contenteditable]:not([contenteditable=false])){font-size:16px!important}
+
+/* Native details has an anonymous content box: a percentage height can resolve to
+   auto and make focus scroll the whole dialog. Bound the desktop reference rail. */
+@media(min-width:800px){.viewer:not([data-compare=true]) .viewer-body{overflow:hidden}.viewer:not([data-compare=true]) .inspector{overflow:hidden}.viewer:not([data-compare=true]) .inspector-inner{height:calc(100dvh - 113px);max-height:100%}}

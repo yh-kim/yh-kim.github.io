@@ -21,6 +21,7 @@
 
 - 390×844: 세 스타일 폼의 이름·이메일, 검색·필터 select, 삭제 확인 입력, 복사용 textarea의 computed font-size 16px. 포커스 후 visual viewport scale 1, 문서 폭 390px을 확인했다. 기존 A 프롬프트와 B 정렬 select도 16px이다.
 - 목록의 12개 모션 버튼을 실제 조작했다. 탭은 0.25× 재생을 중간에 정지해 패널 y=0.499887px가 유지되는 것을 확인하고 이어 재생했다. 모션 줄이기 후 다음 탭의 transform은 none이었다.
+- 1440×900: 재생 속도 조작 후 긴 명세가 상세 창 전체를 스크롤시키는 문제를 수정했다. 가이드 내부 높이를 제한한 뒤 상세 scrollTop=0, header top=17px, 전체 scrollHeight=clientHeight=866px를 확인했다.
 - 다운로드한 폼 HTML을 별도 URL에서 실행했다. 입력·동의 후 다시 재생으로 로컬 신청 완료를 확인했으며 콘솔 오류는 없었다.
 - `node scripts/test-ui-motion-guide.mjs` 71개, `node scripts/test-ui-motion-showcase.mjs --require-full` 57개, `node scripts/test-ui-motion-styles.mjs` 14개 검사 통과.
 - 구조·Daily URL·HTML 목록·본문 링크·개인정보 검사, Jekyll build와 빌드 결과 검사 통과. `scripts/verify-all.sh`는 저장소에 없어 개별 검사를 실행했다.
