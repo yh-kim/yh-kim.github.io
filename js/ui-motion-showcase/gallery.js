@@ -1,12 +1,15 @@
-import { catalog, kinds, detailRules, promptFor } from './data.js?v=20261019-craft4';
-import { mount, standalone } from './engine.js?v=20261019-craft4';
+import {siteOrder,websiteItems as catalog,siteKinds as kinds,siteRules as detailRules,sitePrompt as promptFor} from './site-catalog.js?v=20261019-sites4';
+import {designMarkup,designWire} from './gallery-design.js?v=20261019-sites4';
+import {mountSite as mount,standaloneSite as standalone} from './site-runtime.js?v=20261019-sites4';
 
-const items = catalog.filter(item => item.key !== 'hero');
+const items = catalog.filter(item => item.key !== 'hero').sort((a,b)=>siteOrder.indexOf(a.id)-siteOrder.indexOf(b.id));
 const host = document.getElementById('component-gallery');
 const shadow = host.attachShadow({ mode: 'open' });
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon = name => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${({search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',arrow:'<path d="M6 18 18 6M7 6h11v11"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>',prev:'<path d="m14 6-6 6 6 6"/>',next:'<path d="m10 6 6 6-6 6"/>',reset:'<path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/>',play:'<path d="m9 5 10 7-10 7Z"/>'})[name]}</svg>`;
+const base = new URL(document.body.dataset.galleryBase || './', location.href);
 const url = new URL(location.href);
+let section = location.hash === '#design' || (!location.hash && document.body.dataset.galleryView === 'design') ? 'design' : 'components';
 let query = url.searchParams.get('q') || '';
 let kind = Object.keys(kinds).includes(url.searchParams.get('kind')) ? url.searchParams.get('kind') : 'all';
 let active = null, detailAPI = null, opener = null, previousOverflow = '', currentPane = 'guide', savedScroll = 0;
@@ -14,31 +17,33 @@ const instances = new Map(), snapshots = new Map(), visible = new Set();
 const usedKinds = Object.entries(kinds).filter(([key]) => key === 'all' || items.some(item => item.kind === key));
 const reducedMedia = matchMedia('(prefers-reduced-motion: reduce)');
 let reduced = reducedMedia.matches;
-const motionKeys = new Set(['layers', 'controls', 'process', 'chart', 'tasks', 'filters', 'calendar', 'beam']);
 
+function filterButtons(){return usedKinds.map(([key,name])=>`<button type="button" data-kind="${key}" aria-pressed="${kind===key}">${esc(name)}<span>${key==='all'?items.length:items.filter(i=>i.kind===key).length}</span></button>`).join('');}
+function setSection(next,update=true){section=next;shadow.getElementById('collection-view').hidden=next!=='components';shadow.getElementById('design-view').hidden=next!=='design';shadow.querySelector('.side-categories').hidden=next!=='components';shadow.querySelector('.search-form').hidden=next!=='components';shadow.querySelector('[data-breadcrumb]').textContent=next==='design'?'디자인 기준':'컴포넌트';shadow.querySelectorAll('[data-section]').forEach(b=>b.setAttribute('aria-current',b.dataset.section===next?'page':'false'));if(update)history.replaceState(null,'',location.pathname+location.search+(next==='design'?'#design':document.body.dataset.galleryView==='design'?'#components':''));}
 shadow.innerHTML = `
-<link rel="stylesheet" href="${new URL('./gallery.css?v=20261019-craft4', import.meta.url).href}">
+<link rel="stylesheet" href="${new URL('./gallery.css?v=20261019-sites4', import.meta.url).href}">
 <a class="skip" href="#component-list">컴포넌트 목록으로 건너뛰기</a>
 <main class="library">
-  <header class="masthead">
-    <a class="wordmark" href="./">UI·모션 <span>COMPONENT LIBRARY</span></a>
-    <nav aria-label="UI·모션 탐색"><a href="../">쇼케이스</a><a href="./" aria-current="page">컴포넌트</a><a href="/">블로그 ${icon('arrow')}</a></nav>
-  </header>
-  <section class="intro" aria-labelledby="gallery-title">
-    <div><p class="eyebrow">작동하는 인터페이스의 작은 장면들</p><h1 id="gallery-title">컴포넌트 갤러리<span>${String(items.length).padStart(2,'0')}</span></h1><p>눌러 보고, 바꿔 보고, 필요한 부분을 가져가세요.</p></div>
-    <form class="search-form" role="search" aria-label="컴포넌트 찾기"><label class="search">${icon('search')}<input id="search" type="search" aria-label="컴포넌트 검색" placeholder="어떤 인터랙션을 찾으세요?" autocomplete="off" value="${esc(query)}"><button type="button" data-clear-query aria-label="검색어 지우기" ${query ? '' : 'hidden'}>${icon('close')}</button></label></form>
-  </section>
-  <div class="toolbar"><div class="kind-filters" role="group" aria-label="컴포넌트 분류">${usedKinds.map(([key,name])=>`<button type="button" data-kind="${key}" aria-pressed="${kind===key}">${esc(name)}<span>${key==='all'?items.length:items.filter(i=>i.kind===key).length}</span></button>`).join('')}</div><button class="clear-filters" type="button" data-clear>초기화</button></div>
-  <div class="results"><p id="result-count" role="status" aria-live="polite" aria-atomic="true"></p><span class="hint">미리보기에서 직접 조작 · 상세에서 코드 가져가기</span></div>
+  <aside class="sidebar"><a class="brand" href="${base.href}">UI<span>·</span>모션</a>
+    <nav class="section-nav" aria-label="갤러리 탐색"><button type="button" data-section="components">컴포넌트 <span>12</span></button><button type="button" data-section="design">디자인 기준</button></nav>
+    <div class="side-categories" role="group" aria-label="컴포넌트 분류">${filterButtons()}</div>
+    <div class="sidebar-foot"><p>기존 화면 예제</p><a href="${new URL('ai-workspace/',base)}">AI Workspace ↗</a><a href="${new URL('project-dashboard/',base)}">Project Dashboard ↗</a><a href="/">블로그 ↗</a></div>
+  </aside>
+  <div class="workspace"><header class="topbar"><p class="breadcrumb">라이브러리 / <strong data-breadcrumb>컴포넌트</strong></p><form class="search-form" role="search" aria-label="컴포넌트 찾기"><label class="search">${icon('search')}<input id="search" type="search" aria-label="컴포넌트 검색" placeholder="이름이나 용도로 검색" autocomplete="off" value="${esc(query)}"><button type="button" data-clear-query aria-label="검색어 지우기" ${query ? '' : 'hidden'}>${icon('close')}</button></label></form></header>
+  <section id="collection-view"><header class="intro"><p class="eyebrow">INTERFACE COLLECTION</p><h1 id="gallery-title">사이트를 만드는 UI<span>12</span></h1><p>입력, 탐색, 데이터, 피드백. 목록에서 직접 써보고 필요한 코드를 가져가세요.</p><span class="collection-note">모든 미리보기에서 직접 조작할 수 있습니다.</span></header>
+  <div class="mobile-filter"><details><summary>컴포넌트 분류</summary><div class="kind-filters" role="group" aria-label="모바일 컴포넌트 분류">${filterButtons()}</div></details></div>
+  <div class="results"><p id="result-count" role="status" aria-live="polite" aria-atomic="true"></p><span class="hint">자세히 보기를 누르면 가이드와 코드가 열립니다.</span></div>
   <section id="component-list" class="grid" aria-label="컴포넌트 목록" tabindex="-1">
-    ${items.map((item, i) => `<article class="specimen" data-id="${item.id}" aria-labelledby="name-${item.id}"><div class="stage"><div class="demo-host" data-demo-host="${item.id}"><p class="pending">${esc(item.name)} 미리보기</p></div></div><div class="card-meta"><div><span class="card-kicker">${String(i + 1).padStart(2,'0')} / ${esc(kinds[item.kind])}</span><h2 id="name-${item.id}">${esc(item.name)}</h2><p>${esc(item.description)}</p></div><a class="open-demo" href="#${item.id}" data-open="${item.id}" aria-label="${esc(item.name)} 상세 보기">살펴보기 ${icon('arrow')}</a></div></article>`).join('')}
+    ${items.map((item,i)=>`<article class="specimen" data-id="${item.id}" aria-labelledby="name-${item.id}"><header class="card-meta"><span class="card-kicker">${String(i+1).padStart(2,'0')} / ${esc(kinds[item.kind])}</span><h2 id="name-${item.id}">${esc(item.name)}</h2><p>${esc(item.description)}</p></header><div class="stage"><div class="demo-host" data-demo-host="${item.id}"><p class="pending">${esc(item.name)} 불러오는 중</p></div></div><footer class="card-footer"><p class="try-hint">${esc(item.hint)}</p><div class="card-tools"><button class="reset-card" type="button" data-card-reset="${item.id}" aria-label="${esc(item.name)} 초기화">${icon('reset')}</button><button class="open-demo" type="button" data-open="${item.id}" aria-label="${esc(item.name)} 자세히 보기">자세히 보기 ${icon('arrow')}</button></div></footer></article>`).join('')}
     <div class="empty" hidden><h2>일치하는 컴포넌트가 없습니다.</h2><p>다른 검색어를 입력하거나 분류를 전체로 바꿔보세요.</p><button type="button" class="button" data-clear>검색·필터 초기화</button></div>
-  </section>
-  <footer class="footer"><details><summary>제작 방식과 출처</summary><p>모든 예제는 브라우저 안에서 동작하는 샘플입니다. 입력한 내용은 서버에 전송하거나 영구 저장하지 않습니다. 미리보기·상세·실행 HTML은 같은 구현을 사용합니다.</p><p>기존 <a href="../ai-workspace/">AI Workspace</a> · <a href="../project-dashboard/">Project Dashboard</a>와 <a href="../../hidden-memo/ui-motion-guide/">가이드 글</a>의 경로를 유지했습니다. 외부 라이브러리·웹폰트·사진을 추가하지 않았습니다. 기존 대표 장면의 노이즈 표면에 사용한 <a href="https://github.com/Seokwoooo/lucian-uxui-prompt/blob/036fe0a67048bc135115ae2ed283130567a15357/LICENSE">MIT © 2026 Seokwoooo</a> 고지는 해당 장면의 실행 코드에 보존됩니다.</p></details><p class="footer-note">자동 재생 없이, 필요한 순간에만.</p></footer>
+  </section></section>
+  <section id="design-view" hidden>${designMarkup()}</section>
+  <footer class="footer"><details id="guide-sources"><summary>제작 방식과 출처</summary><p>브라우저 안에서 동작하는 예시 데이터입니다. 입력은 서버에 보내거나 영구 저장하지 않습니다. 목록·상세·실행 HTML에 같은 구현을 사용하며 외부 라이브러리·웹폰트·사진을 추가하지 않았습니다.</p><p>기존 화면 예제의 경로와 컴포넌트 ID를 유지합니다. 기존 대표 장면의 노이즈 표면에 사용한 <a href="https://github.com/Seokwoooo/lucian-uxui-prompt/blob/036fe0a67048bc135115ae2ed283130567a15357/LICENSE">MIT © 2026 Seokwoooo</a> 고지는 해당 장면의 실행 코드에 보존됩니다.</p></details><p class="footer-note">선택하고, 써보고, 가져가세요.</p></footer>
+  </div>
 </main>
 <dialog class="viewer" aria-labelledby="detail-title">
   <header class="viewer-head"><div><p class="viewer-kicker" id="detail-position"></p><h2 id="detail-title"></h2></div><nav class="viewer-nav" aria-label="컴포넌트 탐색"><button type="button" data-prev aria-label="이전 컴포넌트">${icon('prev')}</button><button type="button" data-next aria-label="다음 컴포넌트">${icon('next')}</button><button type="button" class="close" data-close aria-label="상세 닫기">${icon('close')}<span>닫기</span></button></nav></header>
-  <div class="viewer-body"><section class="viewer-main" aria-label="컴포넌트 체험"><div class="demo-context"><p id="detail-description"></p></div><div class="demo-frame"></div><div class="demo-actions"><button type="button" class="button" data-replay>${icon('play')}다시 체험</button><button type="button" class="button" data-pause>일시정지</button><button type="button" class="button" data-reset>${icon('reset')}초기화</button><button type="button" class="button" data-show-code>실행 코드</button><label class="speed">속도 <select id="speed" aria-label="모션 재생 속도"><option value="1">1×</option><option value="4">0.25×</option></select></label><label class="reduce"><input id="reduced" type="checkbox" ${reduced ? 'checked' : ''}>모션 줄이기</label></div><p class="viewer-status" role="status" id="demo-status"></p></section>
+  <div class="viewer-body"><section class="viewer-main" aria-label="컴포넌트 체험"><div class="demo-context"><p id="detail-description"></p></div><div class="demo-frame"></div><div class="demo-actions"><button type="button" class="button" data-reset>${icon('reset')}초기화</button><button type="button" class="button" data-show-code>실행 코드</button><label class="reduce"><input id="reduced" type="checkbox" ${reduced ? 'checked' : ''}>모션 줄이기</label></div><p class="viewer-status" role="status" id="demo-status"></p></section>
     <details class="inspector" open><summary>사용 방법과 실행 코드</summary><aside class="inspector-inner"><p class="inspector-title">이 컴포넌트 가져가기</p><div class="tabs" role="tablist" aria-label="컴포넌트 정보">${[['guide','사용 방법'],['code','실행 코드'],['prompt','프롬프트']].map(([key,label],i) => `<button type="button" role="tab" id="tab-${key}" aria-selected="${i===0}" aria-controls="pane-${key}" tabindex="${i===0?0:-1}" data-pane="${key}">${label}</button>`).join('')}</div><div class="pane" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" tabindex="0"></div>${['code','prompt'].map(key => `<div class="pane" id="pane-${key}" role="tabpanel" aria-labelledby="tab-${key}" hidden><p>${key==='code'?'스타일·동작·토큰이 포함된 단일 HTML입니다. 저장해서 브라우저로 열면 바로 동작합니다.':'실제 동작과 수치를 설명하는 구현 명세입니다. 프로젝트의 데이터와 이벤트에 맞게 적용하세요.'}</p><label class="code-label" for="copy-${key}">${key==='code'?'실행 HTML':'구현 프롬프트'}</label><textarea class="code-input" id="copy-${key}" readonly spellcheck="false"></textarea><div class="code-meta" data-size="${key}"></div><div class="copy-actions"><button type="button" class="button primary" data-copy="${key}">복사</button><button type="button" class="button" data-download="${key}">다운로드</button><button type="button" class="button" data-select="${key}">전체 선택</button></div><p class="copy-feedback" role="status" data-copy-status="${key}"></p>${key==='code'?'<p class="code-hint">외부 의존성 없음 · 한국어 샘플 데이터 포함. 실제 서비스에서는 로컬 샘플을 서비스 데이터로 연결하세요.</p>':''}</div>`).join('')}</aside></details>
   </div>
 </dialog>`;
@@ -48,7 +53,7 @@ const input = shadow.getElementById('search');
 const inspector = shadow.querySelector('.inspector');
 function matching() {
   const text = query.trim().toLocaleLowerCase('ko');
-  return items.filter(item => (kind === 'all' || item.kind === kind) && `${item.name} ${item.description} ${item.use} ${item.key} ${kinds[item.kind]}`.toLocaleLowerCase('ko').includes(text));
+  return items.filter(item => (kind === 'all' || item.kind === kind) && `${item.name} ${item.legacyName} ${item.description} ${item.use} ${item.key} ${kinds[item.kind]}`.toLocaleLowerCase('ko').includes(text));
 }
 function mountCard(id) {
   if (instances.has(id)) return instances.get(id);
@@ -82,8 +87,9 @@ function filter(updateURL = true) {
   shadow.querySelector('.empty').hidden = results.length > 0;
   shadow.getElementById('result-count').innerHTML = `<strong>${results.length}개</strong> / 전체 ${items.length}개${kind !== 'all' ? ` · ${esc(kinds[kind])}` : ''}`;
   shadow.querySelector('[data-clear-query]').hidden = !query;
+  shadow.querySelector('.mobile-filter summary').textContent = kind==='all'?'컴포넌트 분류':kinds[kind]+' · 분류 변경';
   shadow.querySelectorAll('[data-kind]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.kind===kind)));
-  shadow.querySelector('.clear-filters').disabled = !query && kind === 'all';
+
   if (updateURL) {
     const next = new URL(location.href);
     if (query) next.searchParams.set('q', query); else next.searchParams.delete('q');
@@ -99,13 +105,6 @@ function storeDetail() {
   const state = detailAPI.snapshot();
   snapshots.set(active.id, state);
   instances.get(active.id)?.restore(state, true);
-}
-function specMarkup(title, text) {
-  if (title === '토큰 원본') return `<pre>${esc(text)}</pre>`;
-  return `<dl class="spec">${text.split('\n').map(line => {
-    const at = line.indexOf(': ');
-    return at > 0 ? `<div><dt>${esc(line.slice(0, at))}</dt><dd>${esc(line.slice(at + 2))}</dd></div>` : `<div><dd>${esc(line)}</dd></div>`;
-  }).join('')}</dl>`;
 }
 function setPane(key) {
   currentPane = key;
@@ -126,16 +125,11 @@ function showItem(item) {
   shadow.getElementById('detail-position').textContent = `${String(items.indexOf(item)+1).padStart(2,'0')} / ${String(items.length).padStart(2,'0')} · ${kinds[item.kind]}`;
   shadow.getElementById('detail-title').textContent = item.name;
   shadow.getElementById('detail-description').textContent = item.use;
-  shadow.getElementById('pane-guide').innerHTML = detailRules(item).map(([title,text],i) => `<details ${i===0?'open':''}><summary>${esc(title)}</summary>${specMarkup(title,text)}</details>`).join('');
+  shadow.getElementById('pane-guide').innerHTML = detailRules(item).map(([title,text],i)=>`<section class="${i===0?'guide-overview':'guide-section'}"><h3>${esc(title)}</h3><p>${esc(text)}</p></section>`).join('');
   detailAPI = mount(shadow.querySelector('.demo-frame'), item, 'full');
   const state = instances.get(item.id)?.snapshot() || snapshots.get(item.id);
   if (state) detailAPI.restore(state, true);
   detailAPI.setReduced(reduced);
-  shadow.querySelector('[data-replay]').hidden = !motionKeys.has(item.key);
-  shadow.querySelector('[data-pause]').hidden = item.key !== 'process';
-  shadow.querySelector('[data-pause]').textContent = '일시정지';
-  shadow.querySelector('.speed').hidden = !motionKeys.has(item.key);
-  detailAPI.setSpeed(shadow.getElementById('speed').value);
   shadow.getElementById('demo-status').textContent = '';
   inspector.open = innerWidth >= 800;
   shadow.querySelector('.viewer-main').scrollTop = 0;
@@ -157,7 +151,7 @@ function close(update = true) {
   if (!dialog.open) return;
   storeDetail(); detailAPI?.destroy(); detailAPI = null; active = null; dialog.close();
   document.documentElement.style.overflow = previousOverflow;
-  if (update) history.replaceState(null, '', location.pathname + location.search);
+  if (update) history.replaceState(null, '', location.pathname + location.search + (document.body.dataset.galleryView==='design'?'#components':''));
   opener?.focus({ preventScroll:true }); window.scrollTo({ top:savedScroll, behavior:'auto' });
   visible.forEach(id => instances.get(id)?.continue());
 }
@@ -190,15 +184,15 @@ shadow.addEventListener('click', event => {
   if (!target) return;
   if (target.matches('.skip')) { event.preventDefault(); shadow.getElementById('component-list').focus(); return; }
   if (target.dataset.open) { event.preventDefault(); open(items.find(item => item.id === target.dataset.open), target); return; }
-  if (target.dataset.kind) { kind = target.dataset.kind; filter(); }
+  if (target.dataset.section) {setSection(target.dataset.section);window.scrollTo({top:0,behavior:'auto'});}
+  if (target.dataset.cardReset) {mountCard(target.dataset.cardReset).reset();snapshots.delete(target.dataset.cardReset);}
+  if (target.dataset.kind) {setSection('components'); kind = target.dataset.kind; filter(); const menu=target.closest('.mobile-filter details');if(menu){menu.open=false;menu.querySelector('summary').focus();} }
   if (target.hasAttribute('data-clear')) resetFilters();
   if (target.hasAttribute('data-clear-query')) { query = ''; input.value = ''; filter(); input.focus(); }
   if (target.hasAttribute('data-close')) close();
   if (target.hasAttribute('data-prev')) navigate(-1);
   if (target.hasAttribute('data-next')) navigate(1);
-  if (target.hasAttribute('data-replay')) { shadow.querySelector('[data-pause]').textContent = '일시정지'; detailAPI.replay(); shadow.getElementById('demo-status').textContent = '현재 선택에서 다음 동작을 체험합니다.'; }
-  if (target.hasAttribute('data-pause')) { const paused = target.textContent === '계속 재생'; if (paused) detailAPI.resume(); else detailAPI.pause(); target.textContent = paused ? '일시정지' : '계속 재생'; shadow.getElementById('demo-status').textContent = paused ? '이어서 재생합니다.' : '일시정지했습니다.'; }
-  if (target.hasAttribute('data-reset')) { shadow.querySelector('[data-pause]').textContent = '일시정지'; detailAPI.reset(); shadow.getElementById('demo-status').textContent = '초기 상태로 돌아왔습니다.'; }
+  if (target.hasAttribute('data-reset')) {detailAPI.reset();shadow.getElementById('demo-status').textContent='초기 상태로 돌아왔습니다.';}
   if (target.hasAttribute('data-show-code')) revealCode();
   if (target.dataset.pane) setPane(target.dataset.pane);
   if (target.dataset.copy) copy(target.dataset.copy);
@@ -218,7 +212,6 @@ shadow.querySelector('.tabs').addEventListener('keydown', event => {
   else return;
   event.preventDefault(); setPane(tabs[index].dataset.pane); tabs[index].focus();
 });
-shadow.getElementById('speed').addEventListener('change', event => detailAPI?.setSpeed(event.target.value));
 shadow.getElementById('reduced').addEventListener('change', event => {
   reduced = event.target.checked || reducedMedia.matches;
   detailAPI?.setReduced(reduced); instances.forEach(api => api.setReduced(reduced));
@@ -232,9 +225,15 @@ function readLocation() {
   const next = new URL(location.href);
   query = next.searchParams.get('q') || ''; kind = Object.keys(kinds).includes(next.searchParams.get('kind')) ? next.searchParams.get('kind') : 'all';
   input.value = query; filter(false);
-  const item = items.find(item => item.id === location.hash.slice(1));
+  const hash=location.hash.slice(1);
+  const legacy=items.find(item=>'ui-'+item.themeId+'-'+item.key===hash);
+  const item = legacy || items.find(item => item.id === hash);
+  if(['ui-dark-ai-hero','ui-light-project-hero','dark-ai--hero','light-project--hero'].includes(hash)){location.replace(new URL((hash.includes('dark-ai')?'ai-workspace/':'project-dashboard/')+'#'+(hash.includes('dark-ai')?'dark-ai':'light-project')+'--hero',base));return;}
+  setSection(item?'components':hash==='design'||(!hash&&document.body.dataset.galleryView==='design')?'design':'components',false);
   if (item) { if (dialog.open && active?.id !== item.id) showItem(item); else if (!dialog.open) open(item, null, false); }
   else if (dialog.open) close(false);
+  if(hash==='guide-sources'){const sources=shadow.getElementById('guide-sources');sources.open=true;sources.scrollIntoView({block:'start'});}
+  if(hash==='component-list')shadow.getElementById('component-list').scrollIntoView({block:'start'});
 }
 window.addEventListener('popstate', readLocation);
 window.addEventListener('hashchange', readLocation);
@@ -243,4 +242,4 @@ window.addEventListener('pagehide', event => {
   if (!event.persisted) { observer.disconnect(); instances.forEach(api => api.destroy()); detailAPI?.destroy(); }
 });
 window.addEventListener('pageshow', event => { if (event.persisted) { if (dialog.open) detailAPI?.continue(); else visible.forEach(id => instances.get(id)?.continue()); } });
-filter(false); readLocation();
+designWire(shadow); filter(false); readLocation();

@@ -1,27 +1,7 @@
-import {editorMarkup, editorCSS, editorEnhance} from './editor-studies.js?v=20261019-craft4';
-import {dataMarkup, dataCSS, dataEnhance} from './data-studies.js?v=20261019-craft4';
-import {feedbackMarkup, feedbackCSS, feedbackEnhance} from './feedback-studies.js?v=20261019-craft4';
-export const componentTokens = {
- background:'#f3f5f7', surface:'#ffffff', ink:'#202632', muted:'#677180', line:'#e0e5eb',
- accent:'#335cff', onAccent:'#ffffff', focus:'#335cff', success:'#23745b', error:'#b43d43',
- font:'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
- cardHeight:430, fullMax:840, compactPadding:24, fullPadding:36, controlMinHeight:44, controlRadius:8,
- fullMinHeights:{layers:560,controls:560,process:560,beam:560,prompt:560,chart:560,tasks:560,filters:560,calendar:440,'quick-add':560,dialog:560}
-};
-export function componentMarkup(t,key) { return editorMarkup(t,key) || dataMarkup(t,key) || feedbackMarkup(t,key); }
-export function componentEnhancer(t,key) {
- if (['layers','controls','beam','prompt'].includes(key)) return editorEnhance;
- if (key==='process' || key==='dialog' && t.id==='dark-ai') return feedbackEnhance;
- return dataEnhance;
-}
-export function componentCSS(key=null,themeId=null) { return `
-:host{display:block;min-width:0;height:auto;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',sans-serif;color-scheme:light;container-type:inline-size}
-*,*:before,*:after{box-sizing:border-box} [hidden]{display:none!important} h1,h2,h3,h4,h5,p{margin:0}button,input,textarea,select{font:inherit}button{cursor:pointer;touch-action:manipulation}button:disabled{cursor:default;opacity:.45}button,input,textarea,select{-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-.demo{--background:#f3f5f7;--surface:#ffffff;--text:#202632;--muted:#677180;--border:#e0e5eb;--accent:#335cff;--onAccent:#ffffff;--focus:#335cff;--success:#23745b;--error:#b43d43;color:var(--text);background:var(--background);font:400 14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',sans-serif;word-break:keep-all;overflow-wrap:anywhere;min-width:0;max-width:840px;margin:auto;container-type:inline-size}
-.demo[data-demo-key=calendar]{--study-min:440px}.demo[data-presentation=compact]{height:430px;min-height:430px;overflow:hidden}.component-lab{height:100%;min-width:0;padding:24px;display:flex;flex-direction:column;gap:16px;position:relative}.demo[data-presentation=full] .component-lab{height:auto;min-height:var(--study-min,560px);padding:36px;gap:24px}.demo .study-head{display:none;max-width:58ch}.study-head h4{font-size:23px;line-height:1.3;letter-spacing:-.04em}.study-head p{color:var(--muted);font-size:13px;margin-top:7px}.demo[data-presentation=compact] .study-head{display:none}.study-index,.meta{font:600 10px/1.4 ui-monospace,SFMono-Regular,monospace;letter-spacing:.08em;color:var(--muted)}
-.btn,.tab,.chip{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;font-weight:600;line-height:1.4;text-decoration:none}.btn:hover,.tab:hover,.chip:hover{background:color-mix(in srgb,var(--accent) 5%,var(--surface));border-color:color-mix(in srgb,var(--accent) 35%,var(--border))}.btn:active{transform:translateY(1px)}.btn.primary,.tab[aria-selected=true],.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--onAccent)}.study-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.study-tabs,.study-filter-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}input,textarea,select{border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);min-height:44px;padding:10px 12px;min-width:0}textarea{width:100%;resize:vertical;line-height:1.65}input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--error);box-shadow:0 0 0 3px #b43d4310}input[data-valid=true],textarea[data-valid=true]{border-color:var(--success)}.feedback{font-size:12px;line-height:1.6;color:var(--muted)}.feedback[data-tone=error]{color:var(--error)}.feedback[data-tone=success]{color:var(--success)}.empty{color:var(--muted);font-size:13px;padding:24px 12px;text-align:center}.icon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.motion-tools,.settings,[data-motion-status]{display:none}
-.component-lab dialog{position:fixed;inset:0;width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 40px);margin:auto;overflow:auto;padding:28px;border:1px solid #ffffff50;border-radius:18px;background:var(--surface);color:var(--text);box-shadow:0 28px 100px #14223440}.component-lab dialog::backdrop{background:#17213366;backdrop-filter:blur(5px)}.component-lab dialog h4{font-size:24px;line-height:1.3;letter-spacing:-.04em;margin:12px 0}.component-lab dialog p{font-size:14px;line-height:1.75}.dialog-kicker{font-size:11px;font-weight:650;letter-spacing:.07em;color:var(--muted)}.dialog-note{color:var(--muted);font-size:12px!important;margin-top:16px}.dialog-actions{display:flex;gap:8px;margin-top:24px}.dialog-actions .btn{flex:1}
-@container(max-width:480px){.demo[data-presentation=full] .component-lab{padding:24px;gap:20px}.demo[data-presentation=full] .study-head h4{font-size:21px}.component-lab{padding:22px}}
-.demo[data-reduced=true] *,.demo[data-reduced=true] *:before,.demo[data-reduced=true] *:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
-` + (!key||['layers','controls','beam','prompt'].includes(key)?editorCSS():'') + (!key||themeId!=='dark-ai'&&['chart','tasks','filters','calendar','quick-add','dialog'].includes(key)?dataCSS():'') + (!key||key==='process'||key==='dialog'&&themeId==='dark-ai'?feedbackCSS():''); }
+// Compatibility API for existing theme pages; live components use the site runtime.
+import {siteTokens,siteMarkup,siteCSS,siteEnhancer} from './site-runtime.js?v=20261019-sites4';
+export const componentTokens=siteTokens;
+const itemFor=(themeId,key)=>({id:themeId+'--'+key,themeId,key});
+export const componentMarkup=(theme,key)=>siteMarkup(itemFor(theme.id,key));
+export const componentCSS=(key,themeId)=>siteCSS(key?itemFor(themeId,key):null);
+export const componentEnhancer=(theme,key)=>siteEnhancer(itemFor(theme.id,key));

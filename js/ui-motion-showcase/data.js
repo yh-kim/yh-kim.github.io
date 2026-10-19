@@ -1,7 +1,8 @@
+import {websiteItems,siteRules,sitePrompt} from './site-catalog.js?v=20261019-sites4';
 import {themes as originalThemes, elementsFor, colorLabels} from '../ui-motion-guide/themes.js?v=20261016-r2';
 import {aiTokens} from './ai-scene.js?v=20261016-foundation2';
 import {projectTokens} from './project-scene.js?v=20261016-foundation2';
-import {componentTokens} from './component-design.js?v=20261019-craft4';
+import {componentTokens} from './component-design.js?v=20261019-sites4';
 export const themes=structuredClone(originalThemes);
 Object.assign(themes[0],{scene:aiTokens,intent:'ARC 제품 캠페인을 위한 로컬 창작 작업 화면. 후보 선택·프롬프트·속성 조정·생성 상태가 중앙 결과에 연결됩니다.',composition:`${aiTokens.navHeight}px 내비게이션과 ARC Campaign 작업 제목 아래 폭 최대 ${aiTokens.studioMax}px·높이 ${aiTokens.studioHeight+aiTokens.stageExtra}px 장면. 중앙 ${aiTokens.previewHeight}px 결과(좌우 여백 ${aiTokens.canvasLeft}/${aiTokens.canvasRight}px), 왼쪽 ${aiTokens.choiceCount}개 수직 후보(각 ${aiTokens.choiceHeight}px), 오른쪽 ${aiTokens.inspectorWidth}px 속성 패널, 중앙 아래 최대 ${aiTokens.composerWidth}px 떠 있는 프롬프트. ${aiTokens.breakpoint}px 이하에서는 ${aiTokens.mobileTitle}px 제목 → 프리뷰 → 가로 후보 → 프롬프트 → 속성 순서. 제품 이미지는 자체 제작 ARC 스피커 SVG.`});
 Object.assign(themes[0].layout,{breakpoint:aiTokens.breakpoint,max:aiTokens.studioMax,columns:`${aiTokens.railWidth}px minmax(0,1fr) ${aiTokens.inspectorWidth}px`,gap:aiTokens.gap});
@@ -14,7 +15,7 @@ Object.assign(themes[1].colors,{background:projectTokens.material.canvas,surface
 themes[1].motion.records.chart.duration=projectTokens.chartMorphDuration;
 themes[1].motion.records.chart.delay=projectTokens.chartMorphDelay;
 export const presentation={compact:{height:380,padding:16}};
-export const kinds={all:'전체',screen:'완성 화면',panel:'패널',selection:'선택·전환',feedback:'처리·피드백',data:'목록·차트',calendar:'일정',form:'입력',overlay:'확인창'};
+export const kinds={all:'전체',screen:'완성 화면',panel:'콘텐츠',selection:'탐색·설정',feedback:'피드백',data:'데이터',calendar:'예약',form:'입력',overlay:'확인창'};
 const descriptions={
  'dark-ai/hero':['Dark AI Workspace','ARC 제품 후보·프롬프트·속성을 조정합니다.','screen','scene'],
  'light-project/hero':['Light Project Dashboard','같은 샘플 업무의 지표·차트·표·일정.','screen','scene'],
@@ -104,10 +105,12 @@ const studyMotion={
 };
 for(const item of ordered){if(item.key==='hero')continue;const [duration,ease,trigger,target,from,to]=studyMotion[item.key];Object.assign(item.motion,{duration,ease,trigger,target,from,to,delay:item.key==='chart'?25:0,resultDuration:240,errorDuration:180});}
 
+for(const item of ordered){const spec=websiteItems.find(x=>x.id===item.id);if(spec)Object.assign(item,spec);}
 export const catalog=ordered;
 export const fullCatalog=ordered;
 export const themeFor=item=>themes.find(t=>t.id===item.themeId);
 export function detailRules(item){
+ if(item.key!=='hero')return siteRules(item);
  const t=themeFor(item),m=item.motion,s=t.scene,ai=t.id==='dark-ai',hero=item.key==='hero';
  const rows=entries=>entries.map(([key,value])=>key+': '+value).join('\n');
  const motionRows=[
@@ -219,7 +222,6 @@ export function detailRules(item){
 }
 export function promptFor(item){
  if(item.key==='hero')return heroPromptFor(item);
- const t=themeFor(item);
- return `기존 프로젝트의 데이터와 이벤트를 확인하고 유지하면서 ${item.name}을 구현하세요. ${item.use} ${item.behavior}\n\n${detailRules(item).map(([heading,value])=>`## ${heading}\n${value}`).join('\n\n')}\n\n## 화면과 토큰\n이 요소는 최대 ${componentTokens.fullMax}px의 독립 데모입니다. 카드 ${componentTokens.cardHeight}px와 전체 보기에서 같은 상태·동작 함수를 쓰고, 데모 컨테이너가 480px 이하일 때 내부를 재배치합니다. 두 대표 화면의 장면 색·배치 토큰을 이 요소의 배경이나 버튼에 적용하지 마세요.\n${JSON.stringify({component:componentTokens,motion:item.motion},null,2)}\n\n${t.data?'## 샘플 데이터\n'+JSON.stringify(t.data,null,2):'## 샘플 콘텐츠\nARC 휴대용 스피커의 자체 제작 도형과 로컬 상태. 오브젝트/포스터 선택, 8–120자 입력, 진행·완료와 검토를 구현합니다. 입력과 결과는 서버에 보내지 않습니다.'}\n\n키보드·빠른 반복·초기화·reduced-motion을 확인하세요. 갤러리에서는 자동으로 재생하지 않고, 내보낸 파일은 스타일·상태·동작이 포함된 단일 HTML로 실행되어야 합니다. 외부 이미지·웹폰트·서버 요청을 추가하지 마세요. 제3자 MIT 코드가 남아 있으면 저작권·허가문도 함께 제공하세요.`;
+ return sitePrompt(item);
 }
 function heroPromptFor(item){const t=themeFor(item);return `기존 프로젝트의 프레임워크·라우팅·데이터와 이벤트를 확인하고 유지하면서 ${item.name}을 구현하세요. ${item.use}\n\n${detailRules(item).map(([h,v])=>`## ${h}\n${v}`).join('\n\n')}\n\n## 화면 구성\n${t.composition}\n\n## 토큰과 적용 우선순위\n대표 화면은 scene(및 scene.material)의 전용 배치·재질 수치가 공통 layout·element·material보다 우선합니다. 개별 구성요소에는 공통 colors·material·element 값을 적용하고, 해당 요소의 실제 상태·모션 명세를 따르세요. 같은 이름의 공통 토큰을 대표 화면의 패널에 기계적으로 적용하지 마세요.\n${JSON.stringify({colors:t.colors,material:t.material,type:t.type,layout:t.layout,scene:t.scene,presentation,element:t.element,motion:item.motion},null,2)}\n\n${t.data?'## 샘플 데이터\n'+JSON.stringify(t.data,null,2):`ARC 휴대용 스피커의 자체 제작 SVG. 후보 ${t.scene.choiceCount}개, 오브젝트/포스터 선택, 광원 ${t.scene.lightMin}–${t.scene.lightMax}%(기본 ${t.scene.lightDefault}%), 8–120자 지시, ${t.motion.records.process.duration}ms 로컬 생성과 검토. 후보 선택은 미리보기의 색상·위치를 바꾸고 변형은 선택한 후보를 유지한다.`}\n\n금지: A/B 원본 로고·문구·이미지 무단 복제, 가져온 C MIT 코드의 출처/허가문 제거, 외부 URL 자동 분석, 로그인·서버 요청, 무한 자동재생, 사용자 조작 후 자동 개입, 전역 CSS 오염, 축소만 한 모바일. 390×844/1024×768/1440×900px, 키보드·빠른 반복·초기화·reduced-motion을 검증하고 미확인 사항은 명시하세요. 코드는 필수 토큰·스타일·동작을 포함한 단일 HTML로 제공하고, 제3자 MIT 코드가 포함되면 저작권·허가문도 함께 제공하세요.`;}

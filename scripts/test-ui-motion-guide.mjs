@@ -171,15 +171,15 @@ const registry=await readFile(new URL('../_data/html_documents.yml',import.meta.
 check('stable archived guide route and current metadata',()=>{
   const front=post.match(/^---\n([\s\S]*?)\n---/);
   assert.ok(front);
-  assert.match(front[1],/^layout:\s*post\s*$/m);
+  assert.match(front[1],/^layout:\s*null\s*$/m);
   assert.match(front[1],/^title:\s*"테마별 인터랙티브 UI·모션 디자인 가이드"\s*$/m);
   assert.match(front[1],/^permalink:\s*\/p\/hidden-memo\/ui-motion-guide\/\s*$/m);
   assert.match(front[1],/^hidden:\s*true\s*$/m);
   assert.match(front[1],/^tags:\s*\[\]\s*$/m);
-  assert.match(front[1],/^subtitle:\s*"[^"]*두 디자인 화면[^"]*"\s*$/m);
-  assert.match(front[1],/^description:\s*"[^"]*Dark AI Workspace와 Light Project Dashboard[^"]*12개[^"]*"\s*$/m);
+  assert.match(front[1],/^subtitle:\s*"[^"]*타이포[^"]*모션[^"]*"\s*$/m);
+  assert.match(front[1],/^description:\s*"12개 실사용 UI[^"]*"\s*$/m);
   assert.doesNotMatch(front[1],/네 가지|Warm Minimal|Editorial|Technical|Bold Graphic|일곱 가지/);
-  assert.match(post,/href="\{\{ '\/p\/ui-motion\/' \| relative_url \}\}"/);
+  assert.match(post,/data-gallery-view="design"/);
   assert.match(hub,/href="\.\.\/ui-motion\/"/);
   assert.match(hub,/2개 대표 화면[\s\S]*전체 12개 예시/);
   assert.doesNotMatch(hub,/네 가지 화면|4개 테마|28개 요소 데모/);

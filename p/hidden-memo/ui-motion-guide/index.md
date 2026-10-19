@@ -1,8 +1,8 @@
 ---
-layout:     post
+layout:     null
 title:      "테마별 인터랙티브 UI·모션 디자인 가이드"
-subtitle:   "두 디자인 화면을 조작하고, 수치와 코드까지 가져가는 작은 실험실"
-description: "Dark AI Workspace와 Light Project Dashboard의 대표 화면과 12개 UI·모션 데모, 디자인 토큰과 재사용 코드를 비교합니다."
+subtitle:   "실사용 컴포넌트의 타이포·색상·간격·모션 기준"
+description: "12개 실사용 UI의 디자인 기준과 동작·접근성·실행 코드를 확인합니다."
 date:       2026-10-16 00:00:00 +0900
 author:     "Pimi"
 header-img: "img/home-bg.jpg"
@@ -12,15 +12,39 @@ permalink:  /p/hidden-memo/ui-motion-guide/
 hidden:     true
 tags:       []
 ---
+{::nomarkdown}
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="html-document-listing" content="hidden">
+  <meta name="theme-color" content="#ffffff">
+  <title>디자인 기준 · UI·모션</title>
+  <meta name="description" content="입력부터 데이터, 피드백과 오버레이까지. 직접 조작하고 실행 코드를 가져가는 12가지 UI 컴포넌트.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pimi's Blog">
+  <meta property="og:title" content="디자인 기준 · UI·모션">
+  <meta property="og:description" content="직접 조작하고 실행 코드를 가져가는 12가지 UI 컴포넌트.">
+    <meta property="og:url" content="https://blog.pickth.com/p/hidden-memo/ui-motion-guide/">
+  <meta property="og:image" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:secure_url" content="https://blog.pickth.com/img/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Pimi's Blog space icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="디자인 기준 · UI·모션">
+  <meta name="twitter:description" content="직접 조작하고 실행 코드를 가져가는 12가지 UI 컴포넌트.">
+  <meta name="twitter:image" content="https://blog.pickth.com/img/og-image.png">
+  <link rel="shortcut icon" href="/img/favicon.ico">
+  <style>html{background:#ffffff;color:#202632;scrollbar-gutter:stable}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}#component-gallery{display:block;min-height:100vh}.loading{padding:32px}</style>
 
-<p><a href="{{ '/p/hidden-memo/' | relative_url }}">← 히든메모 목록</a></p>
-<p><strong>독립 쇼케이스:</strong> A와 B를 각각의 독립 화면으로 탐색하려면 <a href="{{ '/p/ui-motion/' | relative_url }}">UI·모션 쇼케이스</a>에서 선택하세요. <a href="{{ '/p/ui-motion/ai-workspace/' | relative_url }}">Dark AI Workspace</a> · <a href="{{ '/p/ui-motion/project-dashboard/' | relative_url }}">Light Project Dashboard</a>. 이 글의 기존 데모와 제작 기록도 아래에 보존했습니다.</p>
-<p>어두운 AI 작업실과 밝은 프로젝트 대시보드. <strong>화면 선택 → 직접 조작 → 모션 다시 보기 → 규칙과 코드 가져가기</strong> 순서로 체험하세요. 모든 데이터는 로컬 샘플입니다.</p>
-<div id="ui-motion-guide" lang="ko" aria-label="테마별 UI와 모션 체험"><p>인터랙티브 가이드를 불러오는 중입니다. JavaScript가 필요합니다.</p></div>
-<noscript><p>JavaScript를 켜면 두 대표 화면과 12개 인터랙션, 프롬프트·실행 HTML 복사와 다운로드를 사용할 수 있습니다.</p></noscript>
-<script type="module" src="{{ '/js/ui-motion-guide/index.js?v=20261016-r2' | relative_url }}"></script>
-<h2 id="guide-sources">참고와 제작 기준</h2>
-<p>시각 참고: <a href="https://dribbble.com/shots/27748221-AI-Agent-Website-Design">A · Conceptzilla의 AI Agent UI</a>, <a href="https://www.behance.net/gallery/251693759/PlanIQ-SaaS-Project-Management-Dashboard-UIUX">B · PlanIQ 대시보드 포트폴리오</a>. 2026년 10월 16일 실제 브라우저에서 A의 3200×2400 원본 이미지, B의 커버와 캘린더·타이포 모듈을 확대 확인했습니다. 큰 히어로와 작은 제어부의 대비, 겹친 패널, 상단 내비게이션과 데이터 모듈의 정렬을 참고했습니다. 정적 이미지의 내부 비율은 시각적 추정이며 원본 CSS의 실측값은 아닙니다.</p>
-<p>체험 흐름 참고: <a href="https://lucianlabs.dev/uxui-prompt/">C · Lucian UX/UI Prompt</a>. 분류별 갤러리, 요소 확대 탐색, 201번 자동화 흐름도의 실행, 프롬프트·코드 탭 전환과 실제 클립보드 복사를 확인했습니다. 전체 400개 요소와 모든 원본 모션을 확인한 것은 아닙니다.</p>
-<p>이 글의 FRAME·Orbit은 독립적인 데모 명칭입니다. 원본과 제휴한 공식 구현이 아닙니다. <strong>색·타이포·간격·레이아웃·모션 수치는 의도적으로 새로 설계</strong>했습니다. A·B에서 원본 모션을 확인하지 못했으므로 복원했다고 주장하지 않습니다. 원본 로고·문구·사진·소스는 사용하지 않았고, 고리 조형물은 CSS로 직접 만들었습니다.</p>
-<p>복사 코드는 필수 토큰·스타일·동작을 포함한 <strong>완전한 단일 HTML 문서</strong>입니다. 라이브러리·외부 폰트·서버 없이 파일로 열 수 있습니다. 설치된 글꼴이 없으면 지정된 시스템 대체 글꼴로 표시됩니다. 실제 서비스에 옮길 때는 샘플 데이터를 프로젝트의 데이터·이벤트에 연결하세요.</p>
+</head>
+<body data-gallery-base="../../ui-motion/" data-gallery-view="design">
+  <div id="component-gallery" lang="ko"><p class="loading">컴포넌트를 불러오는 중입니다.</p></div>
+  <noscript><p class="loading">직접 조작하는 갤러리는 JavaScript가 필요합니다. <a href="./">컴포넌트 갤러리로 돌아가기</a></p></noscript>
+  <script type="module" src="/js/ui-motion-showcase/gallery.js?v=20261019-sites4"></script>
+</body>
+</html>
+{:/nomarkdown}
