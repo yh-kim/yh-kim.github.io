@@ -17,6 +17,7 @@ export const projectTokens = Object.freeze({
   tabletBreakpoint: 1040,
   mobileBreakpoint: 700,
   compactHeight: 380,
+  inputFontSize: 16,
   fontBody: '"Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif',
   type: {nav:12,body:13,caption:11,section:14,moduleTitle:15,metricLabel:11,metricValue:25,taskTitle:12},
   material: {
@@ -630,5 +631,6 @@ ${s}[data-presentation=compact] .task-select{min-height:34px}
 ${s}[data-presentation=compact] .task-select strong{font-size:11px}
 ${s}[data-presentation=compact] .task-select small{display:none}
 ${s}[data-presentation=compact] .chart-tooltip{display:none}
+${s} .sort-label select,${s} .settings select{font-size:${p.inputFontSize}px!important}
 `;
 }

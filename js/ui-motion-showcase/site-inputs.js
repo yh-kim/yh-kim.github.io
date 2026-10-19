@@ -1,7 +1,7 @@
 // Compatibility API. The gallery and exports use the selected definition directly.
-import {componentIdFor} from './component-model.js?v=20261019-library7';
-import {componentDefinitions} from './library-components.js?v=20261019-library7';
-import {legacyDefinitions} from './legacy-components.js?v=20261019-library7';
+import {componentIdFor} from './component-model.js?v=20261019-motion8';
+import {componentDefinitions} from './library-components.js?v=20261019-motion8';
+import {legacyDefinitions} from './legacy-components.js?v=20261019-motion8';
 const keys=['upload','menu','tabs','button','form','tags'];
 const definition=item=>{const key=componentIdFor(item);return keys.includes(key)?componentDefinitions[key]||legacyDefinitions[key]:null;};
 export const inputsMarkup=item=>definition(item)?.markup(item)||'';

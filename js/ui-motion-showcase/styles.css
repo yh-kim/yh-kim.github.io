@@ -645,3 +645,6 @@ input[type="search"]::placeholder { color: #647168; }
 
 /* Legacy theme routes also expose complete website controls inside their lists. */
 .theme-page .showcase-card:not([data-id$="--hero"]) .card-demo{height:auto;min-height:400px;overflow:visible}.theme-page .showcase-card:not([data-id$="--hero"]){align-self:start;overflow:visible}.theme-page .showcase-card:not([data-id$="--hero"]):hover{transform:none}
+
+/* Keep editable text legible without iOS Safari's focus zoom in these legacy routes. */
+:is(input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=hidden]),textarea,select,[contenteditable]:not([contenteditable=false])){font-size:16px!important}

@@ -1,5 +1,5 @@
-import {componentIdFor} from './component-model.js?v=20261019-library7';
-import {conceptForItem} from './site-concepts.js?v=20261019-library7';
+import {componentIdFor} from './component-model.js?v=20261019-motion8';
+import {conceptForItem} from './site-concepts.js?v=20261019-motion8';
 // Stable IDs retain existing deep links; names describe the current website pattern.
 const row=(name,description,kind,use,behavior,hint,keyboard,duration=220)=>({name,description,kind,use,behavior,hint,keyboard,duration});
 export const siteCatalog={
@@ -33,16 +33,24 @@ const motionDescription={
 };
 const libraryMotion={
  button:m=>`누름 scale .97→1 ${m.press}ms, 결과 opacity .45→1 ${m.result}ms. 900ms 로컬 저장 후 성공·오류를 같은 위치에 표시합니다.`,
- form:m=>`검증 오류는 즉시 표시하고 첫 오류에 초점을 옮깁니다. 900ms 로컬 제출 후 결과 opacity .45→1 ${m.result}ms.`,
+ form:m=>`검증 오류는 문구와 첫 오류 초점으로 표시하고 해당 입력을 x 0→-4→4→0px로 ${m.content}ms 이동합니다. 현재 입력으로 다시 재생하며 값을 덮어쓰지 않습니다. 900ms 로컬 제출 후 결과 opacity .45→1 ${m.result}ms.`,
  tabs:m=>`선택 표시의 현재 x·폭에서 새 탭까지 ${m.tab}ms, 패널 opacity .45→1 및 y 5→0px ${m.content}ms. 빠른 역선택은 현재 위치에서 이어 갑니다.`,
  drawer:m=>`패널 opacity 0→1 및 x ${m.drawerDistance}→0px ${m.drawerOpen}ms / 닫힘은 현재 위치에서 역방향 ${m.drawerClose}ms. 퇴장 뒤 닫고 초점을 복원합니다.`,
- accordion:m=>`현재 높이에서 펼친 본문 높이 또는 summary 높이까지 ${m.content}ms. 중간에 반대로 누르면 현재 높이에서 목표를 바꾸고 여러 답변을 독립적으로 유지합니다.`
+ accordion:m=>`현재 높이에서 펼친 본문 높이 또는 summary 높이까지 ${m.content}ms. 다시 재생은 첫 답변을 열거나 닫습니다. 중간에 반대로 누르면 현재 높이에서 목표를 바꾸고 여러 답변을 독립적으로 유지합니다.`,
+ menu:(m,item)=>`메뉴 opacity 0→1, y -7→0px ${item.motion.duration}ms. 다시 재생은 메뉴를 다시 열고 기존 프로젝트는 보존합니다. 닫힘은 즉시 반영합니다.`,
+ tags:m=>`추천 태그를 추가하면 opacity 0→1, scale .85→1 ${m.result}ms와 미리보기 y 5→0px ${m.content}ms. 다시 재생은 아직 없는 추천 태그를 추가하고, 한도에서는 현재 미리보기만 재생합니다.`,
+ upload:m=>`파일 행 opacity 0→1, y 8→0px ${m.content}ms. 130ms마다 10%씩 로컬 진행하며 진행 막대는 scaleX와 130ms linear 전환입니다. 다시 재생은 현재 파일을 재시도하거나 샘플을 사용합니다. 화면 밖·일시정지 중에는 진행이 멈춥니다.`,
+ table:m=>`검색·필터·정렬 뒤 같은 주문 ID의 이전 행 위치→새 행 위치를 ${m.content}ms 이동합니다. 새 행은 opacity .35→1, y 8→0px. 행별 지연 25ms, 최대 75ms. 다시 재생은 전체/결제 완료 필터를 전환하며 선택·검색어를 보존합니다.`,
+ calendar:m=>`날짜 선택 시 시간 목록 opacity .45→1, y 8→0px ${m.content}ms. 시간 선택 요약 y 4→0px와 예약 결과 opacity .5→1 ${m.result}ms. 다시 재생은 첫 가능일을 선택하거나 현재 시간 목록을 반복합니다.`,
+ chart:(m,item)=>`최근 7일/4주 전환에서 막대의 현재 높이→새 높이 scaleY ${item.motion.duration}ms, 총액 opacity .5→1 ${m.result}ms. 다시 재생은 기간을 바꾸고 축·주문 수·요약을 같은 데이터로 갱신합니다.`,
+ dialog:(m,item)=>`확인창 opacity 0→1, y 12→0px, scale .98→1 ${item.motion.duration}ms / 닫힘은 현재 위치→역방향 140ms. 다시 재생은 기존 파일의 확인창만 열며 파일을 삭제하지 않습니다.`
 };
 export function siteRules(item){const concept=conceptForItem(item);return [
 ['스타일',`${concept.name} · ${concept.summary}`],
 ['사용 맥락',`${(item.contexts||[]).join(' · ')}. ${item.use}`],['직접 체험',item.behavior],['키보드',item.keyboard],
 ['구조·스타일',`${concept.type.scale}. ${concept.type.body}. 간격 ${concept.spacing}. 모서리 ${concept.radius}. 바탕 ${concept.colors.paper}, 표면 ${concept.colors.surface}, 본문 ${concept.colors.ink}, 강조 ${concept.colors.accent}. 목록·상세·실행 HTML은 같은 구현을 사용합니다.`],
-['모션',`${libraryMotion[item.componentId]?.(concept.styleMotion)||motionDescription[item.id]||concept.motion} easing ${['button','form','tabs','drawer','accordion'].includes(item.componentId)?concept.styleMotion.ease:item.motion.ease}. 모션 줄이기에서는 중간 이동을 생략하고 결과를 표시합니다.`],
+['입력·모바일',`검색·폼·설정·필터·복사용 textarea 등 키보드 입력과 select는 모든 화면에서 ${concept.tokens['input-font-size']} 이상으로 렌더링합니다. 포커스 전후 글자 크기를 유지하고 iOS 포커스 확대를 방지합니다. user-scalable=no, maximum-scale=1, transform 축소로 사용자 확대를 막지 않습니다.`],
+['모션',`${libraryMotion[item.componentId]?.(concept.styleMotion,item)||motionDescription[item.id]||concept.motion} easing ${['button','form','tabs','drawer','accordion','table','calendar'].includes(item.componentId)?concept.styleMotion.ease:item.motion.ease}. 목록의 모션 버튼과 상세의 다시 재생으로 반복하고, 상세에서 일시정지·속도·초기화를 제어합니다. 새 입력은 이전 전환을 취소하고 현재 위치에서 이어 갑니다. 모션 줄이기에서는 중간 이동을 생략하고 결과를 표시합니다.`],
 ['서비스 연결','브라우저 안에서 체험하는 예시 데이터입니다. 실제 서비스에서는 저장·제출·주문·예약을 해당 서비스의 API와 연결하세요.']
 ];}
 

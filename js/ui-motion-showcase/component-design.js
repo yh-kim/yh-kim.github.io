@@ -1,5 +1,5 @@
 // Compatibility API for existing theme pages; live components use the site runtime.
-import {siteTokens,siteMarkup,siteCSS,siteEnhancer} from './site-runtime.js?v=20261019-library7';
+import {siteTokens,siteMarkup,siteCSS,siteEnhancer} from './site-runtime.js?v=20261019-motion8';
 export const componentTokens=siteTokens;
 const itemFor=(themeId,key)=>({id:themeId+'--'+key,themeId,key});
 export const componentMarkup=(theme,key)=>siteMarkup(itemFor(theme.id,key));

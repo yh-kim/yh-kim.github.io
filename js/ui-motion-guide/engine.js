@@ -1,4 +1,4 @@
-import {projectData, elementsFor} from './themes.js?v=20261016-r2';
+import {projectData, elementsFor} from './themes.js?v=20261019-motion8';
 export function variables(t){const x={...t.colors,...t.material,font:t.type.body,mono:t.type.mono,size:t.type.size+'px',title:t.type.title+'px','mobile-title':t.type.mobileTitle+'px',weight:t.type.weight,line:t.type.line,'title-line':t.type.titleLine,tracking:t.type.tracking,pad:t.layout.padding+'px','mobile-pad':t.layout.mobilePadding+'px',gap:t.layout.gap+'px',section:t.layout.section+'px',max:t.layout.max+'px',radius:t.element.radius+'px','control-radius':t.element.controlRadius+'px','panel-pad':t.element.panelPadding+'px',columns:t.layout.columns,bw:t.element.border+'px',height:t.element.height+'px','control-pad':t.element.padding+'px',shadow:t.element.shadow,duration:t.motion.duration+'ms',ease:t.motion.ease};return Object.entries(x).map(([k,v])=>`--${k}:${v}`).join(';');}
 export function demoCSS(t){return `
 .demo{${variables(t)};container-type:inline-size;max-width:var(--max);margin-inline:auto;isolation:isolate;position:relative;color:var(--text);background:var(--background);font:400 var(--size)/var(--line) var(--font);word-break:keep-all;overflow-wrap:anywhere;border-radius:var(--radius);color-scheme:${t.id==='dark-ai'?'dark':'light'}}
@@ -13,6 +13,7 @@ export function demoCSS(t){return `
 @media(max-width:${t.layout.breakpoint}px){.demo dialog{inset:auto 0 0;margin:0;width:100%;max-width:100vw;border-radius:18px 18px 0 0;padding:22px}}
 @media(prefers-reduced-motion:reduce){.demo *,.demo *:before,.demo *:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 .demo[data-reduced=true] *,.demo[data-reduced=true] *:before,.demo[data-reduced=true] *:after{transition:none!important;animation:none!important}
+.demo :is(input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=hidden]),textarea,select,[contenteditable]:not([contenteditable=false])){font-size:16px!important}
 `;}
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function button(text,action,extra='',classes=''){return `<button type="button" class="btn ${classes}" data-action="${action}" ${extra}>${text}</button>`;}

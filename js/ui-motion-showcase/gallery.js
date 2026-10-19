@@ -1,10 +1,10 @@
-import {withStyle} from './component-model.js?v=20261019-library7';
-import {concepts,conceptById,conceptForItem} from './site-concepts.js?v=20261019-library7';
-import {collectionMarkup} from './collection-home.js?v=20261019-library7';
-import {siteOrder,websiteItems as catalog,siteKinds as kinds,siteContexts,siteRules as detailRules,sitePrompt as promptFor} from './site-catalog.js?v=20261019-library7';
+import {withStyle} from './component-model.js?v=20261019-motion8';
+import {concepts,conceptById,conceptForItem} from './site-concepts.js?v=20261019-motion8';
+import {collectionMarkup} from './collection-home.js?v=20261019-motion8';
+import {siteOrder,websiteItems as catalog,siteKinds as kinds,siteContexts,siteRules as detailRules,sitePrompt as promptFor} from './site-catalog.js?v=20261019-motion8';
 let designMarkup=()=>'',designWire=()=>()=>{};
 let mount,standalone,guideAPI,guideComponent='tabs';
-async function ensureRuntime(){if(mount)return;const runtime=await import('./site-runtime.js?v=20261019-library7');mount=runtime.mountSite;standalone=runtime.standaloneSite;}
+async function ensureRuntime(){if(mount)return;const runtime=await import('./site-runtime.js?v=20261019-motion8');mount=runtime.mountSite;standalone=runtime.standaloneSite;}
 
 const url = new URL(location.href);
 const pageConcept = conceptById(document.body.dataset.galleryConcept || url.searchParams.get('concept') || (document.body.dataset.galleryView==='design'?'paper':''));
@@ -17,7 +17,7 @@ const base = new URL(document.body.dataset.galleryBase || './', location.href);
 const hrefFor=(id,view='components')=>new URL(id+'/'+(view==='design'?'#design':''),base).href;
 const homePage=document.body.dataset.galleryHome==='true';
 let homeMode=homePage&&!location.hash&&!url.searchParams.has('q')&&!url.searchParams.has('kind')&&!url.searchParams.has('component')&&!url.searchParams.has('context');
-if(!homeMode){await ensureRuntime();const design=await import('./gallery-design.js?v=20261019-library7');designMarkup=design.designMarkup;designWire=design.designWire;}
+if(!homeMode){await ensureRuntime();const design=await import('./gallery-design.js?v=20261019-motion8');designMarkup=design.designMarkup;designWire=design.designWire;}
 let section = location.hash === '#design' || (!location.hash && document.body.dataset.galleryView === 'design') ? 'design' : 'components';
 let query = url.searchParams.get('q') || '';
 let kind = Object.keys(kinds).includes(url.searchParams.get('kind')) ? url.searchParams.get('kind') : 'all';
@@ -29,7 +29,7 @@ let active = null, detailAPI = null, opener = null, previousOverflow = '', curre
 const instances = new Map(), snapshots = new Map(), visible = new Set();
 const usedKinds = Object.entries(kinds).filter(([key]) => key === 'all' || items.some(item => item.kind === key));
 const reducedMedia = matchMedia('(prefers-reduced-motion: reduce)');
-let reduced = reducedMedia.matches, motionSpeed=1;
+let reduced = reducedMedia.matches, motionSpeed=1, motionPaused=false;
 
 function filterButtons(){return usedKinds.map(([key,name])=>`<button type="button" data-kind="${key}" aria-pressed="${kind===key}">${esc(name)}<span>${key==='all'?items.length:items.filter(i=>i.kind===key).length}</span></button>`).join('');}
 function contextSelect(){return `<label class="context-select">사용 맥락<select data-context-filter aria-label="사용 맥락 필터">${Object.entries(siteContexts).map(([key,label])=>`<option value="${key}" ${contextFilter===key?'selected':''}>${label}</option>`).join('')}</select></label>`;}
@@ -37,7 +37,7 @@ function setSection(next,update=true){section=next;if(next==='design')requestAni
 function setHome(value){homeMode=value;shadow.getElementById('home-view').hidden=!value;shadow.querySelector('.library').hidden=value;}
 function conceptStyle(){return '';}
 shadow.innerHTML = `
-<link rel="stylesheet" href="${new URL('./gallery.css?v=20261019-library7', import.meta.url).href}">
+<link rel="stylesheet" href="${new URL('./gallery.css?v=20261019-motion8', import.meta.url).href}">
 <a class="skip" href="#home-view">본문으로 건너뛰기</a>
 <div class="site-shell" data-concept="${pageConcept?.id||'all'}" style="${conceptStyle(pageConcept)}">
 <header class="site-header"><a class="site-brand" href="${base.href}" aria-label="스타일 라이브러리 홈">UI<span>·</span>모션</a><nav class="site-nav" aria-label="사이트 탐색"><a href="${base.href}" ${homeMode?'aria-current="page"':''}>스타일 라이브러리</a><a href="${new URL('components/',base)}" ${!pageConcept&&!homePage?'aria-current="page"':''}>모든 컴포넌트 <span>${catalog.length}</span></a></nav></header>
@@ -53,7 +53,7 @@ shadow.innerHTML = `
   <div class="mobile-filter"><details><summary>컴포넌트 분류</summary><div class="kind-filters" role="group" aria-label="모바일 컴포넌트 분류">${filterButtons()}${contextSelect()}</div></details></div>
   <div class="results"><p id="result-count" role="status" aria-live="polite" aria-atomic="true"></p><span class="hint">목록에서 직접 조작 · 자세히 보기에서 코드 확인</span></div>
   <section id="component-list" class="grid" aria-label="컴포넌트 목록" tabindex="-1">
-    ${items.map((item,i)=>`<article class="specimen" data-id="${item.id}" data-concept="${item.conceptId}" aria-labelledby="name-${item.id}"><header class="card-meta"><span class="card-kicker">${esc(kinds[item.kind])}</span><h2 id="name-${item.id}">${esc(item.name)}</h2></header><div class="stage"><div class="demo-host" data-demo-host="${item.id}"><p class="pending">${esc(item.name)} 불러오는 중</p></div></div><footer class="card-footer"><div class="card-tools"><button class="reset-card" type="button" data-card-reset="${item.id}" aria-label="${esc(item.name)} 초기화">${icon('reset')}</button><button class="open-demo" type="button" data-open="${item.id}" aria-label="${esc(item.name)} 자세히 보기">자세히 보기 ${icon('arrow')}</button></div></footer></article>`).join('')}
+    ${items.map((item,i)=>`<article class="specimen" data-id="${item.id}" data-concept="${item.conceptId}" aria-labelledby="name-${item.id}"><header class="card-meta"><span class="card-kicker">${esc(kinds[item.kind])}</span><h2 id="name-${item.id}">${esc(item.name)}</h2></header><div class="stage"><div class="demo-host" data-demo-host="${item.id}"><p class="pending">${esc(item.name)} 불러오는 중</p></div></div><footer class="card-footer"><div class="card-tools"><button class="replay-card button" type="button" data-card-replay="${item.id}" aria-label="${esc(item.name)} 모션 보기">${icon('play')}모션</button><button class="reset-card" type="button" data-card-reset="${item.id}" aria-label="${esc(item.name)} 초기화">${icon('reset')}</button><button class="open-demo" type="button" data-open="${item.id}" aria-label="${esc(item.name)} 자세히 보기">자세히 보기 ${icon('arrow')}</button></div></footer></article>`).join('')}
     <div class="empty" hidden><h2>일치하는 컴포넌트가 없습니다.</h2><p>다른 검색어를 입력하거나 분류를 전체로 바꿔보세요.</p><button type="button" class="button" data-clear>검색·필터 초기화</button></div>
   </section></section>
   <section id="design-view" hidden>${pageConcept?designMarkup(pageConcept):`<div class="design-system"><header class="design-lead"><div><h1>스타일별 디자인 기준</h1></div></header>${homePage?'':collectionMarkup(concepts,hrefFor)}</div>`}</section>
@@ -61,7 +61,7 @@ shadow.innerHTML = `
 </main></div>
 <dialog class="viewer" aria-labelledby="detail-title">
   <header class="viewer-head"><div><p class="viewer-kicker" id="detail-position"></p><h2 id="detail-title"></h2></div><nav class="viewer-nav" aria-label="컴포넌트 탐색"><button type="button" data-prev aria-label="이전 컴포넌트">${icon('prev')}</button><button type="button" data-next aria-label="다음 컴포넌트">${icon('next')}</button><button type="button" class="close" data-close aria-label="상세 닫기">${icon('close')}<span>닫기</span></button></nav></header>
-  <div class="viewer-body"><section class="viewer-main" aria-label="컴포넌트 체험"><div class="compare-toolbar"><div class="style-options" role="group" aria-label="상세 데모 스타일">${concepts.map(c=>`<button type="button" data-detail-style="${c.id}" aria-pressed="${currentStyle===c.id}">${c.name}</button>`).join('')}</div><label class="compare-toggle"><input type="checkbox" data-compare>나란히 비교</label></div><div class="comparison-previews"><figure class="preview-primary"><figcaption data-style-caption></figcaption><div class="demo-frame"></div></figure><figure class="preview-peer" hidden><figcaption><select data-peer-style aria-label="비교할 다른 스타일">${concepts.map(c=>`<option value="${c.id}" ${compareStyle===c.id?'selected':''}>${c.name}</option>`).join('')}</select><span>같은 데이터 · 같은 너비</span></figcaption><div class="peer-frame"></div></figure></div><div class="demo-actions"><button type="button" class="button" data-reset>${icon('reset')}초기화</button><button type="button" class="button" data-show-code>실행 코드</button><label class="speed">재생 속도<select data-motion-speed aria-label="모션 재생 속도"><option value="1">1×</option><option value="2">0.5×</option><option value="4">0.25×</option></select></label><label class="reduce"><input id="reduced" type="checkbox" ${reduced ? 'checked' : ''}>모션 줄이기</label></div><p class="viewer-status" role="status" id="demo-status"></p></section>
+  <div class="viewer-body"><section class="viewer-main" aria-label="컴포넌트 체험"><div class="compare-toolbar"><div class="style-options" role="group" aria-label="상세 데모 스타일">${concepts.map(c=>`<button type="button" data-detail-style="${c.id}" aria-pressed="${currentStyle===c.id}">${c.name}</button>`).join('')}</div><label class="compare-toggle"><input type="checkbox" data-compare>나란히 비교</label></div><div class="comparison-previews"><figure class="preview-primary"><figcaption data-style-caption></figcaption><div class="demo-frame"></div></figure><figure class="preview-peer" hidden><figcaption><select data-peer-style aria-label="비교할 다른 스타일">${concepts.map(c=>`<option value="${c.id}" ${compareStyle===c.id?'selected':''}>${c.name}</option>`).join('')}</select><span>같은 데이터 · 같은 너비</span></figcaption><div class="peer-frame"></div></figure></div><div class="demo-actions"><button type="button" class="button" data-replay>${icon('play')}다시 재생</button><button type="button" class="button" data-pause aria-pressed="false">일시정지</button><button type="button" class="button" data-reset>${icon('reset')}초기화</button><button type="button" class="button" data-show-code>실행 코드</button><label class="speed">재생 속도<select data-motion-speed aria-label="모션 재생 속도"><option value="1">1×</option><option value="2">0.5×</option><option value="4">0.25×</option></select></label><label class="reduce"><input id="reduced" type="checkbox" ${reduced ? 'checked' : ''}>모션 줄이기</label></div><p class="viewer-status" role="status" id="demo-status"></p></section>
     <details class="inspector" open><summary>사용 방법과 실행 코드</summary><aside class="inspector-inner"><p class="inspector-title">이 컴포넌트 가져가기</p><div class="tabs" role="tablist" aria-label="컴포넌트 정보">${[['guide','사용 방법'],['code','실행 코드'],['prompt','프롬프트']].map(([key,label],i) => `<button type="button" role="tab" id="tab-${key}" aria-selected="${i===0}" aria-controls="pane-${key}" tabindex="${i===0?0:-1}" data-pane="${key}">${label}</button>`).join('')}</div><div class="pane" id="pane-guide" role="tabpanel" aria-labelledby="tab-guide" tabindex="0"></div>${['code','prompt'].map(key => `<div class="pane" id="pane-${key}" role="tabpanel" aria-labelledby="tab-${key}" hidden><p>${key==='code'?'스타일·동작·토큰이 포함된 단일 HTML입니다. 저장해서 브라우저로 열면 바로 동작합니다.':'실제 동작과 수치를 설명하는 구현 명세입니다. 프로젝트의 데이터와 이벤트에 맞게 적용하세요.'}</p><label class="code-label" for="copy-${key}">${key==='code'?'실행 HTML':'구현 프롬프트'}</label><textarea class="code-input" id="copy-${key}" readonly spellcheck="false"></textarea><div class="code-meta" data-size="${key}"></div><div class="copy-actions"><button type="button" class="button primary" data-copy="${key}">복사</button><button type="button" class="button" data-download="${key}">다운로드</button><button type="button" class="button" data-select="${key}">전체 선택</button></div><p class="copy-feedback" role="status" data-copy-status="${key}"></p>${key==='code'?'<p class="code-hint">외부 의존성 없음 · 한국어 샘플 데이터 포함. 실제 서비스에서는 로컬 샘플을 서비스 데이터로 연결하세요.</p>':''}</div>`).join('')}</aside></details>
   </div>
 </dialog>`;
@@ -154,7 +154,7 @@ function showItem(item) {
   const state = instances.get(item.id)?.snapshot() || snapshots.get(item.id);
   if (state) detailAPI.restore(state, true);
   detailAPI.setReduced(reduced);detailAPI.setSpeed(motionSpeed);
-  shadow.getElementById('demo-status').textContent = '';
+  motionPaused=false;shadow.querySelector('[data-pause]').textContent='일시정지';shadow.querySelector('[data-pause]').setAttribute('aria-pressed','false');shadow.getElementById('demo-status').textContent = item.hint;
   inspector.open = innerWidth >= 800;
   shadow.querySelector('.viewer-main').scrollTop = 0;
   shadow.querySelector('.viewer-body').scrollTop = 0;
@@ -193,7 +193,7 @@ function changeStyle(id,updateURL=true){
 shadow.querySelectorAll('[data-context-filter]').forEach(select=>select.addEventListener('change',event=>{contextFilter=event.target.value;filter();}));
 shadow.querySelector('[data-component-picker]').addEventListener('change',event=>{componentPick=event.target.value;filter();});
 shadow.querySelector('[data-compare]').addEventListener('change',event=>{compareEnabled=event.target.checked;updateComparison();});
-shadow.querySelector('[data-motion-speed]').addEventListener('change',event=>{motionSpeed=Number(event.target.value);detailAPI?.setSpeed(motionSpeed);peerAPI?.setSpeed(motionSpeed);instances.forEach(api=>api.setSpeed(motionSpeed));});
+shadow.querySelector('[data-motion-speed]').addEventListener('change',event=>{motionSpeed=Number(event.target.value);detailAPI?.setSpeed(motionSpeed);peerAPI?.setSpeed(motionSpeed);instances.forEach(api=>api.setSpeed(motionSpeed));guideAPI?.setSpeed(motionSpeed);});
 shadow.querySelector('[data-peer-style]').addEventListener('change',event=>{compareStyle=event.target.value;peerAPI?.setStyle(compareStyle);});
 // Pointer selection can preserve an in-progress input's focus and selection range.
 shadow.addEventListener('pointerdown',event=>{if(event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey&&event.target.closest('[data-style],[data-detail-style],[data-style-route]'))event.preventDefault();});
@@ -204,7 +204,7 @@ function mountGuide(component=guideComponent,state=null){
  guideAPI=mount(target,catalog.find(item=>item.componentId===component),'compact',{styleId:style});guideAPI.setReduced(reduced);if(state)guideAPI.restore(state);
 }
 shadow.addEventListener('change',event=>{if(event.target.matches('[data-guide-component]'))mountGuide(event.target.value);});
-shadow.addEventListener('click',event=>{if(event.target.closest('[data-guide-reset]'))guideAPI?.reset();});
+shadow.addEventListener('click',event=>{if(event.target.closest('[data-guide-reset]'))guideAPI?.reset();if(event.target.closest('[data-guide-replay]'))guideAPI?.replay();});
 function open(item, trigger = null, update = true) {
   if (!item) return;
   if (dialog.open) { showItem(item); return; }
@@ -256,6 +256,9 @@ shadow.addEventListener('click', event => {
   if(target.dataset.detailStyle){changeStyle(target.dataset.detailStyle);return;}
   if (target.dataset.open) { event.preventDefault(); open(items.find(item => item.id === target.dataset.open), target); return; }
   if (target.dataset.section) {setSection(target.dataset.section);window.scrollTo({top:0,behavior:'auto'});}
+  if (target.dataset.cardReplay) {const api=mountCard(target.dataset.cardReplay);api.replay();snapshots.set(target.dataset.cardReplay,api.snapshot());}
+  if (target.hasAttribute('data-replay')) {motionPaused=false;peerAPI?.resume();detailAPI.replay();shadow.querySelector('[data-pause]').textContent='일시정지';shadow.querySelector('[data-pause]').setAttribute('aria-pressed','false');shadow.getElementById('demo-status').textContent=active.hint;}
+  if (target.hasAttribute('data-pause')) {motionPaused=!motionPaused;for(const api of [detailAPI,peerAPI])if(api)motionPaused?api.pause():api.resume();target.textContent=motionPaused?'이어 재생':'일시정지';target.setAttribute('aria-pressed',String(motionPaused));shadow.getElementById('demo-status').textContent=motionPaused?'일시정지했습니다.':'이어 재생합니다.';}
   if (target.dataset.cardReset) {mountCard(target.dataset.cardReset).reset();snapshots.delete(target.dataset.cardReset);}
   if (target.dataset.kind) {setSection('components'); kind = target.dataset.kind; filter(); const menu=target.closest('.mobile-filter details');if(menu){menu.open=false;menu.querySelector('summary').focus();} }
   if (target.hasAttribute('data-clear')) resetFilters();
@@ -263,7 +266,7 @@ shadow.addEventListener('click', event => {
   if (target.hasAttribute('data-close')) close();
   if (target.hasAttribute('data-prev')) navigate(-1);
   if (target.hasAttribute('data-next')) navigate(1);
-  if (target.hasAttribute('data-reset')) {detailAPI.reset();peerAPI?.reset();shadow.getElementById('demo-status').textContent='초기 상태로 돌아왔습니다.';}
+  if (target.hasAttribute('data-reset')) {motionPaused=false;shadow.querySelector('[data-pause]').textContent='일시정지';shadow.querySelector('[data-pause]').setAttribute('aria-pressed','false');detailAPI.reset();peerAPI?.reset();shadow.getElementById('demo-status').textContent='초기 상태로 돌아왔습니다.';}
   if (target.hasAttribute('data-show-code')) revealCode();
   if (target.dataset.pane) setPane(target.dataset.pane);
   if (target.dataset.copy) copy(target.dataset.copy);
@@ -285,11 +288,11 @@ shadow.querySelector('.tabs').addEventListener('keydown', event => {
 });
 shadow.getElementById('reduced').addEventListener('change', event => {
   reduced = event.target.checked || reducedMedia.matches;
-  detailAPI?.setReduced(reduced);peerAPI?.setReduced(reduced); instances.forEach(api => api.setReduced(reduced));
+  detailAPI?.setReduced(reduced);peerAPI?.setReduced(reduced); instances.forEach(api => api.setReduced(reduced));guideAPI?.setReduced(reduced);
 });
 reducedMedia.addEventListener('change', event => {
   reduced = event.matches || shadow.getElementById('reduced').checked;
-  detailAPI?.setReduced(reduced);peerAPI?.setReduced(reduced); instances.forEach(api => api.setReduced(reduced));
+  detailAPI?.setReduced(reduced);peerAPI?.setReduced(reduced); instances.forEach(api => api.setReduced(reduced));guideAPI?.setReduced(reduced);
 });
 dialog.addEventListener('cancel', event => { if (event.target === dialog) { event.preventDefault(); close(); } });
 async function readLocation() {

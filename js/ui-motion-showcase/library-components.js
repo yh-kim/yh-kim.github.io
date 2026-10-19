@@ -47,8 +47,9 @@ function wireButton(root, item, helpers = {}) {
   const save=()=>{stop();state.pendingFail=state.fail;state.fail=false;state.status='loading';render();status('문서를 저장하는 중…');const token=revision;timer=setTimeout(()=>finish(token),900);helpers.animate?.(q('[data-save]'),[{transform:'scale(.97)'},{transform:'scale(1)'}],{duration:motion().press||150});};
   on(q('[data-save]'),'click',save);
   on(q('[data-fail]'),'change',e=>{state.fail=e.target.checked;});
-  on(q('[data-bookmark]'),'click',()=>{state.bookmark=!state.bookmark;render();status(state.bookmark?'북마크에 추가했습니다.':'북마크를 해제했습니다.');});
-  on(q('[data-follow]'),'click',()=>{state.follow=!state.follow;render();status(state.follow?'팔로우를 시작했습니다.':'팔로우를 해제했습니다.');});
+  const toggleMotion=node=>helpers.animate?.(node,[{transform:'scale(.94)'},{transform:'scale(1)'}],{duration:motion().press||150});
+  on(q('[data-bookmark]'),'click',()=>{state.bookmark=!state.bookmark;render();toggleMotion(q('[data-bookmark]'));status(state.bookmark?'북마크에 추가했습니다.':'북마크를 해제했습니다.');});
+  on(q('[data-follow]'),'click',()=>{state.follow=!state.follow;render();toggleMotion(q('[data-follow]'));status(state.follow?'팔로우를 시작했습니다.':'팔로우를 해제했습니다.');});
   const announce=()=>status(state.status==='success'?'문서를 저장했습니다. 로컬 시뮬레이션입니다.':state.status==='error'?'저장에 실패했습니다. 다시 시도할 수 있습니다.':'변경 사항은 이 화면에서만 저장됩니다.',state.status==='success'?'success':state.status==='error'?'error':'');
   render();
   return {snapshot(){return copy(state);},restore(next){if(!next||JSON.stringify(next)===JSON.stringify(state))return;stop();state={...copy(initial),...copy(next)};render();if(state.status==='loading'){const token=revision;timer=setTimeout(()=>finish(token),900);}},reset(){stop();state=copy(initial);render();},replay(){save();},destroy(){stop();cleanup.forEach(fn=>fn());}};
@@ -69,10 +70,10 @@ function wireForm(root, item, helpers = {}) {
   const start=()=>{stop();state.status='pending';render();status('알림 신청을 확인하는 중…');const token=revision;timer=setTimeout(()=>finish(token),900);};
   on(q('[data-form]'),'input',()=>{values();state.errors={};if(state.status==='pending')stop();state.status='idle';status('입력 내용을 확인한 뒤 신청해 주세요.');render();});
   on(q('[data-form]'),'change',()=>{values();render();});
-  on(q('[data-form]'),'submit',e=>{e.preventDefault();values();state.errors={};const name=state.name.trim(),email=state.email.trim();if(name.length<2||name.length>30)state.errors.name='이름을 2–30자로 입력해 주세요.';if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))state.errors.email='올바른 이메일 주소를 입력해 주세요.';if(!state.consent)state.errors.consent='이메일 수신 동의가 필요합니다.';if(Object.keys(state.errors).length){stop();state.status='idle';render();status('입력 내용을 확인해 주세요.','error');q('[aria-invalid="true"]')?.focus();return;}start();});
+  on(q('[data-form]'),'submit',e=>{e.preventDefault();values();state.errors={};const name=state.name.trim(),email=state.email.trim();if(name.length<2||name.length>30)state.errors.name='이름을 2–30자로 입력해 주세요.';if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))state.errors.email='올바른 이메일 주소를 입력해 주세요.';if(!state.consent)state.errors.consent='이메일 수신 동의가 필요합니다.';if(Object.keys(state.errors).length){stop();state.status='idle';render();status('입력 내용을 확인해 주세요.','error');const invalid=q('[aria-invalid="true"]');invalid?.focus();helpers.animate?.(invalid,[{transform:'translateX(0)'},{transform:'translateX(-4px)',offset:.25},{transform:'translateX(4px)',offset:.6},{transform:'translateX(0)'}],{duration:item?.styleMotion?.content||200});return;}start();});
   on(q('[data-form]'),'reset',e=>{e.preventDefault();stop();state=copy(initial);render();status('입력한 내용은 서버로 전송되지 않습니다.');});
   render();
-  return {snapshot(){return copy(state);},restore(next){if(!next||JSON.stringify(next)===JSON.stringify(state))return;stop();state={...copy(initial),...copy(next)};render();if(state.status==='pending'){const token=revision;timer=setTimeout(()=>finish(token),900);}},reset(){stop();state=copy(initial);render();},replay(){q('[data-name]').focus();},destroy(){stop();cleanup.forEach(fn=>fn());}};
+  return {snapshot(){return copy(state);},restore(next){if(!next||JSON.stringify(next)===JSON.stringify(state))return;stop();state={...copy(initial),...copy(next)};render();if(state.status==='pending'){const token=revision;timer=setTimeout(()=>finish(token),900);}},reset(){stop();state=copy(initial);render();},replay(){q('[data-form]').requestSubmit();},destroy(){stop();cleanup.forEach(fn=>fn());}};
 }
 
 function wireTabs(root, item, helpers = {}) {
@@ -94,7 +95,7 @@ function wireTabs(root, item, helpers = {}) {
   on(q('[data-save]'),'click',()=>{state.saved=copy(state.values);render();status('설정을 저장했습니다. 이 화면에서만 유지됩니다.','success');helpers.animate?.(q('[data-status]'),[{opacity:.45},{opacity:1}],{duration:item?.styleMotion?.result||180});});
   const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(()=>align(false)):null;observer?.observe(q('.ui-tablist'));
   render();
-  return {snapshot(){return copy(state);},restore(next){if(!next||JSON.stringify(next)===JSON.stringify(state))return;const changed=next.tab!==state.tab;state={...copy(initial),...copy(next)};render(changed);if(changed)helpers.animate?.(q(`[data-panel="${state.tab}"]`),[{opacity:.45,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:item?.styleMotion?.content||180});},reset(){state=copy(initial);render();},replay(){select('notify',true);},destroy(){indicatorAnimation?.cancel();observer?.disconnect();cleanup.forEach(fn=>fn());}};
+  return {snapshot(){return copy(state);},restore(next){if(!next||JSON.stringify(next)===JSON.stringify(state))return;const changed=next.tab!==state.tab;state={...copy(initial),...copy(next)};render(changed);if(changed)helpers.animate?.(q(`[data-panel="${state.tab}"]`),[{opacity:.45,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:item?.styleMotion?.content||180});},reset(){state=copy(initial);render();},replay(){select(keys[(keys.indexOf(state.tab)+1)%keys.length]);},destroy(){indicatorAnimation?.cancel();observer?.disconnect();cleanup.forEach(fn=>fn());}};
 }
 
 function wireDrawer(root, item, helpers = {}) {
@@ -124,7 +125,7 @@ function wireDrawer(root, item, helpers = {}) {
   on(q('[data-checkout]'),'click',()=>{const total=Object.entries(state.cart).reduce((sum,[key,qty])=>sum+products[key].price*qty,0);state.cart={note:0,tray:0};state.checkedOut=true;state.message=`${money(total)} 주문이 완료되었습니다. 실제 결제는 없습니다.`;render();q('[data-restore]').focus();});
   on(q('[data-restore]'),'click',()=>{state.cart={note:1,tray:2};state.checkedOut=false;state.message='상품을 다시 담았습니다.';render();q('[data-lines] button')?.focus();});
   render();
-  return {snapshot(){return copy(state);},restore(next){if(!next||JSON.stringify(next)===JSON.stringify(state))return;cancelMotion();state={...copy(initial),...copy(next)};render();if(state.open&&!dialog.open)open(false);else if(!state.open&&dialog.open)dialog.close();},setComparison(value){if(!dialog.open)return;const next=!!value,isModal=dialog.matches(':modal');if(isModal===!next)return;const previous=root.getRootNode().activeElement||document.activeElement;cancelMotion();dialog.close();if(next)dialog.show();else dialog.showModal();state.open=true;if(previous?.isConnected&&(next||dialog.contains(previous)))previous.focus({preventScroll:true});},reset(){cancelMotion();if(dialog.open)dialog.close();state=copy(initial);render();},replay(){opener=q('[data-open]');open();},destroy(){cancelMotion();if(dialog.open)dialog.close();cleanup.forEach(fn=>fn());}};
+  return {snapshot(){return copy(state);},restore(next){if(!next||JSON.stringify(next)===JSON.stringify(state))return;cancelMotion();state={...copy(initial),...copy(next)};render();if(state.open&&!dialog.open)open(false);else if(!state.open&&dialog.open)dialog.close();},setComparison(value){if(!dialog.open)return;const next=!!value,isModal=dialog.matches(':modal');if(isModal===!next)return;const previous=root.getRootNode().activeElement||document.activeElement;cancelMotion();dialog.close();if(next)dialog.show();else dialog.showModal();state.open=true;if(previous?.isConnected&&(next||dialog.contains(previous)))previous.focus({preventScroll:true});},reset(){cancelMotion();if(dialog.open)dialog.close();state=copy(initial);render();},replay(){opener=q('[data-open]');if(dialog.open)close(false);else open();},destroy(){cancelMotion();if(dialog.open)dialog.close();cleanup.forEach(fn=>fn());}};
 }
 
 // Layout-neutral essentials; visual personality lives in style-system.js.

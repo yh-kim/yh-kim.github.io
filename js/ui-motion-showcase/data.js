@@ -1,8 +1,8 @@
-import {websiteItems,siteRules,sitePrompt} from './site-catalog.js?v=20261019-library7';
-import {themes as originalThemes, elementsFor, colorLabels} from '../ui-motion-guide/themes.js?v=20261016-r2';
-import {aiTokens} from './ai-scene.js?v=20261016-foundation2';
-import {projectTokens} from './project-scene.js?v=20261016-foundation2';
-import {componentTokens} from './component-design.js?v=20261019-library7';
+import {websiteItems,siteRules,sitePrompt} from './site-catalog.js?v=20261019-motion8';
+import {themes as originalThemes, elementsFor, colorLabels} from '../ui-motion-guide/themes.js?v=20261019-motion8';
+import {aiTokens} from './ai-scene.js?v=20261019-motion8';
+import {projectTokens} from './project-scene.js?v=20261019-motion8';
+import {componentTokens} from './component-design.js?v=20261019-motion8';
 export const themes=structuredClone(originalThemes);
 Object.assign(themes[0],{scene:aiTokens,intent:'ARC 제품 캠페인을 위한 로컬 창작 작업 화면. 후보 선택·프롬프트·속성 조정·생성 상태가 중앙 결과에 연결됩니다.',composition:`${aiTokens.navHeight}px 내비게이션과 ARC Campaign 작업 제목 아래 폭 최대 ${aiTokens.studioMax}px·높이 ${aiTokens.studioHeight+aiTokens.stageExtra}px 장면. 중앙 ${aiTokens.previewHeight}px 결과(좌우 여백 ${aiTokens.canvasLeft}/${aiTokens.canvasRight}px), 왼쪽 ${aiTokens.choiceCount}개 수직 후보(각 ${aiTokens.choiceHeight}px), 오른쪽 ${aiTokens.inspectorWidth}px 속성 패널, 중앙 아래 최대 ${aiTokens.composerWidth}px 떠 있는 프롬프트. ${aiTokens.breakpoint}px 이하에서는 ${aiTokens.mobileTitle}px 제목 → 프리뷰 → 가로 후보 → 프롬프트 → 속성 순서. 제품 이미지는 자체 제작 ARC 스피커 SVG.`});
 Object.assign(themes[0].layout,{breakpoint:aiTokens.breakpoint,max:aiTokens.studioMax,columns:`${aiTokens.railWidth}px minmax(0,1fr) ${aiTokens.inspectorWidth}px`,gap:aiTokens.gap});

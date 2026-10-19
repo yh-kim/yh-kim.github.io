@@ -5,7 +5,7 @@ const tokenSet = ({paper,surface,ink,muted,line,accent,onAccent,selected,error,s
   bg:paper, surface, ink, text:ink, muted, line, accent, 'on-accent':onAccent,
   selected, error, success, disabled, 'control-border':controlBorder, radius, pad, gap,
   'font-size':fontSize,'line-height':lineHeight,'label-size':labelSize,'heading-size':headingSize,'heading-weight':headingWeight,'heading-leading':headingLeading,'meta-size':metaSize,
-  'focus-ring':accent, 'control-radius':radius, 'control-min-height':'44px',
+  'focus-ring':accent, 'control-radius':radius, 'control-min-height':'44px', 'input-font-size':'16px',
   'mobile-pad-y':'14px','mobile-pad-x':'12px','space-1':'4px','space-2':'8px','space-3':'12px','space-4':'16px','space-6':'24px','space-8':'32px'
 });
 
@@ -57,6 +57,6 @@ export const styleGuide = Object.fromEntries(styles.map(style=>[style.id,{
   colorUse:style.id==='paper'?'흰색·종이색 면을 대부분 유지하고 강조색은 버튼과 얇은 선택 표시에 제한합니다.':style.id==='object'?'밝은 면을 주로 쓰고 차콜은 주요 행동과 소량의 표면 깊이에 씁니다.':'밝은 작업 면과 선을 주로 쓰고 파랑은 선택과 주요 행동에 씁니다.',
   colorProportion:style.id==='paper'?'종이·흰 면 약 78% · 잉크와 선 18% · 빨강 4%':style.id==='object'?'밝은 면 약 76% · 차콜과 경계 20% · 강조 4%':'작업 면 약 80% · 잉크와 경계 16% · 파랑 4%',
   layout:{good:style.id==='paper'?'제목을 위에 두고 구분선 아래에 입력과 행동을 세로로 배치합니다.':style.id==='object'?'관련 상품과 수량을 한 면 안에서 묶고 합계를 가장자리에서 분리합니다.':'짧은 라벨과 값을 두 열에 정렬하고 상태를 같은 행 끝에 둡니다.',avoid:style.id==='paper'?'큰 컬러 카드와 여러 겹의 테두리를 피합니다.':style.id==='object'?'서로 무관한 내용을 한 카드 안에 합치거나 과한 그림자를 피합니다.':'라벨·값의 기준선을 섞거나 행마다 다른 패딩을 주지 않습니다.'},
-  control:{minimumHeight:'44px',focus:'강조색 3px 외곽선',disabled:'비활성 글자색과 disabled 상태를 함께 표시'},
+  control:{minimumHeight:'44px',inputFontSize:style.tokens['input-font-size'],focus:'강조색 3px 외곽선',disabled:'비활성 글자색과 disabled 상태를 함께 표시'},
   motionFromTo:{press:'기본 위치 → y 1px 눌림 → 기본 위치',content:'기존 내용 → 짧은 opacity 변화 → 새 내용',tab:'이전 인디케이터 위치 → 선택 탭 위치',result:'대기 상태 → 텍스트가 포함된 성공 또는 오류 상태',drawerOpen:`x ${style.styleMotion.drawerDistance}px, opacity 0 → x 0px, opacity 1`,drawerClose:'x 0px, opacity 1 → x 거리만큼 이동, opacity 0',duration:{press:style.styleMotion.press,content:style.styleMotion.content,tab:style.styleMotion.tab,result:style.styleMotion.result,drawerOpen:style.styleMotion.drawerOpen,drawerClose:style.styleMotion.drawerClose},ease:style.styleMotion.ease,reduced:'prefers-reduced-motion에서는 위치 애니메이션을 건너뛰고 텍스트·상태는 즉시 갱신합니다.'}
 }]));

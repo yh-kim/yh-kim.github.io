@@ -1,5 +1,5 @@
-import { themes, elementsFor, design, prompt, spec } from './themes.js?v=20261016-r2';
-import { variables, demoCSS, markup, wireDemo, standalone } from './engine.js?v=20261016-r2';
+import { themes, elementsFor, design, prompt, spec } from './themes.js?v=20261019-motion8';
+import { variables, demoCSS, markup, wireDemo, standalone } from './engine.js?v=20261019-motion8';
 
 const host = document.getElementById('ui-motion-guide');
 const shadow = host.attachShadow({ mode: 'open' });
@@ -39,7 +39,7 @@ function render() {
   if (viewCleanup) { viewCleanup(); viewCleanup=null; }
   cleanups.forEach(fn=>fn()); cleanups=[];
   const items=entries();
-  shadow.innerHTML=`<link rel="stylesheet" href="${new URL('./guide.css?v=20261016-r2',import.meta.url).href}"><style>${demoCSS(theme)}</style>
+  shadow.innerHTML=`<link rel="stylesheet" href="${new URL('./guide.css?v=20261019-motion8',import.meta.url).href}"><style>${demoCSS(theme)}</style>
   <header class="guide-intro"><div><span class="eyebrow">INTERACTIVE DESIGN FIELD GUIDE</span><h2>두 화면, 두 가지 작업의 리듬.</h2><p>아래 디자인을 선택해 직접 조작하세요. 요소의 움직임을 다시 보고, 실제 수치와 실행 코드를 가져갈 수 있습니다.</p></div><span class="edition">02 SCENES<br>12 LIVE ELEMENTS</span></header>
   <div class="theme-cards" role="group" aria-label="디자인 선택">${themes.map(mini).join('')}</div>
   <nav class="guide-nav" aria-label="가이드 목차"><a href="#ui-${theme.id}-hero" data-jump="hero">완성된 화면</a><a href="#ui-${theme.id}-${items[0].id}" data-jump="${items[0].id}">인터랙션</a><a href="#ui-${theme.id}-rules" data-jump="rules">디자인 규칙</a><a href="#ui-${theme.id}-export" data-jump="export">가져가기</a></nav>

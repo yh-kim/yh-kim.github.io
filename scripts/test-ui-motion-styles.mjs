@@ -188,4 +188,40 @@ check('legacy exports preserve hidden URLs and every style thumbnail has a regis
  }
 });
 
+check('editable controls use 16px in every style and in exported HTML',()=>{
+ for(const style of styles){
+  assert.equal(style.tokens['input-font-size'],'16px');
+  for(const component of ['button','form','tabs','drawer','tags','table','dialog']){
+   const css=styleCSS(style.id,component);
+   assert.match(css,/--input-font-size:16px/);
+   assert.match(css,/input:not\(\[type=checkbox\]\).*textarea,select,\[contenteditable\]:not\(\[contenteditable=false\]\)\)\{font-size:var\(--input-font-size\)!important\}/);
+  }
+ }
+ const item=websiteItems.find(item=>componentIdFor(item)==='form');
+ assert.ok(item,'form export fixture');
+ const html=standaloneSite({...withStyle(item,'frame'),styleMotion:styleById('frame').styleMotion});
+ assert.match(html,/--input-font-size:16px/);
+ assert.match(html,/font-size:var\(--input-font-size\)!important/);
+});
+
+check('playback controls pause, change speed, resume after visibility, and settle reduced motion',()=>{
+ const names=['matchMedia','document','IntersectionObserver','MutationObserver'];const saved=names.map(name=>[name,globalThis[name]]);
+ try{
+  globalThis.matchMedia=()=>({matches:false,addEventListener(){}});globalThis.document={hidden:false,addEventListener(){}};
+  globalThis.IntersectionObserver=class{observe(){}disconnect(){}};globalThis.MutationObserver=class{observe(){}disconnect(){}};
+  let run,replays=0,resets=0;
+  const root={dataset:{},style:{setProperty(){}},querySelector:()=>null,querySelectorAll:()=>[],addEventListener(){}};
+  const api=wireSite(root,{motion:{ease:'linear'}},(_root,_item,helpers)=>{run=helpers.animate;return {replay(){replays++;},reset(){resets++;}};});
+  const animation={playState:'running',playbackRate:1,finished:new Promise(()=>{}),pause(){this.playState='paused';},play(){this.playState='running';},cancel(){this.playState='idle';},finish(){this.playState='finished';},updatePlaybackRate(rate){this.playbackRate=rate;}};
+  run({animate(){return animation;}},[{opacity:0},{opacity:1}],200);
+  api.setSpeed(4);assert.equal(animation.playbackRate,.25);
+  api.pause();assert.equal(animation.playState,'paused');assert.equal(root.dataset.motionPaused,'true');
+  api.suspend();api.resume();assert.equal(animation.playState,'paused');
+  api.continue();assert.equal(animation.playState,'running');assert.equal(root.dataset.motionPaused,'false');
+  api.setSpeed(1);assert.equal(animation.playbackRate,1);
+  api.setReduced(true);assert.equal(animation.playState,'finished');assert.equal(root.dataset.reduced,'true');
+  api.reset();api.replay();assert.equal(resets,1);assert.equal(replays,1);api.destroy();
+ }finally{for(const [name,value] of saved){if(value===undefined)delete globalThis[name];else globalThis[name]=value;}}
+});
+
 if(failures.length){console.error(failures.join('\n'));process.exitCode=1;}else console.log(`PASS: ${count} UI motion style contracts (browser verification remains separate).`);
