@@ -1,9 +1,9 @@
-import {mountSite,standaloneSite} from './site-runtime.js?v=20261019-concepts4';
+import {mountSite,standaloneSite} from './site-runtime.js?v=20261019-refine5';
 import {demoCSS as baseCSS, markup as baseMarkup} from '../ui-motion-guide/engine.js?v=20261016-r2';
-import {themeFor,presentation} from './data.js?v=20261019-concepts4';
+import {themeFor,presentation} from './data.js?v=20261019-refine5';
 import {aiMarkup,aiCSS,aiPreview,productArt} from './ai-scene.js?v=20261016-foundation2';
 import {projectMarkup,projectCSS} from './project-scene.js?v=20261016-foundation2';
-import {componentMarkup,componentCSS,componentTokens,componentEnhancer} from './component-design.js?v=20261019-concepts4';
+import {componentMarkup,componentCSS,componentTokens,componentEnhancer} from './component-design.js?v=20261019-refine5';
 export function markup(t,key){const component=key==='hero'?null:componentMarkup(t,key);if(component)return component;let html=key==='hero'&&t.id==='light-project'?projectMarkup(t):baseMarkup(t,key);if(t.id==='dark-ai')html=aiMarkup(t,key,html);if(key==='process')html=html.replace('<div class="motion-tools">',`<div class="process-result" data-generated-result hidden><div class="result-thumb" aria-hidden="true">${productArt()}</div><div><span class="meta">RENDER COMPLETE</span><h4>생성 완료</h4><p class="muted">직접 만든 SVG 제품 시각화</p></div></div><div class="motion-tools">`);return html.replaceAll('아이디어를 장면으로.','생성 상태').replaceAll('다음 장면을 설명해 주세요.','프롬프트').replaceAll('작은 업무를 더해보세요.','작업 입력').replaceAll('A SIGNAL, NOT A SPECTACLE','선택').replaceAll('WRITE A DIRECTION','입력').replaceAll('ONE SOURCE OF TASK DATA','작업');}
 export function demoCSS(t,isolated=false,key=null){if(isolated)return componentCSS(key,t.id);return baseCSS(t)+`
 :host{display:block;min-width:0;height:100%;color-scheme:${t.id==='dark-ai'?'dark':'light'}}

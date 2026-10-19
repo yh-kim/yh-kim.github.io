@@ -1,0 +1,137 @@
+# UI·모션 갤러리 정제 기록 v2
+
+작성일: 2026-10-19 · 상태: 구현·브라우저 검증 완료
+
+## 목적과 범위
+
+컨셉 컬렉션 홈과 12개 웹사이트 컴포넌트의 화면 밀도, 계층, 제품 표현을 정제한다. 사용자가 이미 알고 있는 컴포넌트 ID와 컨셉별 URL은 유지한다. 참조 화면의 레이아웃 원리를 살펴보되, 이 저장소의 한국어 콘텐츠·예시 데이터·동작을 기준으로 구현한다.
+
+비교 수치는 동일한 **1440 × 1000 뷰포트에서 본 화면의 대략적인 비율**이다. 원본 디자인의 CSS 값을 측정한 수치가 아니며, 브라우저·이미지 크롭에 따라 달라질 수 있다. 아래 Behance 프로젝트는 시각 참고자료다. 참조 이미지와 좌우 비교 캡처는 세션 로컬 작업 공간에만 보관하고 저장소에는 배포하지 않는다. 저장소에는 자체 화면의 before/pass1/final 캡처만 둔다.
+
+## 참조에서 관찰한 구조와 적용 방향
+
+| 컨셉 | 참조에서 관찰한 첫 화면 | 이 갤러리의 적용 방향 |
+| --- | --- | --- |
+| 콘텐츠 사이트 · paper | [Modern Web Design for a Leading Magazine Design Studio](https://www.behance.net/gallery/179562053/Modern-Web-Design-for-a-Leading-Magazine-Design-Studio)의 첫 기기 내부 화면: 본문과 이미지가 대략 46:54, 제목과 본문 크기 비가 약 3.5–4:1, 상단 정렬선 공유, 노란 CTA 한 개. 바깥 노란 면과 기기 목업은 프로젝트 발표 장치로 봤다. | 콘텐츠/폼을 약 55:45로 묶고 큰 제목, 읽기 쉬운 본문, 하나의 우선 행동으로 위계를 정리한다. 발표용 배경과 기기 프레임은 가져오지 않는다. |
+| 온라인 스토어 · object | [Homevo — Modern Ecommerce Furniture Website UI/UX Design](https://www.behance.net/gallery/247907919/Homevo-Modern-Ecommerce-Furniture-Website-UIUX-Design)의 첫 히어로: 1440px 뷰포트 안쪽 UI 폭은 약 915px, 중앙 제품은 약 300px, CTA는 렌더링 화면에서 약 100 × 28px. 중성색 면이 약 80%이고 의자가 중앙 주제다. | 두 독립 제품 사진을 정사각형 비율로 보여 주고, 상품·가격·구매 행동의 순서를 분명히 한다. 스토어 영역의 최대 폭은 960px로 제한한다. |
+| 업무 도구 · frame | [APX — UX/UI Case for SaaS IT Management Platform](https://www.behance.net/gallery/243179235/APX-UXUI-Case-for-SaaS-IT-Management-Platform)의 첫 노트북 내부 화면: 레일·주 영역·맥락 영역이 대략 8:75:17, 제목과 본문 크기 비는 약 1.8:1, 중성색 면 약 80%와 강조색 약 2%. 큰 그림자는 대부분 기기 발표 표현으로 봤다. | 가짜 레일을 덜어 내고 차트와 맥락 영역을 약 76:24로 구성한다. 갤러리 카드에서는 차트와 설정의 폭을 8:4로 배분한다. |
+
+위 관찰은 프로젝트의 첫 대표 이미지에 대한 육안 추정이다. 따라서 퍼센트·픽셀 수치는 최종 제품의 고정 규격이나 원본 제작자의 명세로 해석하지 않는다. 첫 번째 프로젝트의 공개 설명은 큰 산세리프 제목, 큰 이미지, 구조적인 그리드와 여백을 디자인 방향으로 설명한다.
+
+## 관찰 범위와 정밀도
+
+세 프로젝트는 기존 참고 기록의 정확한 URL로 다시 열었다. 각 **첫 대표 이미지 한 장**을 1440×1000 브라우저에서 직접 확인했다. paper는 Chris Atkins의 잡지 스튜디오 화면, object는 Orbillo의 Homevo 제품 히어로, frame은 Filipe Carvalho의 APX 노트북 내부 화면이다. 텍스트 도구의 object/frame 403을 접근 성공의 근거로 사용하지 않았다. 시각 관찰 근거는 실제 브라우저에 표시된 이미지다.
+
+| 관찰 축 | paper의 관찰 | object의 관찰 | frame의 관찰 |
+| --- | --- | --- | --- |
+| 그리드·비율 | 좌측 글/우측 잡지 표지의 두 패널, 약 46:54 | 약 915px 안쪽 화면, 중앙 제품 약 300px, 좌측 작은 보조 이미지 | 약 8:75:17 레일/작업/맥락, 상단 요약 3칸·필터·목록 |
+| 활자 | 제목/본문 약 3.5–4:1, 좁은 폭에 강한 여러 줄 제목 | 두 줄 중앙 제목이 본문보다 대략 3배, 작은 상품 설명과 CTA | 제목/행 텍스트 약 1.8:1, 수치와 데이터 행이 주도 |
+| 여백 반복 | 글과 표지의 상단 정렬, 안쪽 가장자리 여백은 패널 폭의 약 5%, 제목→본문→CTA 간격 반복 | 양쪽 가장자리 약 3% 여백, 제품 주변을 크게 비우고 옵션·구매는 가까이 묶음 | 렌더링 이미지에서 제어 사이 약 8–12px, 행 높이 약 22–28px로 보이는 반복(원근 왜곡 있음) |
+| 이미지·크롭 | 오른쪽 표지 전체가 보이는 세로 크롭, 모바일 기기 중첩은 발표용 | 제품 전체 윤곽과 접지 그림자, 중앙 제품이 시선을 모음 | 내부 화면이 작게 축소된 노트북 목업, 서비스에 기울기 복제 안 함 |
+| 색 면적 | 글 패널은 흰 면, 잡지 표지는 오른쪽 약 54%, 노란 CTA는 작은 한 곳 | 안쪽 UI의 약 80%가 밝은 중성색, 색은 제품과 작은 CTA에 모임 | 중성색 약 80%, 강조색 약 2%, 상태와 작업의 일부에 한정 |
+| 선·그림자 | 본문을 감싼 반복 박스 없음, 큰 그림자는 기기 발표 표현 | 제품의 재질·그림자가 입체감을 담당, 큰 배경 효과는 발표용 | 작업 구획은 가는 선·간격, 가장 큰 그림자는 노트북 밖 |
+| 시선 순서 | 왼쪽 제목 → 오른쪽 표지 → 작은 CTA | 중앙 제목 → 제품 → 옵션/구매 | 상단 요약 → 필터 → 목록 → 오른쪽 맥락 |
+
+위 수치는 화면 이미지에 대한 **육안 추정**이다. 원본 CSS·폰트·간격 토큰은 확보하지 않았다. 실제 구현 값(홈 960px/84px, paper 55:45, 사진 1:1, 차트 76:24, 제어 44px)은 이 관찰을 제품 용도와 접근성에 맞춰 **새로 제안하고 실측한 값**이다. 특히 paper의 이미지 패널을 무관한 사진으로 채우지 않고 실제 구독 폼으로 해석했다.
+
+## 변경 전 화면에서 확인한 문제 5개
+
+1. 홈의 큰 두 열 카드에서 전체 폼과 스토어가 실행되고, 업무 도구는 아래로 밀렸다. 세 선택지를 빠르게 비교하기 어려웠다. [변경 전 홈](assets/ui-motion-gallery/refinement-v2/before-home-1440.png).
+2. paper는 구독 폼을 회색 외곽 패널로 다시 감쌌고, 실제 읽을 콘텐츠가 없어 콘텐츠 사이트의 편집 위계가 드러나지 않았다. [변경 전 paper](assets/ui-motion-gallery/refinement-v2/before-paper-1440.png).
+3. object는 상품이 작은 CSS 실루엣으로 표현되어 천·종이·금속의 구분이 약했다. 작은 절반 폭 상품 목록과 저장 화면이 같은 무게로 놓였다. [변경 전 object](assets/ui-motion-gallery/refinement-v2/before-object-1440.png).
+4. frame은 두 절반 폭 패널과 중첩된 내부 카드가 반복됐고, 차트에는 수직 숫자 축이 없어 크기를 비교하기 어려웠다. [변경 전 frame](assets/ui-motion-gallery/refinement-v2/before-frame-1440.png).
+5. 세 화면 모두 작은 영문 구획·번호·분류가 반복되고, 자세히 보기·내부 버튼의 형태가 서로 경쟁했다. 새 탐색은 중립적인 규칙 하나로 묶고 데모 내부에 구성 차이를 배분했다. 위 네 캡처와 [전후 비교](assets/ui-motion-gallery/refinement-v2/comparison-before-after.jpg)에서 확인할 수 있다.
+
+## 이번 정제의 화면 구조
+
+- **컬렉션 홈:** 최대 폭 960px, 높이 약 84px의 가로형 행, 행 사이 10px, 54px 썸네일. 행 전체가 한 개의 컨셉 링크이며 그 안에 별도 버튼이나 데모를 넣지 않는다.
+- **paper:** 문장과 폼의 시작선을 맞추고 본문·입력·CTA를 실제 콘텐츠 흐름으로 연결한다. 큰 제목과 단일 우선 행동을 유지한다.
+- **object:** 크림색 아카이브 노트와 흑연색 알루미늄 트레이를 각각 독립 사진으로 보여 준다. 초기 4:3 제품 프레임에서 가장자리가 잘린 문제를 정사각형 `contain`과 여백으로 조정한다. 생성 원본·프롬프트·웹 자산은 [제품 이미지 기록](ui-motion-gallery-product-assets-v2.md)에 남겼다.
+- **frame:** 장식적인 가짜 레일과 과한 그림자를 줄이고, 데이터·제어·맥락을 실제 기능 단위에 맞춰 배치한다.
+- **공통 패스1 수정:** 화면 역할과 관계없는 가짜 푸터, 영어 장식 문구, 반복되는 설명 부제를 제거했다. 참조 이미지의 로고, 문장, 사진, 코드나 기기 목업은 복제하지 않았다. 폰트는 시스템 폰트를 사용한다.
+
+## 1440 × 1000 대표 화면 비교
+
+아래 링크는 모두 **이 저장소에서 생성한 갤러리 화면**이다. 참조 작품 캡처는 포함하지 않는다. 1440px 최종 캡처는 전체 페이지이며 표의 비교 이미지는 같은 뷰포트 상단 1000px이다. 캡처 API는 세로 스크롤바 폭을 제외할 수 있지만 브라우저 innerWidth를 별도로 실측했다.
+
+| 화면 | 변경 전 | 패스1 | 최종 |
+| --- | --- | --- | --- |
+| 컬렉션 홈 | [before-home](assets/ui-motion-gallery/refinement-v2/before-home-1440.png) | [pass1-home](assets/ui-motion-gallery/refinement-v2/pass1-home-1440.png) | [after-home](assets/ui-motion-gallery/refinement-v2/after-home-1440.png) |
+| paper | [before-paper](assets/ui-motion-gallery/refinement-v2/before-paper-1440.png) | [pass1-paper](assets/ui-motion-gallery/refinement-v2/pass1-paper-1440.png) | [after-paper](assets/ui-motion-gallery/refinement-v2/after-paper-1440.png) |
+| object | [before-object](assets/ui-motion-gallery/refinement-v2/before-object-1440.png) | [pass1-object](assets/ui-motion-gallery/refinement-v2/pass1-object-1440.png) | [after-object](assets/ui-motion-gallery/refinement-v2/after-object-1440.png) |
+| frame | [before-frame](assets/ui-motion-gallery/refinement-v2/before-frame-1440.png) | [pass1-frame](assets/ui-motion-gallery/refinement-v2/pass1-frame-1440.png) | [after-frame](assets/ui-motion-gallery/refinement-v2/after-frame-1440.png) |
+
+## 보존 대상과 현재 구현 목록
+
+각 행의 `구현`은 현재 코드에 해당 컴포넌트와 컨셉 매핑이 있다는 뜻이다. 실제 목록 동작과 세 폭의 렌더링, 상세 딥링크를 확인했다. 단일 HTML의 별도 브라우저 실행은 아래에 따로 구분한다. URL은 컨셉 페이지에서 해당 ID의 상세 항목으로 이동하는 경로다.
+
+| ID | 이름 | 컨셉 | URL | 분류 | 구현 | 검증 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `dark-ai--prompt` | 뉴스레터 구독 폼 | paper | `/p/ui-motion/paper/#dark-ai--prompt` | 입력 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `light-project--tasks` | 자주 묻는 질문 | paper | `/p/ui-motion/paper/#light-project--tasks` | 콘텐츠 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `light-project--quick-add` | 태그 입력 | paper | `/p/ui-motion/paper/#light-project--quick-add` | 입력 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `dark-ai--layers` | 드롭다운 액션 메뉴 | paper | `/p/ui-motion/paper/#dark-ai--layers` | 탐색·설정 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `dark-ai--dialog` | 장바구니 드로어 | object | `/p/ui-motion/object/#dark-ai--dialog` | 확인창 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `dark-ai--beam` | 버튼과 저장 상태 | object | `/p/ui-motion/object/#dark-ai--beam` | 피드백 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `light-project--calendar` | 상담 예약 피커 | object | `/p/ui-motion/object/#light-project--calendar` | 예약 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `light-project--filters` | 주문 검색과 필터 | object | `/p/ui-motion/object/#light-project--filters` | 데이터 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `light-project--chart` | 매출 분석 차트 | frame | `/p/ui-motion/frame/#light-project--chart` | 데이터 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `dark-ai--controls` | 계정 설정 탭 | frame | `/p/ui-motion/frame/#dark-ai--controls` | 탐색·설정 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `dark-ai--process` | 파일 업로더 | frame | `/p/ui-motion/frame/#dark-ai--process` | 입력 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+| `light-project--dialog` | 삭제 확인 다이얼로그 | frame | `/p/ui-motion/frame/#light-project--dialog` | 확인창 | 있음 | 3폭 렌더링·목록 동작·상세 진입 확인 |
+
+기존 `fullCatalog`의 14개 ID 중 나머지 두 레거시 hero(`dark-ai--hero`, `light-project--hero`)는 이번 12개 사이트 컴포넌트 정제 범위 밖이다. 경로와 보존 상태의 최종 브라우저 검증을 이번 표에서 주장하지 않는다.
+
+## 변경 파일과 제한
+
+현재 작업 트리의 변경은 컬렉션 홈(`collection-home.js`, `gallery.css`, `gallery.js`), 컨셉·카탈로그(`site-concepts.js`, `site-catalog.js`), 각 컴포넌트의 화면·동작(`site-inputs.js`, `site-content.js`, `site-runtime.js`), 내보내기 및 레거시 호환 코드(`engine.js`, `data.js`, `index.js`), 독립 HTML 진입점(`p/ui-motion/`과 숨김 가이드), 제품 WebP 두 장·포함형 데이터 모듈, 테스트, 자체 비교 캡처에 걸쳐 있다. 각 파일의 최종 변경 목록은 `git diff --stat`으로 QA 완료 시 다시 확정한다.
+
+제품 사진은 이미지 생성 도구로 만든 새 자산이며 실제 판매 재고의 사진이라는 의미는 아니다. 참조 사이트의 원본 이미지, 브랜드 자산, 문구, 소스 코드 및 캡처는 저장소의 배포 자산에 넣지 않았다. 화면 비율은 관찰에서 나온 설계 참고치이므로 원본과 픽셀 단위로 일치시키는 목표가 아니다.
+
+## 최종 QA 기록
+
+- 수정한 컴포넌트: **12개**. 실제 시각 검증: **12개를 1440·1180·390px에서 각각 확인**. 이 범위 내 미검증 컴포넌트: **0개**. 별도 레거시 hero 2개는 디자인 변경·이번 시각 검증 범위 밖이다.
+- 홈 포함 **4개 경로 × 3개 폭 = 12개 전체 화면 캡처**. 각 컨셉은 4개 데모를 실제 마운트한 뒤 캡처했다. 문서 가로 넘침과 화면 오른쪽 밖 요소는 12회 모두 0건이었다.
+- 1180px 홈: 최대 960px 중앙 정렬, 세 행 84px, 마지막 행 하단 약 463px/높이 900px. 390px 홈: 84px 가로형 행, 마지막 하단 약 441px/844px. 홈에서 실행된 데모 0개.
+- 390px 실측: 날짜 버튼 폭 약 **44.42px**, 차트 조작 막대 약 **44.14px**, 기간 제어 높이 **44px**. 주문 표는 두 줄 행으로 금액·상태까지 309px 안에 표시된다.
+- 한글 제목·본문·도움말, 긴 태그, 여러 줄 설명, 4주 매출 **₩12,380,000**을 확인했다. 가이드 번호가 두 줄로 갈라지던 문제와 빈 상단 줄도 실제 화면에서 찾아 수정했다.
+
+| 폭 | 홈 | paper | object | frame |
+| --- | --- | --- | --- | --- |
+| 1440×1000 | [화면](assets/ui-motion-gallery/refinement-v2/after-home-1440.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-paper-1440.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-object-1440.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-frame-1440.png) |
+| 1180×900 | [화면](assets/ui-motion-gallery/refinement-v2/after-home-1180.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-paper-1180.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-object-1180.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-frame-1180.png) |
+| 390×844 | [화면](assets/ui-motion-gallery/refinement-v2/after-home-390.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-paper-390.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-object-390.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-frame-390.png) |
+
+### 조작해서 확인한 범위
+
+- 구독: 빈 입력 오류·오류 입력 초점, 이름·이메일·동의, 처리 중 비활성, 완료. 태그: Enter 추가·긴 키워드·중복 오류. FAQ: Enter로 열기·닫기. 메뉴: 복제 결과가 실제 목록에 반영됨.
+- 스토어: 연속 담기, 수량 증가·감소, Escape 후 원 버튼 포커스 복귀, 주문 완료·빈 장바구니·다시 담기. 저장: 실패·재시도·처리 중·완료, 북마크 선택, 비활성 버튼. 예약: 날짜·시간·예약 완료. 주문: 검색·빈 결과·초기화·상태 필터·금액 내림차순·모두 선택·배송 상태 일괄 변경.
+- 업무 도구: 차트 7일/4주 빠른 전환, 막대 End·Escape와 텍스트 수치, 탭 Arrow/Home·설정 유지·저장. 업로드 샘플·취소·재시도·완료, 실제 파일 선택으로 형식 오류·5MB 초과 오류. 삭제: 틀린 이름 비활성·Escape·포커스 복귀·정확한 이름 삭제·실행 취소.
+- 공통: 검색·분류·결과 없음·초기화, 12개 상세 딥링크의 제목/열림, 이전/다음, 닫기·포커스 복귀, 검색으로 숨겨진 항목 상세를 닫으면 검색창 복귀. 홈 링크의 키보드 진입과 [초점 표시](assets/ui-motion-gallery/refinement-v2/state-home-focus-1180.png). 목록 조작은 상세로 이동하지 않았다.
+- 코드: paper·object·frame 대표의 복사 결과를 실제 클립보드와 대조했다. 설정 HTML 다운로드를 실행했다. 12개 독립 HTML의 스크립트 구문·스타일·무외부 의존성·사진 바이트를 계약 검사했다. 이 중 **3개**(구독·스토어·차트)를 별도 로컬 서버에서 열어 제출·제품 사진/수량·기간 전환을 실제 실행했다. 나머지 **9개 독립 HTML의 별도 브라우저 실행**은 하지 않았다.
+- 모션: 연속 탭·기간·담기, 닫기/재열기, 수동 모션 줄이기와 세 컨셉 가이드 선택/역방향 전환. 같은 노드 전환 취소는 단위 검사도 추가했다. 대상 localhost 페이지/독립 HTML의 수집된 콘솔 오류 **0건**. 참고 Behance 자체의 hydration/FedCM 오류는 대상 오류와 분리했다.
+
+### 실제 비교 후 다시 고친 부분
+
+패스1을 같은 1440×1000 참조 화면과 나란히 놓고 확인했다. paper의 가상 영문 푸터와 불필요한 부제를 제거하고, object의 4:3 잘림을 1:1 contain으로 바꾼 뒤 스토어 폭 960px로 줄여 구매 버튼을 함께 보여 줬다. frame의 가짜 아이콘 레일을 제거하고, 제목·기간 줄을 합쳐 차트 밀도를 높였다. 이후 세 폭에서 다시 보며 모바일 주문 재배치, 숫자 축 줄바꿈, 터치 폭, 가이드 번호, 버튼 모서리와 포커스를 추가 조정했다. 참조/최종 좌우 비교 캡처는 세션 로컬에 보관했다.
+
+### 자산·성능·라이선스
+
+제품은 자체 생성 WebP 두 장(22,238B + 10,402B), 썸네일은 자체 실제 화면 크롭 3장이다. 외부 사진·폰트·로고·개별 제작자 컴포넌트 코드는 도입하지 않았다. Unsplash 무료·Unsplash+ 모두 미사용, 구매·가입·API 키 연결·새 의존성 설치 없음. 기존 Lucian #280 MIT 고지는 레거시 장면과 해당 내보내기에 유지한다. [기존 리소스 감사](ui-motion-resource-audit.md)를 이번에 모두 재방문했다고 주장하지 않는다. 생성 프롬프트와 파일 이력은 [제품 기록](ui-motion-gallery-product-assets-v2.md)에 있다.
+
+홈에서는 runtime과 상품 이미지 모듈을 지연 로드하며 실제 마운트 0개였다. 상세는 IntersectionObserver로 필요한 데모를 마운트하고 화면 밖에서는 중단한다. 새 웹폰트·WebGL 없음. 실제 네트워크·CPU·FPS 수치는 계측하지 않았다. 공통 상세 모듈에 포함되는 제품 data URI 모듈 약 43.7KB를 스토어 전용으로 분리하는 추가 최적화는 남아 있다.
+
+### 한계와 검증 명령
+
+390px은 데스크톱 브라우저의 뷰포트 검증이며 실제 iOS/Android 기기와 Safari는 미확인이다. 운영체제의 모션 설정을 직접 변경하지 않았으며 수동 줄이기 실제 조작과 prefers-reduced-motion 코드·계약을 확인했다. 드래그 제스처 자체는 미확인이고 파일 선택·샘플 대안을 검증했다. 전체 스크린리더 감사나 자동 접근성 스캔을 완료했다고 주장하지 않는다. 홈 hover는 CSS와 버튼/링크 상태를 검토했으며 모든 hover 조합의 개별 캡처는 하지 않았다.
+
+최종 실행 결과는 아래 명령을 기준으로 기록한다.
+
+- `node scripts/test-ui-motion-showcase.mjs --require-full --export-previews`: **57 PASS**.
+- `node scripts/test-ui-motion-guide.mjs`: **71 PASS**.
+- `ruby scripts/test-harness.rb`: **PASS**.
+- `scripts/verify-all.sh`: **PASS**, Jekyll build·로컬 링크·빌드 결과·개인정보 노출 검사 포함.
+- 전체 `js/ui-motion-showcase/*.js`의 `node --check`, `git diff --check`: **PASS**.
+- TypeScript·ESLint 설정은 이 프로젝트에 없으므로 별도 타입 검사/ESLint 명령은 실행하지 않았다. JS 구문 검사와 프로젝트 하네스를 사용했다.
+
+커밋·푸시는 앞서 승인된 동일 갤러리 작업 범위에서 진행한다. 강제 푸시나 관련 없는 파일 변경은 하지 않는다. 최종 Git 상태와 배포 결과는 작업 완료 응답에서 보고한다.
