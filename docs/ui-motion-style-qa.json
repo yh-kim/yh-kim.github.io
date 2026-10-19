@@ -1,0 +1,987 @@
+{
+  "date": "2026-10-19",
+  "cssViewports": [
+    1440,
+    1180,
+    390
+  ],
+  "components": 12,
+  "styleVariants": 36,
+  "renderCases": 108,
+  "interactionVariants": 36,
+  "visualOnlyInteractionVariants": 0,
+  "cases": [
+    {
+      "componentId": "button",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 353.53125,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 346.515625,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 363.984375,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 434.078125,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 463.375,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 386.796875,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 353.6875,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 353.53125,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 325.796875,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 284.765625,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 284,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 245.1875,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-paper-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 357.53125,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-object-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 339.421875,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-frame-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 307.984375,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-paper-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 438.078125,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-object-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 467.375,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-frame-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 382.796875,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-paper-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 357.6875,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-object-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 357.53125,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-frame-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 321.796875,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-paper-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 288.765625,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-object-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 288,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-frame-1180.png",
+      "previewWidth": 400,
+      "previewHeight": 241.1875,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-paper-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 357.53125,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-object-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 339.421875,
+      "overflow": false
+    },
+    {
+      "componentId": "button",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/button-frame-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 307.984375,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-paper-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 438.078125,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-object-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 467.375,
+      "overflow": false
+    },
+    {
+      "componentId": "form",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/form-frame-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 382.796875,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-paper-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 357.6875,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-object-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 357.53125,
+      "overflow": false
+    },
+    {
+      "componentId": "tabs",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/tabs-frame-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 321.796875,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-paper-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 288.765625,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-object-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 288,
+      "overflow": false
+    },
+    {
+      "componentId": "drawer",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/drawer-frame-1440.png",
+      "previewWidth": 400,
+      "previewHeight": 241.1875,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 491.484375,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 539.328125,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 427.171875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 235.875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 256.875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 204.640625,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 516.5,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 512.921875,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 478.734375,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 596.6875,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 623.1875,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 598.1875,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 391.09375,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 342.328125,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 303.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 1082.21875,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 999.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 946.953125,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 565.4375,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 558.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 511.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "paper",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-paper-390.png",
+      "previewWidth": 343,
+      "previewHeight": 352.21875,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "object",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-object-390.png",
+      "previewWidth": 343,
+      "previewHeight": 332.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "frame",
+      "viewport": 390,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-frame-390.png",
+      "previewWidth": 343,
+      "previewHeight": 295.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 507.484375,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 537.328125,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 443.171875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 251.875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 272.875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 220.640625,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 513.3125,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 512.421875,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 428.234375,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 474.1875,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 498,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 471.390625,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 407.09375,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 350.328125,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 311.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 818.21875,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 757.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 725.953125,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 585.4375,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 566.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 519.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "paper",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-paper-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 352.21875,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "object",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-object-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 332.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "frame",
+      "viewport": 1180,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-frame-1180.png",
+      "previewWidth": 934.75,
+      "previewHeight": 295.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 507.484375,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 537.328125,
+      "overflow": false
+    },
+    {
+      "componentId": "upload",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/upload-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 443.171875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 251.875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 272.875,
+      "overflow": false
+    },
+    {
+      "componentId": "menu",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/menu-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 220.640625,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 513.3125,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 512.421875,
+      "overflow": false
+    },
+    {
+      "componentId": "tags",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/tags-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 428.234375,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 474.1875,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 498,
+      "overflow": false
+    },
+    {
+      "componentId": "chart",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/chart-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 471.390625,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 407.09375,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 350.328125,
+      "overflow": false
+    },
+    {
+      "componentId": "accordion",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/accordion-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 311.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 818.21875,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 757.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "table",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/table-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 725.953125,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 585.4375,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 566.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "calendar",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/calendar-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 519.453125,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "paper",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-paper-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 352.21875,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "object",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-object-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 332.109375,
+      "overflow": false
+    },
+    {
+      "componentId": "dialog",
+      "styleId": "frame",
+      "viewport": 1440,
+      "screenshot": "assets/ui-motion-gallery/style-library/dialog-frame-1440.png",
+      "previewWidth": 1100,
+      "previewHeight": 295.453125,
+      "overflow": false
+    }
+  ]
+}
