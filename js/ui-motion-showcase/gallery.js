@@ -1,5 +1,5 @@
-import { catalog, kinds, detailRules, promptFor } from './data.js?v=20261019-gallery2';
-import { mount, standalone } from './engine.js?v=20261019-gallery2';
+import { catalog, kinds, detailRules, promptFor } from './data.js?v=20261019-craft4';
+import { mount, standalone } from './engine.js?v=20261019-craft4';
 
 const items = catalog.filter(item => item.key !== 'hero');
 const host = document.getElementById('component-gallery');
@@ -17,27 +17,24 @@ let reduced = reducedMedia.matches;
 const motionKeys = new Set(['layers', 'controls', 'process', 'chart', 'tasks', 'filters', 'calendar', 'beam']);
 
 shadow.innerHTML = `
-<link rel="stylesheet" href="${new URL('./gallery.css?v=20261019-gallery2', import.meta.url).href}">
+<link rel="stylesheet" href="${new URL('./gallery.css?v=20261019-craft4', import.meta.url).href}">
 <a class="skip" href="#component-list">컴포넌트 목록으로 건너뛰기</a>
 <main class="library">
   <header class="masthead">
-    <a class="wordmark" href="./">컴포넌트 갤러리 <span>UI / MOTION</span></a>
+    <a class="wordmark" href="./">UI·모션 <span>COMPONENT LIBRARY</span></a>
     <nav aria-label="UI·모션 탐색"><a href="../">쇼케이스</a><a href="./" aria-current="page">컴포넌트</a><a href="/">블로그 ${icon('arrow')}</a></nav>
   </header>
   <section class="intro" aria-labelledby="gallery-title">
-    <div><h1 id="gallery-title">컴포넌트 갤러리</h1><p>입력·선택·데이터·피드백. 직접 조작하고 코드를 가져가세요.</p></div>
-    <p class="collection-note"><strong>${String(items.length).padStart(2, '0')}</strong>컴포넌트 · <span>직접 조작하는 예제</span></p>
+    <div><p class="eyebrow">작동하는 인터페이스의 작은 장면들</p><h1 id="gallery-title">컴포넌트 갤러리<span>${String(items.length).padStart(2,'0')}</span></h1><p>눌러 보고, 바꿔 보고, 필요한 부분을 가져가세요.</p></div>
+    <form class="search-form" role="search" aria-label="컴포넌트 찾기"><label class="search">${icon('search')}<input id="search" type="search" aria-label="컴포넌트 검색" placeholder="어떤 인터랙션을 찾으세요?" autocomplete="off" value="${esc(query)}"><button type="button" data-clear-query aria-label="검색어 지우기" ${query ? '' : 'hidden'}>${icon('close')}</button></label></form>
   </section>
-  <form class="toolbar" role="search" aria-label="컴포넌트 찾기">
-    <label class="search">${icon('search')}<input id="search" type="search" aria-label="컴포넌트 검색" placeholder="이름, 용도, 동작으로 찾기" autocomplete="off" value="${esc(query)}"><button type="button" data-clear-query aria-label="검색어 지우기" ${query ? '' : 'hidden'}>${icon('close')}</button></label>
-    <div class="filter-select"><label for="kind">분류</label><select id="kind">${usedKinds.map(([key, name]) => `<option value="${key}" ${key === kind ? 'selected' : ''}>${esc(name)} · ${key === 'all' ? items.length : items.filter(i => i.kind === key).length}</option>`).join('')}</select><button type="button" data-clear>초기화</button></div>
-  </form>
+  <div class="toolbar"><div class="kind-filters" role="group" aria-label="컴포넌트 분류">${usedKinds.map(([key,name])=>`<button type="button" data-kind="${key}" aria-pressed="${kind===key}">${esc(name)}<span>${key==='all'?items.length:items.filter(i=>i.kind===key).length}</span></button>`).join('')}</div><button class="clear-filters" type="button" data-clear>초기화</button></div>
   <div class="results"><p id="result-count" role="status" aria-live="polite" aria-atomic="true"></p><span class="hint">미리보기에서 직접 조작 · 상세에서 코드 가져가기</span></div>
   <section id="component-list" class="grid" aria-label="컴포넌트 목록" tabindex="-1">
     ${items.map((item, i) => `<article class="specimen" data-id="${item.id}" aria-labelledby="name-${item.id}"><div class="stage"><div class="demo-host" data-demo-host="${item.id}"><p class="pending">${esc(item.name)} 미리보기</p></div></div><div class="card-meta"><div><span class="card-kicker">${String(i + 1).padStart(2,'0')} / ${esc(kinds[item.kind])}</span><h2 id="name-${item.id}">${esc(item.name)}</h2><p>${esc(item.description)}</p></div><a class="open-demo" href="#${item.id}" data-open="${item.id}" aria-label="${esc(item.name)} 상세 보기">살펴보기 ${icon('arrow')}</a></div></article>`).join('')}
     <div class="empty" hidden><h2>일치하는 컴포넌트가 없습니다.</h2><p>다른 검색어를 입력하거나 분류를 전체로 바꿔보세요.</p><button type="button" class="button" data-clear>검색·필터 초기화</button></div>
   </section>
-  <footer class="footer"><details><summary>제작 방식과 출처</summary><p>모든 예제는 브라우저 안에서 동작하는 샘플입니다. 입력한 내용은 서버에 전송하거나 영구 저장하지 않습니다. 미리보기·상세·실행 HTML은 같은 구현을 사용합니다.</p><p>기존 <a href="../ai-workspace/">AI Workspace</a> · <a href="../project-dashboard/">Project Dashboard</a>와 <a href="../../hidden-memo/ui-motion-guide/">가이드 글</a>의 경로를 유지했습니다. 외부 라이브러리·웹폰트·사진을 추가하지 않았습니다. 기존 노이즈 표면의 <a href="https://github.com/Seokwoooo/lucian-uxui-prompt/blob/036fe0a67048bc135115ae2ed283130567a15357/LICENSE">MIT © 2026 Seokwoooo</a> 고지는 실행 코드에 보존됩니다.</p></details><p class="footer-note">자동 재생 없이, 필요한 순간에만.</p></footer>
+  <footer class="footer"><details><summary>제작 방식과 출처</summary><p>모든 예제는 브라우저 안에서 동작하는 샘플입니다. 입력한 내용은 서버에 전송하거나 영구 저장하지 않습니다. 미리보기·상세·실행 HTML은 같은 구현을 사용합니다.</p><p>기존 <a href="../ai-workspace/">AI Workspace</a> · <a href="../project-dashboard/">Project Dashboard</a>와 <a href="../../hidden-memo/ui-motion-guide/">가이드 글</a>의 경로를 유지했습니다. 외부 라이브러리·웹폰트·사진을 추가하지 않았습니다. 기존 대표 장면의 노이즈 표면에 사용한 <a href="https://github.com/Seokwoooo/lucian-uxui-prompt/blob/036fe0a67048bc135115ae2ed283130567a15357/LICENSE">MIT © 2026 Seokwoooo</a> 고지는 해당 장면의 실행 코드에 보존됩니다.</p></details><p class="footer-note">자동 재생 없이, 필요한 순간에만.</p></footer>
 </main>
 <dialog class="viewer" aria-labelledby="detail-title">
   <header class="viewer-head"><div><p class="viewer-kicker" id="detail-position"></p><h2 id="detail-title"></h2></div><nav class="viewer-nav" aria-label="컴포넌트 탐색"><button type="button" data-prev aria-label="이전 컴포넌트">${icon('prev')}</button><button type="button" data-next aria-label="다음 컴포넌트">${icon('next')}</button><button type="button" class="close" data-close aria-label="상세 닫기">${icon('close')}<span>닫기</span></button></nav></header>
@@ -85,7 +82,8 @@ function filter(updateURL = true) {
   shadow.querySelector('.empty').hidden = results.length > 0;
   shadow.getElementById('result-count').innerHTML = `<strong>${results.length}개</strong> / 전체 ${items.length}개${kind !== 'all' ? ` · ${esc(kinds[kind])}` : ''}`;
   shadow.querySelector('[data-clear-query]').hidden = !query;
-  shadow.querySelector('.filter-select [data-clear]').disabled = !query && kind === 'all';
+  shadow.querySelectorAll('[data-kind]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.kind===kind)));
+  shadow.querySelector('.clear-filters').disabled = !query && kind === 'all';
   if (updateURL) {
     const next = new URL(location.href);
     if (query) next.searchParams.set('q', query); else next.searchParams.delete('q');
@@ -94,7 +92,7 @@ function filter(updateURL = true) {
   }
 }
 function resetFilters() {
-  query = ''; kind = 'all'; input.value = ''; shadow.getElementById('kind').value = 'all'; filter(); input.focus();
+  query = ''; kind = 'all'; input.value = ''; filter(); input.focus();
 }
 function storeDetail() {
   if (!active || !detailAPI) return;
@@ -130,11 +128,11 @@ function showItem(item) {
   shadow.getElementById('detail-description').textContent = item.use;
   shadow.getElementById('pane-guide').innerHTML = detailRules(item).map(([title,text],i) => `<details ${i===0?'open':''}><summary>${esc(title)}</summary>${specMarkup(title,text)}</details>`).join('');
   detailAPI = mount(shadow.querySelector('.demo-frame'), item, 'full');
-  const state = snapshots.get(item.id) || instances.get(item.id)?.snapshot();
+  const state = instances.get(item.id)?.snapshot() || snapshots.get(item.id);
   if (state) detailAPI.restore(state, true);
   detailAPI.setReduced(reduced);
   shadow.querySelector('[data-replay]').hidden = !motionKeys.has(item.key);
-  shadow.querySelector('[data-pause]').hidden = !['layers','process'].includes(item.key);
+  shadow.querySelector('[data-pause]').hidden = item.key !== 'process';
   shadow.querySelector('[data-pause]').textContent = '일시정지';
   shadow.querySelector('.speed').hidden = !motionKeys.has(item.key);
   detailAPI.setSpeed(shadow.getElementById('speed').value);
@@ -186,13 +184,13 @@ function download(key) {
   shadow.querySelector(`[data-copy-status="${key}"]`).textContent = '다운로드를 요청했습니다.';
 }
 input.addEventListener('input', event => { query = event.target.value; filter(); });
-shadow.querySelector('.toolbar').addEventListener('submit', event => event.preventDefault());
-shadow.getElementById('kind').addEventListener('change', event => { kind = event.target.value; filter(); });
+shadow.querySelector('.search-form').addEventListener('submit', event => event.preventDefault());
 shadow.addEventListener('click', event => {
   const target = event.target.closest('button,a');
   if (!target) return;
   if (target.matches('.skip')) { event.preventDefault(); shadow.getElementById('component-list').focus(); return; }
   if (target.dataset.open) { event.preventDefault(); open(items.find(item => item.id === target.dataset.open), target); return; }
+  if (target.dataset.kind) { kind = target.dataset.kind; filter(); }
   if (target.hasAttribute('data-clear')) resetFilters();
   if (target.hasAttribute('data-clear-query')) { query = ''; input.value = ''; filter(); input.focus(); }
   if (target.hasAttribute('data-close')) close();
@@ -233,7 +231,7 @@ dialog.addEventListener('cancel', event => { if (event.target === dialog) { even
 function readLocation() {
   const next = new URL(location.href);
   query = next.searchParams.get('q') || ''; kind = Object.keys(kinds).includes(next.searchParams.get('kind')) ? next.searchParams.get('kind') : 'all';
-  input.value = query; shadow.getElementById('kind').value = kind; filter(false);
+  input.value = query; filter(false);
   const item = items.find(item => item.id === location.hash.slice(1));
   if (item) { if (dialog.open && active?.id !== item.id) showItem(item); else if (!dialog.open) open(item, null, false); }
   else if (dialog.open) close(false);

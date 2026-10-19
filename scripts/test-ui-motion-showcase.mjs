@@ -3,7 +3,7 @@
 // Data and export contracts. Layout, focus, motion timing and interaction are
 // verified in a browser because a source-code assertion cannot prove them.
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {Script} from 'node:vm';
 
 const source = async path => readFile(new URL(path, import.meta.url), 'utf8');
@@ -15,7 +15,11 @@ const oldEngineSource = (await source('../js/ui-motion-guide/engine.js'))
 const oldEngineURL = asModule(oldEngineSource);
 const aiSceneURL = asModule(await source('../js/ui-motion-showcase/ai-scene.js'));
 const projectSceneURL = asModule(await source('../js/ui-motion-showcase/project-scene.js'));
-const componentDesignURL = asModule(await source('../js/ui-motion-showcase/component-design.js'));
+const studyModules = {};
+for (const name of ['editor-studies','data-studies','feedback-studies']) studyModules[name]=asModule(await source('../js/ui-motion-showcase/'+name+'.js'));
+let componentDesignSource=await source('../js/ui-motion-showcase/component-design.js');
+for(const [name,url] of Object.entries(studyModules)) componentDesignSource=componentDesignSource.replace(new RegExp("from ['\"]\\./"+name+"\\.js(?:\\?[^'\"]*)?['\"]"), "from '"+url+"'");
+const componentDesignURL=asModule(componentDesignSource);
 const dataSource = (await source('../js/ui-motion-showcase/data.js'))
   .replace(/from ['"]\.\.\/ui-motion-guide\/themes\.js(?:\?[^'"]*)?['"]/, `from '${themesURL}'`)
   .replace(/from ['"]\.\/ai-scene\.js(?:\?[^'"]*)?['"]/, `from '${aiSceneURL}'`)
@@ -47,6 +51,10 @@ const style = await source('../js/ui-motion-showcase/styles.css');
 const galleryStyle = await source('../js/ui-motion-showcase/gallery.css');
 const inventory = await source('../docs/ui-motion-gallery-inventory.md');
 
+if(process.argv.includes('--export-previews')) {
+ await mkdir('/tmp/ui-motion-export-qa',{recursive:true});
+ for(const item of fullCatalog.filter(x=>x.key!=='hero')) await writeFile('/tmp/ui-motion-export-qa/'+item.id+'.html',standalone(item));
+}
 let count = 0;
 const failures = [];
 function check(name, run) {
@@ -256,9 +264,15 @@ check('each gallery item has its own interactive study markup', () => {
   for (const id of ['dark-ai--dialog', 'light-project--dialog']) {
     const item = fullCatalog.find(x => x.id === id);
     const html = markup(themeFor(item), item.key);
-    assert.ok(html.includes('<dialog>'));
+    assert.ok(/<dialog(?:\s|>)/.test(html));
     assert.ok(html.includes('data-action="open"'));
     assert.ok(html.includes('data-action="close"'));
+  }
+});
+check('component foundations stay out of preserved hero scenes', () => {
+  for(const t of themes){
+    assert.ok(!demoCSS(t).includes('.component-lab{'), 'Component CSS leaked into hero scene');
+    assert.ok(demoCSS(t,true,'process').includes('.component-lab{'));
   }
 });
 check('component rules and prompts match the dedicated gallery palette and dimensions', () => {
@@ -321,7 +335,7 @@ for (const item of fullCatalog) {
     assert.ok(html.includes(item.key === 'hero' ? theme.colors.accent : componentTokens.accent));
     assert.ok(html.includes(`body{margin:0;background:${item.key === 'hero' ? theme.colors.background : componentTokens.background}`));
     assert.ok(html.includes(`main{max-width:${item.key === 'hero' ? theme.layout.max : componentTokens.fullMax}px`));
-    assert.ok(html.includes(`${theme.motion.duration}ms`));
+    assert.ok(html.includes(item.key==='hero'?`${theme.motion.duration}ms`:'--focus:'));
     assert.ok(html.includes(markup(theme, item.key)));
     assert.ok(!/<(?:script|link)\b[^>]*(?:src|href)\s*=|@import\s|url\(\s*['"]?https?:|\b(?:fetch|XMLHttpRequest)\s*\(/i.test(html), 'External dependency found');
     const match = html.match(/<script>([\s\S]*?)<\/script>/i);
