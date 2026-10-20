@@ -1,5 +1,7 @@
 # 사이트 콘텐츠 컴포넌트 QA
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 2026-10-19, 로컬 갤러리 `/p/ui-motion/`와 독립 HTML 내보내기에서 확인했다. 검증 화면은 1440px 및 390px 뷰포트였다.
 
 | 컴포넌트 | 목록에서 확인한 동작 | 독립 HTML에서 확인한 동작 |
@@ -17,4 +19,4 @@
 
 모션 보강 후에는 기간 전환의 매출·주문 수 변경, 장바구니 Escape 닫기와 다시 열기, 파일 삭제창 Escape 닫기를 독립 HTML에서 다시 확인했다. 모션 줄이기 설정에서는 장바구니가 즉시 닫혔다. 오류 로그는 0건이며 `node scripts/test-ui-motion-showcase.mjs --export-previews`의 45개 계약 검사가 통과했다.
 
-화면 증거: [1440px 장바구니 드로어](assets/ui-motion-gallery/content-cart-1440.png), [390px 삭제 확인 카드](assets/ui-motion-gallery/content-delete-390.png).
+화면 증거: 1440px 장바구니 드로어, 390px 삭제 확인 카드.

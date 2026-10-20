@@ -1,10 +1,10 @@
-import {withStyle} from './component-model.js?v=20261019-motion8';
-import {concepts,conceptById,conceptForItem} from './site-concepts.js?v=20261019-motion8';
-import {collectionMarkup} from './collection-home.js?v=20261019-motion8';
-import {siteOrder,websiteItems as catalog,siteKinds as kinds,siteContexts,siteRules as detailRules,sitePrompt as promptFor} from './site-catalog.js?v=20261019-motion8';
+import {withStyle} from './component-model.js?v=20261020-expression9';
+import {concepts,conceptById,conceptForItem} from './site-concepts.js?v=20261020-expression9';
+import {collectionMarkup} from './collection-home.js?v=20261020-expression9';
+import {siteOrder,websiteItems as catalog,siteKinds as kinds,siteContexts,siteRules as detailRules,sitePrompt as promptFor} from './site-catalog.js?v=20261020-expression9';
 let designMarkup=()=>'',designWire=()=>()=>{};
 let mount,standalone,guideAPI,guideComponent='tabs';
-async function ensureRuntime(){if(mount)return;const runtime=await import('./site-runtime.js?v=20261019-motion8');mount=runtime.mountSite;standalone=runtime.standaloneSite;}
+async function ensureRuntime(){if(mount)return;const runtime=await import('./site-runtime.js?v=20261020-expression9');mount=runtime.mountSite;standalone=runtime.standaloneSite;}
 
 const url = new URL(location.href);
 const pageConcept = conceptById(document.body.dataset.galleryConcept || url.searchParams.get('concept') || (document.body.dataset.galleryView==='design'?'paper':''));
@@ -17,7 +17,7 @@ const base = new URL(document.body.dataset.galleryBase || './', location.href);
 const hrefFor=(id,view='components')=>new URL(id+'/'+(view==='design'?'#design':''),base).href;
 const homePage=document.body.dataset.galleryHome==='true';
 let homeMode=homePage&&!location.hash&&!url.searchParams.has('q')&&!url.searchParams.has('kind')&&!url.searchParams.has('component')&&!url.searchParams.has('context');
-if(!homeMode){await ensureRuntime();const design=await import('./gallery-design.js?v=20261019-motion8');designMarkup=design.designMarkup;designWire=design.designWire;}
+if(!homeMode){await ensureRuntime();const design=await import('./gallery-design.js?v=20261020-expression9');designMarkup=design.designMarkup;designWire=design.designWire;}
 let section = location.hash === '#design' || (!location.hash && document.body.dataset.galleryView === 'design') ? 'design' : 'components';
 let query = url.searchParams.get('q') || '';
 let kind = Object.keys(kinds).includes(url.searchParams.get('kind')) ? url.searchParams.get('kind') : 'all';
@@ -37,7 +37,7 @@ function setSection(next,update=true){section=next;if(next==='design')requestAni
 function setHome(value){homeMode=value;shadow.getElementById('home-view').hidden=!value;shadow.querySelector('.library').hidden=value;}
 function conceptStyle(){return '';}
 shadow.innerHTML = `
-<link rel="stylesheet" href="${new URL('./gallery.css?v=20261019-motion9', import.meta.url).href}">
+<link rel="stylesheet" href="${new URL('./gallery.css?v=20261020-expression9', import.meta.url).href}">
 <a class="skip" href="#home-view">본문으로 건너뛰기</a>
 <div class="site-shell" data-concept="${pageConcept?.id||'all'}" style="${conceptStyle(pageConcept)}">
 <header class="site-header"><a class="site-brand" href="${base.href}" aria-label="스타일 라이브러리 홈">UI<span>·</span>모션</a><nav class="site-nav" aria-label="사이트 탐색"><a href="${base.href}" ${homeMode?'aria-current="page"':''}>스타일 라이브러리</a><a href="${new URL('components/',base)}" ${!pageConcept&&!homePage?'aria-current="page"':''}>모든 컴포넌트 <span>${catalog.length}</span></a></nav></header>

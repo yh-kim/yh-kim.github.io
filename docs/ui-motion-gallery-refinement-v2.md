@@ -1,12 +1,14 @@
 # UI·모션 갤러리 정제 기록 v2
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 작성일: 2026-10-19 · 상태: 구현·브라우저 검증 완료
 
 ## 목적과 범위
 
 컨셉 컬렉션 홈과 12개 웹사이트 컴포넌트의 화면 밀도, 계층, 제품 표현을 정제한다. 사용자가 이미 알고 있는 컴포넌트 ID와 컨셉별 URL은 유지한다. 참조 화면의 레이아웃 원리를 살펴보되, 이 저장소의 한국어 콘텐츠·예시 데이터·동작을 기준으로 구현한다.
 
-비교 수치는 동일한 **1440 × 1000 뷰포트에서 본 화면의 대략적인 비율**이다. 원본 디자인의 CSS 값을 측정한 수치가 아니며, 브라우저·이미지 크롭에 따라 달라질 수 있다. 아래 Behance 프로젝트는 시각 참고자료다. 참조 이미지와 좌우 비교 캡처는 세션 로컬 작업 공간에만 보관하고 저장소에는 배포하지 않는다. 저장소에는 자체 화면의 before/pass1/final 캡처만 둔다.
+비교 수치는 동일한 **1440 × 1000 뷰포트에서 본 화면의 대략적인 비율**이다. 원본 디자인의 CSS 값을 측정한 수치가 아니며, 브라우저·이미지 크롭에 따라 달라질 수 있다. 아래 Behance 프로젝트는 시각 참고자료다. 참조 이미지와 화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 
 ## 참조에서 관찰한 구조와 적용 방향
 
@@ -36,11 +38,11 @@
 
 ## 변경 전 화면에서 확인한 문제 5개
 
-1. 홈의 큰 두 열 카드에서 전체 폼과 스토어가 실행되고, 업무 도구는 아래로 밀렸다. 세 선택지를 빠르게 비교하기 어려웠다. [변경 전 홈](assets/ui-motion-gallery/refinement-v2/before-home-1440.png).
-2. paper는 구독 폼을 회색 외곽 패널로 다시 감쌌고, 실제 읽을 콘텐츠가 없어 콘텐츠 사이트의 편집 위계가 드러나지 않았다. [변경 전 paper](assets/ui-motion-gallery/refinement-v2/before-paper-1440.png).
-3. object는 상품이 작은 CSS 실루엣으로 표현되어 천·종이·금속의 구분이 약했다. 작은 절반 폭 상품 목록과 저장 화면이 같은 무게로 놓였다. [변경 전 object](assets/ui-motion-gallery/refinement-v2/before-object-1440.png).
-4. frame은 두 절반 폭 패널과 중첩된 내부 카드가 반복됐고, 차트에는 수직 숫자 축이 없어 크기를 비교하기 어려웠다. [변경 전 frame](assets/ui-motion-gallery/refinement-v2/before-frame-1440.png).
-5. 세 화면 모두 작은 영문 구획·번호·분류가 반복되고, 자세히 보기·내부 버튼의 형태가 서로 경쟁했다. 새 탐색은 중립적인 규칙 하나로 묶고 데모 내부에 구성 차이를 배분했다. 위 네 캡처와 [전후 비교](assets/ui-motion-gallery/refinement-v2/comparison-before-after.jpg)에서 확인할 수 있다.
+1. 홈의 큰 두 열 카드에서 전체 폼과 스토어가 실행되고, 업무 도구는 아래로 밀렸다. 세 선택지를 빠르게 비교하기 어려웠다. 변경 전 홈.
+2. paper는 구독 폼을 회색 외곽 패널로 다시 감쌌고, 실제 읽을 콘텐츠가 없어 콘텐츠 사이트의 편집 위계가 드러나지 않았다. 변경 전 paper.
+3. object는 상품이 작은 CSS 실루엣으로 표현되어 천·종이·금속의 구분이 약했다. 작은 절반 폭 상품 목록과 저장 화면이 같은 무게로 놓였다. 변경 전 object.
+4. frame은 두 절반 폭 패널과 중첩된 내부 카드가 반복됐고, 차트에는 수직 숫자 축이 없어 크기를 비교하기 어려웠다. 변경 전 frame.
+5. 세 화면 모두 작은 영문 구획·번호·분류가 반복되고, 자세히 보기·내부 버튼의 형태가 서로 경쟁했다. 새 탐색은 중립적인 규칙 하나로 묶고 데모 내부에 구성 차이를 배분했다. 위 네 캡처와 전후 비교에서 확인할 수 있다.
 
 ## 이번 정제의 화면 구조
 
@@ -56,10 +58,10 @@
 
 | 화면 | 변경 전 | 패스1 | 최종 |
 | --- | --- | --- | --- |
-| 컬렉션 홈 | [before-home](assets/ui-motion-gallery/refinement-v2/before-home-1440.png) | [pass1-home](assets/ui-motion-gallery/refinement-v2/pass1-home-1440.png) | [after-home](assets/ui-motion-gallery/refinement-v2/after-home-1440.png) |
-| paper | [before-paper](assets/ui-motion-gallery/refinement-v2/before-paper-1440.png) | [pass1-paper](assets/ui-motion-gallery/refinement-v2/pass1-paper-1440.png) | [after-paper](assets/ui-motion-gallery/refinement-v2/after-paper-1440.png) |
-| object | [before-object](assets/ui-motion-gallery/refinement-v2/before-object-1440.png) | [pass1-object](assets/ui-motion-gallery/refinement-v2/pass1-object-1440.png) | [after-object](assets/ui-motion-gallery/refinement-v2/after-object-1440.png) |
-| frame | [before-frame](assets/ui-motion-gallery/refinement-v2/before-frame-1440.png) | [pass1-frame](assets/ui-motion-gallery/refinement-v2/pass1-frame-1440.png) | [after-frame](assets/ui-motion-gallery/refinement-v2/after-frame-1440.png) |
+| 컬렉션 홈 | before-home | pass1-home | after-home |
+| paper | before-paper | pass1-paper | after-paper |
+| object | before-object | pass1-object | after-object |
+| frame | before-frame | pass1-frame | after-frame |
 
 ## 보존 대상과 현재 구현 목록
 
@@ -98,16 +100,16 @@
 
 | 폭 | 홈 | paper | object | frame |
 | --- | --- | --- | --- | --- |
-| 1440×1000 | [화면](assets/ui-motion-gallery/refinement-v2/after-home-1440.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-paper-1440.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-object-1440.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-frame-1440.png) |
-| 1180×900 | [화면](assets/ui-motion-gallery/refinement-v2/after-home-1180.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-paper-1180.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-object-1180.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-frame-1180.png) |
-| 390×844 | [화면](assets/ui-motion-gallery/refinement-v2/after-home-390.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-paper-390.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-object-390.png) | [화면](assets/ui-motion-gallery/refinement-v2/after-frame-390.png) |
+| 1440×1000 | 화면 | 화면 | 화면 | 화면 |
+| 1180×900 | 화면 | 화면 | 화면 | 화면 |
+| 390×844 | 화면 | 화면 | 화면 | 화면 |
 
 ### 조작해서 확인한 범위
 
 - 구독: 빈 입력 오류·오류 입력 초점, 이름·이메일·동의, 처리 중 비활성, 완료. 태그: Enter 추가·긴 키워드·중복 오류. FAQ: Enter로 열기·닫기. 메뉴: 복제 결과가 실제 목록에 반영됨.
 - 스토어: 연속 담기, 수량 증가·감소, Escape 후 원 버튼 포커스 복귀, 주문 완료·빈 장바구니·다시 담기. 저장: 실패·재시도·처리 중·완료, 북마크 선택, 비활성 버튼. 예약: 날짜·시간·예약 완료. 주문: 검색·빈 결과·초기화·상태 필터·금액 내림차순·모두 선택·배송 상태 일괄 변경.
 - 업무 도구: 차트 7일/4주 빠른 전환, 막대 End·Escape와 텍스트 수치, 탭 Arrow/Home·설정 유지·저장. 업로드 샘플·취소·재시도·완료, 실제 파일 선택으로 형식 오류·5MB 초과 오류. 삭제: 틀린 이름 비활성·Escape·포커스 복귀·정확한 이름 삭제·실행 취소.
-- 공통: 검색·분류·결과 없음·초기화, 12개 상세 딥링크의 제목/열림, 이전/다음, 닫기·포커스 복귀, 검색으로 숨겨진 항목 상세를 닫으면 검색창 복귀. 홈 링크의 키보드 진입과 [초점 표시](assets/ui-motion-gallery/refinement-v2/state-home-focus-1180.png). 목록 조작은 상세로 이동하지 않았다.
+- 공통: 검색·분류·결과 없음·초기화, 12개 상세 딥링크의 제목/열림, 이전/다음, 닫기·포커스 복귀, 검색으로 숨겨진 항목 상세를 닫으면 검색창 복귀. 홈 링크의 키보드 진입과 초점 표시. 목록 조작은 상세로 이동하지 않았다.
 - 코드: paper·object·frame 대표의 복사 결과를 실제 클립보드와 대조했다. 설정 HTML 다운로드를 실행했다. 12개 독립 HTML의 스크립트 구문·스타일·무외부 의존성·사진 바이트를 계약 검사했다. 이 중 **3개**(구독·스토어·차트)를 별도 로컬 서버에서 열어 제출·제품 사진/수량·기간 전환을 실제 실행했다. 나머지 **9개 독립 HTML의 별도 브라우저 실행**은 하지 않았다.
 - 모션: 연속 탭·기간·담기, 닫기/재열기, 수동 모션 줄이기와 세 컨셉 가이드 선택/역방향 전환. 같은 노드 전환 취소는 단위 검사도 추가했다. 대상 localhost 페이지/독립 HTML의 수집된 콘솔 오류 **0건**. 참고 Behance 자체의 hydration/FedCM 오류는 대상 오류와 분리했다.
 

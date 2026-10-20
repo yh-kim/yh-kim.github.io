@@ -1,5 +1,7 @@
 # UI·모션 대표 화면 설계·검수 기록
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 2026-10-16. 이번 단계는 기존 두 독립 페이지의 대표 화면과 핵심 상호작용을 재설계했다. 예제 수는 늘리지 않았다. 아래의 **관찰**은 브라우저로 연 참고 자료에서 확인한 내용이다. 픽셀·색·시간 값은 원본 CSS의 실측이 아니라 **이 저장소에서 새로 정한 구현값**이다. [A 장면 토큰](../js/ui-motion-showcase/ai-scene.js)과 [B 장면 토큰](../js/ui-motion-showcase/project-scene.js)이 원본이며 [data.js](../js/ui-motion-showcase/data.js)는 상세 가이드와 복사 프롬프트에 이를 반영한다.
 
 ## 참고 이미지: 관찰과 재설계
@@ -44,10 +46,10 @@ A·B는 정지 이미지이므로 원본의 클릭 결과, duration, easing은 �
 
 | 화면 | 데스크톱 1440×900 | 모바일 390×844 |
 | --- | --- | --- |
-| A | [수정 전후](assets/ui-motion-foundation/a-before-after.jpg) · [첫 화면](assets/ui-motion-foundation/a-desktop.jpg) · [상세](assets/ui-motion-foundation/a-detail.jpg) | [첫 화면](assets/ui-motion-foundation/a-mobile.jpg) · [상세](assets/ui-motion-foundation/a-mobile-detail.jpg) |
-| B | [수정 전후](assets/ui-motion-foundation/b-before-after.jpg) · [첫 화면](assets/ui-motion-foundation/b-desktop.jpg) · [상세](assets/ui-motion-foundation/b-detail.jpg) | [첫 화면](assets/ui-motion-foundation/b-mobile.jpg) · [상세](assets/ui-motion-foundation/b-mobile-detail.jpg) |
+| A | 수정 전후 · 첫 화면 · 상세 | 첫 화면 · 상세 |
+| B | 수정 전후 · 첫 화면 · 상세 | 첫 화면 · 상세 |
 
-[모바일 두 화면 비교](assets/ui-motion-foundation/mobile-pair.jpg). A는 작업 대상과 제어부의 관계가 뚜렷해졌지만 원본의 사진·광원 밀도를 자체 SVG 하나로 대체한 차이가 남는다. B는 표와 데이터 밀도를 첫 화면으로 올렸지만 샘플은 6개 업무·4일에 한정된다.
+모바일 두 화면 비교. A는 작업 대상과 제어부의 관계가 뚜렷해졌지만 원본의 사진·광원 밀도를 자체 SVG 하나로 대체한 차이가 남는다. B는 표와 데이터 밀도를 첫 화면으로 올렸지만 샘플은 6개 업무·4일에 한정된다.
 
 로컬 브라우저에서 A 입력 오류/성공, 후보 선택 뒤 변형 시 선택 보존, 일시정지·초기화·reduced-motion을 조작했다. B에서는 진행 필터(4건), 마감/상태 정렬, 일별→누적(1·2·3·4건), 작업 행·검토 dialog를 조작했다. 표의 검토 버튼을 Enter로 열고 Escape로 닫아 같은 버튼으로 초점이 돌아오는 것을 확인했다. 복사 완료 상태와 수동 선택 복사를 확인했고, 내려받은 A/B 완성 HTML을 별도로 열어 후보 변형·작업 검토를 다시 실행했다. 1440×900·390×844 첫 화면과 상세를 재촬영했다. 모바일 가로 넘침, 상세 진입 시 배경 스크롤 잠금, 닫기 후 복귀도 확인했다. OS 수준 reduced-motion과 실기기 터치는 미확인이다.
 

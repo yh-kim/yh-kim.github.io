@@ -1,10 +1,12 @@
 # 콘셉트 입력·제어 컴포넌트 확인
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 2026-10-19, 로컬 미리보기에서 1440px와 390px 뷰포트로 확인했다. 아래 화면은 각각 Frame의 전체 목록과 Paper 메뉴의 조작 후 상태다.
 
-![1440px Frame 설정·업로드 화면](assets/ui-motion-gallery/concept-inputs-1440.png)
+캡처: 1440px Frame 설정·업로드 화면 (개인 로컬 보관).
 
-![390px Paper 프로젝트 메뉴 상태](assets/ui-motion-gallery/concept-inputs-390.png)
+캡처: 390px Paper 프로젝트 메뉴 상태 (개인 로컬 보관).
 
 | 컴포넌트 | 브라우저에서 확인한 동작 |
 | --- | --- |

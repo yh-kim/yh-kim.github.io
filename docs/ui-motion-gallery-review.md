@@ -1,5 +1,7 @@
 # 컴포넌트 갤러리 개선과 검증
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 2026-10-19. 커밋·푸시는 사용자의 추가 요청으로 승인됐다. 완성 화면을 다시 디자인하는 작업과 개별 컴포넌트 개선을 구분했다.
 
 ## 실제 위치와 시작 상태
@@ -36,12 +38,12 @@
 
 | 변경 전 | 변경 후 |
 | --- | --- |
-| ![배포 전 누적 차트](assets/ui-motion-gallery/before-chart-1440.jpg) | ![변경 후 누적 차트](assets/ui-motion-gallery/after-chart-1440.jpg) |
-| ![배포 전 입력](assets/ui-motion-gallery/before-form-1440.jpg) | ![변경 후 작업 추가 결과](assets/ui-motion-gallery/after-form-1440.jpg) |
+| 캡처: 배포 전 누적 차트 (개인 로컬 보관). | 캡처: 변경 후 누적 차트 (개인 로컬 보관). |
+| 캡처: 배포 전 입력 (개인 로컬 보관). | 캡처: 변경 후 작업 추가 결과 (개인 로컬 보관). |
 
-![최종 1440px 갤러리](assets/ui-motion-gallery/after-gallery-1440.jpg)
+캡처: 최종 1440px 갤러리 (개인 로컬 보관).
 
-[1180px 갤러리](assets/ui-motion-gallery/after-gallery-1180.jpg) · [390px 갤러리](assets/ui-motion-gallery/after-gallery-390.jpg) · [390px 프리셋](assets/ui-motion-gallery/after-controls-390.jpg) · [390px 입력](assets/ui-motion-gallery/after-prompt-390.jpg). `iteration-1440.jpg`는 첫 수정본의 잘림을 보여 주는 중간 기록이다.
+1180px 갤러리 · 390px 갤러리 · 390px 프리셋 · 390px 입력. `iteration-1440.jpg`는 첫 수정본의 잘림을 보여 주는 중간 기록이다.
 
 ## 실제 브라우저 검증
 

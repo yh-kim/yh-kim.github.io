@@ -186,10 +186,11 @@ check('stable archived guide route and current metadata',()=>{
   assert.doesNotMatch(registry,/\/p\/hidden-memo\/ui-motion-guide\//);
 });
 check('blog global files untouched',()=>{
-  const changed=execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
-  const allowed=/^(?:p\/hidden-memo\/ui-motion-guide\/index\.md|p\/hidden-memo\/index\.html|p\/ui-motion\/(?:index\.html|ai-workspace\/index\.html|project-dashboard\/index\.html|(?:components|paper|object|frame)\/index\.html|DESIGN\.md)|js\/ui-motion-guide\/(?:engine|index|themes|guide|showcase)\.(?:js|css)|js\/ui-motion-showcase\/[^/]+\.(?:js|css)|docs\/ui-motion-(?:guide|showcase|gallery|resource|reference)-[^/]+\.md|docs\/assets\/ui-motion-(?:guide|showcase|gallery)(?:-review)?\/[^/]+|scripts\/test-ui-motion-(?:guide|showcase|styles)\.mjs)$/;
-  assert.deepEqual(changed.filter(path=>!allowed.test(path)),[],
-    'Guide work must not change other posts, routing, navigation, or global styles');
+  const changed=execFileSync('git',['diff','--name-status','HEAD'],{encoding:'utf8'}).trim().split('\n').filter(Boolean).map(row=>row.split('\t'));
+  const allowed=/^(?:\.gitignore|p\/hidden-memo\/ui-motion-guide\/index\.md|p\/hidden-memo\/index\.html|p\/ui-motion\/(?:index\.html|ai-workspace\/index\.html|project-dashboard\/index\.html|(?:components|paper|object|frame)\/index\.html|DESIGN\.md)|js\/ui-motion-guide\/(?:engine|index|themes|guide|showcase)\.(?:js|css)|js\/ui-motion-showcase\/[^/]+\.(?:js|css)|docs\/ui-motion-[^/]+\.(?:md|json)|scripts\/test-ui-motion-(?:guide|showcase|styles)\.mjs)$/;
+  const captures=/^(?:docs\/assets\/ui-motion-[^/]+\/|p\/ui-motion\/assets\/(?:style-(?:paper|object|frame)|concept-(?:paper|object|frame)-v2)\.png$)/;
+  assert.deepEqual(changed.filter(([status,path])=>!allowed.test(path)&&!(status==='D'&&captures.test(path))),[],
+    'UI library work must not change unrelated posts, routing, navigation, global styles, or add capture assets');
 });
 const controller=await readFile(new URL('../js/ui-motion-guide/index.js',import.meta.url),'utf8');
 check('copy failure provides manual selection',()=>assert.match(controller,/catch\s*\{\s*box\.focus\(\);box\.select\(\)/));

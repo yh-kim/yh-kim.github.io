@@ -37,9 +37,9 @@ const expectedLegacyStyles={
  'light-project--filters':'object','light-project--calendar':'object','light-project--chart':'frame','light-project--dialog':'frame'
 };
 const expectedMotion={
- paper:{press:150,content:200,tab:180,result:180,drawerOpen:230,drawerClose:150,drawerDistance:24,ease:'cubic-bezier(.2,.8,.2,1)'},
- object:{press:150,content:220,tab:180,result:200,drawerOpen:240,drawerClose:150,drawerDistance:28,ease:'cubic-bezier(.22,1,.36,1)'},
- frame:{press:140,content:180,tab:180,result:180,drawerOpen:220,drawerClose:140,drawerDistance:20,ease:'cubic-bezier(.2,.8,.2,1)'}
+ paper:{press:150,content:200,tab:220,tabPanel:'fade',tabPanelDistance:0,result:180,drawerOpen:230,drawerClose:150,drawerDistance:40,drawerScale:1,ease:'cubic-bezier(.2,.8,.2,1)'},
+ object:{press:150,content:220,tab:220,tabPanel:'slide',tabPanelDistance:10,result:200,drawerOpen:280,drawerClose:190,drawerDistance:28,drawerScale:.98,ease:'cubic-bezier(.22,1,.36,1)'},
+ frame:{press:140,content:160,tab:160,tabPanel:'snap',tabPanelDistance:4,result:160,drawerOpen:180,drawerClose:140,drawerDistance:20,drawerScale:1,ease:'cubic-bezier(.2,.7,.2,1)'}
 };
 const components=['button','form','tabs','drawer'];
 const componentSelector=component=>`.ui-demo--${component}`;
@@ -181,8 +181,8 @@ check('modal Tab wraps both directions and modeless comparison stays navigable',
  }finally{for(const [name,value] of saved){if(value===undefined)delete globalThis[name];else globalThis[name]=value;}}
 });
 
-check('legacy exports preserve hidden URLs and every style thumbnail has a registry entry',()=>{
- for(const style of styles){assert.match(style.thumbnail,new RegExp(`/p/ui-motion/assets/style-${style.id}\\.png$`));}
+check('legacy exports preserve hidden URLs and home thumbnails use no raster captures',()=>{
+ for(const style of styles){assert.equal(style.thumbnail,`inline:form/${style.id}`);}
  for(const id of ['paper','object','frame']){
   const html=hiddenConceptPages[id];assert.match(html,new RegExp('data-gallery-concept="'+id+'"'));assert.match(html,/html-document-listing" content="hidden"/);
  }

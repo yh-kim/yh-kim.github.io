@@ -1,5 +1,7 @@
 # UI·모션 갤러리 컴포넌트·스타일·상태 출처 분석
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 확인일: 2026-10-19. 대상: 버튼·폼·탭·드로어 네 기능과 Paper·Object·Frame 세 시각 스타일. **네 기능 모두 세 스타일에서 같은 의미와 상태를 유지**하며, 스타일만 달라진다. 이 문서는 공개 프로젝트의 실제 컴포넌트 소스를 읽고 구현 원리를 추린 기록이다. 외부 코드·자산을 배포 파일로 복사하지 않는다. 아래 GitHub 링크는 확인 당시 `main`이며 고정 커밋 SHA나 릴리스 버전은 확인하지 못했다. 따라서 이 문서의 소스 판독 기준은 링크와 확인일이다.
 
 ## 시각 자료와 코드 자료의 경계
@@ -10,7 +12,7 @@
 | Object | [Homevo](https://www.behance.net/gallery/247907919/Homevo-Modern-Ecommerce-Furniture-Website-UIUX-Design)의 중성색 여백·제품 중심·구매 행동의 묶음. | 따뜻한 중성색, 부드러운 모서리와 표면 깊이를 네 기능 모두에 적용한다. |
 | Frame | [APX](https://www.behance.net/gallery/243179235/APX-UXUI-Case-for-SaaS-IT-Management-Platform)의 조용한 표면·촘촘한 데이터/제어 관계. | 차분한 청색 강조, 명료한 제어 밀도와 작은 반경을 네 기능 모두에 적용한다. |
 
-Behance 작품은 정적 화면의 **시각 원칙** 근거다. 해당 페이지에서 동작 코드, 원본 CSS 토큰, 실제 모션 타이밍을 얻거나 검증하지 않았다. 위 구현 규칙과 수치는 작품 제작자의 명세가 아니라 이 저장소의 선택이다. 기존 대조에 기록된 대표 이미지 모듈 ID는 위 표 순서대로 `1014297309`·`1434317651`·`1402933193`이다. 이번 문서에서는 해당 이미지의 직접 URL을 복구하지 못했으며, 참조 캡처는 [기존 정제 기록](ui-motion-gallery-refinement-v2.md)에 설명된 세션 로컬 시각화 공간에만 있다. 저장소의 [Paper 화면](assets/ui-motion-gallery/refinement-v2/after-paper-1440.png)·[Object 화면](assets/ui-motion-gallery/refinement-v2/after-object-1440.png)·[Frame 화면](assets/ui-motion-gallery/refinement-v2/after-frame-1440.png)은 **자체 구현 캡처**이지 Behance 원본 캡처가 아니다. [컨셉 검토](ui-motion-gallery-concepts-review.md)의 접근 범위도 따른다. [스타일 시스템](../js/ui-motion-showcase/style-system.js)의 `contexts`는 각 스타일이 잘 맞는 사용 맥락의 예시이며, 기능 배정이나 제한이 아니다.
+Behance 작품은 정적 화면의 **시각 원칙** 근거다. 해당 페이지에서 동작 코드, 원본 CSS 토큰, 실제 모션 타이밍을 얻거나 검증하지 않았다. 위 구현 규칙과 수치는 작품 제작자의 명세가 아니라 이 저장소의 선택이다. 기존 대조에 기록된 대표 이미지 모듈 ID는 위 표 순서대로 `1014297309`·`1434317651`·`1402933193`이다. 이번 문서에서는 해당 이미지의 직접 URL을 복구하지 못했으며, 참조 캡처는 [기존 정제 기록](ui-motion-gallery-refinement-v2.md)에 설명된 세션 로컬 시각화 공간에만 있다. 저장소의 Paper 화면·Object 화면·Frame 화면은 **자체 구현 캡처**이지 Behance 원본 캡처가 아니다. [컨셉 검토](ui-motion-gallery-concepts-review.md)의 접근 범위도 따른다. [스타일 시스템](../js/ui-motion-showcase/style-system.js)의 `contexts`는 각 스타일이 잘 맞는 사용 맥락의 예시이며, 기능 배정이나 제한이 아니다.
 
 ## 실제 오픈소스 구현 4개
 

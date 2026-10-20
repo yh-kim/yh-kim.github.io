@@ -1,5 +1,7 @@
 # UI·모션 가이드 개편 검증 기록
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 2026-10-16. [참고 화면 분석](ui-motion-guide-reference-analysis.md)에 A·B의 정지 이미지 관찰과 C의 브라우저 조작 범위를 기록했다. A·B 원본 이미지는 임시 비교 폴더에만 저장했고 배포 자산에 포함하지 않았다.
 
 ## 변경 범위와 구현 근거
@@ -11,9 +13,9 @@
 
 ## 수정 전후 화면
 
-![기존 MORI 예제와 새 Dark AI·Light Project 장면 비교](assets/ui-motion-guide-review/comparison.jpg)
+캡처: 기존 MORI 예제와 새 Dark AI·Light Project 장면 비교 (개인 로컬 보관).
 
-1440px 뷰포트의 실제 브라우저 캡처: [기존 글](assets/ui-motion-guide-review/before.jpg), [Dark AI Workspace](assets/ui-motion-guide-review/after-dark.jpg), [Light Project Dashboard](assets/ui-motion-guide-review/after-light.jpg). 모바일 360px 캡처: [Dark AI](assets/ui-motion-guide-review/mobile-dark.jpg), [Light Project](assets/ui-motion-guide-review/mobile-light.jpg). AFTER는 확장 보기, BEFORE는 이전 글 기본 상태이므로 카드 크기의 절대 비교가 아닌 화면 구조 변화 확인용이다.
+1440px 뷰포트의 실제 브라우저 캡처: 기존 글, Dark AI Workspace, Light Project Dashboard. 모바일 360px 캡처: Dark AI, Light Project. AFTER는 확장 보기, BEFORE는 이전 글 기본 상태이므로 카드 크기의 절대 비교가 아닌 화면 구조 변화 확인용이다.
 
 비공개 원본 대비 이미지는 `/tmp/ui-guide-review/reference-a-vs-dark.jpg`, `/tmp/ui-guide-review/reference-b-vs-light.jpg`에 만들었다. A는 원본 히어로 웹 화면을, B는 커버의 노트북 UI 영역을 잘라 구현 화면과 비슷한 표시 폭에 놓았다. A의 광원·점 질감·큰 제목·입력부 위계는 반영됐지만 비스듬한 전체 웹 화면과 흰색으로 번지는 넓은 광원은 복제하지 않고 세로 분할 작업실로 재설계했다. B의 지표·차트·목록·우측 영역 관계는 반영됐고, 구현의 글자와 조작 영역은 원본 축소 목업보다 크며 정보 밀도는 낮다. 이 비교는 픽셀 일치나 원본 제품의 동작 증명이 아니다.
 

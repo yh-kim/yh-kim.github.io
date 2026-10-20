@@ -7,3 +7,9 @@ npm-debug.log
 *.sh
 !scripts/serve-site.sh
 !scripts/stop-site.sh
+
+docs/assets/ui-motion-*/
+
+# Legacy UI thumbnail captures; home uses inline vector markup.
+p/ui-motion/assets/style-*.png
+p/ui-motion/assets/concept-*-v*.png

@@ -52,7 +52,7 @@ Behance 작품은 열람만 했으며 재사용 허락이 확인되지 않은 �
 
 ## 증거와 한계
 
-대표 최종 화면은 `assets/ui-motion-gallery/concept-final-{home,paper,object,frame}-1440.png`, 각 컴포넌트 컨셉의 `-1180.png`, `-390.png`다. `concept-final-home-390.png`, `concept-final-guide-1180.png`, `concept-final-guide-390.png`도 기록했다. `concept-home-*`, `concept-inputs-*`, `concept-content-*`는 이번 턴의 중간 수정 기록이며 최종 디자인 증거와 구별한다.
+대표 최종 화면과 중간 수정본은 당시 캡처로 검토했다. 화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 
 Safari/Firefox, 화면 읽기 프로그램, 실제 터치 하드웨어, 모든 상태·OS 조합은 미검증이다. 모든 모션의 프레임 계측은 하지 않았다. 실서비스 전송·업로드·결제·예약 API는 구현 범위가 아니며 화면 내 로컬 시뮬레이션이다. 빌드 성공을 디자인 검증으로 대신하지 않았다.
 

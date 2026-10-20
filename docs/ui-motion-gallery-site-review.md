@@ -31,7 +31,7 @@
 
 ## 대표 비교
 
-- 이전: `docs/assets/ui-motion-gallery/site-before-main-1280.jpg` (1280px 실측)
+- 이전 화면은 1280px 캡처로 확인했다. 화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 - 이후: `site-after-main-1440.jpg`, `site-after-main-390.jpg`
 - 새 디자인 기준: `site-after-design-1440.jpg`, `site-after-design-390.jpg`
 - 1180px 실제 기능: `site-faq-1180.jpg`, `site-cart-1180.jpg`

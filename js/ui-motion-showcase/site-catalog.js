@@ -1,5 +1,5 @@
-import {componentIdFor} from './component-model.js?v=20261019-motion8';
-import {conceptForItem} from './site-concepts.js?v=20261019-motion8';
+import {componentIdFor} from './component-model.js?v=20261020-expression9';
+import {conceptForItem} from './site-concepts.js?v=20261020-expression9';
 // Stable IDs retain existing deep links; names describe the current website pattern.
 const row=(name,description,kind,use,behavior,hint,keyboard,duration=220)=>({name,description,kind,use,behavior,hint,keyboard,duration});
 export const siteCatalog={
@@ -34,8 +34,8 @@ const motionDescription={
 const libraryMotion={
  button:m=>`누름 scale .97→1 ${m.press}ms, 결과 opacity .45→1 ${m.result}ms. 900ms 로컬 저장 후 성공·오류를 같은 위치에 표시합니다.`,
  form:m=>`검증 오류는 문구와 첫 오류 초점으로 표시하고 해당 입력을 x 0→-4→4→0px로 ${m.content}ms 이동합니다. 현재 입력으로 다시 재생하며 값을 덮어쓰지 않습니다. 900ms 로컬 제출 후 결과 opacity .45→1 ${m.result}ms.`,
- tabs:m=>`선택 표시의 현재 x·폭에서 새 탭까지 ${m.tab}ms, 패널 opacity .45→1 및 y 5→0px ${m.content}ms. 빠른 역선택은 현재 위치에서 이어 갑니다.`,
- drawer:m=>`패널 opacity 0→1 및 x ${m.drawerDistance}→0px ${m.drawerOpen}ms / 닫힘은 현재 위치에서 역방향 ${m.drawerClose}ms. 퇴장 뒤 닫고 초점을 복원합니다.`,
+ tabs:m=>`선택 표시의 현재 위치·크기에서 새 탭까지 ${m.tab}ms. ${m.tabPanel==='fade'?'패널은 이동 없이 opacity .36→1':m.tabPanel==='slide'?`패널은 선택 방향 x ±${m.tabPanelDistance}px→0, opacity .72→1`:`패널은 x ${m.tabPanelDistance}px→0, opacity .84→1; 넓이 340px 이상에서 세로 탭`}, ${m.content}ms. 빠른 역선택은 현재 위치에서 이어 갑니다.`,
+ drawer:m=>`패널 opacity 0→1, x ${m.drawerDistance}→0px, scale ${m.drawerScale}→1 ${m.drawerOpen}ms / 닫힘은 현재 위치에서 역방향 ${m.drawerClose}ms. 퇴장 뒤 닫고 초점을 복원합니다.`,
  accordion:m=>`현재 높이에서 펼친 본문 높이 또는 summary 높이까지 ${m.content}ms. 다시 재생은 첫 답변을 열거나 닫습니다. 중간에 반대로 누르면 현재 높이에서 목표를 바꾸고 여러 답변을 독립적으로 유지합니다.`,
  menu:(m,item)=>`메뉴 opacity 0→1, y -7→0px ${item.motion.duration}ms. 다시 재생은 메뉴를 다시 열고 기존 프로젝트는 보존합니다. 닫힘은 즉시 반영합니다.`,
  tags:m=>`추천 태그를 추가하면 opacity 0→1, scale .85→1 ${m.result}ms와 미리보기 y 5→0px ${m.content}ms. 다시 재생은 아직 없는 추천 태그를 추가하고, 한도에서는 현재 미리보기만 재생합니다.`,

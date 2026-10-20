@@ -1,8 +1,8 @@
-import {componentIdFor,styleIdFor,withStyle} from './component-model.js?v=20261019-motion8';
-import {styleById,styleCSS} from './style-system.js?v=20261019-motion8';
-import {componentDefinitions} from './library-components.js?v=20261019-motion8';
-import {conceptForItem} from './site-concepts.js?v=20261019-motion8';
-import {legacyDefinitions} from './legacy-components.js?v=20261019-motion8';
+import {componentIdFor,styleIdFor,withStyle} from './component-model.js?v=20261020-expression9';
+import {styleById,styleCSS} from './style-system.js?v=20261020-expression9';
+import {componentDefinitions} from './library-components.js?v=20261020-expression9';
+import {conceptForItem} from './site-concepts.js?v=20261020-expression9';
+import {legacyDefinitions} from './legacy-components.js?v=20261020-expression9';
 export const siteTokens={background:'#f6f7f9',surface:'#ffffff',ink:'#191c22',muted:'#67717e',line:'#e1e5eb',accent:'#2558d9',onAccent:'#ffffff',focus:'#2558d9',success:'#247453',error:'#b23842',font:'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',cardHeight:null,fullMax:1100,compactPadding:0,fullPadding:0,controlMinHeight:44,controlRadius:8,fullMinHeights:{}};
 export const isInput=item=>['dark-ai--process','dark-ai--layers','dark-ai--controls','dark-ai--beam','dark-ai--prompt','light-project--quick-add'].includes(item.id);
 const definitionFor=item=>componentDefinitions[componentIdFor(item)]||legacyDefinitions[componentIdFor(item)];
@@ -41,7 +41,7 @@ export function wireSite(root,item,componentWire){
  const subscribers=new Set();let previousState='',queued=false;
  const notify=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;const state={study:study.snapshot?.()||{}},key=JSON.stringify(state);if(key===previousState)return;previousState=key;subscribers.forEach(fn=>fn(structuredClone(state)));});};
  for(const event of ['input','change','click','close','toggle'])listen(root,event,notify,{capture:true});
- const changes=new MutationObserver(notify);changes.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','checked','aria-selected','aria-pressed','aria-expanded','open']});
+ const changes=new MutationObserver(notify);changes.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','checked','aria-selected','aria-pressed','aria-expanded','open','data-closing']});
  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;sync();},{threshold:0});observer.observe(root);setReduced(false);
  return {root,setComparison(value){root.dataset.comparison=String(!!value);study.setComparison?.(!!value);},subscribe(fn){subscribers.add(fn);return ()=>subscribers.delete(fn);},snapshot(){return structuredClone({study:study.snapshot?.()||{}});},restore(state){if(state)study.restore?.(state.study||state);},reset(){animations.forEach(a=>a.cancel());animations.clear();paused=false;study.reset?.();sync();notify();},replay(){paused=false;study.replay?.();sync();notify();},action(selector){root.querySelector(selector)?.click();},setReduced,setSpeed(value){const previous=speed;speed=Math.min(4,Math.max(1,Number(value)||1));animations.forEach(a=>a.updatePlaybackRate?.((a.playbackRate||1)*previous/speed));root.style.setProperty('--motion-speed',String(speed));},pause(){paused=true;study.pause?.();sync();},resume(){paused=false;study.resume?.();sync();},suspend(){suspended=true;sync();},continue(){suspended=false;sync();},destroy(){study.destroy?.();controller.abort();animations.forEach(a=>a.cancel());animations.clear();observer.disconnect();changes.disconnect();subscribers.clear();root.querySelectorAll('dialog[open]').forEach(d=>d.close());}};
 }

@@ -1,5 +1,7 @@
 # 테마별 독립 UI·모션 페이지: 구현과 검증
 
+
+화면 캡처는 개인 로컬 보관소에 저장하며 저장소에는 포함하지 않는다.
 2026-10-16 기준. 이 기록의 **자동 검사 결과는 실제로 실행한 명령**을 적었다. 브라우저 시각·조작 검수와 결과 캡처를 포함한다.
 
 ## 배포 경로와 변경 범위
@@ -64,9 +66,9 @@
 
 | 뷰포트 | 허브 | A 완성 화면 | A 상세 | B 완성 화면 | B 상세 |
 | --- | --- | --- | --- | --- | --- |
-| 1440×900 | [hub-desktop](assets/ui-motion-pages/hub-desktop.jpg) | [a-desktop](assets/ui-motion-pages/a-desktop.jpg) | [a-detail-desktop](assets/ui-motion-pages/a-detail-desktop.jpg) | [b-desktop](assets/ui-motion-pages/b-desktop.jpg) | [b-detail-desktop](assets/ui-motion-pages/b-detail-desktop.jpg) |
-| 1024×768 | [hub-tablet](assets/ui-motion-pages/hub-tablet.jpg) | [a-tablet](assets/ui-motion-pages/a-tablet.jpg) | [a-detail-tablet](assets/ui-motion-pages/a-detail-tablet.jpg) | [b-tablet](assets/ui-motion-pages/b-tablet.jpg) | [b-detail-tablet](assets/ui-motion-pages/b-detail-tablet.jpg) |
-| 390×844 | [hub-mobile](assets/ui-motion-pages/hub-mobile.jpg) | [a-mobile](assets/ui-motion-pages/a-mobile.jpg) | [a-detail-mobile](assets/ui-motion-pages/a-detail-mobile.jpg) | [b-mobile](assets/ui-motion-pages/b-mobile.jpg) | [b-detail-mobile](assets/ui-motion-pages/b-detail-mobile.jpg) |
+| 1440×900 | hub-desktop | a-desktop | a-detail-desktop | b-desktop | b-detail-desktop |
+| 1024×768 | hub-tablet | a-tablet | a-detail-tablet | b-tablet | b-detail-tablet |
+| 390×844 | hub-mobile | a-mobile | a-detail-mobile | b-mobile | b-detail-mobile |
 
 ## 브라우저 검수 결과
 
