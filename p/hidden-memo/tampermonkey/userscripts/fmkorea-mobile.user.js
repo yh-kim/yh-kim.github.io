@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.2
-// @description  웜 뉴트럴·틸 모바일 UI, 홈 아이콘, 상세 제목의 게시판·추천수 표시, 광고·상단·댓글 정리
+// @version      1.5.3
+// @description  살구색 포인트·간결한 홈 피드 UI, 홈 아이콘, 상세 제목의 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.2';
+  const SCRIPT_VERSION = '1.5.3';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -321,22 +321,23 @@
   function cleanAppearance() {
     const root = scope('appearance');
     const detail = `${root} .rd_hd .board:has(> .top_area > .date):has(> .btm_area > .side.fr)`;
+    const home = `${root} body:has(.main_recent)`;
     // 사이트 UI만 재정의합니다. 본문 안의 색상·이미지·영상·인용 형식은 그대로 둡니다.
     return `
       ${root} { background: transparent !important; }
       ${root} body {
         --fm-clean-bg: #f6f5f2; --fm-clean-surface: #fff; --fm-clean-raised: #faf9f7;
         --fm-clean-text: #1c1b19; --fm-clean-muted: #6b6862; --fm-clean-line: #e7e4de;
-        --fm-clean-accent: #0f766e; --fm-clean-soft: #e6f2f0;
+        --fm-clean-accent: #9a4e26; --fm-clean-soft: #fff0e7;
         color-scheme: light;
         background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
-        margin: 0 8px !important; padding: 0 !important; box-sizing: border-box;
+        margin: 0 4px !important; padding: 0 !important; box-sizing: border-box;
         font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
       }
       ${root} body.night_mode {
         --fm-clean-bg: #121211; --fm-clean-surface: #1b1b1a; --fm-clean-raised: #232321;
         --fm-clean-text: #ecebe8; --fm-clean-muted: #a3a09a; --fm-clean-line: #2f2e2b;
-        --fm-clean-accent: #5ec4b6; --fm-clean-soft: #1f3532;
+        --fm-clean-accent: #f0b58f; --fm-clean-soft: #3b2a23;
         color-scheme: dark;
       }
       ${root} :where(.bd, .fm_best_widget, nav.fmkorea_navi, .fmkorea_m_navi, #gnb, body > footer) a:not(:where(.xe_content *, article *)) {
@@ -390,7 +391,7 @@
       ${root} .fm-recent-visited .item.bookmark a { color: var(--fm-clean-accent) !important; }
       ${root} .fm-recent-visited .item span.time { color: var(--fm-clean-muted) !important; font-size: 10px !important; }
       ${root} .rd_hd {
-        margin: 0 !important; padding: 10px 10px 8px !important;
+        margin: 0 !important; padding: 10px 8px 8px !important;
         background: var(--fm-clean-surface) !important; border-bottom: 1px solid var(--fm-clean-line) !important;
       }
       ${root} .rd_hd :is(.top_area, .btm_area, .board) {
@@ -450,7 +451,7 @@
         padding: 3px 9px !important; box-shadow: none !important; text-shadow: none !important;
       }
       ${root} .rd_body article .xe_content > p:not(:has(img, picture, video, iframe)) {
-        padding-left: 12px !important; padding-right: 12px !important;
+        padding-left: 8px !important; padding-right: 8px !important;
       }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
         background: transparent !important; border-color: var(--fm-clean-line) !important;
@@ -616,6 +617,61 @@
         color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
         border: 0 !important; border-radius: 999px !important; font-size: 11px !important;
       }
+      ${home} .cnb_n_list_home .bd_cnb {
+        padding: 4px 6px !important; border: 0 !important; background: transparent !important;
+      }
+      ${home} .cnb_n_list_home .bd_cnb ul { display: flex; gap: 4px; padding: 0 !important; }
+      ${home} .cnb_n_list_home .bd_cnb li { margin: 0 !important; }
+      ${home} .cnb_n_list_home .bd_cnb a {
+        padding: 5px 11px !important; font-size: 11px !important; line-height: 1.4 !important;
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-muted) !important;
+        border-color: transparent !important;
+      }
+      ${home} .cnb_n_list_home .bd_cnb a[href="/best2"] {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+      }
+      ${home} .cnb_n_list_home .bd_cnb a[href*="mid=politics"] {
+        color: var(--fm-clean-muted) !important; background: var(--fm-clean-raised) !important;
+        border-color: var(--fm-clean-line) !important;
+      }
+      ${home} .cnb_n_list_home .bd_cnb a.on {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+        border-color: var(--fm-clean-accent) !important;
+      }
+      ${home} .fm_best_widget { padding: 0 !important; }
+      ${home} .fm_best_widget > ul { margin: 0 !important; padding: 0 !important; }
+      ${home} .fm_best_widget > ul > li.li {
+        margin: 0 !important; padding: 5px 8px !important; min-height: 0 !important;
+        background: transparent !important; border: 0 !important;
+        border-bottom: 1px solid var(--fm-clean-line) !important;
+      }
+      ${home} .fm_best_widget > ul > li.li > div.li {
+        padding: 0 !important; min-height: 0 !important;
+      }
+      ${home} .fm_best_widget > ul > li.li > div.li:has(> a > img.thumb) {
+        padding-right: 64px !important; min-height: 44px !important;
+      }
+      ${home} .fm_best_widget img.thumb {
+        left: auto !important; right: 0 !important; top: 0 !important;
+        width: 52px !important; height: 44px !important; object-fit: cover; border-radius: 8px;
+        background: var(--fm-clean-raised) !important;
+      }
+      ${home} .fm_best_widget span.thumb { display: none !important; }
+      ${home} .fm_best_widget .title {
+        margin: 0 0 2px !important; font-size: 13px !important; font-weight: 600 !important; line-height: 1.4 !important;
+      }
+      ${home} .fm_best_widget .title .ellipsis-target {
+        display: inline !important; white-space: normal !important; overflow: visible !important;
+      }
+      ${home} .fm_best_widget > ul > li.li > div.li > div {
+        display: inline !important; font-size: 10.5px !important; line-height: 1.4 !important;
+      }
+      ${home} .fm_best_widget .category { margin-right: 5px; }
+      ${home} .fm_best_widget .title::before { margin-left: 0 !important; }
+      ${home} .fm_best_widget li.li_best2_politics1 .title::before {
+        color: var(--fm-clean-muted) !important; background: var(--fm-clean-raised) !important;
+        border: 1px solid var(--fm-clean-line) !important;
+      }
       ${root} #fm_alert { right: 12px !important; max-width: calc(100vw - 24px) !important; }
       ${root} #fm_alert .fm_alert_wrap.best { width: min(280px, calc(100vw - 24px)) !important; }
       ${root} #fm_alert .best .fm_alert {
@@ -767,8 +823,8 @@
       ${scope('boardLabel')} [data-fm-clean-board] {
         display: inline-block !important; flex: 0 1 auto; align-self: flex-start;
         max-width: 40%; height: 22px; box-sizing: border-box; margin-top: 2px; padding: 0 8px;
-        border: 0; border-radius: 999px; background: var(--fm-clean-soft, #e6f2f0);
-        color: var(--fm-clean-accent, #0f766e) !important; text-decoration: none !important;
+        border: 0; border-radius: 999px; background: var(--fm-clean-soft, #fff0e7);
+        color: var(--fm-clean-accent, #9a4e26) !important; text-decoration: none !important;
         overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
         font: 600 12px/22px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         letter-spacing: 0; text-indent: 0;
@@ -777,7 +833,7 @@
         display: inline-block !important; flex: 0 0 auto; align-self: flex-start;
         height: 22px; box-sizing: border-box; margin: 2px 0 0 auto; padding: 0 8px;
         border: 0; border-radius: 999px;
-        color: var(--fm-clean-accent, #0f766e); background: var(--fm-clean-soft, #e6f2f0); white-space: nowrap;
+        color: var(--fm-clean-accent, #9a4e26); background: var(--fm-clean-soft, #fff0e7); white-space: nowrap;
         font: 600 12px/22px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         letter-spacing: 0; text-indent: 0;
       }
@@ -797,7 +853,7 @@
       }
       ${scope('commentComposer')} details[data-fm-clean-comment-composer][open] > summary::after { transform: rotate(225deg); }
       ${scope('commentComposer')} details[data-fm-clean-comment-composer] > summary:focus-visible {
-        outline: 2px solid var(--fm-clean-accent, #0f766e); outline-offset: 2px;
+        outline: 2px solid var(--fm-clean-accent, #9a4e26); outline-offset: 2px;
       }
       ${scope('commentComposer')} details[data-fm-clean-comment-composer] > .cmt_editor {
         margin: 0 !important; padding: 8px 10px !important;
@@ -866,8 +922,8 @@
           --fm-control-text: var(--fm-clean-text, #1c1b19);
           --fm-control-muted: var(--fm-clean-muted, #6b6862);
           --fm-control-line: var(--fm-clean-line, #e7e4de);
-          --fm-control-accent: var(--fm-clean-accent, #0f766e);
-          --fm-control-soft: var(--fm-clean-soft, #e6f2f0);
+          --fm-control-accent: var(--fm-clean-accent, #9a4e26);
+          --fm-control-soft: var(--fm-clean-soft, #fff0e7);
           --fm-control-track: #797670;
           --fm-control-knob: #fff;
         }
@@ -879,8 +935,8 @@
           --fm-control-text: var(--fm-clean-text, #ecebe8);
           --fm-control-muted: var(--fm-clean-muted, #a3a09a);
           --fm-control-line: var(--fm-clean-line, #2f2e2b);
-          --fm-control-accent: var(--fm-clean-accent, #5ec4b6);
-          --fm-control-soft: var(--fm-clean-soft, #1f3532);
+          --fm-control-accent: var(--fm-clean-accent, #f0b58f);
+          --fm-control-soft: var(--fm-clean-soft, #3b2a23);
           --fm-control-track: #77736d;
           --fm-control-knob: #121211;
         }

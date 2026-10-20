@@ -552,11 +552,11 @@
         const homeBody = homeDoc.body;
         const homeBoard = homeDoc.querySelector('.bd');
         const homeBodyStyle = homeDoc.defaultView.getComputedStyle(homeBody);
-        record('홈 좌우 8px는 padding 아닌 margin이고 본문과 바탕색이 같음',
+        record('홈 좌우 4px는 padding 아닌 margin이고 본문과 바탕색이 같음',
           homeBodyStyle.paddingLeft === '0px' && homeBodyStyle.paddingRight === '0px' &&
-          homeBodyStyle.marginLeft === '8px' && homeBodyStyle.marginRight === '8px' &&
+          homeBodyStyle.marginLeft === '4px' && homeBodyStyle.marginRight === '4px' &&
           homeBodyStyle.backgroundColor === homeDoc.defaultView.getComputedStyle(homeBoard).backgroundColor &&
-          homeBoard.getBoundingClientRect().right <= homeDoc.defaultView.innerWidth - 7 &&
+          homeBoard.getBoundingClientRect().right <= homeDoc.defaultView.innerWidth - 3 &&
           homeDoc.documentElement.scrollWidth <= homeDoc.defaultView.innerWidth + 1);
 
         const composerDoc = await makeLayoutFrame(source, '댓글 입력 접기', `
