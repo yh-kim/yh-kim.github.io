@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.3
+// @version      1.5.4
 // @description  살구색 포인트·간결한 홈 피드 UI, 홈 아이콘, 상세 제목의 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.3';
+  const SCRIPT_VERSION = '1.5.4';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -322,12 +322,13 @@
     const root = scope('appearance');
     const detail = `${root} .rd_hd .board:has(> .top_area > .date):has(> .btm_area > .side.fr)`;
     const home = `${root} body:has(.main_recent)`;
-    // 사이트 UI만 재정의합니다. 본문 안의 색상·이미지·영상·인용 형식은 그대로 둡니다.
+    // 본문 작성자 색상·영상·인용 형식은 유지하고 다크 모드 이미지 밝기만 낮춥니다.
     return `
       ${root} { background: transparent !important; }
       ${root} body {
         --fm-clean-bg: #f6f5f2; --fm-clean-surface: #fff; --fm-clean-raised: #faf9f7;
         --fm-clean-text: #1c1b19; --fm-clean-muted: #6b6862; --fm-clean-line: #e7e4de;
+        --fm-clean-title: #1c1b19;
         --fm-clean-accent: #9a4e26; --fm-clean-soft: #fff0e7;
         color-scheme: light;
         background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
@@ -337,6 +338,7 @@
       ${root} body.night_mode {
         --fm-clean-bg: #121211; --fm-clean-surface: #1b1b1a; --fm-clean-raised: #232321;
         --fm-clean-text: #ecebe8; --fm-clean-muted: #a3a09a; --fm-clean-line: #2f2e2b;
+        --fm-clean-title: #ccc9c3;
         --fm-clean-accent: #f0b58f; --fm-clean-soft: #3b2a23;
         color-scheme: dark;
       }
@@ -407,10 +409,11 @@
       ${root} .rd_hd .board .btm_area { margin: 0 !important; padding: 0 !important; }
       ${root} .rd_hd h1 {
         padding: 0 !important; margin: 4px 0 6px !important;
-        color: var(--fm-clean-text) !important; font-size: 18px !important;
+        color: var(--fm-clean-title) !important; font-size: 18px !important;
         font-weight: 600 !important; line-height: 1.5 !important; letter-spacing: -.2px !important;
         text-shadow: none !important;
       }
+      ${root} .rd_hd h1 .np_18px_span { color: var(--fm-clean-title) !important; }
       ${root} .rd_hd :is(.btm_area, .btm_area span, .btm_area b),
       ${root} .document_address, ${root} .document_address a {
         color: var(--fm-clean-muted) !important; font-size: 12px !important;
@@ -453,6 +456,9 @@
       ${root} .rd_body article .xe_content > p:not(:has(img, picture, video, iframe)) {
         padding-left: 8px !important; padding-right: 8px !important;
       }
+      ${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img) {
+        filter: brightness(.9) !important;
+      }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
         background: transparent !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important; box-shadow: none !important;
@@ -462,7 +468,7 @@
       ${root} .bd_m_lst.zine > li.is_tmb { padding-right: 10px !important; }
       ${root} :is(.bd_lst, .bd_m_lst) > li { border-bottom: 1px solid var(--fm-clean-line) !important; }
       ${root} .bd_m_lst > li .rt_area h3 {
-        color: var(--fm-clean-text) !important; font-size: 13px !important; font-weight: 500 !important; line-height: 1.35 !important;
+        color: var(--fm-clean-title) !important; font-size: 13px !important; font-weight: 500 !important; line-height: 1.35 !important;
         height: auto !important;
         white-space: normal !important; text-overflow: clip !important; overflow: visible !important;
       }
@@ -479,10 +485,10 @@
       ${root} .bd_m_lst > li .info { margin-top: 2px !important; line-height: 1.4 !important; font-size: 10.5px !important; }
       ${root} .bd_m_lst > li .rt_area h3 > a,
       ${root} .bd_m_lst > li .rt_area h3 > a :not(.comment_count) {
-        color: var(--fm-clean-text) !important; text-shadow: none !important;
+        color: var(--fm-clean-title) !important; text-shadow: none !important;
       }
       ${root} .bd_m_lst .blind, ${root} .bd_m_lst .blind * {
-        color: var(--fm-clean-text) !important;
+        color: var(--fm-clean-title) !important;
       }
       ${root} .bd_m_lst > li .rt_area h3 .comment_count,
       ${root} .bd_m_lst > li .visited .comment_count,
@@ -540,7 +546,8 @@
         background: var(--fm-clean-raised) !important; border: 0 !important;
         border-bottom: 1px solid var(--fm-clean-line) !important; border-radius: 0 !important; padding: 8px 10px !important;
       }
-      ${root} .fdb_itm { padding-top: 8px !important; padding-bottom: 8px !important; }
+      ${root} .fdb_itm { padding-top: 6px !important; padding-bottom: 6px !important; }
+      ${root} .fdb_itm > .meta { margin-bottom: 4px !important; }
       ${root} .fdb_itm :is(.meta, .meta .date, .meta a, .meta span) {
         color: var(--fm-clean-muted) !important; font-size: 11px !important;
       }
@@ -551,11 +558,11 @@
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
         border: 0 !important; border-radius: 999px !important;
       }
-      ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
+      ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-title) !important; }
       ${root} .bd_lst td.title, ${root} .bd_lst td.title a {
         font-size: 13px !important; font-weight: 500 !important; line-height: 1.35 !important;
       }
-      ${root} .bd_lst td.title a span:not(.comment_count) { color: var(--fm-clean-text) !important; }
+      ${root} .bd_lst td.title a span:not(.comment_count) { color: var(--fm-clean-title) !important; }
       ${root} .bd_lst td.title .comment_count { color: var(--fm-clean-accent) !important; font-size: 12px !important; }
       ${root} .bd_lst td.title a:is(.visited, :visited),
       ${root} .bd_lst td.title a:is(.visited, :visited) span:not(.comment_count) { color: var(--fm-clean-muted) !important; }
@@ -566,7 +573,7 @@
       }
       ${root} .bd_lst tr:is(.notice, .select) { background: var(--fm-clean-raised) !important; }
       ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; font-size: 10.5px !important; }
-      ${root} .bd_m_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
+      ${root} .bd_m_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-title) !important; }
       ${root} .bd_m_lst :is(.author, .regdate, .m_no, .category) { color: var(--fm-clean-muted) !important; }
       ${root} .bd_m_lst > li :is(.visited, .visited .ellipsis-target),
       ${root} .bd_m_lst > li .rt_area h3 > a:visited {
@@ -596,12 +603,12 @@
         color: var(--fm-clean-accent) !important;
       }
       ${root} .fm_best_widget .title {
-        color: var(--fm-clean-text) !important; font-size: 13px !important;
+        color: var(--fm-clean-title) !important; font-size: 13px !important;
         font-weight: 500 !important; line-height: 1.35 !important;
       }
       ${root} .fm_best_widget .title a,
       ${root} .fm_best_widget .title a .ellipsis-target {
-        color: var(--fm-clean-text) !important;
+        color: var(--fm-clean-title) !important;
       }
       ${root} .fm_best_widget :is(.li_visited, .li_visited .title a, .li_visited .title .ellipsis-target),
       ${root} .fm_best_widget .title a:visited,
@@ -618,12 +625,18 @@
         border: 0 !important; border-radius: 999px !important; font-size: 11px !important;
       }
       ${home} .cnb_n_list_home .bd_cnb {
-        padding: 4px 6px !important; border: 0 !important; background: transparent !important;
+        padding: 3px 6px !important; border: 0 !important; background: transparent !important;
       }
-      ${home} .cnb_n_list_home .bd_cnb ul { display: flex; gap: 4px; padding: 0 !important; }
-      ${home} .cnb_n_list_home .bd_cnb li { margin: 0 !important; }
-      ${home} .cnb_n_list_home .bd_cnb a {
-        padding: 5px 11px !important; font-size: 11px !important; line-height: 1.4 !important;
+      ${home} .cnb_n_list_home .bd_cnb > ul {
+        display: flex; align-items: center; gap: 4px; height: 28px !important;
+        padding: 0 !important; overflow: visible !important;
+      }
+      ${home} .cnb_n_list_home .bd_cnb > ul > li { margin: 0 !important; }
+      ${home} .cnb_n_list_home .bd_cnb > ul > li > a {
+        display: inline-flex !important; align-items: center; justify-content: center;
+        box-sizing: border-box !important; height: 28px !important; margin: 0 !important;
+        padding: 0 11px !important; font-size: 11px !important; line-height: 1 !important;
+        border-radius: 999px !important; box-shadow: none !important;
         background: var(--fm-clean-raised) !important; color: var(--fm-clean-muted) !important;
         border-color: transparent !important;
       }
@@ -659,9 +672,17 @@
       ${home} .fm_best_widget span.thumb { display: none !important; }
       ${home} .fm_best_widget .title {
         margin: 0 0 2px !important; font-size: 13px !important; font-weight: 600 !important; line-height: 1.4 !important;
+        display: block !important; -webkit-line-clamp: unset !important;
+        height: auto !important; max-height: none !important; white-space: normal !important;
+        overflow: visible !important; text-overflow: clip !important;
+      }
+      ${home} .fm_best_widget .title > a {
+        display: inline !important; white-space: normal !important;
+        overflow: visible !important; text-overflow: clip !important;
       }
       ${home} .fm_best_widget .title .ellipsis-target {
         display: inline !important; white-space: normal !important; overflow: visible !important;
+        max-width: none !important; text-overflow: clip !important;
       }
       ${home} .fm_best_widget > ul > li.li > div.li > div {
         display: inline !important; font-size: 10.5px !important; line-height: 1.4 !important;
