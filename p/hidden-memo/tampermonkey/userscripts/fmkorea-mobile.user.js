@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.1
+// @version      1.5.2
 // @description  웜 뉴트럴·틸 모바일 UI, 홈 아이콘, 상세 제목의 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,11 +21,11 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.1';
+  const SCRIPT_VERSION = '1.5.2';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
-    boardLabel: true, count: true, footer: true, commentActions: true, siteFooter: true, appearance: true
+    boardLabel: true, count: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true
   };
   const options = [
     ['enabled', '전체 기능 켜기'],
@@ -37,6 +37,7 @@
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['footer', '상세 주소·하단 도구 숨김'],
     ['commentActions', '댓글 추천·답글·더보기 숨김'],
+    ['commentComposer', '댓글 쓰기 기본 접기'],
     ['siteFooter', '사이트 하단 문의·신고 숨김'],
     ['appearance', '깔끔한 화면 디자인']
   ];
@@ -319,15 +320,17 @@
 
   function cleanAppearance() {
     const root = scope('appearance');
+    const detail = `${root} .rd_hd .board:has(> .top_area > .date):has(> .btm_area > .side.fr)`;
     // 사이트 UI만 재정의합니다. 본문 안의 색상·이미지·영상·인용 형식은 그대로 둡니다.
     return `
+      ${root} { background: transparent !important; }
       ${root} body {
         --fm-clean-bg: #f6f5f2; --fm-clean-surface: #fff; --fm-clean-raised: #faf9f7;
         --fm-clean-text: #1c1b19; --fm-clean-muted: #6b6862; --fm-clean-line: #e7e4de;
         --fm-clean-accent: #0f766e; --fm-clean-soft: #e6f2f0;
         color-scheme: light;
-        background: var(--fm-clean-bg) !important; color: var(--fm-clean-text) !important;
-        padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box;
+        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
+        margin: 0 8px !important; padding: 0 !important; box-sizing: border-box;
         font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
       }
       ${root} body.night_mode {
@@ -367,12 +370,12 @@
         color: var(--fm-clean-text) !important;
       }
       ${root} .fm-recent-visited {
-        background: var(--fm-clean-bg) !important; border-bottom: 1px solid var(--fm-clean-line) !important;
+        background: var(--fm-clean-surface) !important; border-bottom: 1px solid var(--fm-clean-line) !important;
         margin: 0 !important; padding: 5px 8px !important;
       }
       ${root} .fm-recent-visited:not(.expanded) { height: 38px !important; }
       ${root} .fm-recent-visited.expanded { height: auto !important; }
-      ${root} .fm-recent-visited .list { background: var(--fm-clean-bg) !important; }
+      ${root} .fm-recent-visited .list { background: var(--fm-clean-surface) !important; }
       ${root} .fm-recent-visited .item:is(.bookmark, .recent) {
         height: 26px !important; line-height: 24px !important; border: 1px solid var(--fm-clean-line) !important;
         border-radius: 999px !important; background: var(--fm-clean-raised) !important; box-sizing: border-box;
@@ -387,7 +390,7 @@
       ${root} .fm-recent-visited .item.bookmark a { color: var(--fm-clean-accent) !important; }
       ${root} .fm-recent-visited .item span.time { color: var(--fm-clean-muted) !important; font-size: 10px !important; }
       ${root} .rd_hd {
-        margin: 0 !important; padding: 12px 10px 10px !important;
+        margin: 0 !important; padding: 10px 10px 8px !important;
         background: var(--fm-clean-surface) !important; border-bottom: 1px solid var(--fm-clean-line) !important;
       }
       ${root} .rd_hd :is(.top_area, .btm_area, .board) {
@@ -402,7 +405,7 @@
       }
       ${root} .rd_hd .board .btm_area { margin: 0 !important; padding: 0 !important; }
       ${root} .rd_hd h1 {
-        padding: 0 !important; margin: 4px 0 8px !important;
+        padding: 0 !important; margin: 4px 0 6px !important;
         color: var(--fm-clean-text) !important; font-size: 18px !important;
         font-weight: 600 !important; line-height: 1.5 !important; letter-spacing: -.2px !important;
         text-shadow: none !important;
@@ -412,6 +415,29 @@
         color: var(--fm-clean-muted) !important; font-size: 12px !important;
       }
       ${root} .rd_hd .member_plate { color: var(--fm-clean-text) !important; }
+      ${detail} {
+        display: grid !important; grid-template-columns: minmax(0, 1fr) auto auto;
+        column-gap: 7px; align-items: center;
+      }
+      ${detail} > .top_area, ${detail} > .btm_area { display: contents !important; }
+      ${detail}::after, ${detail} > .top_area::after, ${detail} > .btm_area::after { content: none !important; }
+      ${detail} > .top_area > .clear { display: none !important; }
+      ${detail} > .top_area > h1 { grid-row: 1; grid-column: 1 / -1; margin-top: 0 !important; }
+      ${detail} > .top_area > .date {
+        grid-row: 2; grid-column: 3; justify-self: end; align-self: center;
+        margin: 0 !important; white-space: nowrap; font-size: 10px !important;
+      }
+      ${detail} > .btm_area > .side {
+        grid-row: 2; float: none !important; width: auto !important; min-width: 0;
+        margin: 0 !important; padding: 0 !important; font-size: 11px !important;
+      }
+      ${detail} > .btm_area > .side:first-child {
+        grid-column: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      ${detail} > .btm_area > .side.fr {
+        grid-column: 2; display: flex !important; gap: 7px; white-space: nowrap;
+      }
+      ${detail} > .btm_area > .side.fr :is(span, b) { font-size: 11px !important; margin: 0 !important; }
       ${root} .rd_body { padding: 0 !important; margin-left: 0 !important; margin-right: 0 !important; }
       ${root} .rd_body .document_address {
         margin: 0 !important; padding: 10px 12px !important;
@@ -430,16 +456,16 @@
         background: transparent !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important; box-shadow: none !important;
       }
-      ${root} .bd_m_lst.zine > li { padding-top: 8px !important; padding-bottom: 8px !important; }
+      ${root} .bd_m_lst.zine > li { padding-top: 5px !important; padding-bottom: 5px !important; }
       ${root} .bd_m_lst.zine > li:not(.is_tmb) { padding-left: 10px !important; padding-right: 10px !important; }
       ${root} .bd_m_lst.zine > li.is_tmb { padding-right: 10px !important; }
       ${root} :is(.bd_lst, .bd_m_lst) > li { border-bottom: 1px solid var(--fm-clean-line) !important; }
       ${root} .bd_m_lst > li .rt_area h3 {
-        color: var(--fm-clean-text) !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.4 !important;
+        color: var(--fm-clean-text) !important; font-size: 13px !important; font-weight: 500 !important; line-height: 1.35 !important;
         height: auto !important;
         white-space: normal !important; text-overflow: clip !important; overflow: visible !important;
       }
-      ${root} .bd_m_lst > li.notice.pop0 .rt_area h3 { font-size: 13px !important; }
+      ${root} .bd_m_lst > li.notice.pop0 .rt_area h3 { font-size: 12px !important; }
       ${root} .bd_m_lst > li .rt_area h3 > a { white-space: normal !important; }
       ${root} .bd_m_lst h3 .ellipsis-target {
         display: inline !important; white-space: normal !important; overflow: visible !important;
@@ -449,7 +475,7 @@
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
         border-radius: 999px !important; font-size: 10px !important;
       }
-      ${root} .bd_m_lst > li .info { margin-top: 3px !important; line-height: 1.5 !important; font-size: 11px !important; }
+      ${root} .bd_m_lst > li .info { margin-top: 2px !important; line-height: 1.4 !important; font-size: 10.5px !important; }
       ${root} .bd_m_lst > li .rt_area h3 > a,
       ${root} .bd_m_lst > li .rt_area h3 > a :not(.comment_count) {
         color: var(--fm-clean-text) !important; text-shadow: none !important;
@@ -464,7 +490,7 @@
       }
       ${root} .bd_m_lst > li .info,
       ${root} .bd_m_lst > li .info :is(span, b, a, i) {
-        color: var(--fm-clean-muted) !important; font-size: 11px !important;
+        color: var(--fm-clean-muted) !important; font-size: 10.5px !important;
       }
       ${root} .bd_m_lst .mrk,
       ${root} .bd_m_lst .mrk.update,
@@ -511,33 +537,34 @@
       ${root} .fdb_lst_ul { background: var(--fm-clean-surface) !important; }
       ${root} .fdb_tag {
         background: var(--fm-clean-raised) !important; border: 0 !important;
-        border-bottom: 1px solid var(--fm-clean-line) !important; border-radius: 0 !important; padding: 12px !important;
+        border-bottom: 1px solid var(--fm-clean-line) !important; border-radius: 0 !important; padding: 8px 10px !important;
       }
-      ${root} .fdb_itm { padding-top: 14px !important; padding-bottom: 14px !important; }
+      ${root} .fdb_itm { padding-top: 8px !important; padding-bottom: 8px !important; }
       ${root} .fdb_itm :is(.meta, .meta .date, .meta a, .meta span) {
-        color: var(--fm-clean-muted) !important; font-size: 12px !important;
+        color: var(--fm-clean-muted) !important; font-size: 11px !important;
       }
       ${root} .fdb_itm .member_plate { color: var(--fm-clean-text) !important; font-weight: 600; }
-      ${root} .fdb_itm .comment-content { color: var(--fm-clean-text) !important; font-size: 15px !important; line-height: 1.75; }
+      ${root} .fdb_itm .comment-content { color: var(--fm-clean-text) !important; font-size: 13px !important; line-height: 1.55 !important; }
+      ${root} .fdb_itm .comment-content .xe_content { font-size: inherit !important; line-height: inherit !important; }
       ${root} .fdb_itm .meta :is(.best, .icon-hit) {
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
         border: 0 !important; border-radius: 999px !important;
       }
       ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
       ${root} .bd_lst td.title, ${root} .bd_lst td.title a {
-        font-size: 14px !important; font-weight: 600 !important; line-height: 1.4 !important;
+        font-size: 13px !important; font-weight: 500 !important; line-height: 1.35 !important;
       }
       ${root} .bd_lst td.title a span:not(.comment_count) { color: var(--fm-clean-text) !important; }
       ${root} .bd_lst td.title .comment_count { color: var(--fm-clean-accent) !important; font-size: 12px !important; }
       ${root} .bd_lst td.title a:is(.visited, :visited),
       ${root} .bd_lst td.title a:is(.visited, :visited) span:not(.comment_count) { color: var(--fm-clean-muted) !important; }
-      ${root} .bd_lst td { padding-top: 8px !important; padding-bottom: 8px !important; }
+      ${root} .bd_lst td { padding-top: 5px !important; padding-bottom: 5px !important; }
       ${root} .bd_lst th {
         background: var(--fm-clean-raised) !important; color: var(--fm-clean-muted) !important;
         border-color: var(--fm-clean-line) !important;
       }
       ${root} .bd_lst tr:is(.notice, .select) { background: var(--fm-clean-raised) !important; }
-      ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; font-size: 11px !important; }
+      ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; font-size: 10.5px !important; }
       ${root} .bd_m_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
       ${root} .bd_m_lst :is(.author, .regdate, .m_no, .category) { color: var(--fm-clean-muted) !important; }
       ${root} .bd_m_lst > li :is(.visited, .visited .ellipsis-target),
@@ -550,14 +577,15 @@
       }
       ${root} .fm_best_widget li.li {
         background: var(--fm-clean-surface) !important;
-        border-color: var(--fm-clean-line) !important; padding-top: 8px !important; padding-bottom: 8px !important;
+        border-color: var(--fm-clean-line) !important; padding-top: 5px !important; padding-bottom: 5px !important;
+        box-sizing: border-box;
       }
       ${root} .fm_best_widget li.li:is(.on, .li_best2_pop1) {
         background: var(--fm-clean-raised) !important;
       }
       ${root} .fm_best_widget div,
       ${root} .fm_best_widget :is(.category, .regdate, .author, .voted_count, .hotdeal_info) {
-        color: var(--fm-clean-muted) !important; font-size: 11px !important;
+        color: var(--fm-clean-muted) !important; font-size: 10.5px !important;
       }
       ${root} .fm_best_widget :is(a, a:visited, .category a, .category a:visited) {
         color: var(--fm-clean-text) !important; text-shadow: none !important;
@@ -567,8 +595,8 @@
         color: var(--fm-clean-accent) !important;
       }
       ${root} .fm_best_widget .title {
-        color: var(--fm-clean-text) !important; font-size: 14px !important;
-        font-weight: 600 !important; line-height: 1.4 !important;
+        color: var(--fm-clean-text) !important; font-size: 13px !important;
+        font-weight: 500 !important; line-height: 1.35 !important;
       }
       ${root} .fm_best_widget .title a,
       ${root} .fm_best_widget .title a .ellipsis-target {
@@ -586,8 +614,29 @@
       }
       ${root} .fm_best_widget li:is(.li_best2_pop1, .li_best2_hotdeal1, .li_best2_politics1) .title::before {
         color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
-        border: 0 !important; border-radius: 999px !important;
+        border: 0 !important; border-radius: 999px !important; font-size: 11px !important;
       }
+      ${root} #fm_alert { right: 12px !important; max-width: calc(100vw - 24px) !important; }
+      ${root} #fm_alert .fm_alert_wrap.best { width: min(280px, calc(100vw - 24px)) !important; }
+      ${root} #fm_alert .best .fm_alert {
+        padding: 10px 12px !important; border: 1px solid var(--fm-clean-line) !important;
+        border-left: 2px solid var(--fm-clean-accent) !important; border-radius: 10px !important;
+        background: var(--fm-clean-surface) !important; background-image: none !important;
+        box-shadow: 0 4px 16px #0002 !important;
+      }
+      ${root} #fm_alert .best .msg {
+        color: var(--fm-clean-text) !important; font-size: 13px !important; line-height: 1.45 !important;
+      }
+      ${root} #fm_alert .best .msg[data-fm-clean-alert="linked"] { font-size: 0 !important; line-height: 0 !important; }
+      ${root} #fm_alert .best .msg [data-fm-clean-alert-hidden] { display: none !important; }
+      ${root} #fm_alert .best .msg [data-fm-clean-alert-path]:not([data-fm-clean-alert-title]) { display: contents !important; }
+      ${root} #fm_alert .best .msg [data-fm-clean-alert-title] {
+        display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; white-space: normal !important; color: var(--fm-clean-text) !important;
+        font: 500 13px/1.45 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
+        text-decoration: none !important; text-shadow: none !important;
+      }
+      ${root} #fm_alert .best .msg [data-fm-clean-alert-title] * { color: inherit !important; font: inherit !important; }
       ${root} .bd_faq_srch {
         background: var(--fm-clean-surface) !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important;
@@ -693,7 +742,7 @@
     hideRule('votes', ['.rd .fm_vote .vote', '.rd .fm_vote .use_new_voted_count']),
     // 본문과 댓글 사이의 도구 모음 전체만 접습니다. 댓글 목록·페이지 이동·입력은 별도 영역입니다.
     hideRule('footer', ['.rd > .rd_ft', '.rd > .rd_ft_nav', '.rd .m_rd_nav_side', '.rd .rd_body > .document_address']),
-    hideRule('header', ['.fm-recent-visited .footer', '.fm-recent-visited .item.feature-disabled']),
+    hideRule('header', ['.fm-recent-visited .footer', '.fm-recent-visited .item.feature-disabled', '.bd > nav.fmkorea_navi:has(~ .main_recent)']),
     hideRule('commentActions', ['.fdb_itm .fdb_nav']),
     hideRule('siteFooter', ['body > footer .cr', 'body > footer .crhome', '#footer']),
     cleanAppearance(),
@@ -733,6 +782,26 @@
         letter-spacing: 0; text-indent: 0;
       }
       ${scope('count')} [data-fm-clean-original-count] { display: none !important; }
+      ${scope('commentComposer')} details[data-fm-clean-comment-composer] {
+        margin: 8px 10px; border: 1px solid var(--fm-clean-line, #8885); border-radius: 10px;
+        color: inherit; font: 500 13px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+      }
+      ${scope('commentComposer')} details[data-fm-clean-comment-composer] > summary {
+        display: flex; align-items: center; justify-content: space-between; list-style: none;
+        min-height: 36px; padding: 7px 10px; box-sizing: border-box; cursor: pointer;
+      }
+      ${scope('commentComposer')} details[data-fm-clean-comment-composer] > summary::-webkit-details-marker { display: none; }
+      ${scope('commentComposer')} details[data-fm-clean-comment-composer] > summary::after {
+        content: ''; width: 6px; height: 6px; margin: 0 3px 3px 10px;
+        border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg);
+      }
+      ${scope('commentComposer')} details[data-fm-clean-comment-composer][open] > summary::after { transform: rotate(225deg); }
+      ${scope('commentComposer')} details[data-fm-clean-comment-composer] > summary:focus-visible {
+        outline: 2px solid var(--fm-clean-accent, #0f766e); outline-offset: 2px;
+      }
+      ${scope('commentComposer')} details[data-fm-clean-comment-composer] > .cmt_editor {
+        margin: 0 !important; padding: 8px 10px !important;
+      }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
         left: max(8px, env(safe-area-inset-left, 0px)) !important;
@@ -1006,6 +1075,114 @@
     });
   }
 
+  const commentComposers = new Map();
+
+  function updateCommentComposers(active) {
+    for (const [editor, disclosure] of commentComposers) {
+      if (active && editor.isConnected && disclosure.isConnected && editor.parentElement === disclosure) continue;
+      // 원본 에디터를 그대로 되돌려 입력값·업로드·사이트 이벤트를 유지합니다.
+      if (editor.parentElement === disclosure) disclosure.replaceWith(editor);
+      else disclosure.remove();
+      commentComposers.delete(editor);
+    }
+    if (!active || document.readyState === 'loading') return;
+    document.querySelectorAll('.bd .cmt_editor').forEach(editor => {
+      if (editor.closest('#re_cmt, [data-fm-clean-comment-composer], [data-fm-clean-ad-original]') ||
+          editor.hidden || getComputedStyle(editor).display === 'none') return;
+      const disclosure = document.createElement('details');
+      disclosure.setAttribute('data-fm-clean-comment-composer', '');
+      const summary = document.createElement('summary');
+      summary.textContent = '댓글 쓰기';
+      editor.before(disclosure);
+      disclosure.append(summary, editor);
+      commentComposers.set(editor, disclosure);
+    });
+  }
+
+  const bestAlertOriginalText = new Map();
+
+  function updateBestAlerts(active) {
+    for (const [node, record] of bestAlertOriginalText) {
+      if (!node.isConnected || !active) {
+        if (node.isConnected && node.nodeValue === record.cleaned) node.nodeValue = record.original;
+        bestAlertOriginalText.delete(node);
+      } else if (node.nodeValue !== record.cleaned) bestAlertOriginalText.delete(node);
+    }
+
+    const messages = document.querySelectorAll('#fm_alert .fm_alert_wrap.best .fm_alert .msg');
+    messages.forEach(message => {
+      const elements = message.querySelectorAll('*');
+      if (!active) {
+        message.removeAttribute('data-fm-clean-alert');
+        elements.forEach(element => {
+          element.removeAttribute('data-fm-clean-alert-path');
+          element.removeAttribute('data-fm-clean-alert-hidden');
+          element.removeAttribute('data-fm-clean-alert-title');
+        });
+        return;
+      }
+
+      const links = Array.from(message.querySelectorAll('a[href]'));
+      const label = /^\s*(?:\[\s*포텐\s*터짐\s*\]|【\s*포텐\s*터짐\s*】|포텐\s*터짐)\s*(?:[!！:：|·•\-–—]\s*)?/u;
+      const titleLinks = links.filter(link => {
+        const text = link.textContent.trim();
+        return text && (text.replace(label, '').trim() || !label.test(text));
+      });
+      const documentLink = titleLinks.find(link => {
+        try {
+          const url = new URL(link.getAttribute('href'), location.href);
+          return /^https?:$/.test(url.protocol) && (
+            /(?:^|\/)\d+(?:\/|$)/.test(url.pathname) ||
+            /^\d+$/.test(url.searchParams.get('document_srl') || '')
+          );
+        } catch (error) { return false; }
+      });
+      const title = documentLink || titleLinks[titleLinks.length - 1];
+
+      elements.forEach(element => {
+        element.removeAttribute('data-fm-clean-alert-path');
+        element.removeAttribute('data-fm-clean-alert-hidden');
+        element.removeAttribute('data-fm-clean-alert-title');
+      });
+
+      const stripLeadingLabel = root => {
+        const text = root.textContent;
+        const match = text.match(label);
+        if (!match || !text.slice(match[0].length).trim()) return;
+        let remaining = match[0].length;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        let node;
+        while (remaining > 0 && (node = walker.nextNode())) {
+          const current = node.nodeValue;
+          const length = Math.min(remaining, current.length);
+          if (!length) continue;
+          const cleaned = current.slice(length);
+          const previous = bestAlertOriginalText.get(node);
+          const original = previous && previous.cleaned === current ? previous.original : current;
+          bestAlertOriginalText.set(node, { original, cleaned });
+          node.nodeValue = cleaned;
+          remaining -= length;
+        }
+      };
+
+      if (!title) {
+        message.setAttribute('data-fm-clean-alert', 'plain');
+        stripLeadingLabel(message);
+        return;
+      }
+
+      message.setAttribute('data-fm-clean-alert', 'linked');
+      const path = new Set();
+      for (let node = title; node && node !== message; node = node.parentElement) path.add(node);
+      title.querySelectorAll('*').forEach(node => path.add(node));
+      elements.forEach(element => {
+        element.setAttribute(path.has(element) ? 'data-fm-clean-alert-path' : 'data-fm-clean-alert-hidden', '');
+      });
+      title.setAttribute('data-fm-clean-alert-title', '');
+      stripLeadingLabel(title);
+    });
+  }
+
   const observer = new MutationObserver(records => {
     // 같은 작업 안에서 링크가 삽입·교체·제거돼도 광고 클래스의 단서를 놓치지 않습니다.
     for (const record of records) {
@@ -1041,6 +1218,8 @@
     const headerTargets = collectHeaderTargets(adTargets);
     syncHiddenElements('header', mobile && settings.enabled && settings.header, headerTargets);
     syncHiddenElements('ads', mobile && settings.enabled && settings.ads, adTargets);
+    updateBestAlerts(mobile && settings.enabled && settings.appearance);
+    updateCommentComposers(mobile && settings.enabled && settings.commentComposer);
     if (mobile) {
       mountControls();
       if (host) host.hidden = false;

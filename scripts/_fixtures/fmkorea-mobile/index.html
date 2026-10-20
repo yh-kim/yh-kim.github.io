@@ -413,11 +413,11 @@
           resolve();
         }, 20));
         await delay(120);
-        record('홈 북마크 1개만 늦게 삽입해도 숨겨졌던 메뉴 조상 복원',
+        record('홈 북마크 1개만 늦게 삽입해도 저장 메뉴 조상 복원·상단 정적 메뉴 숨김',
           initialMenuHidden && visiblyRendered(homeDoc.querySelector('#home-recent')) &&
           visiblyRendered(homeDoc.querySelector('#saved-menu')) &&
           visiblyRendered(homeDoc.querySelector('#saved-link')) &&
-          visiblyRendered(homeDoc.querySelector('#static-menu')) &&
+          !visiblyRendered(homeDoc.querySelector('#static-menu')) &&
           !visiblyRendered(homeDoc.querySelector('#home-logo')) &&
           !visiblyRendered(homeDoc.querySelector('#home-footer')));
         await new Promise(resolve => homeDoc.defaultView.setTimeout(() => {
@@ -426,10 +426,10 @@
           resolve();
         }, 20));
         await delay(120);
-        record('홈 저장·최근 링크와 정적 메뉴를 모두 표시',
+        record('홈 저장·최근 링크만 표시하고 정적 메뉴 숨김',
           visiblyRendered(homeDoc.querySelector('#saved-link')) &&
           visiblyRendered(homeDoc.querySelector('#recent-link')) &&
-          visiblyRendered(homeDoc.querySelector('#static-menu')) &&
+          !visiblyRendered(homeDoc.querySelector('#static-menu')) &&
           visiblyRendered(homeDoc.querySelector('#home-article')));
 
         const addressDoc = await makeLayoutFrame(source, '상세 본문 앞 주소 영역', `
@@ -499,6 +499,165 @@
             originalTitle.getBoundingClientRect().right <= badgeRect.left + 1
           ));
         }
+
+        const compactDoc = await makeLayoutFrame(source, '상세 날짜·좌우 여백', `
+          <header class="hd">상단 로고</header>
+          <div class="bd bd_mobile" id="compact-board"><div class="rd"><div class="rd_hd">
+            <div class="board" id="compact-header"><div class="top_area" id="compact-top">
+              <span class="date m_no" id="compact-date">2026.10.20 19:13</span>
+              <h1 class="np_18px"><span class="np_18px_span">제목 한 줄</span></h1><div class="clear"></div>
+            </div><div class="btm_area" id="compact-meta">
+              <div class="side"><a class="member_plate" href="#author">작성자</a></div>
+              <div class="side fr"><span id="view-count">조회 수 <b>255</b></span>
+                <span id="comment-count">댓글 <b>7</b></span></div>
+            </div></div></div><div class="rd_body"><article>본문</article></div></div></div>`, `
+          .bd,.bd .clear{display:block;position:relative;clear:both}
+          .bd .clear:after,.bd:after{content:"";display:block;clear:both}
+          .rd_hd .board .date{float:right;display:inline!important}
+          .rd_hd .board .side{display:inline-block;padding:9px}
+          .rd_hd .board .btm_area span{padding:0 6px}
+        `);
+        const compactDate = compactDoc.querySelector('#compact-date');
+        const compactTop = compactDoc.querySelector('#compact-top');
+        const compactBoard = compactDoc.querySelector('#compact-header');
+        const compactView = compactDoc.querySelector('#view-count');
+        const compactComments = compactDoc.querySelector('#comment-count');
+        function dateSharesMetaRow() {
+          const dateRect = compactDate.getBoundingClientRect();
+          const viewRect = compactView.getBoundingClientRect();
+          const commentRect = compactComments.getBoundingClientRect();
+          const boardRect = compactBoard.getBoundingClientRect();
+          return compactDate.parentElement === compactTop &&
+            Math.abs((dateRect.top + dateRect.bottom) / 2 -
+              (commentRect.top + commentRect.bottom) / 2) <= 5 &&
+            Math.abs((viewRect.top + viewRect.bottom) / 2 -
+              (commentRect.top + commentRect.bottom) / 2) <= 5 &&
+            dateRect.left >= commentRect.right - 1 &&
+            dateRect.right <= boardRect.right + 1 &&
+            boardRect.right - dateRect.right <= 24;
+        }
+        record('상세 날짜가 조회·댓글과 같은 줄 오른쪽에 정렬', dateSharesMetaRow());
+        compactDoc.defaultView.frameElement.style.width = '320px';
+        await delay(40);
+        record('320px에서도 날짜·조회·댓글 정렬과 가로 넘침 방지',
+          dateSharesMetaRow() &&
+          compactDoc.documentElement.scrollWidth <= compactDoc.defaultView.innerWidth + 1);
+        const compactOff = detailOption(compactDoc, 'appearance', false);
+        await delay(40);
+        record('화면 디자인 OFF면 날짜 원위치와 원본 배치 복원', compactOff &&
+          compactDate.parentElement === compactTop &&
+          compactDoc.defaultView.getComputedStyle(compactTop).display !== 'contents' &&
+          compactDoc.defaultView.getComputedStyle(compactDate).float === 'right');
+
+        const homeBody = homeDoc.body;
+        const homeBoard = homeDoc.querySelector('.bd');
+        const homeBodyStyle = homeDoc.defaultView.getComputedStyle(homeBody);
+        record('홈 좌우 8px는 padding 아닌 margin이고 본문과 바탕색이 같음',
+          homeBodyStyle.paddingLeft === '0px' && homeBodyStyle.paddingRight === '0px' &&
+          homeBodyStyle.marginLeft === '8px' && homeBodyStyle.marginRight === '8px' &&
+          homeBodyStyle.backgroundColor === homeDoc.defaultView.getComputedStyle(homeBoard).backgroundColor &&
+          homeBoard.getBoundingClientRect().right <= homeDoc.defaultView.innerWidth - 7 &&
+          homeDoc.documentElement.scrollWidth <= homeDoc.defaultView.innerWidth + 1);
+
+        const composerDoc = await makeLayoutFrame(source, '댓글 입력 접기', `
+          <header class="hd">상단 로고</header>
+          <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><h1>댓글 검사</h1></div>
+            <div class="rd_body"><article>본문</article></div>
+            <div class="fdb_lst_wrp"><div id="composer-slot"><div class="cmt_editor" id="original-composer">
+              <form id="original-comment-form"><textarea id="original-comment-text"></textarea>
+                <button type="submit">등록</button></form>
+            </div></div></div></div></div>`);
+        const originalComposer = composerDoc.querySelector('#original-composer');
+        const originalCommentForm = composerDoc.querySelector('#original-comment-form');
+        const originalCommentText = composerDoc.querySelector('#original-comment-text');
+        const composerSlot = composerDoc.querySelector('#composer-slot');
+        const composerDetails = composerDoc.querySelector('details[data-fm-clean-comment-composer]');
+        let commentSubmits = 0;
+        originalCommentForm.addEventListener('submit', event => {
+          event.preventDefault();
+          commentSubmits++;
+        });
+        originalCommentText.value = '작성 중인 댓글';
+        const composerInitiallyClosed = Boolean(composerDetails && !composerDetails.open &&
+          composerDetails.querySelector('summary')?.textContent.trim() === '댓글 쓰기' &&
+          composerDetails.contains(originalComposer) && originalComposer.contains(originalCommentForm));
+        composerDetails?.querySelector('summary')?.click();
+        await delay(30);
+        originalCommentForm.dispatchEvent(new composerDoc.defaultView.Event('submit',
+          { bubbles: true, cancelable: true }));
+        composerDetails?.querySelector('summary')?.click();
+        await delay(30);
+        record('댓글 입력은 기본 닫힘·열고 닫아도 입력값과 원본 제출 동작 유지',
+          composerInitiallyClosed && !composerDetails?.open &&
+          originalCommentText.value === '작성 중인 댓글' && commentSubmits === 1 &&
+          composerDetails?.contains(originalComposer));
+        const composerOff = detailOption(composerDoc, 'commentComposer', false);
+        await delay(40);
+        record('댓글 입력 접기 OFF에서 원본 작성기 제자리 복원', composerOff &&
+          originalComposer.parentElement === composerSlot &&
+          !composerDoc.querySelector('details[data-fm-clean-comment-composer]') &&
+          originalCommentText.value === '작성 중인 댓글');
+        const composerOn = detailOption(composerDoc, 'commentComposer', true);
+        const fullOff = detailOption(composerDoc, 'enabled', false);
+        await delay(40);
+        record('전체 기능 OFF에서 댓글 작성기 원위치 복원', composerOn && fullOff &&
+          originalComposer.parentElement === composerSlot &&
+          !composerDoc.querySelector('details[data-fm-clean-comment-composer]') &&
+          originalCommentText.value === '작성 중인 댓글');
+
+        const alertDoc = await makeLayoutFrame(source, '동적 포텐 알림', `
+          <header class="hd">상단 로고</header><div class="bd bd_mobile"><p id="alert-article">홈 목록</p></div>
+          <div id="fm_alert"></div>`, `
+          #fm_alert{position:fixed;right:8px;bottom:8px}
+          #fm_alert .fm_alert_wrap{display:block;padding:8px;background:#333;color:#fff}
+        `);
+        alertDoc.querySelector('#fm_alert').insertAdjacentHTML('beforeend', `
+          <div class="fm_alert_wrap best" id="best-alert"><div class="fm_alert"><div class="msg" id="best-message">
+            <b id="best-prefix">포텐 터짐</b><br id="best-break"><a id="best-link" href="/best/123">제목만 표시</a>
+          </div></div></div>
+          <div class="fm_alert_wrap best" id="inline-best-alert"><div class="fm_alert"><div class="msg" id="inline-best-message">
+            <a id="inline-best-link" href="/best/456">[포텐 터짐] 두 번째 제목</a>
+          </div></div></div>
+          <div class="fm_alert_wrap notice"><div class="fm_alert"><div class="msg" id="normal-message">일반 알림</div></div></div>`);
+        const bestLink = alertDoc.querySelector('#best-link');
+        const inlineBestLink = alertDoc.querySelector('#inline-best-link');
+        let bestClicks = 0;
+        bestLink.addEventListener('click', event => { event.preventDefault(); bestClicks++; });
+        await delay(120);
+        bestLink.click();
+        record('늦게 뜨는 포텐 알림은 제목만 표시·원본 링크와 일반 알림 유지',
+          alertDoc.querySelector('#best-message')?.hasAttribute('data-fm-clean-alert') &&
+          bestLink.hasAttribute('data-fm-clean-alert-title') &&
+          alertDoc.querySelector('#best-prefix')?.hasAttribute('data-fm-clean-alert-hidden') &&
+          alertDoc.querySelector('#best-break')?.hasAttribute('data-fm-clean-alert-hidden') &&
+          alertDoc.querySelector('#best-message')?.innerText.trim() === '제목만 표시' &&
+          inlineBestLink.textContent.trim() === '두 번째 제목' &&
+          bestLink.getAttribute('href') === '/best/123' && bestClicks === 1 &&
+          visiblyRendered(alertDoc.querySelector('#normal-message')) &&
+          alertDoc.querySelector('#normal-message').textContent.trim() === '일반 알림');
+        alertDoc.querySelector('#fm_alert').insertAdjacentHTML('beforeend', `
+          <div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg">
+            <a id="split-best-link" href="/best/789"><b>포텐 </b><span>터짐</span> 분리된 제목</a>
+          </span></div></div>
+          <div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg" id="plain-best-message">포텐 터짐: 링크 없는 제목</span></div></div>`);
+        const splitBestLink = alertDoc.querySelector('#split-best-link');
+        const originalBold = splitBestLink.querySelector('b');
+        const plainBestMessage = alertDoc.querySelector('#plain-best-message');
+        await delay(80);
+        record('여러 텍스트 노드의 포텐 문구와 링크 없는 알림도 제목만 표시',
+          splitBestLink.textContent.trim() === '분리된 제목' &&
+          splitBestLink.querySelector('b') === originalBold &&
+          plainBestMessage.textContent === '링크 없는 제목' && visiblyRendered(plainBestMessage));
+        plainBestMessage.firstChild.nodeValue = '사이트가 갱신한 새 제목';
+        const alertOff = detailOption(alertDoc, 'appearance', false);
+        await delay(40);
+        record('화면 디자인 OFF에서 포텐 알림 원본 문구 복원', alertOff &&
+          visiblyRendered(alertDoc.querySelector('#best-prefix')) &&
+          inlineBestLink.textContent.trim() === '[포텐 터짐] 두 번째 제목' &&
+          splitBestLink.textContent.trim() === '포텐 터짐 분리된 제목' &&
+          alertDoc.querySelector('#normal-message').textContent.trim() === '일반 알림');
+        record('사이트가 갱신한 알림 내용은 비활성화 시 오래된 제목으로 되돌리지 않음',
+          plainBestMessage.textContent === '사이트가 갱신한 새 제목');
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }
