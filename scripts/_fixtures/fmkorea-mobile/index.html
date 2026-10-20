@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ko" data-test-status="running">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FM코리아 모바일 유저스크립트 브라우저 회귀 검사</title>
+  <style>
+    body { margin: 20px; font: 14px/1.5 system-ui, sans-serif; color: #182230; }
+    h1 { margin: 0 0 8px; font-size: 21px; }
+    p { margin: 0 0 14px; }
+    #summary { margin: 12px 0; font-weight: 700; }
+    #results { padding-left: 22px; }
+    #results li { margin: 5px 0; }
+    .pass { color: #08722b; }
+    .fail { color: #b42318; }
+    .fixture { display: inline-block; vertical-align: top; margin: 8px; }
+    .fixture h2 { margin: 0 0 4px; font-size: 13px; }
+    .fixture iframe { display: block; width: 390px; height: 190px; border: 1px solid #aab; }
+  </style>
+</head>
+<body>
+  <h1>FM코리아 모바일 유저스크립트 회귀 검사</h1>
+  <p>저장소 루트에서 <code>python3 -m http.server 8765</code> 실행 후 <code>/scripts/_fixtures/fmkorea-mobile/</code>를 엽니다.</p>
+  <div id="summary">검사 준비 중…</div>
+  <ol id="results"></ol>
+  <div id="frames"></div>
+  <script>
+    (async () => {
+      const SOURCE_URL = '/p/hidden-memo/tampermonkey/userscripts/fmkorea-mobile.user.js';
+      const results = document.querySelector('#results');
+      const summary = document.querySelector('#summary');
+      const frames = document.querySelector('#frames');
+      const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+      const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+      let passed = 0;
+      let failed = 0;
+
+      function record(label, ok, detail = '') {
+        const row = document.createElement('li');
+        row.className = ok ? 'pass' : 'fail';
+        row.textContent = `${ok ? 'PASS' : 'FAIL'} · ${label}${detail ? ` — ${detail}` : ''}`;
+        results.append(row);
+        if (ok) passed++;
+        else failed++;
+        summary.textContent = `${passed} PASS · ${failed} FAIL`;
+      }
+
+      function escapeScript(source) {
+        return source.replace(/<\/script/gi, '<\\/script');
+      }
+
+      function adProof(name, kind) {
+        if (kind === 'form') {
+          const payload = `a:2:{s:7:"channel";s:13:"m_fmkorea.ch2";s:13:"random_string";s:${name.length}:"${name}";}`;
+          return `<form id="${name}_form"><input type="hidden" name="${name}" value="${btoa(payload)}"></form>`;
+        }
+        const css = `<link rel="stylesheet" disabled href="https://static.fmkorea.com/${name}.css?fixture=1">`;
+        const js = kind === 'pair'
+          ? `<script type="application/json" src="https://static.fmkorea.com/${name}.js?fixture=1"><\/script>`
+          : '';
+        return css + js;
+      }
+
+      function boardMarkup() {
+        return `<div class="bd bd_mobile" id="real-board">
+          <div class="bd_lst_wrp"><p id="plain-text">실제 게시판 글은 보여야 합니다.</p>
+          <img id="normal-image" src="${IMAGE}" width="12" height="12" alt="일반 이미지"></div>
+        </div>`;
+      }
+
+      function childHtml(source, name, kind, withSlot) {
+        const settings = { header: false, appearance: false };
+        const slot = withSlot ? `<div id="ad-slot" class="${name}" style="height:150px">광고 슬롯</div>` : '';
+        const css = `body .${name} { display:block!important; position:relative; height:150px!important;
+          min-height:150px!important; border-top:1px solid #aaa; border-bottom:1px solid #aaa; }`;
+        // 외부 리소스는 식별용 DOM 노드입니다. CSP가 다운로드와 실행을 모두 막습니다.
+        return `<!doctype html><html lang="ko"><head>
+          <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+          <script>window.GM_getValue=(_key,fallback)=>Object.assign({},fallback,${JSON.stringify(settings)});
+            window.GM_setValue=()=>{};<\/script>
+          <script>${escapeScript(source)}<\/script>
+          ${adProof(name, kind)}
+          <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
+            .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
+            #normal-image{display:inline-block;vertical-align:middle}${css}</style>
+        </head><body><header class="hd">상단 로고</header>${slot}${boardMarkup()}</body></html>`;
+      }
+
+      async function makeFrame(source, label, name, kind = 'pair', withSlot = true) {
+        const box = document.createElement('section');
+        box.className = 'fixture';
+        const title = document.createElement('h2');
+        title.textContent = label;
+        const frame = document.createElement('iframe');
+        frame.title = label;
+        frame.srcdoc = childHtml(source, name, kind, withSlot);
+        box.append(title, frame);
+        frames.append(box);
+        await Promise.race([
+          new Promise((resolve, reject) => {
+            frame.addEventListener('load', resolve, { once: true });
+            frame.addEventListener('error', () => reject(new Error('iframe load error')), { once: true });
+          }),
+          delay(4000).then(() => { throw new Error('iframe load timeout'); })
+        ]);
+        await delay(60);
+        return frame.contentDocument;
+      }
+
+      function isParked(element) {
+        if (!element) return false;
+        const style = element.ownerDocument.defaultView.getComputedStyle(element);
+        return element.hasAttribute('data-fm-clean-ad-original') &&
+          style.position === 'absolute' && style.visibility === 'hidden' &&
+          element.getBoundingClientRect().height === 0;
+      }
+
+      function contentVisible(doc) {
+        const board = doc.querySelector('#real-board');
+        const text = board?.querySelector('#plain-text');
+        const image = board?.querySelector('#normal-image');
+        return Boolean(text && image && board &&
+          board.getBoundingClientRect().height > 0 && text.getBoundingClientRect().height > 0 &&
+          image.getBoundingClientRect().height > 0 &&
+          doc.defaultView.getComputedStyle(text).visibility === 'visible');
+      }
+
+      function toggleAds(doc, checked) {
+        const host = doc.querySelector('#fm-clean-controls');
+        const shadow = host?.shadowRoot;
+        const launcher = shadow?.querySelector('.launcher');
+        const input = shadow?.querySelector('input[name="ads"]');
+        if (!launcher || !input) throw new Error('설정 버튼 또는 광고 토글 없음');
+        launcher.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        input.checked = checked;
+        input.dispatchEvent(new doc.defaultView.Event('change', { bubbles: true }));
+      }
+
+      try {
+        const response = await fetch(SOURCE_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`유저스크립트 요청 ${response.status}`);
+        const source = await response.text();
+        if (!source.includes('==UserScript==')) throw new Error('유저스크립트 내용 확인 실패');
+
+        const names = ['aBcDe', 'lCjAtSkuCmf', 'QaBcDeFgHiJkL', 'AaBbCcDdEeFfGgHhIiJj'];
+        for (const name of names) {
+          const doc = await makeFrame(source, `${name.length}자 CSS·JS 광고`, name);
+          record(`${name.length}자 광고 슬롯 숨김`, isParked(doc.querySelector('#ad-slot')) && contentVisible(doc),
+            `class=${name}, header=false`);
+        }
+
+        const formName = 'FmAdFormAbC';
+        const formDoc = await makeFrame(source, 'hidden form 광고', formName, 'form');
+        record('PHP channel/random_string 폼으로 광고 식별',
+          isParked(formDoc.querySelector('#ad-slot')) && contentVisible(formDoc));
+
+        const ordinary = await makeFrame(source, '일반 CSS 단독', 'OrdinaryStyle', 'css-only');
+        const ordinarySlot = ordinary.querySelector('#ad-slot');
+        record('일반 루트 CSS 단독은 숨기지 않음', Boolean(ordinarySlot &&
+          ordinarySlot.getBoundingClientRect().height >= 150 &&
+          !ordinarySlot.hasAttribute('data-fm-clean-ad-original') && contentVisible(ordinary)));
+
+        const cloneName = 'lCjAtSkuCmf';
+        const cloneDoc = await makeFrame(source, '실제 목록 복제 광고', cloneName, 'pair', false);
+        const realBoard = cloneDoc.querySelector('#real-board');
+        const clone = realBoard.cloneNode(true);
+        clone.id = 'ad-clone';
+        clone.classList.add(cloneName);
+        clone.insertAdjacentHTML('afterbegin', '<p>가짜 광고 링크</p>');
+        realBoard.before(clone);
+        await delay(60);
+        record('게시판 목록 복제→광고 class→광고 문구 삽입',
+          isParked(clone) && contentVisible(cloneDoc) &&
+          cloneDoc.querySelector('#real-board') === realBoard);
+
+        const detachName = 'DetachAdOne';
+        const detachDoc = await makeFrame(source, '광고 노드 재삽입', detachName);
+        const detached = detachDoc.querySelector('#ad-slot');
+        const initiallyParked = isParked(detached);
+        detached.remove();
+        await delay(120);
+        detached.removeAttribute('class');
+        detached.removeAttribute('id');
+        detachDoc.querySelector('#real-board').before(detached);
+        await delay(60);
+        record('광고 detach 120ms→class/id 제거→재삽입',
+          initiallyParked && isParked(detached) && contentVisible(detachDoc));
+
+        detached.remove();
+        await delay(120);
+        toggleAds(detachDoc, false);
+        detachDoc.querySelector('#real-board').before(detached);
+        await delay(60);
+        record('광고 OFF 중 재삽입하면 원래 표시 상태로 복원',
+          detached.getBoundingClientRect().height >= 150 &&
+          !detached.hasAttribute('data-fm-clean-ad-original') && contentVisible(detachDoc));
+
+        const toggleName = 'ToggleAdName';
+        const toggleDoc = await makeFrame(source, '광고 OFF/ON 복원', toggleName);
+        const toggled = toggleDoc.querySelector('#ad-slot');
+        const beforeToggle = isParked(toggled);
+        toggled.removeAttribute('class');
+        toggled.removeAttribute('id');
+        await delay(30);
+        toggleAds(toggleDoc, false);
+        await delay(30);
+        const offStyle = toggleDoc.defaultView.getComputedStyle(toggled);
+        const restored = offStyle.position !== 'absolute' && offStyle.visibility === 'visible' &&
+          toggled.getBoundingClientRect().height >= 150 &&
+          !toggled.hasAttribute('data-fm-clean-ad-original');
+        toggleAds(toggleDoc, true);
+        await delay(30);
+        record('class/id 변경 후 광고 OFF 복원·ON 재숨김',
+          beforeToggle && restored && isParked(toggled) && contentVisible(toggleDoc));
+      } catch (error) {
+        record('검사 실행', false, error?.message || String(error));
+      }
+      document.documentElement.dataset.testStatus = failed ? 'failed' : 'passed';
+      summary.textContent = `${passed} PASS · ${failed} FAIL`;
+    })();
+  </script>
+</body>
+</html>

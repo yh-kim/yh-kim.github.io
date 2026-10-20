@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.3.0
-// @description  광고 재삽입 추적, 차분한 모바일 디자인, 상단·글·댓글·사이트 하단 정리, FM 한 번은 메인·두 번은 설정
+// @version      1.4.0
+// @description  길이와 무관한 광고 식별·복제 추적, 목록·상세 네이비 UI, 상단·글·댓글·사이트 하단 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,6 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
+  const SCRIPT_VERSION = '1.4.0';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -36,7 +37,7 @@
     ['footer', '상세 하단 버튼·첨부파일 숨김'],
     ['commentActions', '댓글 추천·답글·더보기 숨김'],
     ['siteFooter', '사이트 하단 문의·신고 숨김'],
-    ['appearance', '차분한 화면 디자인']
+    ['appearance', '네이비 화면 디자인']
   ];
   const settings = loadSettings();
   let host;
@@ -44,6 +45,7 @@
   let launcher;
   let pending = false;
   let launcherClickTimer = null;
+  let primaryContentRoot = null;
   const hiddenElements = { header: new Map(), ads: new Map() };
   const knownAdTargets = new Set();
   const headerSelectors = [
@@ -60,6 +62,7 @@
     'iframe[src*="googlesyndication.com/"]'
   ];
   const discoveredAdSelectors = new Set(adSelectors);
+  const adResources = new Map();
   let currentAdSelectors = adSelectors;
   const narrowScreen = window.matchMedia('(max-width: 1024px)');
 
@@ -73,20 +76,48 @@
       narrowScreen.matches;
   }
 
-  function rememberAdStylesheet(href) {
+  function rememberAdResource(href) {
     try {
       const url = new URL(href, location.href);
-      const match = url.hostname === 'static.fmkorea.com' && url.pathname.match(/^\/([A-Za-z]{12,})\.css$/);
-      if (match) discoveredAdSelectors.add(`.${match[1]}`);
+      const match = url.hostname === 'static.fmkorea.com' && url.pathname.match(/^\/([A-Za-z_][A-Za-z0-9_-]*)\.(css|js)$/);
+      if (!match) return;
+      const assets = adResources.get(match[1]) || new Set();
+      assets.add(match[2]);
+      adResources.set(match[1], assets);
+      // 이름 길이는 요청마다 다릅니다. 동명의 루트 CSS·JS 쌍으로 광고 모듈을 식별합니다.
+      if (assets.has('css') && assets.has('js')) discoveredAdSelectors.add(`.${match[1]}`);
     } catch (error) {
       // 잘못된 외부 리소스 주소는 무시합니다.
     }
   }
 
+  function rememberAdForm(form) {
+    const match = form.id.match(/^([A-Za-z_][A-Za-z0-9_-]*)_form$/);
+    if (!match) return;
+    const field = form.elements.namedItem(match[1]);
+    if (!(field instanceof HTMLInputElement) || field.type !== 'hidden') return;
+    try {
+      const payload = atob(field.value);
+      const identity = payload.match(/s:13:"random_string";s:\d+:"([A-Za-z_][A-Za-z0-9_-]*)";/);
+      if (identity?.[1] === match[1] && /s:7:"channel";s:\d+:"[^"\n]*fmkorea\./.test(payload)) {
+        discoveredAdSelectors.add(`.${match[1]}`);
+      }
+    } catch (error) { /* 일반 폼이나 디코딩할 수 없는 값은 광고로 취급하지 않습니다. */ }
+  }
+
+  function rememberAdNode(node) {
+    if (!(node instanceof Element)) return;
+    const remember = element => {
+      if (element instanceof HTMLFormElement) rememberAdForm(element);
+      else rememberAdResource(element.getAttribute('href') || element.getAttribute('src'));
+    };
+    if (node.matches('link[href], script[src], form[id$="_form"]')) remember(node);
+    node.querySelectorAll('link[href], script[src], form[id$="_form"]').forEach(remember);
+  }
+
   function discoverAdSelectors() {
-    // 광고 복구 모듈은 매 요청마다 CSS 파일명과 광고 클래스명을 함께 바꿉니다.
-    // /modules/... 등의 일반 스타일은 제외하고 해당 루트 CSS의 클래스만 찾습니다.
-    document.querySelectorAll('link[rel~="stylesheet"][href]').forEach(link => rememberAdStylesheet(link.href));
+    // 리소스 쌍과 광고 요청 폼의 random_string을 교차 확인하며 길이는 가정하지 않습니다.
+    rememberAdNode(document.documentElement);
     // CSS 링크가 교체돼도 이미 확인한 광고 클래스의 정체는 유지합니다.
     return [...discoveredAdSelectors];
   }
@@ -139,11 +170,15 @@
 
   function contentRoot() {
     const rotatingClasses = currentAdSelectors.slice(adSelectors.length).join(',');
+    // 광고 복제본이 앞에 삽입돼도 먼저 확인한 실제 게시판을 기준으로 유지합니다.
+    if (primaryContentRoot?.isConnected &&
+        !primaryContentRoot.closest(`[${AD_STATE_ATTRIBUTE}]${rotatingClasses ? `,${rotatingClasses}` : ''}`)) return primaryContentRoot;
     for (const anchor of document.querySelectorAll('.rd_body article, .bd_lst_wrp, .fm_best_widget')) {
       // 복구 모듈은 본문과 목록도 복제하므로 광고 모듈의 복제본을 제외합니다.
       if (rotatingClasses && anchor.closest(rotatingClasses)) continue;
       if (!anchor.getClientRects().length || getComputedStyle(anchor).visibility === 'hidden') continue;
-      return anchor.closest('.bd') || anchor;
+      primaryContentRoot = anchor.closest('.bd') || anchor;
+      return primaryContentRoot;
     }
     return null;
   }
@@ -185,9 +220,11 @@
 
   function syncHiddenElements(key, active, targets) {
     const saved = hiddenElements[key];
-    if (active) {
+    {
       targets.forEach(element => {
         if (saved.has(element)) return;
+        // 꺼진 동안 재삽입된 복제본도 복원 정보를 읽어 원래 표시 상태로 돌립니다.
+        if (!active && !(key === 'ads' && element.hasAttribute(AD_STATE_ATTRIBUTE))) return;
         // display 기반 광고 차단 감지를 유발하지 않고, 흐름 밖으로 빼 공간도 접습니다.
         const styles = key === 'ads' ? {
           position: 'absolute', left: '-100000px', top: '0px', visibility: 'hidden',
@@ -222,7 +259,11 @@
       });
     }
     for (const [element, state] of saved) {
-      if (!active || !targets.has(element)) {
+      if (active && key === 'ads' && !element.isConnected) {
+        // 잠시 DOM 밖으로 뺀 광고의 표식을 지우면 클래스 없는 재삽입을 놓칩니다.
+        // 복원 정보는 노드 자체에 남기고 Map 참조만 해제합니다.
+        saved.delete(element);
+      } else if (!active || !targets.has(element)) {
         for (const [property, original] of state.original) {
           if (original.value) element.style.setProperty(property, original.value, original.priority);
           else element.style.removeProperty(property);
@@ -280,65 +321,147 @@
     // 사이트 UI만 재정의합니다. 본문 안의 색상·이미지·영상·인용 형식은 그대로 둡니다.
     return `
       ${root} body {
-        --fm-clean-bg: #f3f5f2; --fm-clean-surface: #fff; --fm-clean-text: #29332e;
-        --fm-clean-muted: #637168; --fm-clean-line: #e3e8e2;
-        --fm-clean-accent: #487762; --fm-clean-soft: #e9f0eb;
+        --fm-clean-bg: #f3f7fc; --fm-clean-surface: #fff; --fm-clean-raised: #f8fbff;
+        --fm-clean-text: #15243a; --fm-clean-muted: #53657c; --fm-clean-line: #dce5f0;
+        --fm-clean-accent: #2569bd; --fm-clean-soft: #e8f2ff;
+        color-scheme: light;
         background: var(--fm-clean-bg) !important; color: var(--fm-clean-text) !important;
         font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
       }
       ${root} body.night_mode {
-        --fm-clean-bg: #151a17; --fm-clean-surface: #1c231f; --fm-clean-text: #e0e7e1;
-        --fm-clean-muted: #a0ada3; --fm-clean-line: #313c34;
-        --fm-clean-accent: #9cc5ac; --fm-clean-soft: #2c3c31;
+        --fm-clean-bg: #07111e; --fm-clean-surface: #0d1b2b; --fm-clean-raised: #12253a;
+        --fm-clean-text: #ecf3ff; --fm-clean-muted: #afc0d6; --fm-clean-line: #29405a;
+        --fm-clean-accent: #99c8ff; --fm-clean-soft: #1d3b5c;
+        color-scheme: dark;
       }
       ${root} .bd {
         color: var(--fm-clean-text) !important; background: var(--fm-clean-surface) !important;
-        border: 0 !important; border-radius: 16px; margin: 10px 8px !important;
-        box-shadow: 0 1px 4px #18271c08;
+        border: 0 !important; border-radius: 0 !important; margin: 0 !important;
+        box-shadow: none !important;
       }
+      ${root} :is(.bd_lst_wrp, .fdb_lst_wrp) { background: var(--fm-clean-surface) !important; }
       ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) {
-        background: var(--fm-clean-bg) !important; border: 0 !important;
-        padding: 8px !important; box-sizing: border-box;
+        background: var(--fm-clean-bg) !important;
+        border: 0 !important; border-bottom: 1px solid var(--fm-clean-line) !important;
+        padding: 7px 10px !important; box-sizing: border-box;
       }
       ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) :is(.list, .expand) {
         background: var(--fm-clean-bg) !important; border-color: var(--fm-clean-line) !important;
       }
       ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) a {
-        color: var(--fm-clean-text) !important; background: var(--fm-clean-surface) !important;
-        border: 0 !important; border-radius: 9px !important; box-shadow: none !important;
+        color: var(--fm-clean-text) !important; background: var(--fm-clean-raised) !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 8px !important; box-shadow: none !important;
         text-shadow: none !important; font-size: 13px !important; font-weight: 500 !important;
       }
+      ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) :is(.expand, .expand i, button.close) {
+        color: var(--fm-clean-text) !important;
+      }
       ${root} .rd_hd {
-        margin-bottom: 0 !important; padding: 18px 14px 14px !important;
-        background: transparent !important; border-bottom: 1px solid var(--fm-clean-line) !important;
+        margin: 0 !important; padding: 15px 12px 13px !important;
+        background: var(--fm-clean-surface) !important; border-bottom: 1px solid var(--fm-clean-line) !important;
       }
       ${root} .rd_hd :is(.top_area, .btm_area, .board) {
         border: 0 !important; background: transparent !important; box-shadow: none !important;
       }
+      ${root} .rd_hd .board .top_area { padding: 0 !important; }
+      ${root} .rd_hd .board .btm_area { margin: 0 !important; padding: 0 !important; }
       ${root} .rd_hd h1 {
-        padding: 0 !important; margin: 8px 0 12px !important;
+        padding: 0 !important; margin: 7px 0 11px !important;
         color: var(--fm-clean-text) !important; font-size: 20px !important;
-        font-weight: 700 !important; line-height: 1.5 !important; letter-spacing: -.4px !important;
+        font-weight: 700 !important; line-height: 1.4 !important; letter-spacing: -.3px !important;
       }
       ${root} .rd_hd :is(.btm_area, .btm_area span, .btm_area b, .date),
       ${root} .document_address, ${root} .document_address a {
         color: var(--fm-clean-muted) !important; font-size: 12px !important;
       }
       ${root} .rd_hd .member_plate { color: var(--fm-clean-text) !important; }
-      ${root} .rd_body { padding: 16px 12px !important; }
-      ${root} .document_address { margin: 0 0 14px !important; }
+      ${root} .rd_body { padding: 0 !important; margin-left: 0 !important; margin-right: 0 !important; }
+      ${root} .rd_body .document_address {
+        margin: 0 !important; padding: 10px 12px !important;
+        border-bottom: 1px solid var(--fm-clean-line) !important;
+      }
+      ${root} .rd_body article .xe_content > p:not(:has(img, picture, video, iframe)) {
+        padding-left: 12px !important; padding-right: 12px !important;
+      }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
         background: transparent !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important; box-shadow: none !important;
       }
+      ${root} .bd_m_lst.zine > li { padding-top: 11px !important; padding-bottom: 11px !important; }
+      ${root} .bd_m_lst.zine > li:not(.is_tmb) { padding-left: 12px !important; padding-right: 12px !important; }
+      ${root} .bd_m_lst.zine > li.is_tmb { padding-right: 12px !important; }
+      ${root} :is(.bd_lst, .bd_m_lst) > li { border-bottom: 1px solid var(--fm-clean-line) !important; }
+      ${root} .bd_m_lst > li .rt_area h3 {
+        color: var(--fm-clean-text) !important; font-size: 16px !important; line-height: 1.5 !important;
+        height: auto !important;
+        white-space: normal !important; text-overflow: clip !important; overflow: visible !important;
+      }
+      ${root} .bd_m_lst > li.notice.pop0 .rt_area h3 { font-size: 14px !important; }
+      ${root} .bd_m_lst > li .rt_area h3 > a { white-space: normal !important; }
+      ${root} .bd_m_lst h3 .ellipsis-target {
+        display: inline !important; white-space: normal !important; overflow: visible !important;
+        max-width: none !important; text-overflow: clip !important;
+      }
+      ${root} .bd_m_lst h3 .no strong {
+        background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
+        border-radius: 5px !important; font-size: 10px !important;
+      }
+      ${root} .bd_m_lst > li .info { margin-top: 6px !important; line-height: 1.6 !important; }
+      ${root} .bd_m_lst > li .rt_area h3 > a,
+      ${root} .bd_m_lst > li .rt_area h3 > a :not(.comment_count) {
+        color: var(--fm-clean-text) !important; text-shadow: none !important;
+      }
+      ${root} .bd_m_lst > li .rt_area h3 .comment_count,
+      ${root} .bd_m_lst > li .rt_area h3 .no strong {
+        color: var(--fm-clean-accent) !important;
+      }
+      ${root} .bd_m_lst > li .info,
+      ${root} .bd_m_lst > li .info :is(span, b, a, i) {
+        color: var(--fm-clean-muted) !important;
+      }
+      ${root} .bd_m_lst > li .tmb_wrp {
+        background: var(--fm-clean-raised) !important; border-color: var(--fm-clean-line) !important;
+      }
+      ${root} :is(.tl_srch, .new_lst_btn, .bd_cnb, .bd_hd) {
+        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
+        border-color: var(--fm-clean-line) !important; box-shadow: none !important;
+      }
+      ${root} :is(.tl_srch, .new_lst_btn, .bd_cnb) { border-bottom: 1px solid var(--fm-clean-line) !important; }
+      ${root} .tl_srch .bd_tl :is(h1, h1 a) { color: var(--fm-clean-text) !important; }
+      ${root} .new_lst_btn :is(a, a i, .view_notice),
+      ${root} .bd_hd .btn_img { color: var(--fm-clean-muted) !important; text-shadow: none !important; }
+      ${root} .bd_hd .btn_img {
+        background: var(--fm-clean-raised) !important; border: 1px solid var(--fm-clean-line) !important;
+        border-radius: 7px !important; box-shadow: none !important;
+      }
+      ${root} .new_lst_btn :is(.view_notice .a, .pop_border .a, .lst_btn a) {
+        background-color: var(--fm-clean-raised) !important; border-color: var(--fm-clean-line) !important;
+      }
+      ${root} .new_lst_btn .lst_btn li.on a {
+        background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
+        border-color: var(--fm-clean-line) !important;
+      }
+      ${root} .bd_cnb ul { background: transparent !important; border: 0 !important; }
+      ${root} .bd_cnb li a {
+        background: var(--fm-clean-raised) !important; border: 1px solid var(--fm-clean-line) !important;
+        border-radius: 6px !important; color: var(--fm-clean-text) !important;
+        text-shadow: none !important;
+      }
+      ${root} .bd_cnb li.on a, ${root} .bd_cnb li a.on, ${root} .bd_cnb .a1.on {
+        background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
+      }
+      ${root} .bd_cnb .a1.on::before { content: none !important; }
       ${root} .fdb_lst_ul { background: var(--fm-clean-surface) !important; }
-      ${root} .fdb_tag { border: 0 !important; border-bottom: 1px solid var(--fm-clean-line) !important; border-radius: 0 !important; padding: 12px !important; }
-      ${root} .fdb_itm { padding-top: 16px !important; padding-bottom: 16px !important; }
+      ${root} .fdb_tag {
+        background: var(--fm-clean-raised) !important; border: 0 !important;
+        border-bottom: 1px solid var(--fm-clean-line) !important; border-radius: 0 !important; padding: 12px !important;
+      }
+      ${root} .fdb_itm { padding-top: 14px !important; padding-bottom: 14px !important; }
       ${root} .fdb_itm :is(.meta, .meta .date, .meta a, .meta span) {
         color: var(--fm-clean-muted) !important; font-size: 12px !important;
       }
       ${root} .fdb_itm .member_plate { color: var(--fm-clean-text) !important; font-weight: 600; }
-      ${root} .fdb_itm .comment-content { color: var(--fm-clean-text) !important; line-height: 1.7; }
+      ${root} .fdb_itm .comment-content { color: var(--fm-clean-text) !important; font-size: 15px !important; line-height: 1.75; }
       ${root} .fdb_itm .meta :is(.best, .icon-hit) {
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
         border: 0 !important; border-radius: 4px;
@@ -347,6 +470,36 @@
       ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; }
       ${root} .bd_m_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
       ${root} .bd_m_lst :is(.author, .regdate, .m_no, .category) { color: var(--fm-clean-muted) !important; }
+      ${root} .bd_faq_srch {
+        background: var(--fm-clean-surface) !important; border-color: var(--fm-clean-line) !important;
+        color: var(--fm-clean-text) !important;
+      }
+      ${root} .bd_faq_srch.m_srch {
+        width: 100% !important; max-width: none !important; margin: 0 !important;
+        padding: 12px !important; box-sizing: border-box !important; border: 0 !important;
+        border-top: 1px solid var(--fm-clean-line) !important; border-radius: 0 !important;
+      }
+      ${root} .bd_faq_srch :is(.itx, .select, select, .srch_itx, .bd_btn) {
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-text) !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 7px !important;
+        box-shadow: none !important;
+      }
+      ${root} .bd_faq_srch .bd_btn {
+        background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
+      }
+      ${root} #search_assist_wrapper,
+      ${root} #search_assist_wrapper :is(.search_bar, .contents, .keyword_ranking, .recent_searches, .recommend_boards, .recommend_keywords) {
+        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
+        border-color: var(--fm-clean-line) !important;
+      }
+      ${root} #search_assist_wrapper :is(.title, .list, .item, .loading, .feature-disabled-footer) {
+        background: var(--fm-clean-surface) !important; border-color: var(--fm-clean-line) !important;
+      }
+      ${root} #search_assist_wrapper :is(h2, a, button, span) { color: var(--fm-clean-text) !important; }
+      ${root} #search_assist_wrapper .search_input {
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-text) !important;
+        border-color: var(--fm-clean-line) !important;
+      }
       ${root} body > footer .ft {
         background: var(--fm-clean-bg) !important; padding: 8px 12px !important;
       }
@@ -359,6 +512,7 @@
         border-color: var(--fm-clean-line) !important; border-radius: 7px !important;
         box-shadow: none !important; text-shadow: none !important;
       }
+      ${root} .bd_pg { border-top: 1px solid var(--fm-clean-line) !important; padding: 10px 8px !important; }
       ${root} :is(.fm_navi, .bd_pg, .fdb_tag) :is(.this, .active, strong) {
         color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
         border-color: transparent !important; border-radius: 7px;
@@ -404,7 +558,7 @@
       ${scope('count')} [data-fm-clean-badge] {
         display: inline-block !important; flex: 0 0 auto; margin-left: auto;
         padding: 4px 8px; border: 0; border-radius: 8px;
-        color: var(--fm-clean-accent, #487762); background: var(--fm-clean-soft, #e9f0eb); white-space: nowrap;
+        color: var(--fm-clean-accent, #386daa); background: var(--fm-clean-soft, #e8f2ff); white-space: nowrap;
         font: 600 12px/1.4 -apple-system, BlinkMacSystemFont, sans-serif;
         letter-spacing: 0; text-indent: 0;
       }
@@ -470,32 +624,36 @@
         button { cursor: pointer; }
         .launcher {
           display: block; min-width: 48px; height: 44px; padding: 0 10px;
-          border: 1px solid #64748b66; border-radius: 12px;
-          background: #263b30f2; color: #fff; box-shadow: 0 2px 8px #0002;
+          border: 1px solid #6caeff99; border-radius: 11px;
+          background: #102a49f2; color: #f5f9ff; box-shadow: 0 4px 16px #030b18aa;
           font: 600 13px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .launcher:focus-visible, .close:focus-visible, input:focus-visible {
+          outline: 2px solid #8cc4ff; outline-offset: 2px;
         }
         .panel {
           position: absolute; left: 0; bottom: 52px; width: 256px;
           max-width: calc(100vw - 24px); max-height: calc(100dvh - 92px);
-          overflow-y: auto; padding: 12px; border: 1px solid #cbd5e1;
-          border-radius: 12px; background: #fff; color: #172033;
-          box-shadow: 0 8px 32px #0003;
+          overflow-y: auto; padding: 13px; border: 1px solid var(--fm-clean-line, #dce5f0);
+          border-radius: 12px; background: var(--fm-clean-surface, #fff); color: var(--fm-clean-text, #15243a);
+          box-shadow: 0 12px 36px #050d1d55;
           font: 13px/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
         }
         [hidden] { display: none !important; }
-        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
         strong { font-size: 13px; }
         .close { border: 0; background: transparent; color: inherit; padding: 4px 8px; font-size: 18px; }
-        label { display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
-        input { width: 16px; height: 16px; margin: 0; accent-color: #487762; flex-shrink: 0; }
-        p { font-size: 11px; color: #64748b; margin: 8px 0 0; }
+        label { display: flex; align-items: center; gap: 8px; min-height: 38px; cursor: pointer; border-top: 1px solid var(--fm-clean-line, #dce5f0); }
+        input { width: 16px; height: 16px; margin: 0; accent-color: #4e9cff; flex-shrink: 0; }
+        p { font-size: 11px; color: var(--fm-clean-muted, #53657c); margin: 10px 0 0; }
         @media (prefers-color-scheme: dark) {
-          .panel { background: #172033; color: #f1f5f9; border-color: #475569; }
-          p { color: #94a3b8; }
+          .panel { background: var(--fm-clean-surface, #0d1b2b); color: var(--fm-clean-text, #ecf3ff); border-color: var(--fm-clean-line, #29405a); }
+          label { border-color: var(--fm-clean-line, #29405a); }
+          p { color: var(--fm-clean-muted, #afc0d6); }
         }
       </style>
       <section class="panel" id="fm-clean-panel" aria-label="FM코리아 화면 정리 설정" hidden>
-        <header><strong>FM코리아 화면 정리</strong><button class="close" type="button" aria-label="설정 닫기">×</button></header>
+        <header><strong>화면 정리 · ${SCRIPT_VERSION}</strong><button class="close" type="button" aria-label="설정 닫기">×</button></header>
         ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
         <p data-save-status>설정이 자동 저장됩니다.</p>
       </section>
@@ -569,14 +727,12 @@
   const observer = new MutationObserver(records => {
     // 같은 작업 안에서 링크가 삽입·교체·제거돼도 광고 클래스의 단서를 놓치지 않습니다.
     for (const record of records) {
-      if (record.type === 'attributes' && record.target instanceof HTMLLinkElement) {
-        rememberAdStylesheet(record.target.href);
-        if (record.attributeName === 'href' && record.oldValue) rememberAdStylesheet(record.oldValue);
+      if (record.type === 'attributes' && record.target.matches('link[href], script[src]')) {
+        rememberAdResource(record.target.getAttribute('href') || record.target.getAttribute('src'));
+        if (['href', 'src'].includes(record.attributeName) && record.oldValue) rememberAdResource(record.oldValue);
       }
       for (const node of [...record.addedNodes, ...record.removedNodes]) {
-        if (!(node instanceof Element)) continue;
-        if (node.matches('link[href]')) rememberAdStylesheet(node.href);
-        node.querySelectorAll('link[href]').forEach(link => rememberAdStylesheet(link.href));
+        rememberAdNode(node);
       }
     }
     scheduleRefresh();
