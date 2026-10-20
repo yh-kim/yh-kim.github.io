@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.5
+// @version      1.5.6
 // @description  살구색 모바일 UI, 스크롤 제목·진행 바, 목록 읽음 구분, 상세 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.5';
+  const SCRIPT_VERSION = '1.5.6';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -37,7 +37,7 @@
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['readingHeader', '스크롤 시 제목·진행 바 표시'],
     ['footer', '상세 주소·하단 도구 숨김'],
-    ['commentActions', '댓글 추천·답글·더보기 숨김'],
+    ['commentActions', '댓글 이동·추천 수 간결하게 표시'],
     ['commentComposer', '댓글 쓰기 기본 접기'],
     ['siteFooter', '사이트 하단 문의·신고 숨김'],
     ['appearance', '깔끔한 화면 디자인']
@@ -323,6 +323,8 @@
     const root = scope('appearance');
     const detail = `${root} .rd_hd .board:has(> .top_area > .date):has(> .btm_area > .side.fr)`;
     const home = `${root} body:has(.main_recent)`;
+    const commentItem = `${root}[data-fm-clean-commentactions="true"] .fdb_itm:has(> .fdb_nav)`;
+    const commentNav = `${root}[data-fm-clean-commentactions="true"] .fdb_itm .fdb_nav`;
     // 본문 작성자 색상·영상·인용 형식은 유지하고 다크 모드 이미지 밝기만 낮춥니다.
     return `
       ${root} { background: transparent !important; }
@@ -331,6 +333,7 @@
         --fm-clean-text: #1c1b19; --fm-clean-muted: #6b6862; --fm-clean-line: #e7e4de;
         --fm-clean-title: #1c1b19;
         --fm-clean-read: #74716b;
+        --fm-clean-comment: #8b5a3c;
         --fm-clean-accent: #9a4e26; --fm-clean-soft: #fff0e7;
         color-scheme: light;
         background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
@@ -342,6 +345,7 @@
         --fm-clean-text: #ecebe8; --fm-clean-muted: #a3a09a; --fm-clean-line: #2f2e2b;
         --fm-clean-title: #ccc9c3;
         --fm-clean-read: #928f89;
+        --fm-clean-comment: #b69a86;
         --fm-clean-accent: #f0b58f; --fm-clean-soft: #3b2a23;
         color-scheme: dark;
       }
@@ -459,7 +463,10 @@
       ${root} .rd_body article .xe_content > p:not(:has(img, picture, video, iframe)) {
         padding-left: 8px !important; padding-right: 8px !important;
       }
-      ${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img) {
+      ${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]) {
+        filter: none !important;
+      }
+      ${root} body.night_mode .rd_body article .xe_content img[data-fm-clean-bright-image]:not(table.invertl img):not([style*="filter" i]) {
         filter: brightness(.78) !important;
       }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
@@ -494,7 +501,9 @@
         color: var(--fm-clean-title) !important;
       }
       ${root} .bd_m_lst > li .rt_area h3 .comment_count,
-      ${root} .bd_m_lst > li .visited .comment_count,
+      ${root} .bd_m_lst > li .visited .comment_count {
+        color: var(--fm-clean-comment) !important;
+      }
       ${root} .bd_m_lst > li .rt_area h3 .no strong {
         color: var(--fm-clean-accent) !important;
       }
@@ -561,12 +570,54 @@
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
         border: 0 !important; border-radius: 999px !important;
       }
+      ${commentItem} {
+        display: grid !important; grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 6px; align-items: center;
+      }
+      ${commentItem}::after { content: none !important; display: none !important; }
+      ${commentItem} > .meta {
+        grid-row: 1; grid-column: 1; min-width: 0; margin-bottom: 4px !important;
+        overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+      }
+      ${commentItem} > .meta .date { padding: 0 0 0 5px !important; }
+      ${commentItem} > .comment-content { grid-row: 2; grid-column: 1 / -1; }
+      ${commentNav} {
+        grid-row: 1; grid-column: 2; position: static !important; float: none !important;
+        display: flex !important; align-items: center; justify-content: flex-end; gap: 3px;
+        margin: 0 0 4px !important; padding: 0 !important; line-height: 1 !important;
+      }
+      ${commentNav} .vote {
+        position: static !important; float: none !important; display: inline-flex !important;
+        align-items: center; gap: 3px; margin: 0 !important; padding: 0 !important;
+      }
+      ${commentNav} :is(a.findComment, .vote a) {
+        position: static !important; float: none !important; top: auto !important; right: auto !important;
+        display: inline-flex !important; align-items: center; justify-content: center; gap: 3px;
+        height: 24px !important; min-width: 30px; box-sizing: border-box !important;
+        margin: 0 !important; padding: 0 6px !important; overflow: visible !important; white-space: nowrap;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 999px !important;
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-muted) !important;
+        font: 500 10px/1 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
+        text-shadow: none !important; box-shadow: none !important; text-decoration: none !important;
+      }
+      ${commentNav} .vote em { display: inline-flex; align-items: center; font: inherit; }
+      ${commentNav} :is(a.findComment, .vote a) i { display: none !important; }
+      ${commentNav} .vote a[title="추천"]::before { content: '↑'; font-size: 13px; }
+      ${commentNav} .vote a[title="비추천"]::before { content: '↓'; font-size: 13px; }
+      ${commentNav} a.findComment span { display: inline !important; }
+      ${commentNav} [data-fm-clean-empty-count]::after { content: '0'; }
+      ${commentNav} :is(.voted_count, .blamed_count) { color: inherit !important; font: inherit !important; }
+      ${commentNav} .vote:is(.my_vote_up, .my_vote_down) a:is(:hover, :focus-visible),
+      ${commentNav} .vote.my_vote_up a[title="추천"],
+      ${commentNav} .vote.my_vote_down a[title="비추천"] {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+      }
       ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-title) !important; }
       ${root} .bd_lst td.title, ${root} .bd_lst td.title a {
         font-size: 13px !important; font-weight: 600 !important; line-height: 1.35 !important;
       }
       ${root} .bd_lst td.title a span:not(.comment_count) { color: var(--fm-clean-title) !important; }
-      ${root} .bd_lst td.title .comment_count { color: var(--fm-clean-accent) !important; font-size: 12px !important; }
+      ${root} .bd_lst td.title .comment_count { color: var(--fm-clean-comment) !important; font-size: 12px !important; }
       ${root} .bd_lst td.title a:is(.visited, :visited),
       ${root} .bd_lst td.title a:is(.visited, :visited) span:not(.comment_count) { color: var(--fm-clean-read) !important; }
       ${root} .bd_lst td { padding-top: 5px !important; padding-bottom: 5px !important; }
@@ -618,7 +669,7 @@
       ${root} .fm_best_widget .title a:visited .ellipsis-target {
         color: var(--fm-clean-read) !important;
       }
-      ${root} .fm_best_widget .comment_count { color: var(--fm-clean-accent) !important; }
+      ${root} .fm_best_widget .comment_count { color: var(--fm-clean-comment) !important; }
       ${root} .m_top_hotdeal::before {
         color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
         border-color: var(--fm-clean-line) !important; border-radius: 999px !important;
@@ -703,13 +754,11 @@
       ${root} .bd_lst td.title a.visited span:not(.comment_count) {
         color: var(--fm-clean-read) !important; font-weight: 400 !important;
       }
-      ${root} .fm_best_widget .li_visited .title::after,
-      ${root} .bd_m_lst > li .rt_area h3:has(> a.visited)::after,
-      ${root} .bd_lst td.title:has(a.visited)::after {
-        content: '읽음'; display: inline-block; margin-left: 5px; padding: 0 4px;
-        color: var(--fm-clean-read); border: 1px solid var(--fm-clean-line); border-radius: 999px;
-        font: 400 10px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-        vertical-align: 1px;
+      ${root} .fm_best_widget .li_visited .comment_count,
+      ${root} .fm_best_widget .title a:visited .comment_count,
+      ${root} .bd_m_lst > li .rt_area h3 > a:is(.visited, :visited) .comment_count,
+      ${root} .bd_lst td.title a:is(.visited, :visited) .comment_count {
+        color: var(--fm-clean-read) !important; font-weight: 400 !important;
       }
       ${root} #fm_alert { right: 12px !important; max-width: calc(100vw - 24px) !important; }
       ${root} #fm_alert .fm_alert_wrap.best { width: min(280px, calc(100vw - 24px)) !important; }
@@ -838,7 +887,7 @@
     // 본문과 댓글 사이의 도구 모음 전체만 접습니다. 댓글 목록·페이지 이동·입력은 별도 영역입니다.
     hideRule('footer', ['.rd > .rd_ft', '.rd > .rd_ft_nav', '.rd .m_rd_nav_side', '.rd .rd_body > .document_address']),
     hideRule('header', ['.fm-recent-visited .footer', '.fm-recent-visited .item.feature-disabled', '.bd > nav.fmkorea_navi:has(~ .main_recent)']),
-    hideRule('commentActions', ['.fdb_itm .fdb_nav']),
+    hideRule('commentActions', ['.fdb_itm .fdb_nav > :not(.findComment):not(.vote)']),
     hideRule('siteFooter', ['body > footer .cr', 'body > footer .crhome', '#footer']),
     cleanAppearance(),
     `
@@ -907,9 +956,118 @@
   ].join('\n');
   const styleText = style.textContent;
 
+  const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i])';
+  const brightImages = {
+    sources: new WeakMap(), cache: new Map(), visible: new WeakSet(), tracked: new Set(),
+    observer: null, listening: false
+  };
+
+  function brightImageModeActive() {
+    return settings.enabled && settings.appearance && document.body?.classList.contains('night_mode') &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+  }
+
+  function inspectBrightImage(url) {
+    return new Promise(resolve => {
+      // 원본 이미지의 CORS·로딩 속성은 바꾸지 않고 분석용 복사본만 읽습니다.
+      const probe = new Image();
+      const finish = value => {
+        window.clearTimeout(timeout);
+        probe.onload = probe.onerror = null;
+        resolve(value);
+      };
+      const timeout = window.setTimeout(() => finish(false), 8000);
+      probe.crossOrigin = 'anonymous';
+      probe.decoding = 'async';
+      probe.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 32;
+          const context = canvas.getContext('2d', { willReadFrequently: true });
+          if (!context) return finish(false);
+          context.drawImage(probe, 0, 0, 32, 32);
+          const pixels = context.getImageData(0, 0, 32, 32).data;
+          let white = 0;
+          for (let i = 0; i < pixels.length; i += 4) {
+            const low = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
+            const high = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
+            if (pixels[i + 3] >= 230 && low >= 230 && high - low <= 25) white++;
+          }
+          finish(white / (32 * 32) >= .55);
+        } catch (error) {
+          // 픽셀 읽기를 허용하지 않는 외부 이미지는 원래 밝기를 유지합니다.
+          finish(false);
+        }
+      };
+      probe.onerror = () => finish(false);
+      probe.src = url;
+    });
+  }
+
+  function classifyBrightImage(image) {
+    if (!brightImageModeActive() || !image.isConnected || !image.complete ||
+        image.naturalWidth < 64 || image.naturalHeight < 64) return;
+    const url = image.currentSrc || image.src;
+    if (!url || brightImages.sources.get(image) === url) return;
+    brightImages.sources.set(image, url);
+    image.removeAttribute('data-fm-clean-bright-image');
+    if (!brightImages.cache.has(url)) brightImages.cache.set(url, inspectBrightImage(url));
+    brightImages.cache.get(url).then(bright => {
+      if (image.isConnected && brightImages.sources.get(image) === url && (image.currentSrc || image.src) === url) {
+        image.toggleAttribute('data-fm-clean-bright-image', bright);
+      }
+    });
+  }
+
+  function syncBrightImages() {
+    if (!brightImageModeActive()) return;
+    if (!brightImages.listening) {
+      brightImages.listening = true;
+      if (window.IntersectionObserver) {
+        brightImages.observer = new IntersectionObserver(entries => {
+          for (const { target, isIntersecting } of entries) {
+            if (isIntersecting) {
+              brightImages.visible.add(target);
+              classifyBrightImage(target);
+            } else brightImages.visible.delete(target);
+          }
+        }, { rootMargin: '600px 0px' });
+      }
+      document.addEventListener('load', event => {
+        const image = event.target;
+        if (image instanceof HTMLImageElement && image.matches(BRIGHT_IMAGE_SELECTOR) &&
+            (!brightImages.observer || brightImages.visible.has(image))) classifyBrightImage(image);
+      }, true);
+    }
+    for (const image of brightImages.tracked) {
+      if (image.isConnected && image.matches(BRIGHT_IMAGE_SELECTOR)) continue;
+      brightImages.observer?.unobserve(image);
+      brightImages.tracked.delete(image);
+      image.removeAttribute('data-fm-clean-bright-image');
+    }
+    document.querySelectorAll(BRIGHT_IMAGE_SELECTOR).forEach(image => {
+      if (brightImages.sources.get(image) !== (image.currentSrc || image.src)) {
+        brightImages.sources.delete(image);
+        image.removeAttribute('data-fm-clean-bright-image');
+      }
+      if (!brightImages.tracked.has(image)) {
+        brightImages.tracked.add(image);
+        brightImages.observer?.observe(image);
+      }
+      if (!brightImages.observer || brightImages.visible.has(image)) classifyBrightImage(image);
+    });
+  }
+
+  function syncCommentCounts() {
+    if (!settings.enabled || !settings.commentActions) return;
+    document.querySelectorAll('.fdb_itm .fdb_nav .voted_count, .fdb_itm .fdb_nav .blamed_count').forEach(count => {
+      count.toggleAttribute('data-fm-clean-empty-count', !count.textContent.trim());
+    });
+  }
+
   const readingState = {
     host: null, bar: null, title: null, progress: null, percent: null,
-    heading: null, frame: 0, resizeObserver: null, body: null
+    heading: null, end: null, frame: 0, resizeObserver: null, body: null
   };
 
   function scheduleReadingProgress() {
@@ -924,9 +1082,11 @@
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
     bar.hidden = !active || heading.getBoundingClientRect().bottom > 0;
     if (bar.hidden) return;
-    // 댓글과 하단 목록까지 포함해 현재 페이지에서 이동 가능한 전체 길이를 표시합니다.
-    const range = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const value = range ? Math.round(Math.min(1, Math.max(0, window.scrollY / range)) * 100) : 0;
+    // 마지막 댓글이 화면 하단에 도달하면 100%입니다. 댓글이 없으면 본문 끝을 사용합니다.
+    const end = readingState.end?.isConnected ? readingState.end : heading;
+    const endY = window.scrollY + end.getBoundingClientRect().bottom;
+    const range = Math.max(0, endY - window.innerHeight);
+    const value = range ? Math.round(Math.min(1, Math.max(0, window.scrollY / range)) * 100) : 100;
     if (progress.value !== value) progress.value = value;
     const label = `${value}%`;
     if (percent.textContent !== label) percent.textContent = label;
@@ -937,6 +1097,9 @@
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
     const heading = active ? document.querySelector('.rd .rd_hd h1') : null;
     readingState.heading = heading;
+    const article = heading?.closest('.rd');
+    readingState.end = article ? Array.from(article.querySelectorAll('.fdb_itm')).reverse()
+      .find(item => item.getClientRects().length) || article.querySelector('.rd_body') || heading : null;
     if (!heading) {
       if (readingState.bar) readingState.bar.hidden = true;
       return;
@@ -973,8 +1136,11 @@
           }
           .title {
             flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            pointer-events: auto; cursor: pointer; touch-action: manipulation; text-align: left;
+            border: 0; padding: 0; background: transparent; font-family: inherit;
             color: var(--reader-title); font-size: 12px; font-weight: 600; line-height: 1.5;
           }
+          .title:focus-visible { outline: 2px solid var(--reader-accent); outline-offset: 2px; }
           .percent { flex: none; color: var(--reader-muted); font-size: 10px; font-variant-numeric: tabular-nums; }
           progress {
             appearance: none; -webkit-appearance: none; display: block; width: 100%; height: 3px;
@@ -985,8 +1151,8 @@
           progress::-moz-progress-bar { background: var(--reader-accent); }
         </style>
         <div class="bar" hidden>
-          <div class="row"><span class="title"></span><span class="percent" aria-hidden="true">0%</span></div>
-          <progress max="100" value="0" aria-label="페이지 스크롤 진행률"></progress>
+          <div class="row"><button class="title" type="button"></button><span class="percent" aria-hidden="true">0%</span></div>
+          <progress max="100" value="0" aria-label="댓글 끝까지의 스크롤 진행률"></progress>
         </div>
       `;
       readingState.host = host;
@@ -994,6 +1160,9 @@
       readingState.title = shadow.querySelector('.title');
       readingState.progress = shadow.querySelector('progress');
       readingState.percent = shadow.querySelector('.percent');
+      readingState.title.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      });
       window.addEventListener('scroll', scheduleReadingProgress, { passive: true });
       window.addEventListener('resize', scheduleReadingProgress, { passive: true });
       if (window.ResizeObserver) readingState.resizeObserver = new ResizeObserver(scheduleReadingProgress);
@@ -1011,7 +1180,8 @@
     }
     if (readingState.title.textContent !== text) {
       readingState.title.textContent = text;
-      readingState.title.title = text;
+      readingState.title.title = `${text} · 맨 위로 이동`;
+      readingState.title.setAttribute('aria-label', `${text} · 맨 위로 이동`);
     }
     if (readingState.body !== document.body) {
       readingState.resizeObserver?.disconnect();
@@ -1027,6 +1197,8 @@
     }
     document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
     syncReadingHeader();
+    syncBrightImages();
+    syncCommentCounts();
     if (!launcher) return;
     launcher.toggleAttribute('data-off', !settings.enabled);
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
