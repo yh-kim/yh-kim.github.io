@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.1.0
-// @description  모바일 상단·광고·닉네임 아이콘·포텐/방출 버튼 숨김, 글 상세 제목 오른쪽 포텐수와 왼쪽 아래 설정
+// @version      1.2.0
+// @description  모바일 상단·광고·닉네임 아이콘·상세 하단 숨김, 제목 오른쪽 추천 숫자, FM 한 번은 메인·두 번은 설정
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -19,25 +19,33 @@
 
   const STORAGE_KEY = 'pimi.fmkorea.mobile-cleaner.v1';
   const HOST_ID = 'fm-clean-controls';
-  const defaults = { enabled: true, header: true, ads: true, icons: true, votes: true, count: true };
+  const MAIN_URL = 'https://www.fmkorea.com/';
+  const DOUBLE_TAP_MS = 400;
+  const defaults = {
+    enabled: true, header: true, ads: true, icons: true, votes: true,
+    count: true, footer: true, commentActions: true
+  };
   const options = [
     ['enabled', '전체 기능 켜기'],
-    ['header', '본문 위 상단 영역 숨김'],
+    ['header', '상단 로고·알림 숨김'],
     ['ads', '광고 영역 숨김'],
     ['icons', '글·댓글 닉네임 아이콘 숨김'],
     ['votes', '포텐·방출 버튼 숨김'],
-    ['count', '상세 제목 오른쪽 포텐수']
+    ['count', '상세 제목 오른쪽 추천 숫자'],
+    ['footer', '상세 하단 버튼·첨부파일 숨김'],
+    ['commentActions', '댓글 추천·답글·더보기 숨김']
   ];
   const settings = loadSettings();
   let host;
   let panel;
   let launcher;
   let pending = false;
+  let launcherClickTimer = null;
   const hiddenElements = { header: new Map(), ads: new Map() };
   const headerSelectors = [
-    'header.hd', 'div.hd', '#header', '#gnb', '.msearch', '.msearch + .dummy', 'nav.fmkorea_navi',
-    '.main_recent', '.fm-recent-visited.mobile'
+    'header.hd', 'div.hd', '#header', '.msearch', '.msearch + .dummy'
   ];
+  const menuSelectors = 'nav.fmkorea_navi, #gnb';
   const adSelectors = [
     '.fmad_wrapper', '[id^="fmad_wrapper_"]', '[id^="fmad_extra_wrapper_"]',
     '.ad_wrapper', '.adpost', '.adsbygoogle', '.google-auto-placed', '.pli', '.responsive_fill',
@@ -97,10 +105,15 @@
 
   function collectAdTargets() {
     const targets = new Set();
+    const parked = Array.from(hiddenElements.ads.keys());
     document.querySelectorAll(currentAdSelectors.join(',')).forEach(element => {
+      const target = adContainer(element);
       // 빈 차단 감지용 미끼는 건드리지 않습니다. 실제 광고가 들어오면 다시 검사합니다.
-      if (!element.firstElementChild && !element.textContent.trim() && !element.getBoundingClientRect().height) return;
-      targets.add(adContainer(element));
+      // 숨겨진 슬롯의 부모에 고정 높이가 남아 있거나 이미 접은 슬롯인 경우에는 계속 관리합니다.
+      if (!element.firstElementChild && !element.textContent.trim() && !element.getBoundingClientRect().height &&
+          !target.getBoundingClientRect().height &&
+          !parked.some(saved => saved === element || saved.contains(element))) return;
+      targets.add(target);
     });
     return targets;
   }
@@ -118,12 +131,19 @@
 
   function collectHeaderTargets(adTargets) {
     const targets = new Set();
-    const ads = Array.from(adTargets);
+    // 아직 비어 있거나 원래 숨겨진 광고 슬롯도 상단 display:none 처리에서는 제외합니다.
+    const ads = [...adTargets, ...document.querySelectorAll(currentAdSelectors.join(','))];
+    const menus = Array.from(document.querySelectorAll(menuSelectors));
+    // 최근 방문 안에 실제 게시판 링크가 있으면 그 메뉴 목록만 보존합니다.
+    document.querySelectorAll('.fm-recent-visited .list').forEach(list => {
+      if (list.querySelector('.item.bookmark a[href], .item.recent a[href]')) menus.push(list);
+    });
     function add(element) {
       if (element.matches(`script, style, link, template, #${HOST_ID}`)) return;
       if (ads.some(ad => ad === element || ad.contains(element))) return;
-      if (ads.some(ad => element.contains(ad))) {
-        // 상단과 광고를 따로 토글하고, 광고를 display:none으로 감추지 않게 합니다.
+      if (menus.some(menu => menu === element || menu.contains(element))) return;
+      if (ads.some(ad => element.contains(ad)) || menus.some(menu => element.contains(menu))) {
+        // 게시판 메뉴는 보존하고, 광고는 display:none으로 감추지 않게 분리합니다.
         Array.from(element.children).forEach(add);
       } else {
         targets.add(element);
@@ -139,6 +159,8 @@
       // 본문이 아직 파싱되지 않았거나 로그인/설정 화면인 경우에만 좁은 fallback을 사용합니다.
       document.querySelectorAll(headerSelectors.join(',')).forEach(add);
     }
+    // 알림/최근방문 제어부와 현재 게시판 위치 표시는 본문 안에 있어도 숨깁니다.
+    document.querySelectorAll('.main_recent, .fm-recent-visited, .bd .tl_srch').forEach(add);
     return targets;
   }
 
@@ -150,7 +172,13 @@
         // display 기반 광고 차단 감지를 유발하지 않고, 흐름 밖으로 빼 공간도 접습니다.
         const styles = key === 'ads' ? {
           position: 'absolute', left: '-100000px', top: '0px', visibility: 'hidden',
-          'pointer-events': 'none', width: `${Math.max(element.getBoundingClientRect().width, 1)}px`
+          'pointer-events': 'none', width: `${Math.max(element.getBoundingClientRect().width, 1)}px`,
+          height: '0px', 'min-height': '0px', 'max-height': '0px',
+          'margin-top': '0px', 'margin-right': '0px', 'margin-bottom': '0px', 'margin-left': '0px',
+          'padding-top': '0px', 'padding-right': '0px', 'padding-bottom': '0px', 'padding-left': '0px',
+          'border-top-width': '0px', 'border-right-width': '0px',
+          'border-bottom-width': '0px', 'border-left-width': '0px',
+          'overflow-x': 'hidden', 'overflow-y': 'hidden'
         } : { display: 'none' };
         const original = new Map();
         for (const property of Object.keys(styles)) original.set(property, {
@@ -221,8 +249,11 @@
       'img.level[src*="/modules/point/icons/"]',
       '.rd_hd img[src*="/modules/point/icons/"]', '.fdb_itm .meta img[src*="/modules/point/icons/"]'
     ]),
-    // 댓글 추천/비추천 및 신고·목록 버튼은 이 범위에 포함되지 않습니다.
+    // 글 추천 버튼과, 본문 아래 도구 모음 및 댓글별 도구 모음은 각각 토글합니다.
     hideRule('votes', ['.rd .fm_vote .vote', '.rd .fm_vote .use_new_voted_count']),
+    // 본문과 댓글 사이의 도구 모음 전체만 접습니다. 댓글 목록·페이지 이동·입력은 별도 영역입니다.
+    hideRule('footer', ['.rd > .rd_ft']),
+    hideRule('commentActions', ['.fdb_itm .fdb_nav']),
     `
       [data-fm-clean-badge] { display: none !important; }
       ${scope('count')} [data-fm-clean-title] {
@@ -257,7 +288,7 @@
     }
     if (!launcher) return;
     launcher.textContent = settings.enabled ? 'FM' : 'FM 꺼짐';
-    launcher.title = settings.enabled ? 'FM코리아 화면 정리 설정' : 'FM코리아 화면 정리 꺼짐 · 설정 열기';
+    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 설정`;
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];
   }
@@ -267,6 +298,20 @@
     launcher.setAttribute('aria-expanded', String(open));
     if (open) panel.querySelector('input').focus();
     else launcher.focus();
+  }
+
+  function handleLauncherClick() {
+    if (launcherClickTimer !== null) {
+      window.clearTimeout(launcherClickTimer);
+      launcherClickTimer = null;
+      setPanelOpen(panel.hidden);
+      return;
+    }
+    // 첫 탭에서 바로 이동하면 두 번째 탭을 받을 수 없어 잠깐 기다립니다.
+    launcherClickTimer = window.setTimeout(() => {
+      launcherClickTimer = null;
+      window.location.assign(MAIN_URL);
+    }, DOUBLE_TAP_MS);
   }
 
   function mountControls() {
@@ -287,14 +332,14 @@
         button, label { touch-action: manipulation; }
         button { cursor: pointer; }
         .launcher {
-          display: block; min-width: 36px; height: 32px; padding: 0 8px;
-          border: 1px solid #64748b66; border-radius: 10px;
+          display: block; min-width: 48px; height: 44px; padding: 0 10px;
+          border: 1px solid #64748b66; border-radius: 12px;
           background: #1e293beb; color: #fff; box-shadow: 0 2px 8px #0002;
-          font: 600 11px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+          font: 600 13px/1 -apple-system, BlinkMacSystemFont, sans-serif;
         }
         .panel {
-          position: absolute; left: 0; bottom: 40px; width: 256px;
-          max-width: calc(100vw - 24px); max-height: calc(100dvh - 80px);
+          position: absolute; left: 0; bottom: 52px; width: 256px;
+          max-width: calc(100vw - 24px); max-height: calc(100dvh - 92px);
           overflow-y: auto; padding: 12px; border: 1px solid #cbd5e1;
           border-radius: 12px; background: #fff; color: #172033;
           box-shadow: 0 8px 32px #0003;
@@ -317,11 +362,18 @@
         ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
         <p data-save-status>설정이 자동 저장됩니다.</p>
       </section>
-      <button class="launcher" type="button" aria-label="FM코리아 화면 정리 설정" aria-expanded="false" aria-controls="fm-clean-panel">FM</button>
+      <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 설정" aria-expanded="false" aria-controls="fm-clean-panel">FM</button>
     `;
     panel = shadow.querySelector('.panel');
     launcher = shadow.querySelector('.launcher');
-    launcher.addEventListener('click', () => setPanelOpen(panel.hidden));
+    launcher.addEventListener('click', handleLauncherClick);
+    launcher.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowDown') return;
+      event.preventDefault();
+      window.clearTimeout(launcherClickTimer);
+      launcherClickTimer = null;
+      setPanelOpen(true);
+    });
     shadow.querySelector('.close').addEventListener('click', () => setPanelOpen(false));
     panel.addEventListener('change', event => {
       const input = event.target;
@@ -369,7 +421,7 @@
         badge.setAttribute('data-fm-clean-badge', '');
         title.appendChild(badge);
       }
-      const text = `포텐 ${count}`;
+      const text = count;
       if (badge.textContent !== text) badge.textContent = text;
       badge.setAttribute('aria-label', `포텐수 ${count}`);
       title.setAttribute('data-fm-clean-title', '');
@@ -398,6 +450,8 @@
     } else if (host) {
       // host의 display: block !important에 가려지지 않게 모바일이 아니면 제거합니다.
       host.remove();
+      window.clearTimeout(launcherClickTimer);
+      launcherClickTimer = null;
     }
     observer.observe(document.documentElement, {
       childList: true, subtree: true, characterData: true,
