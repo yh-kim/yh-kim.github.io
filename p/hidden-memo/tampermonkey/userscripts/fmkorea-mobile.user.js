@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.0.0
+// @version      1.1.0
 // @description  모바일 상단·광고·닉네임 아이콘·포텐/방출 버튼 숨김, 글 상세 제목 오른쪽 포텐수와 왼쪽 아래 설정
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
+// @downloadURL  https://blog.pickth.com/p/hidden-memo/tampermonkey/userscripts/fmkorea-mobile.user.js
+// @updateURL    https://blog.pickth.com/p/hidden-memo/tampermonkey/userscripts/fmkorea-mobile.user.js
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @run-at       document-start
@@ -20,7 +22,7 @@
   const defaults = { enabled: true, header: true, ads: true, icons: true, votes: true, count: true };
   const options = [
     ['enabled', '전체 기능 켜기'],
-    ['header', '상단 로고·메뉴 숨김'],
+    ['header', '본문 위 상단 영역 숨김'],
     ['ads', '광고 영역 숨김'],
     ['icons', '글·댓글 닉네임 아이콘 숨김'],
     ['votes', '포텐·방출 버튼 숨김'],
@@ -31,6 +33,152 @@
   let panel;
   let launcher;
   let pending = false;
+  const hiddenElements = { header: new Map(), ads: new Map() };
+  const headerSelectors = [
+    'header.hd', 'div.hd', '#header', '#gnb', '.msearch', '.msearch + .dummy', 'nav.fmkorea_navi',
+    '.main_recent', '.fm-recent-visited.mobile'
+  ];
+  const adSelectors = [
+    '.fmad_wrapper', '[id^="fmad_wrapper_"]', '[id^="fmad_extra_wrapper_"]',
+    '.ad_wrapper', '.adpost', '.adsbygoogle', '.google-auto-placed', '.pli', '.responsive_fill',
+    '[id^="google_ads_iframe_"]', '[id^="div-gpt-ad"]', '[id^="aswift_"][id$="_host"]',
+    'iframe[src*="//loader.fmkorea.com/"]', 'iframe[src*="//cdn.nhnace.com/"]',
+    'iframe[src*="//new-cdn.nhnace.com/"]', 'iframe[src*="doubleclick.net/"]',
+    'iframe[src*="googlesyndication.com/"]'
+  ];
+  let currentAdSelectors = adSelectors;
+  const narrowScreen = window.matchMedia('(max-width: 1024px)');
+
+  function isMobileView() {
+    // 모바일 브라우저의 PC형 HTML·태블릿·주소 리다이렉트도 처리합니다.
+    return Boolean(document.querySelector('header.hd, div.hd, link[href*="/m.layouts/"]')) ||
+      location.hostname === 'm.fmkorea.com' ||
+      new URLSearchParams(location.search).get('m') === '1' ||
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent)) ||
+      narrowScreen.matches;
+  }
+
+  function discoverAdSelectors() {
+    const selectors = [...adSelectors];
+    // 광고 복구 모듈은 매 요청마다 CSS 파일명과 광고 클래스명을 함께 바꿉니다.
+    // /modules/... 등의 일반 스타일은 제외하고 해당 루트 CSS의 클래스만 찾습니다.
+    document.querySelectorAll('link[rel="stylesheet"][href]').forEach(link => {
+      try {
+        const url = new URL(link.href, location.href);
+        const match = url.hostname === 'static.fmkorea.com' && url.pathname.match(/^\/([A-Za-z]{12,})\.css$/);
+        if (match) selectors.push(`.${match[1]}`);
+      } catch (error) {
+        // 잘못된 외부 리소스 주소는 무시합니다.
+      }
+    });
+    return selectors;
+  }
+
+  function adContainer(element) {
+    // 광고만 담긴 고정 높이 래퍼도 함께 접어 빈 광고 공간이 남지 않게 합니다.
+    let container = element;
+    while (container.parentElement) {
+      const parent = container.parentElement;
+      if (!parent.matches('div, section, aside, li') || parent.matches(
+        '#wrap, #container, #content, main, article, .rd, .rd_hd, .rd_body, .rd_ft, .fdb_itm, .comment-content, .xe_content'
+      )) break;
+      const hasContent = Array.from(parent.childNodes).some(node => {
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent.trim() !== '';
+        if (node.nodeType !== Node.ELEMENT_NODE || node === container) return false;
+        if (node.matches('div:empty') && (!node.className || node.style.clear === 'both')) return false;
+        return !node.matches(`script, style, template, ${currentAdSelectors.join(',')}`);
+      });
+      if (hasContent) break;
+      container = parent;
+    }
+    return container;
+  }
+
+  function collectAdTargets() {
+    const targets = new Set();
+    document.querySelectorAll(currentAdSelectors.join(',')).forEach(element => {
+      // 빈 차단 감지용 미끼는 건드리지 않습니다. 실제 광고가 들어오면 다시 검사합니다.
+      if (!element.firstElementChild && !element.textContent.trim() && !element.getBoundingClientRect().height) return;
+      targets.add(adContainer(element));
+    });
+    return targets;
+  }
+
+  function contentRoot() {
+    const rotatingClasses = currentAdSelectors.slice(adSelectors.length).join(',');
+    for (const anchor of document.querySelectorAll('.rd_body article, .bd_lst_wrp, .fm_best_widget')) {
+      // 복구 모듈은 본문과 목록도 복제하므로 광고 모듈의 복제본을 제외합니다.
+      if (rotatingClasses && anchor.closest(rotatingClasses)) continue;
+      if (!anchor.getClientRects().length || getComputedStyle(anchor).visibility === 'hidden') continue;
+      return anchor.closest('.bd') || anchor;
+    }
+    return null;
+  }
+
+  function collectHeaderTargets(adTargets) {
+    const targets = new Set();
+    const ads = Array.from(adTargets);
+    function add(element) {
+      if (element.matches(`script, style, link, template, #${HOST_ID}`)) return;
+      if (ads.some(ad => ad === element || ad.contains(element))) return;
+      if (ads.some(ad => element.contains(ad))) {
+        // 상단과 광고를 따로 토글하고, 광고를 display:none으로 감추지 않게 합니다.
+        Array.from(element.children).forEach(add);
+      } else {
+        targets.add(element);
+      }
+    }
+    const root = contentRoot();
+    if (root) {
+      // 태그·클래스에 의존하지 않고 실제 본문 이전의 형제 영역을 접습니다.
+      for (let node = root; node && node !== document.body; node = node.parentElement) {
+        for (let sibling = node.previousElementSibling; sibling; sibling = sibling.previousElementSibling) add(sibling);
+      }
+    } else {
+      // 본문이 아직 파싱되지 않았거나 로그인/설정 화면인 경우에만 좁은 fallback을 사용합니다.
+      document.querySelectorAll(headerSelectors.join(',')).forEach(add);
+    }
+    return targets;
+  }
+
+  function syncHiddenElements(key, active, targets) {
+    const saved = hiddenElements[key];
+    if (active) {
+      targets.forEach(element => {
+        if (saved.has(element)) return;
+        // display 기반 광고 차단 감지를 유발하지 않고, 흐름 밖으로 빼 공간도 접습니다.
+        const styles = key === 'ads' ? {
+          position: 'absolute', left: '-100000px', top: '0px', visibility: 'hidden',
+          'pointer-events': 'none', width: `${Math.max(element.getBoundingClientRect().width, 1)}px`
+        } : { display: 'none' };
+        const original = new Map();
+        for (const property of Object.keys(styles)) original.set(property, {
+          value: element.style.getPropertyValue(property), priority: element.style.getPropertyPriority(property)
+        });
+        saved.set(element, { styles, original });
+      });
+    }
+    for (const [element, state] of saved) {
+      if (!active || !targets.has(element)) {
+        for (const [property, original] of state.original) {
+          if (original.value) element.style.setProperty(property, original.value, original.priority);
+          else element.style.removeProperty(property);
+        }
+        saved.delete(element);
+      } else if (!element.isConnected) {
+        saved.delete(element);
+      } else {
+        for (const [property, value] of Object.entries(state.styles)) {
+          if (element.style.getPropertyValue(property) === value && element.style.getPropertyPriority(property) === 'important') continue;
+          state.original.set(property, {
+            value: element.style.getPropertyValue(property), priority: element.style.getPropertyPriority(property)
+          });
+          element.style.setProperty(property, value, 'important');
+        }
+      }
+    }
+  }
 
   function loadSettings() {
     const result = { ...defaults };
@@ -66,14 +214,6 @@
   const style = document.createElement('style');
   style.id = 'fm-clean-style';
   style.textContent = [
-    hideRule('header', ['header.hd', '.msearch', 'nav.fmkorea_navi', '.main_recent', '.fm-recent-visited.mobile']),
-    hideRule('ads', [
-      '.fmad_wrapper', '[id^="fmad_wrapper_"]', '.ad_wrapper', '.adpost',
-      '.adsbygoogle', '[id^="google_ads_iframe_"]', '[id^="div-gpt-ad"]',
-      'iframe[src*="//loader.fmkorea.com/"]', 'iframe[src*="//cdn.nhnace.com/"]',
-      'iframe[src*="//new-cdn.nhnace.com/"]', 'iframe[src*="doubleclick.net/"]',
-      'iframe[src*="googlesyndication.com/"]'
-    ]),
     // 회원 이름 안의 장식만 숨겨 본문 이미지·댓글 이모티콘·추천 아이콘을 보존합니다.
     hideRule('icons', [
       '.member_plate img:not(.image_name)', '.member_plate .level', '.member_plate .ico',
@@ -109,6 +249,7 @@
       }
     `
   ].join('\n');
+  const styleText = style.textContent;
 
   function applySettings() {
     for (const [key, value] of Object.entries(settings)) {
@@ -129,7 +270,11 @@
   }
 
   function mountControls() {
-    if (host?.isConnected || !document.body) return;
+    if (!document.body) return;
+    if (host) {
+      if (!host.isConnected) document.body.appendChild(host);
+      return;
+    }
     host = document.createElement('div');
     host.id = HOST_ID;
     const shadow = host.attachShadow({ mode: 'open' });
@@ -184,7 +329,7 @@
       settings[input.name] = input.checked;
       applySettings();
       saveSettings();
-      scheduleRefresh();
+      refresh();
     });
     document.addEventListener('pointerdown', event => {
       if (!panel.hidden && !event.composedPath().includes(host)) setPanelOpen(false);
@@ -236,10 +381,16 @@
   function refresh() {
     pending = false;
     observer.disconnect();
+    if (style.textContent !== styleText) style.textContent = styleText;
     if (!style.isConnected) (document.head || document.documentElement).appendChild(style);
-    // 화면 폭/기기 추측 대신 실제 모바일 레이아웃을 확인합니다. PC에서는 아무것도 숨기지 않습니다.
-    const mobile = Boolean(document.querySelector('header.hd, link[href*="/m.layouts/"]'));
+    const mobile = isMobileView();
     document.documentElement.setAttribute('data-fm-clean-mobile', String(mobile));
+    applySettings();
+    currentAdSelectors = discoverAdSelectors();
+    const adTargets = collectAdTargets();
+    const headerTargets = collectHeaderTargets(adTargets);
+    syncHiddenElements('header', mobile && settings.enabled && settings.header, headerTargets);
+    syncHiddenElements('ads', mobile && settings.enabled && settings.ads, adTargets);
     if (mobile) {
       mountControls();
       if (host) host.hidden = false;
@@ -250,7 +401,7 @@
     }
     observer.observe(document.documentElement, {
       childList: true, subtree: true, characterData: true,
-      attributes: true, attributeFilter: ['class', 'id', 'src', 'href']
+      attributes: true, attributeFilter: ['class', 'id', 'src', 'href', 'style']
     });
   }
 
@@ -265,6 +416,7 @@
     refresh();
     document.addEventListener('DOMContentLoaded', scheduleRefresh, { once: true });
     window.addEventListener('pageshow', scheduleRefresh);
+    narrowScreen.addEventListener('change', scheduleRefresh);
   }
   if (document.documentElement) start();
   else document.addEventListener('DOMContentLoaded', start, { once: true });
