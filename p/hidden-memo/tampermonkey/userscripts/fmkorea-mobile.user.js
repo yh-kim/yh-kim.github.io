@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.4.0
-// @description  길이와 무관한 광고 식별·복제 추적, 목록·상세 네이비 UI, 상단·글·댓글·사이트 하단 정리
+// @version      1.5.0
+// @description  웜 뉴트럴·틸 모바일 UI, 홈 아이콘, 상세 제목의 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,11 +21,11 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.4.0';
+  const SCRIPT_VERSION = '1.5.0';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
-    count: true, footer: true, commentActions: true, siteFooter: true, appearance: true
+    boardLabel: true, count: true, footer: true, commentActions: true, siteFooter: true, appearance: true
   };
   const options = [
     ['enabled', '전체 기능 켜기'],
@@ -33,11 +33,12 @@
     ['ads', '광고 영역 숨김'],
     ['icons', '글·댓글 닉네임 아이콘 숨김'],
     ['votes', '포텐·방출 버튼 숨김'],
+    ['boardLabel', '상세 제목 왼쪽 현재 메뉴 표시'],
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['footer', '상세 하단 버튼·첨부파일 숨김'],
     ['commentActions', '댓글 추천·답글·더보기 숨김'],
     ['siteFooter', '사이트 하단 문의·신고 숨김'],
-    ['appearance', '네이비 화면 디자인']
+    ['appearance', '깔끔한 화면 디자인']
   ];
   const settings = loadSettings();
   let host;
@@ -321,18 +322,21 @@
     // 사이트 UI만 재정의합니다. 본문 안의 색상·이미지·영상·인용 형식은 그대로 둡니다.
     return `
       ${root} body {
-        --fm-clean-bg: #f3f7fc; --fm-clean-surface: #fff; --fm-clean-raised: #f8fbff;
-        --fm-clean-text: #15243a; --fm-clean-muted: #53657c; --fm-clean-line: #dce5f0;
-        --fm-clean-accent: #2569bd; --fm-clean-soft: #e8f2ff;
+        --fm-clean-bg: #f6f5f2; --fm-clean-surface: #fff; --fm-clean-raised: #faf9f7;
+        --fm-clean-text: #1c1b19; --fm-clean-muted: #6b6862; --fm-clean-line: #e7e4de;
+        --fm-clean-accent: #0f766e; --fm-clean-soft: #e6f2f0;
         color-scheme: light;
         background: var(--fm-clean-bg) !important; color: var(--fm-clean-text) !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
+        font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
       }
       ${root} body.night_mode {
-        --fm-clean-bg: #07111e; --fm-clean-surface: #0d1b2b; --fm-clean-raised: #12253a;
-        --fm-clean-text: #ecf3ff; --fm-clean-muted: #afc0d6; --fm-clean-line: #29405a;
-        --fm-clean-accent: #99c8ff; --fm-clean-soft: #1d3b5c;
+        --fm-clean-bg: #121211; --fm-clean-surface: #1b1b1a; --fm-clean-raised: #232321;
+        --fm-clean-text: #ecebe8; --fm-clean-muted: #a3a09a; --fm-clean-line: #2f2e2b;
+        --fm-clean-accent: #5ec4b6; --fm-clean-soft: #1f3532;
         color-scheme: dark;
+      }
+      ${root} :where(.bd, .fm_best_widget, nav.fmkorea_navi, .fmkorea_m_navi, #gnb, body > footer) a:not(:where(.xe_content *, article *)) {
+        color: var(--fm-clean-text) !important;
       }
       ${root} .bd {
         color: var(--fm-clean-text) !important; background: var(--fm-clean-surface) !important;
@@ -350,8 +354,13 @@
       }
       ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) a {
         color: var(--fm-clean-text) !important; background: var(--fm-clean-raised) !important;
-        border: 1px solid var(--fm-clean-line) !important; border-radius: 8px !important; box-shadow: none !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 999px !important; box-shadow: none !important;
         text-shadow: none !important; font-size: 13px !important; font-weight: 500 !important;
+      }
+      ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) a:is(.on, .active, [aria-current]:not([aria-current="false"])),
+      ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) :is(li.on, li.active) > a {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+        border-color: transparent !important;
       }
       ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) :is(.expand, .expand i, button.close) {
         color: var(--fm-clean-text) !important;
@@ -380,6 +389,12 @@
         margin: 0 !important; padding: 10px 12px !important;
         border-bottom: 1px solid var(--fm-clean-line) !important;
       }
+      ${root} .document_address .btn_pack { background: none !important; padding: 0 !important; border: 0 !important; }
+      ${root} .document_address .btn_pack button {
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-muted) !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 999px !important;
+        padding: 3px 9px !important; box-shadow: none !important; text-shadow: none !important;
+      }
       ${root} .rd_body article .xe_content > p:not(:has(img, picture, video, iframe)) {
         padding-left: 12px !important; padding-right: 12px !important;
       }
@@ -387,12 +402,12 @@
         background: transparent !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important; box-shadow: none !important;
       }
-      ${root} .bd_m_lst.zine > li { padding-top: 11px !important; padding-bottom: 11px !important; }
+      ${root} .bd_m_lst.zine > li { padding-top: 13px !important; padding-bottom: 13px !important; }
       ${root} .bd_m_lst.zine > li:not(.is_tmb) { padding-left: 12px !important; padding-right: 12px !important; }
       ${root} .bd_m_lst.zine > li.is_tmb { padding-right: 12px !important; }
       ${root} :is(.bd_lst, .bd_m_lst) > li { border-bottom: 1px solid var(--fm-clean-line) !important; }
       ${root} .bd_m_lst > li .rt_area h3 {
-        color: var(--fm-clean-text) !important; font-size: 16px !important; line-height: 1.5 !important;
+        color: var(--fm-clean-text) !important; font-size: 16px !important; font-weight: 600 !important; line-height: 1.5 !important;
         height: auto !important;
         white-space: normal !important; text-overflow: clip !important; overflow: visible !important;
       }
@@ -404,20 +419,33 @@
       }
       ${root} .bd_m_lst h3 .no strong {
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
-        border-radius: 5px !important; font-size: 10px !important;
+        border-radius: 999px !important; font-size: 10px !important;
       }
-      ${root} .bd_m_lst > li .info { margin-top: 6px !important; line-height: 1.6 !important; }
+      ${root} .bd_m_lst > li .info { margin-top: 6px !important; line-height: 1.6 !important; font-size: 12px !important; }
       ${root} .bd_m_lst > li .rt_area h3 > a,
       ${root} .bd_m_lst > li .rt_area h3 > a :not(.comment_count) {
         color: var(--fm-clean-text) !important; text-shadow: none !important;
       }
+      ${root} .bd_m_lst .blind, ${root} .bd_m_lst .blind * {
+        color: var(--fm-clean-text) !important;
+      }
       ${root} .bd_m_lst > li .rt_area h3 .comment_count,
+      ${root} .bd_m_lst > li .visited .comment_count,
       ${root} .bd_m_lst > li .rt_area h3 .no strong {
         color: var(--fm-clean-accent) !important;
       }
       ${root} .bd_m_lst > li .info,
       ${root} .bd_m_lst > li .info :is(span, b, a, i) {
-        color: var(--fm-clean-muted) !important;
+        color: var(--fm-clean-muted) !important; font-size: 12px !important;
+      }
+      ${root} .bd_m_lst .mrk,
+      ${root} .bd_m_lst .mrk.update,
+      ${root} .bd_m_lst .mrk.pop {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+        border-radius: 999px !important;
+      }
+      ${root} .bd_m_lst > li:is(.notice.pop1, .select) {
+        background: var(--fm-clean-raised) !important;
       }
       ${root} .bd_m_lst > li .tmb_wrp {
         background: var(--fm-clean-raised) !important; border-color: var(--fm-clean-line) !important;
@@ -432,19 +460,20 @@
       ${root} .bd_hd .btn_img { color: var(--fm-clean-muted) !important; text-shadow: none !important; }
       ${root} .bd_hd .btn_img {
         background: var(--fm-clean-raised) !important; border: 1px solid var(--fm-clean-line) !important;
-        border-radius: 7px !important; box-shadow: none !important;
+        border-radius: 999px !important; box-shadow: none !important;
       }
       ${root} .new_lst_btn :is(.view_notice .a, .pop_border .a, .lst_btn a) {
         background-color: var(--fm-clean-raised) !important; border-color: var(--fm-clean-line) !important;
+        border-radius: 999px !important;
       }
       ${root} .new_lst_btn .lst_btn li.on a {
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
-        border-color: var(--fm-clean-line) !important;
+        border-color: var(--fm-clean-line) !important; border-radius: 999px !important;
       }
       ${root} .bd_cnb ul { background: transparent !important; border: 0 !important; }
       ${root} .bd_cnb li a {
         background: var(--fm-clean-raised) !important; border: 1px solid var(--fm-clean-line) !important;
-        border-radius: 6px !important; color: var(--fm-clean-text) !important;
+        border-radius: 999px !important; color: var(--fm-clean-text) !important;
         text-shadow: none !important;
       }
       ${root} .bd_cnb li.on a, ${root} .bd_cnb li a.on, ${root} .bd_cnb .a1.on {
@@ -464,12 +493,73 @@
       ${root} .fdb_itm .comment-content { color: var(--fm-clean-text) !important; font-size: 15px !important; line-height: 1.75; }
       ${root} .fdb_itm .meta :is(.best, .icon-hit) {
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
-        border: 0 !important; border-radius: 4px;
+        border: 0 !important; border-radius: 999px !important;
       }
       ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
-      ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; }
+      ${root} .bd_lst td.title, ${root} .bd_lst td.title a {
+        font-size: 16px !important; font-weight: 600 !important; line-height: 1.5 !important;
+      }
+      ${root} .bd_lst td.title a span:not(.comment_count) { color: var(--fm-clean-text) !important; }
+      ${root} .bd_lst td.title .comment_count { color: var(--fm-clean-accent) !important; font-size: 12px !important; }
+      ${root} .bd_lst td.title a:is(.visited, :visited),
+      ${root} .bd_lst td.title a:is(.visited, :visited) span:not(.comment_count) { color: var(--fm-clean-muted) !important; }
+      ${root} .bd_lst td { padding-top: 12px !important; padding-bottom: 12px !important; }
+      ${root} .bd_lst th {
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-muted) !important;
+        border-color: var(--fm-clean-line) !important;
+      }
+      ${root} .bd_lst tr:is(.notice, .select) { background: var(--fm-clean-raised) !important; }
+      ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; font-size: 12px !important; }
       ${root} .bd_m_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
       ${root} .bd_m_lst :is(.author, .regdate, .m_no, .category) { color: var(--fm-clean-muted) !important; }
+      ${root} .bd_m_lst > li :is(.visited, .visited .ellipsis-target),
+      ${root} .bd_m_lst > li .rt_area h3 > a:visited {
+        color: var(--fm-clean-muted) !important;
+      }
+      ${root} .fm_best_widget {
+        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
+        border-color: var(--fm-clean-line) !important;
+      }
+      ${root} .fm_best_widget li.li {
+        background: var(--fm-clean-surface) !important;
+        border-color: var(--fm-clean-line) !important; padding-top: 12px !important; padding-bottom: 12px !important;
+      }
+      ${root} .fm_best_widget li.li:is(.on, .li_best2_pop1) {
+        background: var(--fm-clean-raised) !important;
+      }
+      ${root} .fm_best_widget div,
+      ${root} .fm_best_widget :is(.category, .regdate, .author, .voted_count, .hotdeal_info) {
+        color: var(--fm-clean-muted) !important; font-size: 12px !important;
+      }
+      ${root} .fm_best_widget :is(a, a:visited, .category a, .category a:visited) {
+        color: var(--fm-clean-text) !important; text-shadow: none !important;
+      }
+      ${root} .fm_best_widget :is(a:hover, a:focus-visible, a:active, a.on),
+      ${root} .fm_best_widget .hotdeal_info .strong {
+        color: var(--fm-clean-accent) !important;
+      }
+      ${root} .fm_best_widget .title {
+        color: var(--fm-clean-text) !important; font-size: 16px !important;
+        font-weight: 600 !important; line-height: 1.5 !important;
+      }
+      ${root} .fm_best_widget .title a,
+      ${root} .fm_best_widget .title a .ellipsis-target {
+        color: var(--fm-clean-text) !important;
+      }
+      ${root} .fm_best_widget :is(.li_visited, .li_visited .title a, .li_visited .title .ellipsis-target),
+      ${root} .fm_best_widget .title a:visited,
+      ${root} .fm_best_widget .title a:visited .ellipsis-target {
+        color: var(--fm-clean-muted) !important;
+      }
+      ${root} .fm_best_widget .comment_count { color: var(--fm-clean-accent) !important; }
+      ${root} .m_top_hotdeal::before {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+        border-color: var(--fm-clean-line) !important; border-radius: 999px !important;
+      }
+      ${root} .fm_best_widget li:is(.li_best2_pop1, .li_best2_hotdeal1, .li_best2_politics1) .title::before {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+        border: 0 !important; border-radius: 999px !important;
+      }
       ${root} .bd_faq_srch {
         background: var(--fm-clean-surface) !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important;
@@ -481,11 +571,12 @@
       }
       ${root} .bd_faq_srch :is(.itx, .select, select, .srch_itx, .bd_btn) {
         background: var(--fm-clean-raised) !important; color: var(--fm-clean-text) !important;
-        border: 1px solid var(--fm-clean-line) !important; border-radius: 7px !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 10px !important;
         box-shadow: none !important;
       }
       ${root} .bd_faq_srch .bd_btn {
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
+        border-radius: 999px !important;
       }
       ${root} #search_assist_wrapper,
       ${root} #search_assist_wrapper :is(.search_bar, .contents, .keyword_ranking, .recent_searches, .recommend_boards, .recommend_keywords) {
@@ -498,24 +589,57 @@
       ${root} #search_assist_wrapper :is(h2, a, button, span) { color: var(--fm-clean-text) !important; }
       ${root} #search_assist_wrapper .search_input {
         background: var(--fm-clean-raised) !important; color: var(--fm-clean-text) !important;
+        border-color: var(--fm-clean-line) !important; border-radius: 10px !important;
+      }
+      ${root} #search_assist_wrapper .search_bar button {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+        border-color: var(--fm-clean-line) !important; border-radius: 999px !important;
+      }
+      ${root} :is(.cmt_wrt, .simple_wrt, #re_cmt) {
+        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
+        border-color: var(--fm-clean-line) !important;
+      }
+      ${root} :is(.cmt_wrt, .simple_wrt, #re_cmt) :is(textarea, input[type="text"], input[type="search"]) {
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-text) !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 10px !important;
+      }
+      ${root} :is(.cmt_wrt, .simple_wrt, #re_cmt) .bd_btn {
+        background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 999px !important;
+        box-shadow: none !important; text-shadow: none !important;
+      }
+      ${root} :is(.fm_navi, .fm_navi2, .bd_pg) {
+        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
         border-color: var(--fm-clean-line) !important;
       }
       ${root} body > footer .ft {
         background: var(--fm-clean-bg) !important; padding: 8px 12px !important;
       }
+      ${root} body > footer :is(.cr, .crhome) {
+        background: var(--fm-clean-bg) !important; color: var(--fm-clean-muted) !important;
+        font-size: 12px !important;
+      }
       ${root} body > footer .ft :is(li, a) {
         background: transparent !important; border: 0 !important;
         color: var(--fm-clean-muted) !important; text-shadow: none !important; font-weight: 400 !important;
+        border-radius: 999px !important;
       }
       ${root} :is(.fm_navi, .fm_navi2, .bd_pg, .fdb_tag) :is(a, button, input) {
         background: transparent !important; color: var(--fm-clean-muted) !important;
-        border-color: var(--fm-clean-line) !important; border-radius: 7px !important;
+        border-color: var(--fm-clean-line) !important; border-radius: 999px !important;
         box-shadow: none !important; text-shadow: none !important;
       }
       ${root} .bd_pg { border-top: 1px solid var(--fm-clean-line) !important; padding: 10px 8px !important; }
       ${root} :is(.fm_navi, .bd_pg, .fdb_tag) :is(.this, .active, strong) {
         color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
-        border-color: transparent !important; border-radius: 7px;
+        border-color: transparent !important; border-radius: 999px !important;
+      }
+      ${root} :is(.fm_navi, .fm_navi2, .bd_pg, .fdb_tag) :is(a:hover, a:focus-visible, button:hover) {
+        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
+      }
+      ${root} .fm_navi2 input[type="number"] {
+        background: var(--fm-clean-raised) !important; color: var(--fm-clean-text) !important;
+        border: 1px solid var(--fm-clean-line) !important; border-radius: 10px !important;
       }
       ${root} :is(.cmt_wrt, .bd_srch) :is(textarea, input[type=text], input[type=search]) {
         background: var(--fm-clean-bg) !important; color: var(--fm-clean-text) !important;
@@ -546,20 +670,31 @@
     cleanAppearance(),
     `
       html[data-fm-clean-boot="true"] body { opacity: 0 !important; pointer-events: none !important; }
-      [data-fm-clean-badge] { display: none !important; }
-      ${scope('count')} [data-fm-clean-title] {
+      [data-fm-clean-badge], [data-fm-clean-board] { display: none !important; }
+      ${scope('count')} [data-fm-clean-title],
+      ${scope('boardLabel')} [data-fm-clean-title] {
         display: flex !important; align-items: flex-start; gap: 8px;
-        width: 100% !important; box-sizing: border-box; clear: both;
+        width: 100% !important; box-sizing: border-box; clear: both; overflow-wrap: anywhere;
       }
-      ${scope('count')} [data-fm-clean-title] .np_18px_span {
+      ${scope('count')} [data-fm-clean-title] .np_18px_span,
+      ${scope('boardLabel')} [data-fm-clean-title] .np_18px_span {
         flex: 1 1 auto; min-width: 0; width: auto !important;
         white-space: normal !important; overflow-wrap: anywhere;
       }
+      ${scope('boardLabel')} [data-fm-clean-board] {
+        display: inline-block !important; flex: 0 1 auto; align-self: flex-start;
+        max-width: 40%; height: 22px; box-sizing: border-box; margin-top: 3px; padding: 0 8px;
+        border: 0; border-radius: 999px; background: var(--fm-clean-soft, #e6f2f0);
+        color: var(--fm-clean-accent, #0f766e) !important; text-decoration: none !important;
+        overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+        font: 600 12px/22px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+        letter-spacing: 0; text-indent: 0;
+      }
       ${scope('count')} [data-fm-clean-badge] {
         display: inline-block !important; flex: 0 0 auto; margin-left: auto;
-        padding: 4px 8px; border: 0; border-radius: 8px;
-        color: var(--fm-clean-accent, #386daa); background: var(--fm-clean-soft, #e8f2ff); white-space: nowrap;
-        font: 600 12px/1.4 -apple-system, BlinkMacSystemFont, sans-serif;
+        padding: 4px 8px; border: 0; border-radius: 999px;
+        color: var(--fm-clean-accent, #0f766e); background: var(--fm-clean-soft, #e6f2f0); white-space: nowrap;
+        font: 600 12px/1.4 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         letter-spacing: 0; text-indent: 0;
       }
       ${scope('count')} [data-fm-clean-original-count] { display: none !important; }
@@ -577,8 +712,10 @@
     for (const [key, value] of Object.entries(settings)) {
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
     }
+    document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
     if (!launcher) return;
-    launcher.textContent = settings.enabled ? 'FM' : 'FM 꺼짐';
+    launcher.toggleAttribute('data-off', !settings.enabled);
+    host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
     launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 설정`;
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];
@@ -617,39 +754,88 @@
     // Shadow DOM으로 사이트의 버튼/입력 스타일과 충돌하지 않게 합니다.
     shadow.innerHTML = `
       <style>
-        :host { color-scheme: light dark; }
+        :host {
+          color-scheme: light;
+          --fm-control-bg: var(--fm-clean-bg, #f6f5f2);
+          --fm-control-surface: var(--fm-clean-surface, #fff);
+          --fm-control-raised: var(--fm-clean-raised, #faf9f7);
+          --fm-control-text: var(--fm-clean-text, #1c1b19);
+          --fm-control-muted: var(--fm-clean-muted, #6b6862);
+          --fm-control-line: var(--fm-clean-line, #e7e4de);
+          --fm-control-accent: var(--fm-clean-accent, #0f766e);
+          --fm-control-soft: var(--fm-clean-soft, #e6f2f0);
+          --fm-control-track: #797670;
+          --fm-control-knob: #fff;
+        }
+        :host([data-night]) {
+          color-scheme: dark;
+          --fm-control-bg: var(--fm-clean-bg, #121211);
+          --fm-control-surface: var(--fm-clean-surface, #1b1b1a);
+          --fm-control-raised: var(--fm-clean-raised, #232321);
+          --fm-control-text: var(--fm-clean-text, #ecebe8);
+          --fm-control-muted: var(--fm-clean-muted, #a3a09a);
+          --fm-control-line: var(--fm-clean-line, #2f2e2b);
+          --fm-control-accent: var(--fm-clean-accent, #5ec4b6);
+          --fm-control-soft: var(--fm-clean-soft, #1f3532);
+          --fm-control-track: #77736d;
+          --fm-control-knob: #121211;
+        }
         * { box-sizing: border-box; }
         button, input { font: inherit; }
         button, label { touch-action: manipulation; }
         button { cursor: pointer; }
         .launcher {
-          display: block; min-width: 48px; height: 44px; padding: 0 10px;
-          border: 1px solid #6caeff99; border-radius: 11px;
-          background: #102a49f2; color: #f5f9ff; box-shadow: 0 4px 16px #030b18aa;
-          font: 600 13px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+          display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
+          border: 1px solid var(--fm-control-line); border-radius: 999px;
+          background: var(--fm-control-surface); color: var(--fm-control-accent);
+          box-shadow: 0 4px 16px #0003;
+        }
+        .launcher svg { display: block; width: 20px; height: 20px; }
+        .launcher[data-off] {
+          background: var(--fm-control-raised); color: var(--fm-control-muted);
+          border-color: var(--fm-control-line);
         }
         .launcher:focus-visible, .close:focus-visible, input:focus-visible {
-          outline: 2px solid #8cc4ff; outline-offset: 2px;
+          outline: 2px solid var(--fm-control-accent); outline-offset: 2px;
         }
         .panel {
           position: absolute; left: 0; bottom: 52px; width: 256px;
           max-width: calc(100vw - 24px); max-height: calc(100dvh - 92px);
-          overflow-y: auto; padding: 13px; border: 1px solid var(--fm-clean-line, #dce5f0);
-          border-radius: 12px; background: var(--fm-clean-surface, #fff); color: var(--fm-clean-text, #15243a);
-          box-shadow: 0 12px 36px #050d1d55;
-          font: 13px/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
+          overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
+          border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
+          box-shadow: 0 12px 36px #0004;
+          font: 13px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         }
         [hidden] { display: none !important; }
         header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
         strong { font-size: 13px; }
-        .close { border: 0; background: transparent; color: inherit; padding: 4px 8px; font-size: 18px; }
-        label { display: flex; align-items: center; gap: 8px; min-height: 38px; cursor: pointer; border-top: 1px solid var(--fm-clean-line, #dce5f0); }
-        input { width: 16px; height: 16px; margin: 0; accent-color: #4e9cff; flex-shrink: 0; }
-        p { font-size: 11px; color: var(--fm-clean-muted, #53657c); margin: 10px 0 0; }
-        @media (prefers-color-scheme: dark) {
-          .panel { background: var(--fm-clean-surface, #0d1b2b); color: var(--fm-clean-text, #ecf3ff); border-color: var(--fm-clean-line, #29405a); }
-          label { border-color: var(--fm-clean-line, #29405a); }
-          p { color: var(--fm-clean-muted, #afc0d6); }
+        .close {
+          width: 34px; height: 34px; padding: 0; border: 0; border-radius: 999px;
+          background: transparent; color: var(--fm-control-muted); font-size: 20px;
+        }
+        .close:hover { background: var(--fm-control-soft); color: var(--fm-control-accent); }
+        label {
+          display: flex; align-items: center; gap: 10px; min-height: 42px; cursor: pointer;
+          border-top: 1px solid var(--fm-control-line); color: var(--fm-control-text);
+        }
+        input[type="checkbox"] {
+          appearance: none; -webkit-appearance: none; position: relative; flex: 0 0 auto;
+          accent-color: var(--fm-control-accent);
+          width: 38px; height: 22px; margin: 0; border: 1px solid var(--fm-control-track);
+          border-radius: 999px; background: var(--fm-control-track); cursor: pointer;
+        }
+        input[type="checkbox"]::before {
+          content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+          border-radius: 999px; background: var(--fm-control-knob);
+          transition: transform .15s ease;
+        }
+        input[type="checkbox"]:checked {
+          border-color: var(--fm-control-accent); background: var(--fm-control-accent);
+        }
+        input[type="checkbox"]:checked::before { transform: translateX(16px); }
+        p { font-size: 11px; color: var(--fm-control-muted); margin: 10px 0 0; }
+        @media (prefers-reduced-motion: reduce) {
+          input[type="checkbox"]::before { transition: none; }
         }
       </style>
       <section class="panel" id="fm-clean-panel" aria-label="FM코리아 화면 정리 설정" hidden>
@@ -657,7 +843,9 @@
         ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
         <p data-save-status>설정이 자동 저장됩니다.</p>
       </section>
-      <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 설정" aria-expanded="false" aria-controls="fm-clean-panel">FM</button>
+      <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 설정" aria-expanded="false" aria-controls="fm-clean-panel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+      </button>
     `;
     panel = shadow.querySelector('.panel');
     launcher = shadow.querySelector('.launcher');
@@ -695,6 +883,65 @@
     return match ? match[0] : null;
   }
 
+  function syncDetailTitle(title) {
+    const active = settings.enabled && (
+      (settings.boardLabel && title.querySelector('[data-fm-clean-board]')) ||
+      (settings.count && title.querySelector('[data-fm-clean-badge]'))
+    );
+    title.toggleAttribute('data-fm-clean-title', Boolean(active));
+  }
+
+  function updateBoardLabels() {
+    function fromLink(link) {
+      const text = link?.textContent.replace(/\s+/g, ' ').trim();
+      if (!text) return null;
+      const href = link.getAttribute('href');
+      try {
+        if (href && /^https?:$/.test(new URL(href, location.href).protocol)) return { text, href };
+      } catch (error) { /* URL이 없거나 잘못된 경우 게시판 이름만 표시합니다. */ }
+      return { text, href: null };
+    }
+
+    document.querySelectorAll('.rd').forEach(article => {
+      const board = article.closest('.bd');
+      let identity = fromLink(board?.querySelector('.tl_srch .bd_tl h1 a'));
+      if (!identity) {
+        for (const menu of document.querySelectorAll('nav.fmkorea_navi, #gnb')) {
+          identity = fromLink(menu.querySelector(
+            'li.on > a, li.active > a, a.on, a.active, a[aria-current]:not([aria-current="false"]), [aria-current]:not([aria-current="false"]) > a'
+          ));
+          if (identity) break;
+        }
+      }
+      if (!identity) {
+        const parts = document.title.split(' - ').map(part => part.trim()).filter(Boolean);
+        if (parts.length > 1 && /에펨코리아|fmkorea/i.test(parts[parts.length - 1])) {
+          identity = { text: parts[parts.length - 2], href: null };
+        }
+      }
+
+      article.querySelectorAll('.rd_hd h1').forEach(title => {
+        let chip = title.querySelector('[data-fm-clean-board]');
+        if (!identity) {
+          chip?.remove();
+          syncDetailTitle(title);
+          return;
+        }
+        const tag = identity.href ? 'a' : 'span';
+        if (!chip || chip.localName !== tag) {
+          const replacement = document.createElement(tag);
+          replacement.setAttribute('data-fm-clean-board', '');
+          if (chip) chip.replaceWith(replacement);
+          chip = replacement;
+        }
+        if (chip.textContent !== identity.text) chip.textContent = identity.text;
+        if (identity.href && chip.getAttribute('href') !== identity.href) chip.setAttribute('href', identity.href);
+        if (title.firstChild !== chip) title.insertBefore(chip, title.firstChild);
+        syncDetailTitle(title);
+      });
+    });
+  }
+
   function updateDetailCounts() {
     // .rd는 글 상세에만 존재합니다. 목록 제목/댓글 추천수는 변경하지 않습니다.
     document.querySelectorAll('.rd').forEach(article => {
@@ -707,7 +954,7 @@
       let badge = title.querySelector('[data-fm-clean-badge]');
       if (count === null) {
         badge?.remove();
-        title.removeAttribute('data-fm-clean-title');
+        syncDetailTitle(title);
         metadata?.removeAttribute('data-fm-clean-original-count');
         return;
       }
@@ -719,7 +966,7 @@
       const text = count;
       if (badge.textContent !== text) badge.textContent = text;
       badge.setAttribute('aria-label', `포텐수 ${count}`);
-      title.setAttribute('data-fm-clean-title', '');
+      syncDetailTitle(title);
       metadata?.setAttribute('data-fm-clean-original-count', '');
     });
   }
@@ -762,6 +1009,7 @@
     if (mobile) {
       mountControls();
       if (host) host.hidden = false;
+      if (settings.enabled && settings.boardLabel) updateBoardLabels();
       if (settings.enabled && settings.count) updateDetailCounts();
     } else if (host) {
       // host의 display: block !important에 가려지지 않게 모바일이 아니면 제거합니다.

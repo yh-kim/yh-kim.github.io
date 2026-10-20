@@ -137,6 +137,82 @@
         input.dispatchEvent(new doc.defaultView.Event('change', { bubbles: true }));
       }
 
+      // 상세 화면은 기존 목록 광고 fixture와 독립적으로 문서 시작 시점부터 스크립트를 실행합니다.
+      async function makeDetailFrame(source, label, settings = {}, boardSource = 'heading') {
+        const box = document.createElement('section');
+        box.className = 'fixture';
+        const heading = document.createElement('h2');
+        heading.textContent = label;
+        const frame = document.createElement('iframe');
+        frame.title = label;
+        const boardHeading = boardSource === 'heading'
+          ? '<div class="tl_srch"><div class="bd_tl"><h1><a href="/football_world">해외축구</a></h1></div></div>'
+          : '';
+        const activeMenu = boardSource === 'menu'
+          ? '<nav class="fmkorea_navi"><a href="/humor">유머</a><a class="on" href="/football_world">해외축구</a></nav>'
+          : '';
+        const pageTitle = boardSource === 'title' ? '상세 글 - 해외축구 - 에펨코리아' : '상세 글 - 에펨코리아';
+        frame.srcdoc = `<!doctype html><html lang="ko"><head>
+          <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+          <title>${pageTitle}</title>
+          <script>window.GM_getValue=(_key,fallback)=>Object.assign({},fallback,${JSON.stringify(settings)});
+            window.GM_setValue=()=>{};<\/script>
+          <script>${escapeScript(source)}<\/script>
+          <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
+            .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
+            .rd_hd h1{margin:8px 0}.rd_body{min-height:40px}</style>
+          </head><body><header class="hd">상단 로고</header>
+          <div id="detail-board" class="bd bd_mobile">${activeMenu}${boardHeading}
+            <div class="rd"><div class="rd_hd"><div class="top_area">
+              <h1 class="np_18px"><span class="np_18px_span">상세 제목</span></h1>
+            </div><div class="btm_area"><div class="side"><span>추천 수 <b>238</b></span></div></div></div>
+              <div class="rd_body"><article id="detail-content">실제 글 내용</article></div>
+              <div class="fm_vote"><div class="vote"><span class="new_voted_count">238</span></div></div>
+            </div></div></body></html>`;
+        box.append(heading, frame);
+        frames.append(box);
+        await Promise.race([
+          new Promise((resolve, reject) => {
+            frame.addEventListener('load', resolve, { once: true });
+            frame.addEventListener('error', () => reject(new Error('detail iframe load error')), { once: true });
+          }),
+          delay(4000).then(() => { throw new Error('detail iframe load timeout'); })
+        ]);
+        await delay(60);
+        return frame.contentDocument;
+      }
+
+      function detailLauncher(doc) {
+        return doc.querySelector('#fm-clean-controls')?.shadowRoot?.querySelector('.launcher');
+      }
+
+      function detailOption(doc, key, checked) {
+        const shadow = doc.querySelector('#fm-clean-controls')?.shadowRoot;
+        const launcher = shadow?.querySelector('.launcher');
+        const input = shadow?.querySelector(`input[name="${key}"]`);
+        if (!launcher || !input) return false;
+        launcher.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        input.checked = checked;
+        input.dispatchEvent(new doc.defaultView.Event('change', { bubbles: true }));
+        return true;
+      }
+
+      function detailChip(doc) {
+        return doc.querySelector('.rd > .rd_hd h1 > [data-fm-clean-board]');
+      }
+
+      function detailCount(doc) {
+        return doc.querySelector('.rd > .rd_hd h1 > [data-fm-clean-badge]');
+      }
+
+      function visiblyRendered(element) {
+        if (!element?.isConnected) return false;
+        const style = element.ownerDocument.defaultView.getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden' &&
+          element.getBoundingClientRect().height > 0;
+      }
+
       try {
         const response = await fetch(SOURCE_URL, { cache: 'no-store' });
         if (!response.ok) throw new Error(`유저스크립트 요청 ${response.status}`);
@@ -213,6 +289,69 @@
         await delay(30);
         record('class/id 변경 후 광고 OFF 복원·ON 재숨김',
           beforeToggle && restored && isParked(toggled) && contentVisible(toggleDoc));
+
+        const detailDoc = await makeDetailFrame(source, '상세 제목 게시판 배지·설정',
+          { boardLabel: true, count: true });
+        const titleHeading = detailDoc.querySelector('.rd > .rd_hd h1');
+        const boardChip = detailChip(detailDoc);
+        const launcher = detailLauncher(detailDoc);
+        record('FM 버튼은 SVG이고 FM 텍스트가 없음', Boolean(launcher?.querySelector('svg') &&
+          !launcher.textContent.includes('FM') && launcher.getAttribute('aria-label')));
+        record('상세 제목 첫 요소가 해외축구 게시판 배지', Boolean(boardChip &&
+          titleHeading?.firstElementChild === boardChip && boardChip.textContent.trim() === '해외축구' &&
+          visiblyRendered(boardChip) && visiblyRendered(detailDoc.querySelector('#detail-content'))));
+
+        const boardOff = detailOption(detailDoc, 'boardLabel', false);
+        await delay(30);
+        record('게시판 배지 OFF에서도 추천 숫자와 본문 유지', boardOff &&
+          !visiblyRendered(detailChip(detailDoc)) && visiblyRendered(detailCount(detailDoc)) &&
+          visiblyRendered(detailDoc.querySelector('#detail-content')));
+        const boardOn = detailOption(detailDoc, 'boardLabel', true);
+        const countOff = detailOption(detailDoc, 'count', false);
+        await delay(30);
+        record('추천 숫자 OFF에서도 게시판 배지와 본문 유지', boardOn && countOff &&
+          visiblyRendered(detailChip(detailDoc)) && !visiblyRendered(detailCount(detailDoc)) &&
+          visiblyRendered(detailDoc.querySelector('#detail-content')));
+        const bothOff = detailOption(detailDoc, 'boardLabel', false);
+        await delay(30);
+        record('게시판 배지·추천 숫자 모두 OFF에서도 본문 유지', bothOff &&
+          !visiblyRendered(detailChip(detailDoc)) && !visiblyRendered(detailCount(detailDoc)) &&
+          visiblyRendered(detailDoc.querySelector('#detail-content')));
+        const boardBackOn = detailOption(detailDoc, 'boardLabel', true);
+        const countOn = detailOption(detailDoc, 'count', true);
+        await delay(30);
+        record('게시판 배지·추천 숫자 ON 조합 유지', boardBackOn && countOn &&
+          visiblyRendered(detailChip(detailDoc)) && visiblyRendered(detailCount(detailDoc)) &&
+          detailCount(detailDoc).textContent.includes('238') &&
+          visiblyRendered(detailDoc.querySelector('#detail-content')));
+
+        const disabledDoc = await makeDetailFrame(source, '전체 기능 OFF',
+          { enabled: false, boardLabel: true, count: true });
+        const disabledLauncher = detailLauncher(disabledDoc);
+        record('전체 기능 OFF에서는 배지 숨김·SVG 버튼 유지', Boolean(disabledLauncher?.querySelector('svg') &&
+          !disabledLauncher.textContent.includes('FM') &&
+          !visiblyRendered(detailChip(disabledDoc)) &&
+          visiblyRendered(disabledDoc.querySelector('#detail-content'))));
+
+        const menuDoc = await makeDetailFrame(source, '활성 메뉴 게시판 이름',
+          { boardLabel: true }, 'menu');
+        record('제목 메뉴가 없으면 활성 메뉴의 해외축구 사용',
+          detailChip(menuDoc)?.textContent.trim() === '해외축구' &&
+          visiblyRendered(detailChip(menuDoc)) && visiblyRendered(menuDoc.querySelector('#detail-content')));
+
+        const titleDoc = await makeDetailFrame(source, '문서 제목 게시판 이름',
+          { boardLabel: true }, 'title');
+        record('메뉴가 없으면 document.title의 해외축구 사용',
+          detailChip(titleDoc)?.textContent.trim() === '해외축구' &&
+          visiblyRendered(detailChip(titleDoc)) && visiblyRendered(titleDoc.querySelector('#detail-content')));
+
+        const headingMenu = detailDoc.querySelector('.tl_srch');
+        headingMenu?.remove();
+        detailDoc.title = ' - 에펨코리아';
+        await delay(30);
+        record('게시판 근거가 사라지면 배지도 제거',
+          !visiblyRendered(detailChip(detailDoc)) &&
+          visiblyRendered(detailDoc.querySelector('#detail-content')));
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }

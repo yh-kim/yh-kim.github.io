@@ -7,6 +7,7 @@ npm-debug.log
 *.sh
 !scripts/serve-site.sh
 !scripts/stop-site.sh
+!scripts/verify-all.sh
 
 docs/assets/ui-motion-*/
 
