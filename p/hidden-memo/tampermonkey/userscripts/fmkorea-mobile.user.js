@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.6
+// @version      1.5.7
 // @description  살구색 모바일 UI, 스크롤 제목·진행 바, 목록 읽음 구분, 상세 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.6';
+  const SCRIPT_VERSION = '1.5.7';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -37,7 +37,7 @@
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['readingHeader', '스크롤 시 제목·진행 바 표시'],
     ['footer', '상세 주소·하단 도구 숨김'],
-    ['commentActions', '댓글 이동·추천 수 간결하게 표시'],
+    ['commentActions', '댓글 추천 수만 표시·이동 버튼 정리'],
     ['commentComposer', '댓글 쓰기 기본 접기'],
     ['siteFooter', '사이트 하단 문의·신고 숨김'],
     ['appearance', '깔끔한 화면 디자인']
@@ -332,6 +332,7 @@
         --fm-clean-bg: #f6f5f2; --fm-clean-surface: #fff; --fm-clean-raised: #faf9f7;
         --fm-clean-text: #1c1b19; --fm-clean-muted: #6b6862; --fm-clean-line: #e7e4de;
         --fm-clean-title: #1c1b19;
+        --fm-clean-content: #1c1b19;
         --fm-clean-read: #74716b;
         --fm-clean-comment: #8b5a3c;
         --fm-clean-accent: #9a4e26; --fm-clean-soft: #fff0e7;
@@ -342,9 +343,9 @@
       }
       ${root} body.night_mode {
         --fm-clean-bg: #121211; --fm-clean-surface: #1b1b1a; --fm-clean-raised: #232321;
-        --fm-clean-text: #ecebe8; --fm-clean-muted: #a3a09a; --fm-clean-line: #2f2e2b;
-        --fm-clean-title: #ccc9c3;
-        --fm-clean-read: #928f89;
+        --fm-clean-text: #f0efeb; --fm-clean-muted: #b0ada6; --fm-clean-line: #2f2e2b;
+        --fm-clean-title: #dad7d1; --fm-clean-content: #d5d2cc;
+        --fm-clean-read: #9b9891;
         --fm-clean-comment: #b69a86;
         --fm-clean-accent: #f0b58f; --fm-clean-soft: #3b2a23;
         color-scheme: dark;
@@ -463,11 +464,14 @@
       ${root} .rd_body article .xe_content > p:not(:has(img, picture, video, iframe)) {
         padding-left: 8px !important; padding-right: 8px !important;
       }
+      ${root} body.night_mode .rd_body article .xe_content:not([style*="color" i]) {
+        color: var(--fm-clean-content) !important;
+      }
       ${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]) {
         filter: none !important;
       }
       ${root} body.night_mode .rd_body article .xe_content img[data-fm-clean-bright-image]:not(table.invertl img):not([style*="filter" i]) {
-        filter: brightness(.78) !important;
+        filter: brightness(.72) !important;
       }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
         background: transparent !important; border-color: var(--fm-clean-line) !important;
@@ -564,8 +568,9 @@
         color: var(--fm-clean-muted) !important; font-size: 11px !important;
       }
       ${root} .fdb_itm .member_plate { color: var(--fm-clean-text) !important; font-weight: 600; }
-      ${root} .fdb_itm .comment-content { color: var(--fm-clean-text) !important; font-size: 13px !important; line-height: 1.55 !important; }
+      ${root} .fdb_itm .comment-content { color: var(--fm-clean-content) !important; font-size: 13px !important; line-height: 1.55 !important; }
       ${root} .fdb_itm .comment-content .xe_content { font-size: inherit !important; line-height: inherit !important; }
+      ${root} .fdb_itm .comment-content > .xe_content:not([style*="color" i]) { color: inherit !important; }
       ${root} .fdb_itm .meta :is(.best, .icon-hit) {
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
         border: 0 !important; border-radius: 999px !important;
@@ -577,20 +582,31 @@
       ${commentItem}::after { content: none !important; display: none !important; }
       ${commentItem} > .meta {
         grid-row: 1; grid-column: 1; min-width: 0; margin-bottom: 4px !important;
-        overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+        display: flex !important; align-items: center; flex-wrap: wrap; gap: 3px 6px;
+        overflow: visible; white-space: normal;
       }
-      ${commentItem} > .meta .date { padding: 0 0 0 5px !important; }
+      ${commentItem} > .meta .member_plate {
+        min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      ${commentItem} > .meta .date { padding: 0 !important; font-size: 10px !important; }
+      ${commentItem} [data-fm-clean-comment-stats] {
+        display: inline-flex; align-items: center; gap: 7px; padding-left: 7px;
+        border-left: 1px solid var(--fm-clean-line); white-space: nowrap;
+        font-variant-numeric: tabular-nums; cursor: default;
+      }
+      ${commentItem} [data-fm-clean-comment-stats] span {
+        color: var(--fm-clean-muted) !important; font-size: 10px !important; font-weight: 500;
+      }
+      ${commentItem} [data-fm-clean-comment-stats] [data-stat="up"] { color: var(--fm-clean-comment) !important; }
       ${commentItem} > .comment-content { grid-row: 2; grid-column: 1 / -1; }
       ${commentNav} {
         grid-row: 1; grid-column: 2; position: static !important; float: none !important;
         display: flex !important; align-items: center; justify-content: flex-end; gap: 3px;
         margin: 0 0 4px !important; padding: 0 !important; line-height: 1 !important;
       }
-      ${commentNav} .vote {
-        position: static !important; float: none !important; display: inline-flex !important;
-        align-items: center; gap: 3px; margin: 0 !important; padding: 0 !important;
-      }
-      ${commentNav} :is(a.findComment, .vote a) {
+      ${commentItem}:not(:has(> .fdb_nav > .findComment)) { grid-template-columns: minmax(0, 1fr); }
+      ${commentNav}:not(:has(> .findComment)) { display: none !important; }
+      ${commentNav} a.findComment {
         position: static !important; float: none !important; top: auto !important; right: auto !important;
         display: inline-flex !important; align-items: center; justify-content: center; gap: 3px;
         height: 24px !important; min-width: 30px; box-sizing: border-box !important;
@@ -600,18 +616,8 @@
         font: 500 10px/1 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
         text-shadow: none !important; box-shadow: none !important; text-decoration: none !important;
       }
-      ${commentNav} .vote em { display: inline-flex; align-items: center; font: inherit; }
-      ${commentNav} :is(a.findComment, .vote a) i { display: none !important; }
-      ${commentNav} .vote a[title="추천"]::before { content: '↑'; font-size: 13px; }
-      ${commentNav} .vote a[title="비추천"]::before { content: '↓'; font-size: 13px; }
+      ${commentNav} a.findComment i { display: none !important; }
       ${commentNav} a.findComment span { display: inline !important; }
-      ${commentNav} [data-fm-clean-empty-count]::after { content: '0'; }
-      ${commentNav} :is(.voted_count, .blamed_count) { color: inherit !important; font: inherit !important; }
-      ${commentNav} .vote:is(.my_vote_up, .my_vote_down) a:is(:hover, :focus-visible),
-      ${commentNav} .vote.my_vote_up a[title="추천"],
-      ${commentNav} .vote.my_vote_down a[title="비추천"] {
-        color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
-      }
       ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-title) !important; }
       ${root} .bd_lst td.title, ${root} .bd_lst td.title a {
         font-size: 13px !important; font-weight: 600 !important; line-height: 1.35 !important;
@@ -887,7 +893,7 @@
     // 본문과 댓글 사이의 도구 모음 전체만 접습니다. 댓글 목록·페이지 이동·입력은 별도 영역입니다.
     hideRule('footer', ['.rd > .rd_ft', '.rd > .rd_ft_nav', '.rd .m_rd_nav_side', '.rd .rd_body > .document_address']),
     hideRule('header', ['.fm-recent-visited .footer', '.fm-recent-visited .item.feature-disabled', '.bd > nav.fmkorea_navi:has(~ .main_recent)']),
-    hideRule('commentActions', ['.fdb_itm .fdb_nav > :not(.findComment):not(.vote)']),
+    hideRule('commentActions', ['.fdb_itm .fdb_nav > :not(.findComment)']),
     hideRule('siteFooter', ['body > footer .cr', 'body > footer .crhome', '#footer']),
     cleanAppearance(),
     `
@@ -1059,14 +1065,39 @@
   }
 
   function syncCommentCounts() {
-    if (!settings.enabled || !settings.commentActions) return;
-    document.querySelectorAll('.fdb_itm .fdb_nav .voted_count, .fdb_itm .fdb_nav .blamed_count').forEach(count => {
-      count.toggleAttribute('data-fm-clean-empty-count', !count.textContent.trim());
+    const active = settings.enabled && settings.commentActions &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    document.querySelectorAll('[data-fm-clean-comment-stats]').forEach(stats => {
+      if (!active || !stats.closest('.fdb_itm')?.querySelector('.fdb_nav .vote')) stats.remove();
+    });
+    if (!active) return;
+    document.querySelectorAll('.fdb_itm').forEach(item => {
+      const meta = item.querySelector(':scope > .meta');
+      const nav = item.querySelector(':scope > .fdb_nav');
+      if (!meta || !nav?.querySelector('.vote')) return;
+      let stats = meta.querySelector('[data-fm-clean-comment-stats]');
+      if (!stats) {
+        stats = document.createElement('span');
+        stats.setAttribute('data-fm-clean-comment-stats', '');
+        stats.setAttribute('role', 'group');
+        stats.innerHTML = '<span data-stat="up" aria-hidden="true"></span> <span data-stat="down" aria-hidden="true"></span>';
+        meta.appendChild(stats);
+      }
+      const up = readCount(nav.querySelector('.voted_count')) ?? '0';
+      const down = readCount(nav.querySelector('.blamed_count')) ?? '0';
+      const upLabel = `↑ ${up}`;
+      const downLabel = `↓ ${down}`;
+      const upText = stats.querySelector('[data-stat="up"]');
+      const downText = stats.querySelector('[data-stat="down"]');
+      if (upText.textContent !== upLabel) upText.textContent = upLabel;
+      if (downText.textContent !== downLabel) downText.textContent = downLabel;
+      const label = `추천 ${up}, 비추천 ${down}`;
+      if (stats.getAttribute('aria-label') !== label) stats.setAttribute('aria-label', label);
     });
   }
 
   const readingState = {
-    host: null, bar: null, title: null, progress: null, percent: null,
+    host: null, bar: null, title: null, progress: null, fill: null, percent: null,
     heading: null, end: null, frame: 0, resizeObserver: null, body: null
   };
 
@@ -1076,20 +1107,30 @@
 
   function updateReadingProgress() {
     readingState.frame = 0;
-    const { bar, heading, progress, percent } = readingState;
+    const { bar, heading, progress, fill, percent } = readingState;
     if (!bar) return;
     const active = settings.enabled && settings.readingHeader && heading?.isConnected &&
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    const wasHidden = bar.hidden;
     bar.hidden = !active || heading.getBoundingClientRect().bottom > 0;
-    if (bar.hidden) return;
+    if (bar.hidden) {
+      bar.removeAttribute('data-ready');
+      return;
+    }
+    if (wasHidden) bar.removeAttribute('data-ready');
     // 마지막 댓글이 화면 하단에 도달하면 100%입니다. 댓글이 없으면 본문 끝을 사용합니다.
     const end = readingState.end?.isConnected ? readingState.end : heading;
     const endY = window.scrollY + end.getBoundingClientRect().bottom;
     const range = Math.max(0, endY - window.innerHeight);
-    const value = range ? Math.round(Math.min(1, Math.max(0, window.scrollY / range)) * 100) : 100;
+    const value = range ? Math.round(Math.min(1, Math.max(0, window.scrollY / range)) * 1000) / 10 : 100;
     if (progress.value !== value) progress.value = value;
-    const label = `${value}%`;
+    const scale = `scaleX(${value / 100})`;
+    if (fill.style.transform !== scale) fill.style.transform = scale;
+    const label = `${Math.round(value)}%`;
     if (percent.textContent !== label) percent.textContent = label;
+    if (wasHidden) window.requestAnimationFrame(() => {
+      if (!bar.hidden) bar.setAttribute('data-ready', '');
+    });
   }
 
   function syncReadingHeader() {
@@ -1122,8 +1163,8 @@
           }
           :host([data-night]) {
             --reader-surface: var(--fm-clean-surface, #1b1b1a);
-            --reader-title: var(--fm-clean-title, #ccc9c3);
-            --reader-muted: var(--fm-clean-muted, #a3a09a);
+            --reader-title: var(--fm-clean-title, #dad7d1);
+            --reader-muted: var(--fm-clean-muted, #b0ada6);
             --reader-line: var(--fm-clean-line, #2f2e2b);
             --reader-accent: var(--fm-clean-accent, #f0b58f);
           }
@@ -1143,22 +1184,29 @@
           .title:focus-visible { outline: 2px solid var(--reader-accent); outline-offset: 2px; }
           .percent { flex: none; color: var(--reader-muted); font-size: 10px; font-variant-numeric: tabular-nums; }
           progress {
-            appearance: none; -webkit-appearance: none; display: block; width: 100%; height: 3px;
-            border: 0; background: var(--reader-line); color: var(--reader-accent); accent-color: var(--reader-accent);
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; border: 0;
+            overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%);
           }
-          progress::-webkit-progress-bar { background: var(--reader-line); }
-          progress::-webkit-progress-value { background: var(--reader-accent); }
-          progress::-moz-progress-bar { background: var(--reader-accent); }
+          .track { height: 3px; overflow: hidden; background: var(--reader-line); }
+          .fill {
+            display: block; width: 100%; height: 100%; background: var(--reader-accent);
+            transform: scaleX(0); transform-origin: left center;
+            transition: transform 200ms cubic-bezier(.22, .61, .36, 1);
+          }
+          .bar:not([data-ready]) .fill { transition: none; }
+          @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
         </style>
         <div class="bar" hidden>
           <div class="row"><button class="title" type="button"></button><span class="percent" aria-hidden="true">0%</span></div>
           <progress max="100" value="0" aria-label="댓글 끝까지의 스크롤 진행률"></progress>
+          <div class="track" aria-hidden="true"><span class="fill"></span></div>
         </div>
       `;
       readingState.host = host;
       readingState.bar = shadow.querySelector('.bar');
       readingState.title = shadow.querySelector('.title');
       readingState.progress = shadow.querySelector('progress');
+      readingState.fill = shadow.querySelector('.fill');
       readingState.percent = shadow.querySelector('.percent');
       readingState.title.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -1258,8 +1306,8 @@
           --fm-control-bg: var(--fm-clean-bg, #121211);
           --fm-control-surface: var(--fm-clean-surface, #1b1b1a);
           --fm-control-raised: var(--fm-clean-raised, #232321);
-          --fm-control-text: var(--fm-clean-text, #ecebe8);
-          --fm-control-muted: var(--fm-clean-muted, #a3a09a);
+          --fm-control-text: var(--fm-clean-text, #f0efeb);
+          --fm-control-muted: var(--fm-clean-muted, #b0ada6);
           --fm-control-line: var(--fm-clean-line, #2f2e2b);
           --fm-control-accent: var(--fm-clean-accent, #f0b58f);
           --fm-control-soft: var(--fm-clean-soft, #3b2a23);
