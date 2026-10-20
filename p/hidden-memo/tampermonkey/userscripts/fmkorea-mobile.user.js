@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.7
-// @description  살구색 모바일 UI, 스크롤 제목·진행 바, 목록 읽음 구분, 상세 게시판·추천수 표시, 광고·상단·댓글 정리
+// @version      1.5.8
+// @description  살구색 모바일 UI, 스와이프 뒤로가기, 스크롤 제목·진행 바, 상세 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,11 +21,11 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.7';
+  const SCRIPT_VERSION = '1.5.8';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
-    boardLabel: true, count: true, readingHeader: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true
+    boardLabel: true, count: true, readingHeader: true, swipeBack: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true
   };
   const options = [
     ['enabled', '전체 기능 켜기'],
@@ -36,6 +36,7 @@
     ['boardLabel', '상세 제목 왼쪽 현재 메뉴 표시'],
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['readingHeader', '스크롤 시 제목·진행 바 표시'],
+    ['swipeBack', '오른쪽 스와이프로 뒤로가기'],
     ['footer', '상세 주소·하단 도구 숨김'],
     ['commentActions', '댓글 추천 수만 표시·이동 버튼 정리'],
     ['commentComposer', '댓글 쓰기 기본 접기'],
@@ -471,7 +472,7 @@
         filter: none !important;
       }
       ${root} body.night_mode .rd_body article .xe_content img[data-fm-clean-bright-image]:not(table.invertl img):not([style*="filter" i]) {
-        filter: brightness(.72) !important;
+        filter: brightness(.64) !important;
       }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
         background: transparent !important; border-color: var(--fm-clean-line) !important;
@@ -558,6 +559,10 @@
       }
       ${root} .bd_cnb .a1.on::before { content: none !important; }
       ${root} .fdb_lst_ul { background: var(--fm-clean-surface) !important; }
+      ${root} .rd > .fdb_lst_wrp {
+        margin-top: 8px !important; padding-top: 8px !important;
+        border-top: 1px solid var(--fm-clean-line) !important;
+      }
       ${root} .fdb_tag {
         background: var(--fm-clean-raised) !important; border: 0 !important;
         border-bottom: 1px solid var(--fm-clean-line) !important; border-radius: 0 !important; padding: 8px 10px !important;
@@ -568,6 +573,12 @@
         color: var(--fm-clean-muted) !important; font-size: 11px !important;
       }
       ${root} .fdb_itm .member_plate { color: var(--fm-clean-text) !important; font-weight: 600; }
+      ${root} .fdb_itm .meta [data-fm-clean-author] {
+        display: inline-flex; align-items: center; flex: none; vertical-align: middle;
+        padding: 2px 5px; border-radius: 999px; background: var(--fm-clean-soft);
+        color: var(--fm-clean-accent) !important; font-size: 9px !important;
+        font-weight: 600; line-height: 1.3; white-space: nowrap;
+      }
       ${root} .fdb_itm .comment-content { color: var(--fm-clean-content) !important; font-size: 13px !important; line-height: 1.55 !important; }
       ${root} .fdb_itm .comment-content .xe_content { font-size: inherit !important; line-height: inherit !important; }
       ${root} .fdb_itm .comment-content > .xe_content:not([style*="color" i]) { color: inherit !important; }
@@ -1096,6 +1107,22 @@
     });
   }
 
+  function syncCommentAuthors() {
+    const active = settings.enabled && settings.appearance &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    document.querySelectorAll('.fdb_itm').forEach(item => {
+      const name = item.querySelector(':scope > .meta .member_plate');
+      const author = active && name && item.querySelector(':scope > .comment-content.document_writer');
+      const badge = item.querySelector('[data-fm-clean-author]');
+      if (!author) { badge?.remove(); return; }
+      if (badge) return;
+      const label = document.createElement('span');
+      label.setAttribute('data-fm-clean-author', '');
+      label.textContent = '작성자';
+      name.after(label);
+    });
+  }
+
   const readingState = {
     host: null, bar: null, title: null, progress: null, fill: null, percent: null,
     heading: null, end: null, frame: 0, resizeObserver: null, body: null
@@ -1239,6 +1266,169 @@
     scheduleReadingProgress();
   }
 
+  const swipeBackState = { host: null, reset: null };
+
+  function syncSwipeBack() {
+    const enabled = () => settings.enabled && settings.swipeBack && document.body &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    if (!enabled()) {
+      swipeBackState.reset?.();
+      return;
+    }
+    if (swipeBackState.host) {
+      if (!swipeBackState.host.isConnected) document.body.appendChild(swipeBackState.host);
+      swipeBackState.host.toggleAttribute('data-night', document.body.classList.contains('night_mode'));
+      return;
+    }
+    const host = document.createElement('div');
+    host.id = 'fm-clean-swipe-back';
+    host.setAttribute('aria-hidden', 'true');
+    host.toggleAttribute('data-night', document.body.classList.contains('night_mode'));
+    const shadow = host.attachShadow({ mode: 'open' });
+    shadow.innerHTML = `
+      <style>
+        :host {
+          all: initial !important; position: fixed !important; inset: 0 !important;
+          z-index: 2147483645 !important; pointer-events: none !important;
+          --swipe-surface: var(--fm-clean-surface, #fff);
+          --swipe-line: var(--fm-clean-line, #e7e4de);
+          --swipe-accent: var(--fm-clean-accent, #9a4e26);
+          --swipe-soft: var(--fm-clean-soft, #fff0e7);
+        }
+        :host([data-night]) {
+          --swipe-surface: var(--fm-clean-surface, #1b1b1a);
+          --swipe-line: var(--fm-clean-line, #2f2e2b);
+          --swipe-accent: var(--fm-clean-accent, #f0b58f);
+          --swipe-soft: var(--fm-clean-soft, #3b2a23);
+        }
+        .cue {
+          position: absolute; left: 12px; top: 50%; width: 44px; height: 44px;
+          display: grid; place-items: center; box-sizing: border-box; border-radius: 50%;
+          border: 1px solid var(--swipe-line); background: var(--swipe-surface);
+          color: var(--swipe-accent); box-shadow: 0 4px 16px #0002;
+          opacity: 0; transform: translate3d(-64px, 0, 0) scale(.9);
+        }
+        .cue[data-ready] { background: var(--swipe-soft); border-color: var(--swipe-accent); }
+        @media (prefers-reduced-motion: reduce) { .cue { transition: none !important; } }
+      </style>
+      <div class="cue"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5-7 7 7 7M5 12h14"/></svg></div>
+    `;
+    const cue = shadow.querySelector('.cue');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let gesture = null;
+    let frame = 0;
+    let backTimer = 0;
+    let clickUntil = 0;
+    let clickTarget = null;
+    const reset = () => {
+      window.clearTimeout(backTimer);
+      window.cancelAnimationFrame(frame);
+      backTimer = 0; frame = 0; gesture = null; clickTarget = null; clickUntil = 0;
+      cue.style.transition = 'none';
+      cue.style.opacity = '0';
+      cue.style.transform = 'translate3d(-64px, 0, 0) scale(.9)';
+      cue.removeAttribute('data-ready');
+    };
+    const paint = () => {
+      frame = 0;
+      if (!gesture?.claimed) return;
+      const ratio = Math.min(1, Math.max(0, gesture.dx / gesture.threshold));
+      cue.style.opacity = String(Math.min(1, Math.max(0, gesture.dx / 32)));
+      cue.style.transform = reducedMotion.matches ? 'none' :
+        `translate3d(${-64 + Math.min(100, Math.max(0, gesture.dx) * .65)}px, 0, 0) scale(${.9 + ratio * .1})`;
+      cue.toggleAttribute('data-ready', ratio === 1);
+    };
+    const settle = commit => {
+      const claimed = gesture?.claimed;
+      const target = gesture?.target;
+      window.cancelAnimationFrame(frame);
+      frame = 0; gesture = null;
+      if (!claimed) return;
+      clickUntil = performance.now() + 450;
+      clickTarget = target;
+      cue.style.transition = 'transform 180ms cubic-bezier(.22,.61,.36,1), opacity 180ms ease-out';
+      cue.style.transform = reducedMotion.matches ? 'none' :
+        `translate3d(${commit ? 62 : -64}px, 0, 0) scale(${commit ? 1.04 : .9})`;
+      cue.style.opacity = '0';
+      if (commit) backTimer = window.setTimeout(() => {
+        if (enabled() && history.length > 1) history.back();
+        // 동일 문서의 history 항목이나 이동이 취소된 경우에도 다시 사용할 수 있습니다.
+        backTimer = window.setTimeout(reset, 700);
+      }, reducedMotion.matches ? 0 : 150);
+    };
+    const ignoredTarget = event => event.composedPath().some(element => {
+      if (!(element instanceof Element)) return false;
+      if (element.matches(`#${HOST_ID}, #fm-clean-reading-header, nav, #gnb, .fm-recent-visited,
+        input, textarea, select, button, summary, video, audio, iframe, canvas,
+        [contenteditable]:not([contenteditable="false"]), [role="slider"], a[download],
+        .swiper, .swiper-container, .swiper-wrapper, .slick-slider, [data-fm-clean-swipe-ignore]`)) return true;
+      return element !== document.body && element !== document.documentElement &&
+        element.scrollWidth > element.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(element).overflowX);
+    });
+    document.addEventListener('touchstart', event => {
+      clickTarget = null;
+      if (event.touches.length !== 1) { settle(false); return; }
+      if (!enabled() || backTimer || history.length < 2 || document.hidden ||
+        (panel && !panel.hidden) || document.querySelector('dialog[open], [aria-modal="true"]') ||
+        window.getSelection()?.isCollapsed === false || ignoredTarget(event)) return;
+      const touch = event.touches[0];
+      // 가장자리 제스처는 브라우저에 맡기고 화면 가운데에서 시작한 동작만 처리합니다.
+      if (touch.clientX < 32 || touch.clientX > window.innerWidth - 80 ||
+        touch.clientY < 48 || touch.clientY > window.innerHeight - 40) return;
+      gesture = { id: touch.identifier, x: touch.clientX, y: touch.clientY,
+        target: event.target.closest?.('a') || event.target,
+        scrollY: window.scrollY, start: performance.now(), dx: 0, dy: 0, claimed: false,
+        threshold: Math.min(112, Math.max(80, window.innerWidth * .24), window.innerWidth - touch.clientX - 12) };
+    }, { passive: true, capture: true });
+    document.addEventListener('touchmove', event => {
+      if (!gesture) return;
+      const touch = Array.from(event.touches).find(item => item.identifier === gesture.id);
+      if (!enabled() || event.touches.length !== 1 || !touch || !event.cancelable) { settle(false); return; }
+      gesture.dx = touch.clientX - gesture.x;
+      gesture.dy = touch.clientY - gesture.y;
+      if (!gesture.claimed) {
+        if (Math.hypot(gesture.dx, gesture.dy) < 14) return;
+        if (gesture.dx < 14 || Math.abs(gesture.dy) > gesture.dx * .6 ||
+          Math.abs(window.scrollY - gesture.scrollY) > 4 || performance.now() - gesture.start > 800) {
+          settle(false); return;
+        }
+        gesture.claimed = true;
+        cue.style.transition = 'none';
+        cue.style.top = `${Math.max(60, Math.min(window.innerHeight - 84, gesture.y - 22))}px`;
+      }
+      if (Math.abs(gesture.dy) > 56 || Math.abs(gesture.dy) > Math.max(44, gesture.dx * .6)) { settle(false); return; }
+      event.preventDefault();
+      if (!frame) frame = window.requestAnimationFrame(paint);
+    }, { passive: false, capture: true });
+    document.addEventListener('touchend', event => {
+      if (!gesture) return;
+      const touch = Array.from(event.changedTouches).find(item => item.identifier === gesture.id);
+      if (!touch) return;
+      gesture.dx = touch.clientX - gesture.x;
+      gesture.dy = touch.clientY - gesture.y;
+      const commit = enabled() && gesture.claimed && gesture.dx >= gesture.threshold &&
+        Math.abs(gesture.dy) <= 56 && Math.abs(gesture.dy) < Math.max(44, gesture.dx * .6) &&
+        performance.now() - gesture.start < 1600;
+      if (gesture.claimed && event.cancelable) event.preventDefault();
+      settle(commit);
+    }, { passive: false, capture: true });
+    document.addEventListener('touchcancel', () => settle(false), { passive: true, capture: true });
+    document.addEventListener('click', event => {
+      if (event.detail && clickTarget && performance.now() < clickUntil && event.composedPath().includes(clickTarget)) {
+        clickTarget = null;
+        event.preventDefault(); event.stopImmediatePropagation();
+      }
+    }, true);
+    window.addEventListener('pageshow', reset);
+    window.addEventListener('pagehide', reset);
+    window.addEventListener('popstate', reset);
+    window.addEventListener('resize', reset, { passive: true });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
+    swipeBackState.host = host;
+    swipeBackState.reset = reset;
+    document.body.appendChild(host);
+  }
+
   function applySettings() {
     for (const [key, value] of Object.entries(settings)) {
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
@@ -1247,6 +1437,8 @@
     syncReadingHeader();
     syncBrightImages();
     syncCommentCounts();
+    syncCommentAuthors();
+    syncSwipeBack();
     if (!launcher) return;
     launcher.toggleAttribute('data-off', !settings.enabled);
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
