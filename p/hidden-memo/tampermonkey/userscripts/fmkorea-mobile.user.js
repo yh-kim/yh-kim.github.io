@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.0
+// @version      1.5.1
 // @description  웜 뉴트럴·틸 모바일 UI, 홈 아이콘, 상세 제목의 게시판·추천수 표시, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.0';
+  const SCRIPT_VERSION = '1.5.1';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -35,7 +35,7 @@
     ['votes', '포텐·방출 버튼 숨김'],
     ['boardLabel', '상세 제목 왼쪽 현재 메뉴 표시'],
     ['count', '상세 제목 오른쪽 추천 숫자'],
-    ['footer', '상세 하단 버튼·첨부파일 숨김'],
+    ['footer', '상세 주소·하단 도구 숨김'],
     ['commentActions', '댓글 추천·답글·더보기 숨김'],
     ['siteFooter', '사이트 하단 문의·신고 숨김'],
     ['appearance', '깔끔한 화면 디자인']
@@ -327,6 +327,7 @@
         --fm-clean-accent: #0f766e; --fm-clean-soft: #e6f2f0;
         color-scheme: light;
         background: var(--fm-clean-bg) !important; color: var(--fm-clean-text) !important;
+        padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box;
         font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
       }
       ${root} body.night_mode {
@@ -365,21 +366,48 @@
       ${root} :is(nav.fmkorea_navi, .fmkorea_m_navi, #gnb) :is(.expand, .expand i, button.close) {
         color: var(--fm-clean-text) !important;
       }
+      ${root} .fm-recent-visited {
+        background: var(--fm-clean-bg) !important; border-bottom: 1px solid var(--fm-clean-line) !important;
+        margin: 0 !important; padding: 5px 8px !important;
+      }
+      ${root} .fm-recent-visited:not(.expanded) { height: 38px !important; }
+      ${root} .fm-recent-visited.expanded { height: auto !important; }
+      ${root} .fm-recent-visited .list { background: var(--fm-clean-bg) !important; }
+      ${root} .fm-recent-visited .item:is(.bookmark, .recent) {
+        height: 26px !important; line-height: 24px !important; border: 1px solid var(--fm-clean-line) !important;
+        border-radius: 999px !important; background: var(--fm-clean-raised) !important; box-sizing: border-box;
+      }
+      ${root} .fm-recent-visited .item:is(.bookmark, .recent) a {
+        color: var(--fm-clean-text) !important; padding: 0 9px !important; text-decoration: none !important;
+        font: 500 12px/24px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
+      }
+      ${root} .fm-recent-visited .item.bookmark {
+        background: var(--fm-clean-soft) !important; border-color: transparent !important;
+      }
+      ${root} .fm-recent-visited .item.bookmark a { color: var(--fm-clean-accent) !important; }
+      ${root} .fm-recent-visited .item span.time { color: var(--fm-clean-muted) !important; font-size: 10px !important; }
       ${root} .rd_hd {
-        margin: 0 !important; padding: 15px 12px 13px !important;
+        margin: 0 !important; padding: 12px 10px 10px !important;
         background: var(--fm-clean-surface) !important; border-bottom: 1px solid var(--fm-clean-line) !important;
       }
       ${root} .rd_hd :is(.top_area, .btm_area, .board) {
         border: 0 !important; background: transparent !important; box-shadow: none !important;
+        text-shadow: none !important;
       }
       ${root} .rd_hd .board .top_area { padding: 0 !important; }
+      ${root} .rd_hd .date {
+        display: block !important; float: none !important; text-align: right;
+        color: var(--fm-clean-muted) !important;
+        margin: 0 0 4px !important; font-size: 11px !important; line-height: 1.4 !important;
+      }
       ${root} .rd_hd .board .btm_area { margin: 0 !important; padding: 0 !important; }
       ${root} .rd_hd h1 {
-        padding: 0 !important; margin: 7px 0 11px !important;
-        color: var(--fm-clean-text) !important; font-size: 20px !important;
-        font-weight: 700 !important; line-height: 1.4 !important; letter-spacing: -.3px !important;
+        padding: 0 !important; margin: 4px 0 8px !important;
+        color: var(--fm-clean-text) !important; font-size: 18px !important;
+        font-weight: 600 !important; line-height: 1.5 !important; letter-spacing: -.2px !important;
+        text-shadow: none !important;
       }
-      ${root} .rd_hd :is(.btm_area, .btm_area span, .btm_area b, .date),
+      ${root} .rd_hd :is(.btm_area, .btm_area span, .btm_area b),
       ${root} .document_address, ${root} .document_address a {
         color: var(--fm-clean-muted) !important; font-size: 12px !important;
       }
@@ -402,16 +430,16 @@
         background: transparent !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important; box-shadow: none !important;
       }
-      ${root} .bd_m_lst.zine > li { padding-top: 13px !important; padding-bottom: 13px !important; }
-      ${root} .bd_m_lst.zine > li:not(.is_tmb) { padding-left: 12px !important; padding-right: 12px !important; }
-      ${root} .bd_m_lst.zine > li.is_tmb { padding-right: 12px !important; }
+      ${root} .bd_m_lst.zine > li { padding-top: 8px !important; padding-bottom: 8px !important; }
+      ${root} .bd_m_lst.zine > li:not(.is_tmb) { padding-left: 10px !important; padding-right: 10px !important; }
+      ${root} .bd_m_lst.zine > li.is_tmb { padding-right: 10px !important; }
       ${root} :is(.bd_lst, .bd_m_lst) > li { border-bottom: 1px solid var(--fm-clean-line) !important; }
       ${root} .bd_m_lst > li .rt_area h3 {
-        color: var(--fm-clean-text) !important; font-size: 16px !important; font-weight: 600 !important; line-height: 1.5 !important;
+        color: var(--fm-clean-text) !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.4 !important;
         height: auto !important;
         white-space: normal !important; text-overflow: clip !important; overflow: visible !important;
       }
-      ${root} .bd_m_lst > li.notice.pop0 .rt_area h3 { font-size: 14px !important; }
+      ${root} .bd_m_lst > li.notice.pop0 .rt_area h3 { font-size: 13px !important; }
       ${root} .bd_m_lst > li .rt_area h3 > a { white-space: normal !important; }
       ${root} .bd_m_lst h3 .ellipsis-target {
         display: inline !important; white-space: normal !important; overflow: visible !important;
@@ -421,7 +449,7 @@
         background: var(--fm-clean-soft) !important; color: var(--fm-clean-accent) !important;
         border-radius: 999px !important; font-size: 10px !important;
       }
-      ${root} .bd_m_lst > li .info { margin-top: 6px !important; line-height: 1.6 !important; font-size: 12px !important; }
+      ${root} .bd_m_lst > li .info { margin-top: 3px !important; line-height: 1.5 !important; font-size: 11px !important; }
       ${root} .bd_m_lst > li .rt_area h3 > a,
       ${root} .bd_m_lst > li .rt_area h3 > a :not(.comment_count) {
         color: var(--fm-clean-text) !important; text-shadow: none !important;
@@ -436,7 +464,7 @@
       }
       ${root} .bd_m_lst > li .info,
       ${root} .bd_m_lst > li .info :is(span, b, a, i) {
-        color: var(--fm-clean-muted) !important; font-size: 12px !important;
+        color: var(--fm-clean-muted) !important; font-size: 11px !important;
       }
       ${root} .bd_m_lst .mrk,
       ${root} .bd_m_lst .mrk.update,
@@ -497,19 +525,19 @@
       }
       ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
       ${root} .bd_lst td.title, ${root} .bd_lst td.title a {
-        font-size: 16px !important; font-weight: 600 !important; line-height: 1.5 !important;
+        font-size: 14px !important; font-weight: 600 !important; line-height: 1.4 !important;
       }
       ${root} .bd_lst td.title a span:not(.comment_count) { color: var(--fm-clean-text) !important; }
       ${root} .bd_lst td.title .comment_count { color: var(--fm-clean-accent) !important; font-size: 12px !important; }
       ${root} .bd_lst td.title a:is(.visited, :visited),
       ${root} .bd_lst td.title a:is(.visited, :visited) span:not(.comment_count) { color: var(--fm-clean-muted) !important; }
-      ${root} .bd_lst td { padding-top: 12px !important; padding-bottom: 12px !important; }
+      ${root} .bd_lst td { padding-top: 8px !important; padding-bottom: 8px !important; }
       ${root} .bd_lst th {
         background: var(--fm-clean-raised) !important; color: var(--fm-clean-muted) !important;
         border-color: var(--fm-clean-line) !important;
       }
       ${root} .bd_lst tr:is(.notice, .select) { background: var(--fm-clean-raised) !important; }
-      ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; font-size: 12px !important; }
+      ${root} .bd_lst :is(.author, .time, .count, .category) { color: var(--fm-clean-muted) !important; font-size: 11px !important; }
       ${root} .bd_m_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-text) !important; }
       ${root} .bd_m_lst :is(.author, .regdate, .m_no, .category) { color: var(--fm-clean-muted) !important; }
       ${root} .bd_m_lst > li :is(.visited, .visited .ellipsis-target),
@@ -522,14 +550,14 @@
       }
       ${root} .fm_best_widget li.li {
         background: var(--fm-clean-surface) !important;
-        border-color: var(--fm-clean-line) !important; padding-top: 12px !important; padding-bottom: 12px !important;
+        border-color: var(--fm-clean-line) !important; padding-top: 8px !important; padding-bottom: 8px !important;
       }
       ${root} .fm_best_widget li.li:is(.on, .li_best2_pop1) {
         background: var(--fm-clean-raised) !important;
       }
       ${root} .fm_best_widget div,
       ${root} .fm_best_widget :is(.category, .regdate, .author, .voted_count, .hotdeal_info) {
-        color: var(--fm-clean-muted) !important; font-size: 12px !important;
+        color: var(--fm-clean-muted) !important; font-size: 11px !important;
       }
       ${root} .fm_best_widget :is(a, a:visited, .category a, .category a:visited) {
         color: var(--fm-clean-text) !important; text-shadow: none !important;
@@ -539,8 +567,8 @@
         color: var(--fm-clean-accent) !important;
       }
       ${root} .fm_best_widget .title {
-        color: var(--fm-clean-text) !important; font-size: 16px !important;
-        font-weight: 600 !important; line-height: 1.5 !important;
+        color: var(--fm-clean-text) !important; font-size: 14px !important;
+        font-weight: 600 !important; line-height: 1.4 !important;
       }
       ${root} .fm_best_widget .title a,
       ${root} .fm_best_widget .title a .ellipsis-target {
@@ -664,16 +692,22 @@
     // 글 추천 버튼과, 본문 아래 도구 모음 및 댓글별 도구 모음은 각각 토글합니다.
     hideRule('votes', ['.rd .fm_vote .vote', '.rd .fm_vote .use_new_voted_count']),
     // 본문과 댓글 사이의 도구 모음 전체만 접습니다. 댓글 목록·페이지 이동·입력은 별도 영역입니다.
-    hideRule('footer', ['.rd > .rd_ft', '.rd > .rd_ft_nav']),
+    hideRule('footer', ['.rd > .rd_ft', '.rd > .rd_ft_nav', '.rd .m_rd_nav_side', '.rd .rd_body > .document_address']),
+    hideRule('header', ['.fm-recent-visited .footer', '.fm-recent-visited .item.feature-disabled']),
     hideRule('commentActions', ['.fdb_itm .fdb_nav']),
     hideRule('siteFooter', ['body > footer .cr', 'body > footer .crhome', '#footer']),
     cleanAppearance(),
     `
       html[data-fm-clean-boot="true"] body { opacity: 0 !important; pointer-events: none !important; }
+      /* 홈은 즐겨찾기를 CSS로, 최근 방문이 없으면 JS로 부모까지 숨깁니다. 실제 저장 링크가 있을 때만 복원합니다. */
+      ${scope('header')} .main_recent .fm-recent-visited:has(.list.swiper-wrapper .item.bookmark a[href]) {
+        display: block !important;
+      }
+      ${scope('header')} .main_recent .fm-recent-visited .list .item.bookmark { display: inline-flex !important; }
       [data-fm-clean-badge], [data-fm-clean-board] { display: none !important; }
       ${scope('count')} [data-fm-clean-title],
       ${scope('boardLabel')} [data-fm-clean-title] {
-        display: flex !important; align-items: flex-start; gap: 8px;
+        display: flex !important; align-items: flex-start; gap: 6px;
         width: 100% !important; box-sizing: border-box; clear: both; overflow-wrap: anywhere;
       }
       ${scope('count')} [data-fm-clean-title] .np_18px_span,
@@ -683,7 +717,7 @@
       }
       ${scope('boardLabel')} [data-fm-clean-board] {
         display: inline-block !important; flex: 0 1 auto; align-self: flex-start;
-        max-width: 40%; height: 22px; box-sizing: border-box; margin-top: 3px; padding: 0 8px;
+        max-width: 40%; height: 22px; box-sizing: border-box; margin-top: 2px; padding: 0 8px;
         border: 0; border-radius: 999px; background: var(--fm-clean-soft, #e6f2f0);
         color: var(--fm-clean-accent, #0f766e) !important; text-decoration: none !important;
         overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
@@ -691,10 +725,11 @@
         letter-spacing: 0; text-indent: 0;
       }
       ${scope('count')} [data-fm-clean-badge] {
-        display: inline-block !important; flex: 0 0 auto; margin-left: auto;
-        padding: 4px 8px; border: 0; border-radius: 999px;
+        display: inline-block !important; flex: 0 0 auto; align-self: flex-start;
+        height: 22px; box-sizing: border-box; margin: 2px 0 0 auto; padding: 0 8px;
+        border: 0; border-radius: 999px;
         color: var(--fm-clean-accent, #0f766e); background: var(--fm-clean-soft, #e6f2f0); white-space: nowrap;
-        font: 600 12px/1.4 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+        font: 600 12px/22px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         letter-spacing: 0; text-indent: 0;
       }
       ${scope('count')} [data-fm-clean-original-count] { display: none !important; }

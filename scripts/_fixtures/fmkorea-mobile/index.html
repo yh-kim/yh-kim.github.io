@@ -213,6 +213,44 @@
           element.getBoundingClientRect().height > 0;
       }
 
+      // 사이트 CSS와 늦게 채워지는 메뉴를 함께 재현합니다. 스크립트는 문서 시작에 배치합니다.
+      async function makeLayoutFrame(source, label, body, css = '', settings = {}) {
+        const box = document.createElement('section');
+        box.className = 'fixture';
+        const heading = document.createElement('h2');
+        heading.textContent = label;
+        const frame = document.createElement('iframe');
+        frame.title = label;
+        frame.srcdoc = `<!doctype html><html lang="ko"><head>
+          <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+          <title>레이아웃 회귀 검사 - 에펨코리아</title>
+          <script>window.GM_getValue=(_key,fallback)=>Object.assign({},fallback,${JSON.stringify(settings)});
+            window.GM_setValue=()=>{};<\/script>
+          <script>${escapeScript(source)}<\/script>
+          <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
+            .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
+            ${css}</style>
+          </head><body>${body}</body></html>`;
+        box.append(heading, frame);
+        frames.append(box);
+        await Promise.race([
+          new Promise((resolve, reject) => {
+            frame.addEventListener('load', resolve, { once: true });
+            frame.addEventListener('error', () => reject(new Error('layout iframe load error')), { once: true });
+          }),
+          delay(4000).then(() => { throw new Error('layout iframe load timeout'); })
+        ]);
+        await delay(80);
+        return frame.contentDocument;
+      }
+
+      function firstLineCenter(element) {
+        const rect = element.getBoundingClientRect();
+        const lineHeight = Number.parseFloat(element.ownerDocument.defaultView.getComputedStyle(element).lineHeight);
+        return rect.top + Math.min(lineHeight || rect.height, rect.height) / 2;
+      }
+
       try {
         const response = await fetch(SOURCE_URL, { cache: 'no-store' });
         if (!response.ok) throw new Error(`유저스크립트 요청 ${response.status}`);
@@ -352,6 +390,115 @@
         record('게시판 근거가 사라지면 배지도 제거',
           !visiblyRendered(detailChip(detailDoc)) &&
           visiblyRendered(detailDoc.querySelector('#detail-content')));
+
+        const homeDoc = await makeLayoutFrame(source, '홈 저장 메뉴 늦은 삽입', `
+          <header class="hd" id="home-logo">상단 로고</header>
+          <div class="bd bd_mobile"><nav class="fmkorea_navi" id="static-menu"><a href="/best">포텐</a></nav>
+          <div class="main_recent" id="home-recent" style="opacity:1">
+            <div class="fm-recent-visited mobile loaded" id="saved-menu" style="display:none">
+              <div class="list swiper-wrapper" id="saved-list"></div>
+            </div>
+          </div>
+            <div class="bd_lst_wrp"><p id="home-article">홈 목록 글</p></div></div>
+          <footer><div class="cr" id="home-footer">문의신고</div></footer>`, `
+          .main_recent .item.bookmark{display:none}
+          .main_recent .fm-recent-visited .item.bookmark{display:none!important}
+          .main_recent .fm-recent-visited{opacity:1}
+        `);
+        const savedList = homeDoc.querySelector('#saved-list');
+        const initialMenuHidden = !visiblyRendered(homeDoc.querySelector('#saved-menu'));
+        await new Promise(resolve => homeDoc.defaultView.setTimeout(() => {
+          savedList.insertAdjacentHTML('beforeend',
+            '<div class="item bookmark"><a id="saved-link" href="/football_world">해외축구</a></div>');
+          resolve();
+        }, 20));
+        await delay(120);
+        record('홈 북마크 1개만 늦게 삽입해도 숨겨졌던 메뉴 조상 복원',
+          initialMenuHidden && visiblyRendered(homeDoc.querySelector('#home-recent')) &&
+          visiblyRendered(homeDoc.querySelector('#saved-menu')) &&
+          visiblyRendered(homeDoc.querySelector('#saved-link')) &&
+          visiblyRendered(homeDoc.querySelector('#static-menu')) &&
+          !visiblyRendered(homeDoc.querySelector('#home-logo')) &&
+          !visiblyRendered(homeDoc.querySelector('#home-footer')));
+        await new Promise(resolve => homeDoc.defaultView.setTimeout(() => {
+          savedList.insertAdjacentHTML('beforeend',
+            '<div class="item recent"><a id="recent-link" href="/humor">유머</a></div>');
+          resolve();
+        }, 20));
+        await delay(120);
+        record('홈 저장·최근 링크와 정적 메뉴를 모두 표시',
+          visiblyRendered(homeDoc.querySelector('#saved-link')) &&
+          visiblyRendered(homeDoc.querySelector('#recent-link')) &&
+          visiblyRendered(homeDoc.querySelector('#static-menu')) &&
+          visiblyRendered(homeDoc.querySelector('#home-article')));
+
+        const addressDoc = await makeLayoutFrame(source, '상세 본문 앞 주소 영역', `
+          <header class="hd">상단 로고</header>
+          <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><div class="board">
+            <div class="top_area"><h1 class="np_18px"><span class="np_18px_span">주소 숨김 검사</span></h1></div>
+            <div class="btm_area"><div class="side"><a class="member_plate" id="address-author" href="#author">작성자</a></div></div>
+          </div></div><div class="rd_body"><div class="document_address document_address_m" id="address-row">
+            <a href="/10466426400">fmkorea.com/10466426400</a><button>복사</button></div>
+            <article id="address-article"><div class="xe_content" id="address-content"
+              style="color:#c1a68a">본문 고유 색상</div></article></div>
+          <div class="rd_ft">하단 도구</div></div></div>`);
+        const addressAuthor = addressDoc.querySelector('#address-author');
+        const addressContent = addressDoc.querySelector('#address-content');
+        const authorColor = addressDoc.defaultView.getComputedStyle(addressAuthor).color;
+        const contentColor = addressDoc.defaultView.getComputedStyle(addressContent).color;
+        record('상세 본문 직전 링크·복사 영역만 숨김',
+          !visiblyRendered(addressDoc.querySelector('#address-row')) &&
+          visiblyRendered(addressContent) && visiblyRendered(addressAuthor));
+        const footerOff = detailOption(addressDoc, 'footer', false);
+        await delay(40);
+        record('상세 하단 숨김 OFF에서 주소 복원·본문과 저자 색 유지', footerOff &&
+          visiblyRendered(addressDoc.querySelector('#address-row')) &&
+          addressDoc.defaultView.getComputedStyle(addressAuthor).color === authorColor &&
+          addressDoc.defaultView.getComputedStyle(addressContent).color === contentColor);
+
+        for (const [label, titleText, expectWrap] of [
+          ['짧은 제목', '오늘 처음 입장하고옴', false],
+          ['두 줄 제목', '왼쪽 게시판 이름과 오른쪽 추천 숫자가 긴 제목의 첫 줄에도 가지런히 놓이는지 확인합니다', true]
+        ]) {
+          const alignedDoc = await makeLayoutFrame(source, `${label} 상세 헤더`, `
+            <header class="hd">상단 로고</header>
+            <div class="bd bd_mobile"><div class="tl_srch"><div class="bd_tl"><h1><a href="/house">부동산</a></h1></div></div>
+              <div class="rd"><div class="rd_hd"><div class="board"><div class="top_area">
+                <span class="date m_no" id="detail-date">2026.10.20 19:13</span>
+                <h1 class="np_18px"><span class="np_18px_span" id="original-title">${titleText}</span></h1>
+                <div class="clear"></div></div><div class="btm_area"><div class="side">
+                  <a class="member_plate" href="#author">작성자</a></div>
+                  <div class="side fr"><span>추천 수 <b>238</b></span></div></div></div></div>
+                <div class="rd_body"><article>본문</article></div>
+                <div class="fm_vote"><div class="vote"><span class="new_voted_count">238</span></div></div>
+              </div></div>`, `
+            .rd_hd .board .date{float:right;display:inline!important}
+            .rd_hd .board h1{font-size:17px;line-height:18px}
+          `);
+          const heading = alignedDoc.querySelector('.rd_hd h1');
+          const originalTitle = alignedDoc.querySelector('#original-title');
+          const chip = detailChip(alignedDoc);
+          const badge = detailCount(alignedDoc);
+          const date = alignedDoc.querySelector('#detail-date');
+          let clickCount = 0;
+          originalTitle?.addEventListener('click', () => clickCount++);
+          originalTitle?.click();
+          const titleLineHeight = Number.parseFloat(alignedDoc.defaultView.getComputedStyle(originalTitle).lineHeight);
+          const titleWraps = originalTitle?.getBoundingClientRect().height > titleLineHeight * 1.8;
+          const center = firstLineCenter(originalTitle);
+          const chipRect = chip?.getBoundingClientRect();
+          const badgeRect = badge?.getBoundingClientRect();
+          record(`${label} 게시판·제목·추천수 첫 줄 정렬과 원본 제목 유지`, Boolean(
+            heading && originalTitle && chip && badge && date &&
+            heading.contains(originalTitle) && heading.firstElementChild === chip && clickCount === 1 &&
+            (expectWrap ? titleWraps : !titleWraps) &&
+            alignedDoc.defaultView.getComputedStyle(date).float === 'none' &&
+            Math.abs((chipRect.top + chipRect.height / 2) - center) <= 4 &&
+            Math.abs((badgeRect.top + badgeRect.height / 2) - center) <= 4 &&
+            chipRect.right <= originalTitle.getBoundingClientRect().left + 1 &&
+            originalTitle.getBoundingClientRect().right <= badgeRect.left + 1
+          ));
+        }
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }
