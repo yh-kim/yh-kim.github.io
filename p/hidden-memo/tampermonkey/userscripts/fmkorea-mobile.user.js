@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.8
-// @description  살구색 모바일 UI, 스와이프 뒤로가기, 스크롤 제목·진행 바, 상세 게시판·추천수 표시, 광고·상단·댓글 정리
+// @version      1.5.9
+// @description  저장 메뉴·짧은 링크 복사, 살구색 모바일 UI, 스와이프 뒤로가기, 스크롤 제목·진행 바, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.8';
+  const SCRIPT_VERSION = '1.5.9';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1008,9 +1008,9 @@
           for (let i = 0; i < pixels.length; i += 4) {
             const low = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
             const high = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
-            if (pixels[i + 3] >= 230 && low >= 230 && high - low <= 25) white++;
+            if (pixels[i + 3] >= 230 && low >= 220 && high - low <= 30) white++;
           }
-          finish(white / (32 * 32) >= .55);
+          finish(white / (32 * 32) >= .5);
         } catch (error) {
           // 픽셀 읽기를 허용하지 않는 외부 이미지는 원래 밝기를 유지합니다.
           finish(false);
@@ -1429,6 +1429,116 @@
     document.body.appendChild(host);
   }
 
+  function savedMenuLinks() {
+    const seen = new Set();
+    const links = [];
+    document.querySelectorAll('.fm-recent-visited .list .item.bookmark > a[href]').forEach(link => {
+      const text = link.textContent.replace(/\s+/g, ' ').trim();
+      if (!text) return;
+      try {
+        const url = new URL(link.getAttribute('href'), location.href);
+        if (!/^https?:$/.test(url.protocol) ||
+          !(url.hostname === location.hostname || /(^|\.)fmkorea\.com$/i.test(url.hostname))) return;
+        const key = url.pathname + url.search;
+        if (seen.has(key)) return;
+        seen.add(key);
+        links.push({ text, href: url.href });
+      } catch (error) { /* 유효한 저장 메뉴만 표시합니다. */ }
+    });
+    return links;
+  }
+
+  function compactDetailLink() {
+    const article = document.querySelector('.rd:has(.rd_hd h1)');
+    if (!article) return null;
+    let id = article.getAttribute('data-docsrl')?.trim();
+    if (!/^\d+$/.test(id || '')) {
+      const content = article.querySelector('.rd_body article .xe_content');
+      id = Array.from(content?.classList || []).map(name => name.match(/^document_(\d+)_/))
+        .find(Boolean)?.[1];
+    }
+    if (!id) {
+      const sources = [
+        article.querySelector('.document_address a[href]')?.getAttribute('href'),
+        article.querySelector('.document_address [data-clipboard-text]')?.getAttribute('data-clipboard-text'),
+        document.querySelector('link[rel="canonical"]')?.href,
+        document.querySelector('meta[property="og:url"]')?.content,
+        location.href
+      ];
+      for (const source of sources) {
+        if (!source) continue;
+        try {
+          const url = new URL(source, location.href);
+          if (!/^https?:$/.test(url.protocol) ||
+            !(url.hostname === location.hostname || /(^|\.)fmkorea\.com$/i.test(url.hostname))) continue;
+          const queryId = url.searchParams.get('document_srl');
+          id = /^\d+$/.test(queryId || '') ? queryId : url.pathname.split('/').find(part => /^\d+$/.test(part));
+          if (id) break;
+        } catch (error) { /* 다음 상세 주소를 확인합니다. */ }
+      }
+    }
+    return id ? `https://www.fmkorea.com/${id}` : null;
+  }
+
+  function syncMenuPanel() {
+    if (!panel) return;
+    const list = panel.querySelector('[data-saved-menus]');
+    const links = savedMenuLinks();
+    const signature = JSON.stringify(links);
+    if (list.getAttribute('data-menu-signature') !== signature) {
+      const items = links.map(({ text, href }) => {
+        const link = document.createElement('a');
+        link.textContent = text;
+        link.href = href;
+        return link;
+      });
+      list.replaceChildren(...items);
+      list.setAttribute('data-menu-signature', signature);
+    }
+    panel.querySelector('[data-menu-empty]').hidden = links.length > 0;
+    const url = compactDetailLink();
+    panel.querySelector('.copy-area').hidden = !url;
+    panel.querySelector('[data-copy-url]').textContent = url || '';
+  }
+
+  async function copyDetailLink() {
+    const url = compactDetailLink();
+    if (!url) return;
+    const status = panel.querySelector('[data-copy-status]');
+    let copied = false;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        copied = true;
+      }
+    } catch (error) { /* 클립보드 API가 막히면 브라우저의 복사 명령을 사용합니다. */ }
+    if (!copied) {
+      const input = document.createElement('textarea');
+      input.value = url;
+      input.readOnly = true;
+      input.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px';
+      const focused = host.shadowRoot.activeElement || document.activeElement;
+      const selection = window.getSelection();
+      const ranges = Array.from({ length: selection?.rangeCount || 0 }, (_, index) => selection.getRangeAt(index).cloneRange());
+      try {
+        document.body.appendChild(input);
+        input.focus({ preventScroll: true });
+        input.select();
+        input.setSelectionRange(0, url.length);
+        copied = document.execCommand('copy');
+      } catch (error) { /* 실패 여부는 패널 안에서 안내합니다. */ }
+      finally {
+        input.remove();
+        if (focused?.isConnected) focused.focus({ preventScroll: true });
+        if (selection && ranges.length) {
+          selection.removeAllRanges();
+          ranges.filter(range => range.commonAncestorContainer.isConnected).forEach(range => selection.addRange(range));
+        }
+      }
+    }
+    status.textContent = copied ? '링크를 복사했습니다.' : '복사하지 못했습니다. 아래 주소를 길게 눌러 복사해 주세요.';
+  }
+
   function applySettings() {
     for (const [key, value] of Object.entries(settings)) {
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
@@ -1442,15 +1552,21 @@
     if (!launcher) return;
     launcher.toggleAttribute('data-off', !settings.enabled);
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
-    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 설정`;
+    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴`;
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];
+    if (!panel.hidden) syncMenuPanel();
   }
 
   function setPanelOpen(open) {
+    if (open) {
+      syncMenuPanel();
+      panel.querySelector('[data-copy-status]').textContent = '';
+    }
     panel.hidden = !open;
     launcher.setAttribute('aria-expanded', String(open));
-    if (open) panel.querySelector('input').focus();
+    if (open) (panel.querySelector('[data-saved-menus] a') ||
+      (!panel.querySelector('.copy-area').hidden && panel.querySelector('.copy-link')) || panel.querySelector('.close')).focus();
     else launcher.focus();
   }
 
@@ -1476,6 +1592,7 @@
     }
     host = document.createElement('div');
     host.id = HOST_ID;
+    host.setAttribute('data-fm-clean-version', SCRIPT_VERSION);
     const shadow = host.attachShadow({ mode: 'open' });
     // Shadow DOM으로 사이트의 버튼/입력 스타일과 충돌하지 않게 합니다.
     shadow.innerHTML = `
@@ -1490,8 +1607,6 @@
           --fm-control-line: var(--fm-clean-line, #e7e4de);
           --fm-control-accent: var(--fm-clean-accent, #9a4e26);
           --fm-control-soft: var(--fm-clean-soft, #fff0e7);
-          --fm-control-track: #797670;
-          --fm-control-knob: #fff;
         }
         :host([data-night]) {
           color-scheme: dark;
@@ -1503,12 +1618,9 @@
           --fm-control-line: var(--fm-clean-line, #2f2e2b);
           --fm-control-accent: var(--fm-clean-accent, #f0b58f);
           --fm-control-soft: var(--fm-clean-soft, #3b2a23);
-          --fm-control-track: #77736d;
-          --fm-control-knob: #121211;
         }
         * { box-sizing: border-box; }
-        button, input { font: inherit; }
-        button, label { touch-action: manipulation; }
+        button, a { font: inherit; touch-action: manipulation; }
         button { cursor: pointer; }
         .launcher {
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
@@ -1521,7 +1633,7 @@
           background: var(--fm-control-raised); color: var(--fm-control-muted);
           border-color: var(--fm-control-line);
         }
-        .launcher:focus-visible, .close:focus-visible, input:focus-visible {
+        button:focus-visible, a:focus-visible {
           outline: 2px solid var(--fm-control-accent); outline-offset: 2px;
         }
         .panel {
@@ -1540,36 +1652,44 @@
           background: transparent; color: var(--fm-control-muted); font-size: 20px;
         }
         .close:hover { background: var(--fm-control-soft); color: var(--fm-control-accent); }
-        label {
-          display: flex; align-items: center; gap: 10px; min-height: 42px; cursor: pointer;
-          border-top: 1px solid var(--fm-control-line); color: var(--fm-control-text);
+        [data-saved-menus] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        [data-saved-menus] a {
+          display: flex; align-items: center; min-height: 36px; padding: 7px 10px;
+          border: 1px solid var(--fm-control-line); border-radius: 10px;
+          background: var(--fm-control-raised); color: var(--fm-control-text);
+          text-decoration: none; overflow-wrap: anywhere; font-size: 12px; font-weight: 500;
         }
-        input[type="checkbox"] {
-          appearance: none; -webkit-appearance: none; position: relative; flex: 0 0 auto;
-          accent-color: var(--fm-control-accent);
-          width: 38px; height: 22px; margin: 0; border: 1px solid var(--fm-control-track);
-          border-radius: 999px; background: var(--fm-control-track); cursor: pointer;
+        [data-saved-menus] a:is(:hover, :focus-visible) {
+          background: var(--fm-control-soft); color: var(--fm-control-accent);
         }
-        input[type="checkbox"]::before {
-          content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
-          border-radius: 999px; background: var(--fm-control-knob);
-          transition: transform .15s ease;
+        .copy-area { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line); }
+        .copy-link {
+          display: flex; align-items: center; justify-content: center; gap: 7px;
+          width: 100%; min-height: 36px; padding: 8px 10px; border: 0; border-radius: 10px;
+          background: var(--fm-control-soft); color: var(--fm-control-accent); font-size: 12px; font-weight: 600;
         }
-        input[type="checkbox"]:checked {
-          border-color: var(--fm-control-accent); background: var(--fm-control-accent);
-        }
-        input[type="checkbox"]:checked::before { transform: translateX(16px); }
-        p { font-size: 11px; color: var(--fm-control-muted); margin: 10px 0 0; }
-        @media (prefers-reduced-motion: reduce) {
-          input[type="checkbox"]::before { transition: none; }
+        p { font-size: 11px; color: var(--fm-control-muted); margin: 8px 0 0; }
+        [data-copy-status]:empty { display: none; }
+        [data-copy-url] {
+          display: block; margin-top: 7px; color: var(--fm-control-muted); font-size: 10px;
+          overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
         }
       </style>
-      <section class="panel" id="fm-clean-panel" aria-label="FM코리아 화면 정리 설정" hidden>
-        <header><strong>화면 정리 · ${SCRIPT_VERSION}</strong><button class="close" type="button" aria-label="설정 닫기">×</button></header>
-        ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
-        <p data-save-status>설정이 자동 저장됩니다.</p>
+      <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" hidden>
+        <header><strong>저장한 메뉴</strong><button class="close" type="button" aria-label="메뉴 닫기">×</button></header>
+        <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
+        <p data-menu-empty hidden>저장한 메뉴가 없습니다.</p>
+        <div class="copy-area" hidden>
+          <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
+          <p data-copy-status role="status"></p><span data-copy-url></span>
+        </div>
+        <!-- 저장된 설정과 기존 DOM 연동은 유지하되 메뉴 화면에는 설정 UI를 노출하지 않습니다. -->
+        <div hidden data-settings-compat>
+          ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
+          <p data-save-status>설정이 자동 저장됩니다.</p>
+        </div>
       </section>
-      <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 설정" aria-expanded="false" aria-controls="fm-clean-panel">
+      <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴" aria-expanded="false" aria-controls="fm-clean-panel">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
       </button>
     `;
@@ -1584,6 +1704,7 @@
       setPanelOpen(true);
     });
     shadow.querySelector('.close').addEventListener('click', () => setPanelOpen(false));
+    shadow.querySelector('.copy-link').addEventListener('click', copyDetailLink);
     panel.addEventListener('change', event => {
       const input = event.target;
       if (!Object.prototype.hasOwnProperty.call(defaults, input.name)) return;
