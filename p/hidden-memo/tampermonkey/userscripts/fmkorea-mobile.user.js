@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.9
+// @version      1.5.10
 // @description  저장 메뉴·짧은 링크 복사, 살구색 모바일 UI, 스와이프 뒤로가기, 스크롤 제목·진행 바, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.9';
+  const SCRIPT_VERSION = '1.5.10';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -967,7 +967,7 @@
         all: initial !important; display: block !important; position: fixed !important;
         left: max(8px, env(safe-area-inset-left, 0px)) !important;
         bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
-        z-index: 2147483647 !important;
+        z-index: 2147483647 !important; pointer-events: none !important;
       }
     `
   ].join('\n');
@@ -1623,6 +1623,7 @@
         button, a { font: inherit; touch-action: manipulation; }
         button { cursor: pointer; }
         .launcher {
+          pointer-events: auto;
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
           border: 1px solid var(--fm-control-line); border-radius: 999px;
           background: var(--fm-control-surface); color: var(--fm-control-accent);
@@ -1637,7 +1638,7 @@
           outline: 2px solid var(--fm-control-accent); outline-offset: 2px;
         }
         .panel {
-          position: absolute; left: 0; bottom: 52px; width: 256px;
+          position: relative; width: 256px; margin-bottom: 8px; pointer-events: auto;
           max-width: calc(100vw - 24px); max-height: calc(100dvh - 92px);
           overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
           border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
@@ -1705,6 +1706,10 @@
     });
     shadow.querySelector('.close').addEventListener('click', () => setPanelOpen(false));
     shadow.querySelector('.copy-link').addEventListener('click', copyDetailLink);
+    // 패널 안의 터치는 사이트의 전역 메뉴·새로고침 처리로 전파하지 않습니다.
+    for (const type of ['pointerdown', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'click', 'dblclick']) {
+      shadow.addEventListener(type, event => event.stopPropagation(), { passive: true });
+    }
     panel.addEventListener('change', event => {
       const input = event.target;
       if (!Object.prototype.hasOwnProperty.call(defaults, input.name)) return;

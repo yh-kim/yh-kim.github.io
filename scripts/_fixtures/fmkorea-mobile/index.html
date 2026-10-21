@@ -658,6 +658,51 @@
           alertDoc.querySelector('#normal-message').textContent.trim() === '일반 알림');
         record('사이트가 갱신한 알림 내용은 비활성화 시 오래된 제목으로 되돌리지 않음',
           plainBestMessage.textContent === '사이트가 갱신한 새 제목');
+
+        const tapDoc = await makeLayoutFrame(source, '저장 메뉴 패널 터치 영역', `
+          <div class="fm-recent-visited"><div class="list"><div class="item bookmark">
+            <a href="https://m.fmkorea.com/football_world">해외축구</a></div></div></div>
+          <div class="bd"><div class="rd" data-docsrl="123456">
+            <div class="rd_hd"><h1><span class="np_18px_span">상세 글</span></h1></div>
+            <div class="rd_body"><article>본문</article></div></div></div>`);
+        tapDoc.defaultView.frameElement.style.height = '480px';
+        const menuHost = tapDoc.querySelector('#fm-clean-controls');
+        const menuShadow = menuHost.shadowRoot;
+        detailLauncher(tapDoc).dispatchEvent(new tapDoc.defaultView.KeyboardEvent('keydown',
+          { key: 'ArrowDown', bubbles: true }));
+        await delay(30);
+        const menuPanel = menuShadow.querySelector('.panel');
+        const hostBounds = menuHost.getBoundingClientRect();
+        const panelBounds = menuPanel.getBoundingClientRect();
+        const menuLink = menuShadow.querySelector('[data-saved-menus] a');
+        const copyButton = menuShadow.querySelector('.copy-link');
+        const receivesTouch = element => {
+          const bounds = element.getBoundingClientRect();
+          const hit = menuShadow.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+          return element === hit || element.contains(hit);
+        };
+        record('저장 메뉴와 복사 버튼이 host 경계 안에서 실제 터치 대상으로 잡힘',
+          panelBounds.left >= hostBounds.left && panelBounds.right <= hostBounds.right &&
+          panelBounds.top >= hostBounds.top && panelBounds.bottom <= hostBounds.bottom &&
+          receivesTouch(menuLink) && receivesTouch(copyButton));
+        let menuActivations = 0;
+        let leakedEvents = 0;
+        let copiedLink = '';
+        Object.defineProperty(tapDoc.defaultView.navigator, 'clipboard', { configurable: true,
+          value: { writeText: async value => { copiedLink = value; } } });
+        tapDoc.addEventListener('pointerdown', () => leakedEvents++);
+        tapDoc.addEventListener('click', () => leakedEvents++);
+        menuLink.addEventListener('click', event => { event.preventDefault(); menuActivations++; });
+        for (const target of [menuLink, copyButton]) {
+          target.dispatchEvent(new tapDoc.defaultView.PointerEvent('pointerdown',
+            { bubbles: true, composed: true, pointerType: 'touch' }));
+          target.click();
+        }
+        await delay(30);
+        record('패널 터치는 사이트로 전파되지 않고 메뉴 활성화와 짧은 링크 복사 실행',
+          !menuPanel.hidden && leakedEvents === 0 && menuActivations === 1 &&
+          copiedLink === 'https://www.fmkorea.com/123456' &&
+          menuShadow.querySelector('[data-copy-status]').textContent === '링크를 복사했습니다.');
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }
