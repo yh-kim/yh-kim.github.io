@@ -698,6 +698,7 @@
         positionSwitch.checked = true;
         positionSwitch.dispatchEvent(new tapDoc.defaultView.Event('change', { bubbles: true }));
         const rightLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
+        const rightPanelBounds = menuPanel.getBoundingClientRect();
         const rightLauncherTop = rightLauncherBounds.top;
         const rightPositionWorks = menuHost.getAttribute('data-side') === 'right' &&
           rightLauncherBounds.left > initialLauncherBounds.left &&
@@ -712,6 +713,11 @@
           Math.abs(initialLauncherTop - rightLauncherTop) < 1 &&
           Math.abs(initialLauncherTop - restoredLauncherTop) < 1 &&
           Math.abs(initialLauncherBounds.left - restoredLauncherBounds.left) < 1);
+        record('팝업은 버튼 배치에 맞춰 화면 좌우 가장자리에서 12px 띄워 표시',
+          Math.abs(panelBounds.left - 12) < 1 &&
+          Math.abs(tapDoc.defaultView.innerWidth - rightPanelBounds.right - 12) < 1 &&
+          Math.abs(initialLauncherTop - panelBounds.bottom - 8) < 1 &&
+          Math.abs(rightLauncherTop - rightPanelBounds.bottom - 8) < 1);
         let menuActivations = 0;
         let leakedEvents = 0;
         let copiedLink = '';
