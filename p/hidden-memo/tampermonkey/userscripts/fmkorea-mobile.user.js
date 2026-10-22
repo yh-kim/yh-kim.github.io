@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.14
+// @version      1.5.15
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.14';
+  const SCRIPT_VERSION = '1.5.15';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1288,7 +1288,8 @@
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 32) return null;
       if (Math.abs(dy) > Math.abs(dx) * 1.2) return dy < 0 ? 'top' : 'bottom';
       const inwardX = settings.launcherRight ? -dx : dx;
-      return inwardX > Math.abs(dy) * 1.2 ? 'comments' : null;
+      if (inwardX > Math.abs(dy) * 1.2) return 'comments';
+      return -inwardX > Math.abs(dy) * 1.2 ? 'reload' : null;
     };
     const reset = () => {
       const pointer = gesture?.id;
@@ -1306,6 +1307,7 @@
     };
     const navigate = destination => {
       if (!active()) return;
+      if (destination === 'reload') { window.location.reload(); return; }
       let top = 0;
       if (destination === 'bottom') top = document.scrollingElement.scrollHeight;
       else if (destination === 'comments') {
@@ -1339,9 +1341,7 @@
       launcher.toggleAttribute('data-ready', Boolean(destination &&
         (destination !== 'comments' || document.querySelector('.rd .rd_hd h1'))));
       if (!reducedMotion.matches) {
-        const moveX = settings.launcherRight
-          ? Math.max(-40, Math.min(12, dx * .45))
-          : Math.max(-12, Math.min(40, dx * .45));
+        const moveX = Math.max(-40, Math.min(40, dx * .45));
         launcher.style.transform = `translate3d(${moveX}px, ${Math.max(-40, Math.min(40, dy * .45))}px, 0)`;
       }
     });
@@ -1715,7 +1715,7 @@
     launcher.toggleAttribute('data-off', !settings.enabled);
     host.setAttribute('data-side', settings.launcherRight ? 'right' : 'left');
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
-    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴 · 위/아래로 끌면 맨 위/아래, 상세에서 ${settings.launcherRight ? '왼쪽' : '오른쪽'}으로 끌면 댓글`;
+    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴 · 위/아래로 끌면 맨 위/아래, 상세에서 ${settings.launcherRight ? '왼쪽' : '오른쪽'}으로 끌면 댓글 · ${settings.launcherRight ? '오른쪽' : '왼쪽'}으로 밀면 새로고침`;
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];
     if (!panel.hidden) syncMenuPanel();
