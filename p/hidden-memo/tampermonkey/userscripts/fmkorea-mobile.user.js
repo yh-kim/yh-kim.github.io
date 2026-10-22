@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.10
-// @description  저장 메뉴·짧은 링크 복사, 살구색 모바일 UI, 스와이프 뒤로가기, 스크롤 제목·진행 바, 광고·상단·댓글 정리
+// @version      1.5.11
+// @description  저장 메뉴·짧은 링크 복사, 상세 드래그 이동, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.10';
+  const SCRIPT_VERSION = '1.5.11';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -483,7 +483,7 @@
       ${root} .bd_m_lst.zine > li.is_tmb { padding-right: 10px !important; }
       ${root} :is(.bd_lst, .bd_m_lst) > li { border-bottom: 1px solid var(--fm-clean-line) !important; }
       ${root} .bd_m_lst > li .rt_area h3 {
-        color: var(--fm-clean-title) !important; font-size: 13px !important; font-weight: 600 !important; line-height: 1.35 !important;
+        color: var(--fm-clean-title) !important; font-size: 13px !important; font-weight: 400 !important; line-height: 1.35 !important;
         height: auto !important;
         white-space: normal !important; text-overflow: clip !important; overflow: visible !important;
       }
@@ -631,7 +631,7 @@
       ${commentNav} a.findComment span { display: inline !important; }
       ${root} .bd_lst :is(.title, .title a, .title a > span) { color: var(--fm-clean-title) !important; }
       ${root} .bd_lst td.title, ${root} .bd_lst td.title a {
-        font-size: 13px !important; font-weight: 600 !important; line-height: 1.35 !important;
+        font-size: 13px !important; font-weight: 400 !important; line-height: 1.35 !important;
       }
       ${root} .bd_lst td.title a span:not(.comment_count) { color: var(--fm-clean-title) !important; }
       ${root} .bd_lst td.title .comment_count { color: var(--fm-clean-comment) !important; font-size: 12px !important; }
@@ -675,7 +675,7 @@
       }
       ${root} .fm_best_widget .title {
         color: var(--fm-clean-title) !important; font-size: 13px !important;
-        font-weight: 600 !important; line-height: 1.35 !important;
+        font-weight: 400 !important; line-height: 1.35 !important;
       }
       ${root} .fm_best_widget .title a,
       ${root} .fm_best_widget .title a .ellipsis-target {
@@ -742,7 +742,7 @@
       }
       ${home} .fm_best_widget span.thumb { display: none !important; }
       ${home} .fm_best_widget .title {
-        margin: 0 0 2px !important; font-size: 13px !important; font-weight: 600 !important; line-height: 1.4 !important;
+        margin: 0 0 2px !important; font-size: 13px !important; font-weight: 400 !important; line-height: 1.4 !important;
         display: block !important; -webkit-line-clamp: unset !important;
         height: auto !important; max-height: none !important; white-space: normal !important;
         overflow: visible !important; text-overflow: clip !important;
@@ -764,6 +764,12 @@
         color: var(--fm-clean-muted) !important; background: var(--fm-clean-raised) !important;
         border: 1px solid var(--fm-clean-line) !important;
       }
+      ${root} .bd_m_lst > li .rt_area h3 > a,
+      ${root} .bd_m_lst > li .rt_area h3 > a :not(.comment_count),
+      ${root} .bd_lst td.title a,
+      ${root} .bd_lst td.title a :not(.comment_count),
+      ${root} .fm_best_widget .title > a,
+      ${root} .fm_best_widget .title > a :not(.comment_count) { font-weight: 400 !important; }
       ${root} .fm_best_widget .li_visited :is(.title, .title a, .title .ellipsis-target),
       ${root} .bd_m_lst > li .rt_area h3 > a.visited,
       ${root} .bd_m_lst > li .rt_area h3 > a.visited :not(.comment_count),
@@ -1145,7 +1151,7 @@
       return;
     }
     if (wasHidden) bar.removeAttribute('data-ready');
-    // 마지막 댓글이 화면 하단에 도달하면 100%입니다. 댓글이 없으면 본문 끝을 사용합니다.
+    // 댓글을 제외한 본문 끝이 화면 하단에 도달하면 100%입니다.
     const end = readingState.end?.isConnected ? readingState.end : heading;
     const endY = window.scrollY + end.getBoundingClientRect().bottom;
     const range = Math.max(0, endY - window.innerHeight);
@@ -1166,8 +1172,7 @@
     const heading = active ? document.querySelector('.rd .rd_hd h1') : null;
     readingState.heading = heading;
     const article = heading?.closest('.rd');
-    readingState.end = article ? Array.from(article.querySelectorAll('.fdb_itm')).reverse()
-      .find(item => item.getClientRects().length) || article.querySelector('.rd_body') || heading : null;
+    readingState.end = article?.querySelector('.rd_body article') || article?.querySelector('.rd_body') || heading;
     if (!heading) {
       if (readingState.bar) readingState.bar.hidden = true;
       return;
@@ -1225,7 +1230,7 @@
         </style>
         <div class="bar" hidden>
           <div class="row"><button class="title" type="button"></button><span class="percent" aria-hidden="true">0%</span></div>
-          <progress max="100" value="0" aria-label="댓글 끝까지의 스크롤 진행률"></progress>
+          <progress max="100" value="0" aria-label="본문 끝까지의 스크롤 진행률"></progress>
           <div class="track" aria-hidden="true"><span class="fill"></span></div>
         </div>
       `;
@@ -1264,6 +1269,136 @@
       readingState.body = document.body;
     }
     scheduleReadingProgress();
+  }
+
+  const detailNavigation = { host: null, reset: null, article: null };
+
+  function syncDetailNavigation() {
+    const article = settings.enabled && document.body &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true'
+      ? document.querySelector('.rd:has(.rd_hd h1)') : null;
+    detailNavigation.article = article;
+    if (!article) {
+      detailNavigation.reset?.();
+      if (detailNavigation.host && !detailNavigation.host.hidden) detailNavigation.host.hidden = true;
+      return;
+    }
+    if (!detailNavigation.host) {
+      const host = document.createElement('div');
+      host.id = 'fm-clean-detail-navigation';
+      host.setAttribute('data-fm-clean-swipe-ignore', '');
+      const shadow = host.attachShadow({ mode: 'open' });
+      shadow.innerHTML = `
+        <style>
+          :host {
+            all: initial !important; display: block !important; position: fixed !important;
+            right: max(10px, env(safe-area-inset-right, 0px)) !important;
+            bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+            z-index: 2147483646 !important; pointer-events: none !important;
+            --nav-surface: var(--fm-clean-surface, #fff);
+            --nav-line: var(--fm-clean-line, #e7e4de);
+            --nav-accent: var(--fm-clean-accent, #9a4e26);
+            --nav-soft: var(--fm-clean-soft, #fff0e7);
+          }
+          :host([data-night]) {
+            --nav-surface: var(--fm-clean-surface, #1b1b1a);
+            --nav-line: var(--fm-clean-line, #2f2e2b);
+            --nav-accent: var(--fm-clean-accent, #f0b58f);
+            --nav-soft: var(--fm-clean-soft, #3b2a23);
+          }
+          :host([hidden]) { display: none !important; }
+          button {
+            display: block; width: 44px; height: 44px; padding: 0; box-sizing: border-box;
+            border: 1px solid var(--nav-line); border-radius: 50%; background: var(--nav-surface);
+            box-shadow: 0 3px 12px #0002; opacity: .6; pointer-events: auto; cursor: grab; touch-action: none;
+            user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+            transition: transform 180ms ease-out, opacity 120ms, background 120ms, border-color 120ms;
+          }
+          button[data-dragging] { cursor: grabbing; opacity: .92; transition: opacity 120ms, background 120ms, border-color 120ms; }
+          button[data-ready] { background: var(--nav-soft); border-color: var(--nav-accent); }
+          button:focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; }
+          @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+        </style>
+        <button type="button" aria-label="잡고 위로: 맨 위, 아래로: 맨 아래, 왼쪽으로: 댓글. 방향키로도 이동" title="위: 맨 위 · 아래: 맨 아래 · 왼쪽: 댓글"></button>
+      `;
+      const button = shadow.querySelector('button');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let gesture = null;
+      const direction = (dx, dy) => {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 32) return null;
+        if (Math.abs(dy) > Math.abs(dx) * 1.2) return dy < 0 ? 'top' : 'bottom';
+        return dx < 0 && -dx > Math.abs(dy) * 1.2 ? 'comments' : null;
+      };
+      const reset = () => {
+        const pointer = gesture?.id;
+        gesture = null;
+        button.removeAttribute('data-dragging');
+        button.removeAttribute('data-ready');
+        button.style.removeProperty('transform');
+        if (pointer !== undefined && button.hasPointerCapture(pointer)) button.releasePointerCapture(pointer);
+      };
+      const navigate = destination => {
+        if (!detailNavigation.article?.isConnected || host.hidden) return;
+        let top = 0;
+        if (destination === 'bottom') top = document.scrollingElement.scrollHeight;
+        else if (destination === 'comments') {
+          const board = detailNavigation.article.closest('.bd') || document;
+          const comments = board.querySelector('.fdb_lst_wrp') || board.querySelector('#comment, .fdb_lst, .cmt_editor');
+          if (!comments) return;
+          // 댓글 제목이 고정된 읽기 헤더 아래에 보이도록 여유를 둡니다.
+          const headerHeight = readingState.bar && !readingState.bar.hidden ? readingState.bar.getBoundingClientRect().height : 0;
+          top = window.scrollY + comments.getBoundingClientRect().top - Math.max(56, headerHeight + 8);
+        }
+        window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+      };
+      button.addEventListener('pointerdown', event => {
+        if (gesture || !event.isPrimary || event.button !== 0) { reset(); return; }
+        gesture = { id: event.pointerId, x: event.clientX, y: event.clientY };
+        button.setPointerCapture(event.pointerId);
+        button.setAttribute('data-dragging', '');
+        event.preventDefault();
+      });
+      button.addEventListener('pointermove', event => {
+        if (gesture?.id !== event.pointerId) return;
+        const dx = event.clientX - gesture.x;
+        const dy = event.clientY - gesture.y;
+        button.toggleAttribute('data-ready', Boolean(direction(dx, dy)));
+        if (!reducedMotion.matches) button.style.transform =
+          `translate3d(${Math.max(-40, Math.min(12, dx * .45))}px, ${Math.max(-40, Math.min(40, dy * .45))}px, 0)`;
+      });
+      button.addEventListener('pointerup', event => {
+        if (gesture?.id !== event.pointerId) return;
+        const destination = direction(event.clientX - gesture.x, event.clientY - gesture.y);
+        reset();
+        if (destination) navigate(destination);
+      });
+      button.addEventListener('pointercancel', event => {
+        if (gesture?.id === event.pointerId) reset();
+      });
+      button.addEventListener('lostpointercapture', event => {
+        if (gesture?.id === event.pointerId && !button.hasPointerCapture(event.pointerId)) reset();
+      });
+      button.addEventListener('keydown', event => {
+        const destination = { ArrowUp: 'top', ArrowDown: 'bottom', ArrowLeft: 'comments' }[event.key];
+        if (event.key === 'Escape') reset();
+        if (!destination) return;
+        event.preventDefault();
+        navigate(destination);
+      });
+      // 사이트의 전역 터치 처리와 분리하고 기존 뒤로가기 스와이프도 시작하지 않습니다.
+      for (const type of ['pointerdown', 'pointermove', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'click']) {
+        shadow.addEventListener(type, event => event.stopPropagation(), { passive: true });
+      }
+      window.addEventListener('pagehide', reset);
+      window.addEventListener('resize', reset, { passive: true });
+      document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
+      detailNavigation.host = host;
+      detailNavigation.reset = reset;
+    }
+    const host = detailNavigation.host;
+    if (!host.isConnected) document.body.appendChild(host);
+    if (host.hidden) host.hidden = false;
+    host.toggleAttribute('data-night', document.body.classList.contains('night_mode'));
   }
 
   const swipeBackState = { host: null, reset: null };
@@ -1545,6 +1680,7 @@
     }
     document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
     syncReadingHeader();
+    syncDetailNavigation();
     syncBrightImages();
     syncCommentCounts();
     syncCommentAuthors();
