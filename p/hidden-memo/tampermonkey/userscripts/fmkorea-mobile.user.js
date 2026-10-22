@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.19
+// @version      1.5.20
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.19';
+  const SCRIPT_VERSION = '1.5.20';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1827,13 +1827,12 @@
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
           border: 1px solid var(--fm-control-line); border-radius: 999px;
           background: var(--fm-control-surface); color: var(--fm-control-accent);
-          box-shadow: 0 4px 16px #0003; opacity: .7; touch-action: none;
+          box-shadow: 0 4px 16px #0003; opacity: .55; touch-action: none;
           user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
           transition: transform 180ms ease-out, opacity 120ms, background 120ms;
         }
         .launcher[data-dragging] { opacity: .92; transition: opacity 120ms, background 120ms; }
         .launcher[data-ready] { background: var(--fm-control-soft); border-color: var(--fm-control-accent); }
-        .launcher:focus-visible { opacity: .92; }
         @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
         :host([data-side="right"]) .launcher { margin-left: auto; }
         .launcher svg { display: block; width: 20px; height: 20px; }
@@ -1844,6 +1843,7 @@
         button:focus-visible, a:focus-visible {
           outline: 2px solid var(--fm-control-accent); outline-offset: 2px;
         }
+        .launcher:focus, .launcher:focus-visible { outline: none; }
         .panel {
           position: relative; width: 256px; margin-bottom: 8px; pointer-events: auto;
           max-width: calc(100vw - var(--fm-control-edge, 112px) - 12px); max-height: calc(100svh - 308px - env(safe-area-max-inset-bottom, 0px));
@@ -1854,7 +1854,11 @@
         }
         [hidden] { display: none !important; }
         .panel:focus { outline: none; }
-        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+        header {
+          position: sticky; top: -13px; z-index: 1;
+          display: flex; align-items: center; justify-content: space-between; gap: 4px;
+          margin: -13px -13px 7px; padding: 13px 13px 0; background: var(--fm-control-surface);
+        }
         strong { font-size: 13px; }
         .close {
           width: 34px; height: 34px; padding: 0; border: 0; border-radius: 999px;
@@ -1878,11 +1882,10 @@
           outline: none;
         }
         .position-control {
-          display: flex; align-items: center; justify-content: space-between; gap: 10px;
-          margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line);
-          color: var(--fm-control-muted); font-size: 11px;
+          display: flex; align-items: center; gap: 6px; white-space: nowrap;
+          color: var(--fm-control-muted); font-size: 10px;
         }
-        .position-toggle { display: flex; align-items: center; gap: 6px; min-height: 32px; cursor: pointer; }
+        .position-toggle { display: flex; align-items: center; gap: 4px; min-height: 32px; cursor: pointer; }
         .position-toggle input {
           appearance: none; -webkit-appearance: none; position: relative; flex: none;
           width: 34px; height: 20px; margin: 0; border: 1px solid var(--fm-control-line); border-radius: 999px;
@@ -1915,7 +1918,14 @@
       <div class="backdrop" aria-hidden="true" hidden></div>
       <div class="control-anchor">
         <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
-          <header><strong>저장한 메뉴</strong><button class="close" type="button" aria-label="메뉴 닫기">×</button></header>
+          <header>
+            <div class="position-control"><span>버튼 위치</span>
+              <label class="position-toggle"><span class="left">왼쪽</span>
+                <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
+                <span class="right">오른쪽</span></label>
+            </div>
+            <button class="close" type="button" aria-label="메뉴 닫기">×</button>
+          </header>
           <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
           <p data-menu-empty hidden>저장한 메뉴가 없습니다.</p>
           <div class="copy-area" hidden>
@@ -1926,11 +1936,6 @@
           <div hidden data-settings-compat>
             ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
             <p data-save-status>설정이 자동 저장됩니다.</p>
-          </div>
-          <div class="position-control"><span>버튼 위치</span>
-            <label class="position-toggle"><span class="left">왼쪽</span>
-              <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
-              <span class="right">오른쪽</span></label>
           </div>
         </section>
         <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴" aria-expanded="false" aria-controls="fm-clean-panel">

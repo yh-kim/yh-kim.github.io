@@ -685,6 +685,33 @@
           panelBounds.left >= hostBounds.left && panelBounds.right <= hostBounds.right &&
           panelBounds.top >= hostBounds.top && panelBounds.bottom <= hostBounds.bottom &&
           receivesTouch(menuLink) && receivesTouch(copyButton));
+        const positionControl = menuShadow.querySelector('.position-control');
+        const positionSwitch = positionControl?.querySelector('input[name="launcherRight"]');
+        const panelHeader = menuPanel.querySelector('header');
+        const positionBounds = positionControl?.getBoundingClientRect();
+        record('낮은 상세 화면에서도 버튼 위치 전환이 패널 첫 줄에 보이고 터치됨',
+          panelHeader?.contains(positionControl) && positionBounds && positionSwitch &&
+          positionBounds.top >= panelBounds.top && positionBounds.bottom <= panelBounds.bottom &&
+          receivesTouch(positionSwitch));
+        const initialLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
+        const initialLauncherTop = initialLauncherBounds.top;
+        positionSwitch.checked = true;
+        positionSwitch.dispatchEvent(new tapDoc.defaultView.Event('change', { bubbles: true }));
+        const rightLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
+        const rightLauncherTop = rightLauncherBounds.top;
+        const rightPositionWorks = menuHost.getAttribute('data-side') === 'right' &&
+          rightLauncherBounds.left > initialLauncherBounds.left &&
+          !menuPanel.hidden && receivesTouch(positionSwitch);
+        positionSwitch.checked = false;
+        positionSwitch.dispatchEvent(new tapDoc.defaultView.Event('change', { bubbles: true }));
+        const restoredLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
+        const restoredLauncherTop = restoredLauncherBounds.top;
+        record('상세 메뉴에서 좌우 전환 후에도 높이와 열린 패널이 유지됨',
+          rightPositionWorks && menuHost.getAttribute('data-side') === 'left' &&
+          !menuPanel.hidden && receivesTouch(positionSwitch) &&
+          Math.abs(initialLauncherTop - rightLauncherTop) < 1 &&
+          Math.abs(initialLauncherTop - restoredLauncherTop) < 1 &&
+          Math.abs(initialLauncherBounds.left - restoredLauncherBounds.left) < 1);
         let menuActivations = 0;
         let leakedEvents = 0;
         let copiedLink = '';
