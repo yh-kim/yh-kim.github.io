@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.11
-// @description  저장 메뉴·짧은 링크 복사, 상세 드래그 이동, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
+// @version      1.5.12
+// @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.11';
+  const SCRIPT_VERSION = '1.5.12';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -971,8 +971,8 @@
       }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
-        left: max(8px, env(safe-area-inset-left, 0px)) !important;
-        bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+        left: max(16px, env(safe-area-inset-left, 0px)) !important;
+        bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
         z-index: 2147483647 !important; pointer-events: none !important;
       }
     `
@@ -1271,134 +1271,103 @@
     scheduleReadingProgress();
   }
 
-  const detailNavigation = { host: null, reset: null, article: null };
-
-  function syncDetailNavigation() {
-    const article = settings.enabled && document.body &&
-      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true'
-      ? document.querySelector('.rd:has(.rd_hd h1)') : null;
-    detailNavigation.article = article;
-    if (!article) {
-      detailNavigation.reset?.();
-      if (detailNavigation.host && !detailNavigation.host.hidden) detailNavigation.host.hidden = true;
-      return;
-    }
-    if (!detailNavigation.host) {
-      const host = document.createElement('div');
-      host.id = 'fm-clean-detail-navigation';
-      host.setAttribute('data-fm-clean-swipe-ignore', '');
-      const shadow = host.attachShadow({ mode: 'open' });
-      shadow.innerHTML = `
-        <style>
-          :host {
-            all: initial !important; display: block !important; position: fixed !important;
-            right: max(10px, env(safe-area-inset-right, 0px)) !important;
-            bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
-            z-index: 2147483646 !important; pointer-events: none !important;
-            --nav-surface: var(--fm-clean-surface, #fff);
-            --nav-line: var(--fm-clean-line, #e7e4de);
-            --nav-accent: var(--fm-clean-accent, #9a4e26);
-            --nav-soft: var(--fm-clean-soft, #fff0e7);
-          }
-          :host([data-night]) {
-            --nav-surface: var(--fm-clean-surface, #1b1b1a);
-            --nav-line: var(--fm-clean-line, #2f2e2b);
-            --nav-accent: var(--fm-clean-accent, #f0b58f);
-            --nav-soft: var(--fm-clean-soft, #3b2a23);
-          }
-          :host([hidden]) { display: none !important; }
-          button {
-            display: block; width: 44px; height: 44px; padding: 0; box-sizing: border-box;
-            border: 1px solid var(--nav-line); border-radius: 50%; background: var(--nav-surface);
-            box-shadow: 0 3px 12px #0002; opacity: .6; pointer-events: auto; cursor: grab; touch-action: none;
-            user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
-            transition: transform 180ms ease-out, opacity 120ms, background 120ms, border-color 120ms;
-          }
-          button[data-dragging] { cursor: grabbing; opacity: .92; transition: opacity 120ms, background 120ms, border-color 120ms; }
-          button[data-ready] { background: var(--nav-soft); border-color: var(--nav-accent); }
-          button:focus-visible { outline: 2px solid var(--nav-accent); outline-offset: 3px; }
-          @media (prefers-reduced-motion: reduce) { button { transition: none; } }
-        </style>
-        <button type="button" aria-label="잡고 위로: 맨 위, 아래로: 맨 아래, 왼쪽으로: 댓글. 방향키로도 이동" title="위: 맨 위 · 아래: 맨 아래 · 왼쪽: 댓글"></button>
-      `;
-      const button = shadow.querySelector('button');
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      let gesture = null;
-      const direction = (dx, dy) => {
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 32) return null;
-        if (Math.abs(dy) > Math.abs(dx) * 1.2) return dy < 0 ? 'top' : 'bottom';
-        return dx < 0 && -dx > Math.abs(dy) * 1.2 ? 'comments' : null;
-      };
-      const reset = () => {
-        const pointer = gesture?.id;
-        gesture = null;
-        button.removeAttribute('data-dragging');
-        button.removeAttribute('data-ready');
-        button.style.removeProperty('transform');
-        if (pointer !== undefined && button.hasPointerCapture(pointer)) button.releasePointerCapture(pointer);
-      };
-      const navigate = destination => {
-        if (!detailNavigation.article?.isConnected || host.hidden) return;
-        let top = 0;
-        if (destination === 'bottom') top = document.scrollingElement.scrollHeight;
-        else if (destination === 'comments') {
-          const board = detailNavigation.article.closest('.bd') || document;
-          const comments = board.querySelector('.fdb_lst_wrp') || board.querySelector('#comment, .fdb_lst, .cmt_editor');
-          if (!comments) return;
-          // 댓글 제목이 고정된 읽기 헤더 아래에 보이도록 여유를 둡니다.
-          const headerHeight = readingState.bar && !readingState.bar.hidden ? readingState.bar.getBoundingClientRect().height : 0;
-          top = window.scrollY + comments.getBoundingClientRect().top - Math.max(56, headerHeight + 8);
-        }
-        window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion.matches ? 'auto' : 'smooth' });
-      };
-      button.addEventListener('pointerdown', event => {
-        if (gesture || !event.isPrimary || event.button !== 0) { reset(); return; }
-        gesture = { id: event.pointerId, x: event.clientX, y: event.clientY };
-        button.setPointerCapture(event.pointerId);
-        button.setAttribute('data-dragging', '');
-        event.preventDefault();
-      });
-      button.addEventListener('pointermove', event => {
-        if (gesture?.id !== event.pointerId) return;
-        const dx = event.clientX - gesture.x;
-        const dy = event.clientY - gesture.y;
-        button.toggleAttribute('data-ready', Boolean(direction(dx, dy)));
-        if (!reducedMotion.matches) button.style.transform =
-          `translate3d(${Math.max(-40, Math.min(12, dx * .45))}px, ${Math.max(-40, Math.min(40, dy * .45))}px, 0)`;
-      });
-      button.addEventListener('pointerup', event => {
-        if (gesture?.id !== event.pointerId) return;
-        const destination = direction(event.clientX - gesture.x, event.clientY - gesture.y);
-        reset();
-        if (destination) navigate(destination);
-      });
-      button.addEventListener('pointercancel', event => {
-        if (gesture?.id === event.pointerId) reset();
-      });
-      button.addEventListener('lostpointercapture', event => {
-        if (gesture?.id === event.pointerId && !button.hasPointerCapture(event.pointerId)) reset();
-      });
-      button.addEventListener('keydown', event => {
-        const destination = { ArrowUp: 'top', ArrowDown: 'bottom', ArrowLeft: 'comments' }[event.key];
-        if (event.key === 'Escape') reset();
-        if (!destination) return;
-        event.preventDefault();
-        navigate(destination);
-      });
-      // 사이트의 전역 터치 처리와 분리하고 기존 뒤로가기 스와이프도 시작하지 않습니다.
-      for (const type of ['pointerdown', 'pointermove', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'click']) {
-        shadow.addEventListener(type, event => event.stopPropagation(), { passive: true });
+  function mountLauncherNavigation() {
+    const dragSlop = 16;
+    let gesture = null;
+    let clickUntil = 0;
+    let suppressNextClick = false;
+    const active = () => settings.enabled &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const direction = (dx, dy) => {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 32) return null;
+      if (Math.abs(dy) > Math.abs(dx) * 1.2) return dy < 0 ? 'top' : 'bottom';
+      return dx > 0 && dx > Math.abs(dy) * 1.2 ? 'comments' : null;
+    };
+    const reset = () => {
+      const pointer = gesture?.id;
+      gesture = null;
+      launcher.removeAttribute('data-dragging');
+      launcher.removeAttribute('data-ready');
+      launcher.style.removeProperty('transform');
+      if (pointer !== undefined && launcher.hasPointerCapture(pointer)) launcher.releasePointerCapture(pointer);
+    };
+    const suppressClick = () => {
+      clickUntil = performance.now() + 500;
+      suppressNextClick = true;
+      window.clearTimeout(launcherClickTimer);
+      launcherClickTimer = null;
+    };
+    const navigate = destination => {
+      if (!active()) return;
+      let top = 0;
+      if (destination === 'bottom') top = document.scrollingElement.scrollHeight;
+      else if (destination === 'comments') {
+        const article = document.querySelector('.rd:has(.rd_hd h1)');
+        if (!article) return;
+        const board = article.closest('.bd') || document;
+        const comments = board.querySelector('.fdb_lst_wrp') || board.querySelector('#comment, .fdb_lst, .cmt_editor');
+        if (!comments) return;
+        const headerHeight = readingState.bar && !readingState.bar.hidden ? readingState.bar.getBoundingClientRect().height : 0;
+        top = window.scrollY + comments.getBoundingClientRect().top - Math.max(56, headerHeight + 8);
       }
-      window.addEventListener('pagehide', reset);
-      window.addEventListener('resize', reset, { passive: true });
-      document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
-      detailNavigation.host = host;
-      detailNavigation.reset = reset;
-    }
-    const host = detailNavigation.host;
-    if (!host.isConnected) document.body.appendChild(host);
-    if (host.hidden) host.hidden = false;
-    host.toggleAttribute('data-night', document.body.classList.contains('night_mode'));
+      window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+    };
+    launcher.addEventListener('pointerdown', event => {
+      if (gesture || !event.isPrimary || event.button !== 0) { reset(); return; }
+      if (!active() || !panel.hidden) return;
+      suppressNextClick = false;
+      gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, dragged: false };
+      launcher.setPointerCapture(event.pointerId);
+    });
+    launcher.addEventListener('pointermove', event => {
+      if (gesture?.id !== event.pointerId) return;
+      if (!active()) { reset(); return; }
+      const dx = event.clientX - gesture.x;
+      const dy = event.clientY - gesture.y;
+      if (Math.hypot(dx, dy) >= dragSlop) gesture.dragged = true;
+      if (!gesture.dragged) return;
+      suppressClick();
+      launcher.setAttribute('data-dragging', '');
+      const destination = direction(dx, dy);
+      launcher.toggleAttribute('data-ready', Boolean(destination &&
+        (destination !== 'comments' || document.querySelector('.rd .rd_hd h1'))));
+      if (!reducedMotion.matches) launcher.style.transform =
+        `translate3d(${Math.max(-12, Math.min(40, dx * .45))}px, ${Math.max(-40, Math.min(40, dy * .45))}px, 0)`;
+    });
+    launcher.addEventListener('pointerup', event => {
+      if (gesture?.id !== event.pointerId) return;
+      const dx = event.clientX - gesture.x;
+      const dy = event.clientY - gesture.y;
+      const dragged = gesture.dragged || Math.hypot(dx, dy) >= dragSlop;
+      const destination = dragged ? direction(dx, dy) : null;
+      if (dragged) suppressClick();
+      reset();
+      if (destination) navigate(destination);
+    });
+    launcher.addEventListener('pointercancel', event => {
+      if (gesture?.id !== event.pointerId) return;
+      if (gesture.dragged) suppressClick();
+      reset();
+    });
+    launcher.addEventListener('lostpointercapture', event => {
+      if (gesture?.id !== event.pointerId || launcher.hasPointerCapture(event.pointerId)) return;
+      if (gesture.dragged) suppressClick();
+      reset();
+    });
+    launcher.addEventListener('click', event => {
+      if (!event.detail || !suppressNextClick || performance.now() >= clickUntil) return;
+      suppressNextClick = false;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
+    launcher.addEventListener('keydown', event => { if (event.key === 'Escape') reset(); });
+    window.addEventListener('pagehide', reset);
+    let viewportWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+      if (window.innerWidth !== viewportWidth) { viewportWidth = window.innerWidth; reset(); }
+    }, { passive: true });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
   }
 
   const swipeBackState = { host: null, reset: null };
@@ -1498,7 +1467,8 @@
         [contenteditable]:not([contenteditable="false"]), [role="slider"], a[download],
         .swiper, .swiper-container, .swiper-wrapper, .slick-slider, [data-fm-clean-swipe-ignore]`)) return true;
       return element !== document.body && element !== document.documentElement &&
-        element.scrollWidth > element.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(element).overflowX);
+        element.scrollWidth > element.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(element).overflowX) &&
+        (element.scrollLeft > 2 || getComputedStyle(element).direction === 'rtl');
     });
     document.addEventListener('touchstart', event => {
       clickTarget = null;
@@ -1508,30 +1478,36 @@
         window.getSelection()?.isCollapsed === false || ignoredTarget(event)) return;
       const touch = event.touches[0];
       // 가장자리 제스처는 브라우저에 맡기고 화면 가운데에서 시작한 동작만 처리합니다.
-      if (touch.clientX < 32 || touch.clientX > window.innerWidth - 80 ||
+      if (touch.clientX < 32 || touch.clientX > window.innerWidth - 48 ||
         touch.clientY < 48 || touch.clientY > window.innerHeight - 40) return;
       gesture = { id: touch.identifier, x: touch.clientX, y: touch.clientY,
         target: event.target.closest?.('a') || event.target,
         scrollY: window.scrollY, start: performance.now(), dx: 0, dy: 0, claimed: false,
-        threshold: Math.min(112, Math.max(80, window.innerWidth * .24), window.innerWidth - touch.clientX - 12) };
+        threshold: Math.min(88, Math.max(64, window.innerWidth * .2), window.innerWidth - touch.clientX - 12) };
     }, { passive: true, capture: true });
     document.addEventListener('touchmove', event => {
       if (!gesture) return;
       const touch = Array.from(event.touches).find(item => item.identifier === gesture.id);
-      if (!enabled() || event.touches.length !== 1 || !touch || !event.cancelable) { settle(false); return; }
+      if (!enabled() || event.touches.length !== 1 || !touch) { settle(false); return; }
       gesture.dx = touch.clientX - gesture.x;
       gesture.dy = touch.clientY - gesture.y;
+      const dx = gesture.dx;
+      const dy = Math.abs(gesture.dy);
+      if (!event.cancelable) {
+        if (gesture.claimed || Math.abs(window.scrollY - gesture.scrollY) > 12) settle(false);
+        return;
+      }
       if (!gesture.claimed) {
-        if (Math.hypot(gesture.dx, gesture.dy) < 14) return;
-        if (gesture.dx < 14 || Math.abs(gesture.dy) > gesture.dx * .6 ||
-          Math.abs(window.scrollY - gesture.scrollY) > 4 || performance.now() - gesture.start > 800) {
-          settle(false); return;
-        }
+        if (Math.max(Math.abs(dx), dy) < 10) return;
+        // 작은 대각선 흔들림은 기다리고, 가로 방향이 분명해지면 제스처를 잡습니다.
+        if (dx < -10 || dy > Math.max(18, Math.abs(dx) * 1.25) ||
+          Math.abs(window.scrollY - gesture.scrollY) > 12) { settle(false); return; }
+        if (dx < 10 || dx < dy * 1.25) return;
         gesture.claimed = true;
         cue.style.transition = 'none';
         cue.style.top = `${Math.max(60, Math.min(window.innerHeight - 84, gesture.y - 22))}px`;
       }
-      if (Math.abs(gesture.dy) > 56 || Math.abs(gesture.dy) > Math.max(44, gesture.dx * .6)) { settle(false); return; }
+      if (dx < -8 || dy > Math.max(36, Math.abs(dx) * .85)) { settle(false); return; }
       event.preventDefault();
       if (!frame) frame = window.requestAnimationFrame(paint);
     }, { passive: false, capture: true });
@@ -1541,9 +1517,10 @@
       if (!touch) return;
       gesture.dx = touch.clientX - gesture.x;
       gesture.dy = touch.clientY - gesture.y;
-      const commit = enabled() && gesture.claimed && gesture.dx >= gesture.threshold &&
-        Math.abs(gesture.dy) <= 56 && Math.abs(gesture.dy) < Math.max(44, gesture.dx * .6) &&
-        performance.now() - gesture.start < 1600;
+      const duration = Math.max(1, performance.now() - gesture.start);
+      const distance = gesture.dx >= gesture.threshold || (gesture.dx >= 44 && gesture.dx / duration >= .5);
+      const commit = enabled() && gesture.claimed && distance &&
+        Math.abs(gesture.dy) <= gesture.dx * .8 && duration < 4000;
       if (gesture.claimed && event.cancelable) event.preventDefault();
       settle(commit);
     }, { passive: false, capture: true });
@@ -1557,7 +1534,11 @@
     window.addEventListener('pageshow', reset);
     window.addEventListener('pagehide', reset);
     window.addEventListener('popstate', reset);
-    window.addEventListener('resize', reset, { passive: true });
+    let viewportWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+      // Safari 주소창이 접히는 높이 변화로 진행 중인 스와이프를 취소하지 않습니다.
+      if (window.innerWidth !== viewportWidth) { viewportWidth = window.innerWidth; reset(); }
+    }, { passive: true });
     document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
     swipeBackState.host = host;
     swipeBackState.reset = reset;
@@ -1680,7 +1661,6 @@
     }
     document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
     syncReadingHeader();
-    syncDetailNavigation();
     syncBrightImages();
     syncCommentCounts();
     syncCommentAuthors();
@@ -1688,7 +1668,7 @@
     if (!launcher) return;
     launcher.toggleAttribute('data-off', !settings.enabled);
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
-    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴`;
+    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴 · 위/아래로 끌면 맨 위/아래, 상세에서 오른쪽으로 끌면 댓글`;
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];
     if (!panel.hidden) syncMenuPanel();
@@ -1763,8 +1743,14 @@
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
           border: 1px solid var(--fm-control-line); border-radius: 999px;
           background: var(--fm-control-surface); color: var(--fm-control-accent);
-          box-shadow: 0 4px 16px #0003;
+          box-shadow: 0 4px 16px #0003; opacity: .6; touch-action: none;
+          user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+          transition: transform 180ms ease-out, opacity 120ms, background 120ms;
         }
+        .launcher[data-dragging] { opacity: .92; transition: opacity 120ms, background 120ms; }
+        .launcher[data-ready] { background: var(--fm-control-soft); border-color: var(--fm-control-accent); }
+        .launcher:focus-visible { opacity: .92; }
+        @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
         .launcher svg { display: block; width: 20px; height: 20px; }
         .launcher[data-off] {
           background: var(--fm-control-raised); color: var(--fm-control-muted);
@@ -1775,7 +1761,7 @@
         }
         .panel {
           position: relative; width: 256px; margin-bottom: 8px; pointer-events: auto;
-          max-width: calc(100vw - 24px); max-height: calc(100dvh - 92px);
+          max-width: calc(100vw - 24px); max-height: calc(100dvh - 164px - env(safe-area-inset-bottom, 0px));
           overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
           border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
           box-shadow: 0 12px 36px #0004;
@@ -1833,6 +1819,7 @@
     panel = shadow.querySelector('.panel');
     launcher = shadow.querySelector('.launcher');
     launcher.addEventListener('click', handleLauncherClick);
+    mountLauncherNavigation();
     launcher.addEventListener('keydown', event => {
       if (event.key !== 'ArrowDown') return;
       event.preventDefault();
@@ -1843,7 +1830,7 @@
     shadow.querySelector('.close').addEventListener('click', () => setPanelOpen(false));
     shadow.querySelector('.copy-link').addEventListener('click', copyDetailLink);
     // 패널 안의 터치는 사이트의 전역 메뉴·새로고침 처리로 전파하지 않습니다.
-    for (const type of ['pointerdown', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'click', 'dblclick']) {
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'click', 'dblclick']) {
       shadow.addEventListener(type, event => event.stopPropagation(), { passive: true });
     }
     panel.addEventListener('change', event => {
