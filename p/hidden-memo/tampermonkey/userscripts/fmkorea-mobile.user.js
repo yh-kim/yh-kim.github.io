@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.15
+// @version      1.5.16
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.15';
+  const SCRIPT_VERSION = '1.5.16';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -971,13 +971,13 @@
       }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
-        --fm-control-edge: max(36px, env(safe-area-inset-left, 0px));
+        --fm-control-edge: max(52px, env(safe-area-inset-left, 0px));
         left: var(--fm-control-edge) !important;
-        bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+        bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
         z-index: 2147483647 !important; pointer-events: none !important;
       }
       #${HOST_ID}[data-side="right"] {
-        --fm-control-edge: max(36px, env(safe-area-inset-right, 0px));
+        --fm-control-edge: max(52px, env(safe-area-inset-right, 0px));
         left: auto !important; right: var(--fm-control-edge) !important;
       }
     `
@@ -1285,11 +1285,11 @@
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const direction = (dx, dy) => {
+      const inwardX = settings.launcherRight ? -dx : dx;
+      if (-inwardX >= 20 && -inwardX > Math.abs(dy) * 1.2) return 'reload';
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 32) return null;
       if (Math.abs(dy) > Math.abs(dx) * 1.2) return dy < 0 ? 'top' : 'bottom';
-      const inwardX = settings.launcherRight ? -dx : dx;
-      if (inwardX > Math.abs(dy) * 1.2) return 'comments';
-      return -inwardX > Math.abs(dy) * 1.2 ? 'reload' : null;
+      return inwardX > Math.abs(dy) * 1.2 ? 'comments' : null;
     };
     const reset = () => {
       const pointer = gesture?.id;
@@ -1789,7 +1789,7 @@
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
           border: 1px solid var(--fm-control-line); border-radius: 999px;
           background: var(--fm-control-surface); color: var(--fm-control-accent);
-          box-shadow: 0 4px 16px #0003; opacity: .85; touch-action: none;
+          box-shadow: 0 4px 16px #0003; opacity: .7; touch-action: none;
           user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
           transition: transform 180ms ease-out, opacity 120ms, background 120ms;
         }
@@ -1808,7 +1808,7 @@
         }
         .panel {
           position: relative; width: 256px; margin-bottom: 8px; pointer-events: auto;
-          max-width: calc(100vw - var(--fm-control-edge, 36px) - 12px); max-height: calc(100dvh - 164px - env(safe-area-inset-bottom, 0px));
+          max-width: calc(100vw - var(--fm-control-edge, 52px) - 12px); max-height: calc(100dvh - 188px - env(safe-area-inset-bottom, 0px));
           overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
           border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
           box-shadow: 0 12px 36px #0004;
