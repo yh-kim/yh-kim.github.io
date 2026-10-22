@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.16
+// @version      1.5.17
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.16';
+  const SCRIPT_VERSION = '1.5.17';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -783,7 +783,15 @@
       ${root} .bd_lst td.title a:is(.visited, :visited) .comment_count {
         color: var(--fm-clean-read) !important; font-weight: 400 !important;
       }
-      ${root} #fm_alert { right: 12px !important; max-width: calc(100vw - 24px) !important; }
+      /* 하단 주소창이 접혀도 알림의 화면상 위치가 따라 움직이지 않게 합니다. */
+      ${root} #fm_alert {
+        --fm-alert-bottom: 12px;
+        position: fixed !important; right: 12px !important; bottom: auto !important;
+        top: calc(100vh - var(--fm-alert-bottom) - env(safe-area-max-inset-bottom, 0px)) !important;
+        top: calc(100svh - var(--fm-alert-bottom) - env(safe-area-max-inset-bottom, 0px)) !important;
+        transform: translateY(-100%) !important; max-width: calc(100vw - 24px) !important;
+      }
+      ${root}.document #fm_alert, ${root} .document #fm_alert { --fm-alert-bottom: 50px; }
       ${root} #fm_alert .fm_alert_wrap.best { width: min(280px, calc(100vw - 24px)) !important; }
       ${root} #fm_alert .best .fm_alert {
         padding: 10px 12px !important; border: 1px solid var(--fm-clean-line) !important;
@@ -971,13 +979,16 @@
       }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
-        --fm-control-edge: max(52px, env(safe-area-inset-left, 0px));
+        --fm-control-edge: max(80px, env(safe-area-inset-left, 0px));
         left: var(--fm-control-edge) !important;
-        bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+        /* svh와 정적 안전 영역으로 주소창 변화에 따른 좌표 이동을 막습니다. */
+        top: calc(100vh - 160px - env(safe-area-max-inset-bottom, 0px)) !important;
+        top: calc(100svh - 160px - env(safe-area-max-inset-bottom, 0px)) !important;
+        bottom: auto !important; transform: translateY(-100%) !important;
         z-index: 2147483647 !important; pointer-events: none !important;
       }
       #${HOST_ID}[data-side="right"] {
-        --fm-control-edge: max(52px, env(safe-area-inset-right, 0px));
+        --fm-control-edge: max(80px, env(safe-area-inset-right, 0px));
         left: auto !important; right: var(--fm-control-edge) !important;
       }
     `
@@ -1808,7 +1819,7 @@
         }
         .panel {
           position: relative; width: 256px; margin-bottom: 8px; pointer-events: auto;
-          max-width: calc(100vw - var(--fm-control-edge, 52px) - 12px); max-height: calc(100dvh - 188px - env(safe-area-inset-bottom, 0px));
+          max-width: calc(100vw - var(--fm-control-edge, 80px) - 12px); max-height: calc(100svh - 244px - env(safe-area-max-inset-bottom, 0px));
           overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
           border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
           box-shadow: 0 12px 36px #0004;
