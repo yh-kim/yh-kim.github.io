@@ -703,6 +703,29 @@
           !menuPanel.hidden && leakedEvents === 0 && menuActivations === 1 &&
           copiedLink === 'https://www.fmkorea.com/123456' &&
           menuShadow.querySelector('[data-copy-status]').textContent === '링크를 복사했습니다.');
+
+        const outsideLink = tapDoc.createElement('a');
+        outsideLink.href = '#background-link';
+        outsideLink.textContent = '배경 링크';
+        outsideLink.style.cssText = 'position:fixed;top:4px;left:4px;width:80px;height:24px';
+        let outsideActivations = 0;
+        outsideLink.addEventListener('click', event => { event.preventDefault(); outsideActivations++; });
+        tapDoc.body.append(outsideLink);
+        await delay(30);
+        const outsideHit = tapDoc.elementFromPoint(12, 12);
+        const dismissTarget = outsideHit === menuHost ? menuShadow.elementFromPoint(12, 12) : outsideHit;
+        dismissTarget.dispatchEvent(new tapDoc.defaultView.PointerEvent('pointerdown',
+          { bubbles: true, composed: true, pointerType: 'touch' }));
+        const stayedOpen = !menuPanel.hidden;
+        dismissTarget.dispatchEvent(new tapDoc.defaultView.PointerEvent('pointerup',
+          { bubbles: true, composed: true, pointerType: 'touch' }));
+        dismissTarget.click();
+        record('메뉴 바깥 첫 터치는 창만 닫고 배경 링크를 실행하지 않음',
+          stayedOpen && menuPanel.hidden && outsideActivations === 0 && leakedEvents === 0);
+        const nextHit = tapDoc.elementFromPoint(12, 12);
+        nextHit.click();
+        record('창이 닫힌 뒤 다음 터치는 배경 링크를 정상 실행',
+          nextHit === outsideLink && outsideActivations === 1);
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }

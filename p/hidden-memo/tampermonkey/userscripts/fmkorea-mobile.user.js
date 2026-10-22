@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.17
+// @version      1.5.18
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.17';
+  const SCRIPT_VERSION = '1.5.18';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -46,6 +46,7 @@
   const settings = loadSettings();
   let host;
   let panel;
+  let backdrop;
   let launcher;
   let pending = false;
   let launcherClickTimer = null;
@@ -882,6 +883,26 @@
         box-shadow: none !important; text-shadow: none !important;
       }
       ${root} .bd_pg { border-top: 1px solid var(--fm-clean-line) !important; padding: 10px 8px !important; }
+      ${root} .bd_pg :is(a, strong) {
+        display: inline-flex !important; align-items: center; justify-content: center;
+        min-width: 36px !important; min-height: 44px !important; height: auto !important;
+        padding: 0 6px !important; box-sizing: border-box !important;
+        line-height: 1.2 !important; vertical-align: middle;
+      }
+      ${root} .fm_navi table a {
+        display: flex !important; align-items: center; justify-content: center;
+        min-width: 36px !important; min-height: 44px !important;
+        padding: 0 2px !important; box-sizing: border-box !important; line-height: 1.2 !important;
+      }
+      ${root} .fm_navi :is(.js_prev, .js_next) {
+        top: 0 !important; min-width: 36px !important; min-height: 44px !important;
+        padding: 0 8px !important; box-sizing: border-box !important;
+        line-height: 42px !important; text-align: center;
+      }
+      ${root} .fm_navi2 :is(a.direction, button.move) {
+        display: inline-flex !important; align-items: center; justify-content: center;
+        min-height: 44px !important; box-sizing: border-box !important; line-height: 1.2 !important;
+      }
       ${root} :is(.fm_navi, .bd_pg, .fdb_tag) :is(.this, .active, strong) {
         color: var(--fm-clean-accent) !important; background: var(--fm-clean-soft) !important;
         border-color: transparent !important; border-radius: 999px !important;
@@ -892,6 +913,8 @@
       ${root} .fm_navi2 input[type="number"] {
         background: var(--fm-clean-raised) !important; color: var(--fm-clean-text) !important;
         border: 1px solid var(--fm-clean-line) !important; border-radius: 10px !important;
+        width: 44px !important; min-height: 44px !important; height: 44px !important;
+        box-sizing: border-box !important; line-height: normal !important; text-align: center !important;
       }
       ${root} :is(.cmt_wrt, .bd_srch) :is(textarea, input[type=text], input[type=search]) {
         background: var(--fm-clean-bg) !important; color: var(--fm-clean-text) !important;
@@ -979,17 +1002,12 @@
       }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
-        --fm-control-edge: max(80px, env(safe-area-inset-left, 0px));
-        left: var(--fm-control-edge) !important;
-        /* svh와 정적 안전 영역으로 주소창 변화에 따른 좌표 이동을 막습니다. */
-        top: calc(100vh - 160px - env(safe-area-max-inset-bottom, 0px)) !important;
-        top: calc(100svh - 160px - env(safe-area-max-inset-bottom, 0px)) !important;
-        bottom: auto !important; transform: translateY(-100%) !important;
+        --fm-control-edge: max(100px, env(safe-area-inset-left, 0px));
+        inset: 0 !important;
         z-index: 2147483647 !important; pointer-events: none !important;
       }
       #${HOST_ID}[data-side="right"] {
-        --fm-control-edge: max(80px, env(safe-area-inset-right, 0px));
-        left: auto !important; right: var(--fm-control-edge) !important;
+        --fm-control-edge: max(100px, env(safe-area-inset-right, 0px));
       }
     `
   ].join('\n');
@@ -1738,9 +1756,10 @@
       panel.querySelector('[data-copy-status]').textContent = '';
     }
     panel.hidden = !open;
+    backdrop.hidden = !open;
     launcher.setAttribute('aria-expanded', String(open));
     if (open) panel.focus({ preventScroll: true });
-    else launcher.focus();
+    else launcher.focus({ preventScroll: true });
   }
 
   function handleLauncherClick() {
@@ -1795,6 +1814,17 @@
         * { box-sizing: border-box; }
         button, a { font: inherit; touch-action: manipulation; }
         button { cursor: pointer; }
+        .backdrop {
+          position: absolute; inset: 0; z-index: 0; pointer-events: auto; touch-action: none;
+        }
+        .control-anchor {
+          position: absolute; left: var(--fm-control-edge, 100px); z-index: 1; pointer-events: none;
+          /* svh와 정적 안전 영역으로 주소창 변화에 따른 좌표 이동을 막습니다. */
+          top: calc(100vh - 200px - env(safe-area-max-inset-bottom, 0px));
+          top: calc(100svh - 200px - env(safe-area-max-inset-bottom, 0px));
+          transform: translateY(-100%);
+        }
+        :host([data-side="right"]) .control-anchor { left: auto; right: var(--fm-control-edge, 100px); }
         .launcher {
           pointer-events: auto;
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
@@ -1819,7 +1849,7 @@
         }
         .panel {
           position: relative; width: 256px; margin-bottom: 8px; pointer-events: auto;
-          max-width: calc(100vw - var(--fm-control-edge, 80px) - 12px); max-height: calc(100svh - 244px - env(safe-area-max-inset-bottom, 0px));
+          max-width: calc(100vw - var(--fm-control-edge, 100px) - 12px); max-height: calc(100svh - 284px - env(safe-area-max-inset-bottom, 0px));
           overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
           border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
           box-shadow: 0 12px 36px #0004;
@@ -1885,29 +1915,33 @@
           overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
         }
       </style>
-      <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
-        <header><strong>저장한 메뉴</strong><button class="close" type="button" aria-label="메뉴 닫기">×</button></header>
-        <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
-        <p data-menu-empty hidden>저장한 메뉴가 없습니다.</p>
-        <div class="copy-area" hidden>
-          <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
-          <p data-copy-status role="status"></p><span data-copy-url></span>
-        </div>
-        <!-- 저장된 설정과 기존 DOM 연동은 유지하되 메뉴 화면에는 설정 UI를 노출하지 않습니다. -->
-        <div hidden data-settings-compat>
-          ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
-          <p data-save-status>설정이 자동 저장됩니다.</p>
-        </div>
-        <div class="position-control"><span>버튼 위치</span>
-          <label class="position-toggle"><span class="left">왼쪽</span>
-            <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
-            <span class="right">오른쪽</span></label>
-        </div>
-      </section>
-      <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴" aria-expanded="false" aria-controls="fm-clean-panel">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
-      </button>
+      <div class="backdrop" aria-hidden="true" hidden></div>
+      <div class="control-anchor">
+        <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
+          <header><strong>저장한 메뉴</strong><button class="close" type="button" aria-label="메뉴 닫기">×</button></header>
+          <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
+          <p data-menu-empty hidden>저장한 메뉴가 없습니다.</p>
+          <div class="copy-area" hidden>
+            <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
+            <p data-copy-status role="status"></p><span data-copy-url></span>
+          </div>
+          <!-- 저장된 설정과 기존 DOM 연동은 유지하되 메뉴 화면에는 설정 UI를 노출하지 않습니다. -->
+          <div hidden data-settings-compat>
+            ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
+            <p data-save-status>설정이 자동 저장됩니다.</p>
+          </div>
+          <div class="position-control"><span>버튼 위치</span>
+            <label class="position-toggle"><span class="left">왼쪽</span>
+              <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
+              <span class="right">오른쪽</span></label>
+          </div>
+        </section>
+        <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴" aria-expanded="false" aria-controls="fm-clean-panel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        </button>
+      </div>
     `;
+    backdrop = shadow.querySelector('.backdrop');
     panel = shadow.querySelector('.panel');
     launcher = shadow.querySelector('.launcher');
     launcher.addEventListener('click', handleLauncherClick);
@@ -1933,8 +1967,11 @@
       saveSettings();
       refresh();
     });
-    document.addEventListener('pointerdown', event => {
-      if (!panel.hidden && !event.composedPath().includes(host)) setPanelOpen(false);
+    // 클릭이 끝날 때까지 배경을 유지해 닫기 터치가 뒤쪽 링크에 전달되지 않게 합니다.
+    backdrop.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      setPanelOpen(false);
     });
     shadow.addEventListener('keydown', event => {
       if (event.key === 'Escape') setPanelOpen(false);
