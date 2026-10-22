@@ -333,8 +333,13 @@
         const titleHeading = detailDoc.querySelector('.rd > .rd_hd h1');
         const boardChip = detailChip(detailDoc);
         const launcher = detailLauncher(detailDoc);
-        record('FM 버튼은 SVG이고 FM 텍스트가 없음', Boolean(launcher?.querySelector('svg') &&
-          !launcher.textContent.includes('FM') && launcher.getAttribute('aria-label')));
+        const launcherStyle = launcher && detailDoc.defaultView.getComputedStyle(launcher);
+        record('홈 버튼은 배경·아이콘·문구 없이 테두리와 접근성 이름만 있음', Boolean(launcher &&
+          !launcher.querySelector('svg') && !launcher.textContent.trim() &&
+          launcher.getAttribute('aria-label') && launcherStyle.borderTopStyle === 'solid' &&
+          Number.parseFloat(launcherStyle.borderTopWidth) >= 1 &&
+          ['transparent', 'rgba(0, 0, 0, 0)'].includes(launcherStyle.backgroundColor) &&
+          launcherStyle.backgroundImage === 'none'));
         record('상세 제목 첫 요소가 해외축구 게시판 배지', Boolean(boardChip &&
           titleHeading?.firstElementChild === boardChip && boardChip.textContent.trim() === '해외축구' &&
           visiblyRendered(boardChip) && visiblyRendered(detailDoc.querySelector('#detail-content'))));
@@ -366,8 +371,9 @@
         const disabledDoc = await makeDetailFrame(source, '전체 기능 OFF',
           { enabled: false, boardLabel: true, count: true });
         const disabledLauncher = detailLauncher(disabledDoc);
-        record('전체 기능 OFF에서는 배지 숨김·SVG 버튼 유지', Boolean(disabledLauncher?.querySelector('svg') &&
-          !disabledLauncher.textContent.includes('FM') &&
+        record('전체 기능 OFF에서는 배지 숨김·빈 테두리 버튼 유지', Boolean(disabledLauncher &&
+          !disabledLauncher.querySelector('svg') && !disabledLauncher.textContent.trim() &&
+          disabledLauncher.getAttribute('aria-label')?.includes('꺼짐') &&
           !visiblyRendered(detailChip(disabledDoc)) &&
           visiblyRendered(disabledDoc.querySelector('#detail-content'))));
 
@@ -713,11 +719,14 @@
           Math.abs(initialLauncherTop - rightLauncherTop) < 1 &&
           Math.abs(initialLauncherTop - restoredLauncherTop) < 1 &&
           Math.abs(initialLauncherBounds.left - restoredLauncherBounds.left) < 1);
+        const panelGapIsEight = (button, popup) =>
+          Math.abs(button.top - popup.bottom - 8) < 1 ||
+          Math.abs(popup.top - button.bottom - 8) < 1;
         record('팝업은 버튼 배치에 맞춰 화면 좌우 가장자리에서 12px 띄워 표시',
           Math.abs(panelBounds.left - 12) < 1 &&
           Math.abs(tapDoc.defaultView.innerWidth - rightPanelBounds.right - 12) < 1 &&
-          Math.abs(initialLauncherTop - panelBounds.bottom - 8) < 1 &&
-          Math.abs(rightLauncherTop - rightPanelBounds.bottom - 8) < 1);
+          panelGapIsEight(initialLauncherBounds, panelBounds) &&
+          panelGapIsEight(rightLauncherBounds, rightPanelBounds));
         let menuActivations = 0;
         let leakedEvents = 0;
         let copiedLink = '';
@@ -759,6 +768,47 @@
         nextHit.click();
         record('창이 닫힌 뒤 다음 터치는 배경 링크를 정상 실행',
           nextHit === outsideLink && outsideActivations === 1);
+
+        const longMenus = Array.from({ length: 30 }, (_, index) =>
+          `<div class="item bookmark"><a href="https://m.fmkorea.com/fixture_menu_${index}">메뉴 ${index + 1}</a></div>`).join('');
+        const longMenuDoc = await makeLayoutFrame(source, '긴 저장 메뉴의 상세 팝업', `
+          <div class="fm-recent-visited"><div class="list">${longMenus}</div></div>
+          <div class="bd"><div class="rd" data-docsrl="123456">
+            <div class="rd_hd"><h1><span class="np_18px_span">상세 글</span></h1></div>
+            <div class="rd_body"><article>본문</article></div></div></div>`);
+        longMenuDoc.defaultView.frameElement.style.width = '320px';
+        longMenuDoc.defaultView.frameElement.style.height = '480px';
+        const longShadow = longMenuDoc.querySelector('#fm-clean-controls').shadowRoot;
+        detailLauncher(longMenuDoc).dispatchEvent(new longMenuDoc.defaultView.KeyboardEvent('keydown',
+          { key: 'ArrowDown', bubbles: true }));
+        await delay(30);
+        const longPanel = longShadow.querySelector('.panel');
+        const longNav = longShadow.querySelector('[data-saved-menus]');
+        const longHeader = longPanel.querySelector('header');
+        const longCopy = longPanel.querySelector('.copy-link');
+        const longStyle = longMenuDoc.defaultView.getComputedStyle(longPanel);
+        const navStyle = longMenuDoc.defaultView.getComputedStyle(longNav);
+        record('좁고 낮은 상세 화면에서 긴 메뉴 목록만 세로 스크롤됨',
+          !longPanel.hidden && longNav.children.length === 30 &&
+          longStyle.overflowY === 'hidden' &&
+          longPanel.scrollHeight <= longPanel.clientHeight + 1 &&
+          navStyle.overflowY === 'auto' && longNav.scrollHeight > longNav.clientHeight);
+        const headerBefore = longHeader.getBoundingClientRect();
+        const copyBefore = longCopy.getBoundingClientRect();
+        longNav.scrollTop = 80;
+        const headerAfter = longHeader.getBoundingClientRect();
+        const copyAfter = longCopy.getBoundingClientRect();
+        const longReceivesTouch = element => {
+          const bounds = element.getBoundingClientRect();
+          const hit = longShadow.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+          return element === hit || element.contains(hit);
+        };
+        record('메뉴를 스크롤해도 위치 스위치와 링크 복사는 고정되어 터치됨',
+          longNav.scrollTop > 0 &&
+          Math.abs(headerBefore.top - headerAfter.top) < 1 &&
+          Math.abs(copyBefore.top - copyAfter.top) < 1 &&
+          longReceivesTouch(longHeader.querySelector('input[name="launcherRight"]')) &&
+          longReceivesTouch(longCopy));
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }

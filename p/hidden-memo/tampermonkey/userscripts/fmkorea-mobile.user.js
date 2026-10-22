@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.21
+// @version      1.5.22
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.21';
+  const SCRIPT_VERSION = '1.5.22';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1819,39 +1819,35 @@
         .control-anchor {
           position: absolute; left: var(--fm-control-edge, 112px); width: 44px; z-index: 1; pointer-events: none;
           /* svh와 정적 안전 영역으로 주소창 변화에 따른 좌표 이동을 막습니다. */
-          top: calc(100vh - 248px - env(safe-area-max-inset-bottom, 0px));
-          top: calc(100svh - 248px - env(safe-area-max-inset-bottom, 0px));
+          top: calc(100vh - 272px - env(safe-area-max-inset-bottom, 0px));
+          top: calc(100svh - 272px - env(safe-area-max-inset-bottom, 0px));
           transform: translateY(-100%);
         }
         :host([data-side="right"]) .control-anchor { left: auto; right: var(--fm-control-edge, 112px); }
         .launcher {
           pointer-events: auto;
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
-          border: 1px solid var(--fm-control-line); border-radius: 999px;
-          background: var(--fm-control-surface); color: var(--fm-control-accent);
-          box-shadow: 0 4px 16px #0003; opacity: .55; touch-action: none;
+          border: 1.5px solid currentColor; border-radius: 999px;
+          background: transparent; color: var(--fm-control-accent);
+          box-shadow: none; opacity: .55; touch-action: none;
           user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
-          transition: transform 180ms ease-out, opacity 120ms, background 120ms;
+          transition: transform 180ms ease-out, opacity 120ms;
         }
-        .launcher[data-dragging] { opacity: .92; transition: opacity 120ms, background 120ms; }
-        .launcher[data-ready] { background: var(--fm-control-soft); border-color: var(--fm-control-accent); }
+        .launcher[data-dragging] { opacity: .75; transition: opacity 120ms; }
+        .launcher[data-ready] { opacity: .92; }
         @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
         :host([data-side="right"]) .launcher { margin-left: auto; }
-        .launcher svg { display: block; width: 20px; height: 20px; }
-        .launcher[data-off] {
-          background: var(--fm-control-raised); color: var(--fm-control-muted);
-          border-color: var(--fm-control-line);
-        }
+        .launcher[data-off] { color: var(--fm-control-muted); opacity: .4; }
         button:focus-visible, a:focus-visible {
-          outline: 2px solid var(--fm-control-accent); outline-offset: 2px;
+          outline: none;
         }
         .launcher:focus, .launcher:focus-visible { outline: none; }
         .panel {
           position: absolute; bottom: calc(100% + 8px); left: calc(var(--fm-menu-left, 12px) - var(--fm-control-edge, 112px));
-          width: 256px; margin: 0; pointer-events: auto;
+          display: flex; flex-direction: column; width: 256px; margin: 0; pointer-events: auto;
           max-width: calc(100vw - var(--fm-menu-left, 12px) - var(--fm-menu-right, 12px));
-          max-height: calc(100svh - 332px - env(safe-area-max-inset-bottom, 0px));
-          overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
+          max-height: calc(100svh - 356px - env(safe-area-max-inset-bottom, 0px));
+          overflow: hidden; padding: 13px; border: 1px solid var(--fm-control-line);
           border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
           box-shadow: 0 12px 36px #0004;
           font: 13px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
@@ -1859,12 +1855,14 @@
         :host([data-side="right"]) .panel {
           left: auto; right: calc(var(--fm-menu-right, 12px) - var(--fm-control-edge, 112px));
         }
+        @media (max-height: 600px) {
+          .panel { bottom: auto; top: calc(100% + 8px); max-height: 252px; }
+        }
         [hidden] { display: none !important; }
         .panel:focus { outline: none; }
         header {
-          position: sticky; top: -13px; z-index: 1;
-          display: flex; align-items: center; justify-content: space-between; gap: 4px;
-          margin: -13px -13px 7px; padding: 13px 13px 0; background: var(--fm-control-surface);
+          display: flex; flex: none; align-items: center; justify-content: space-between; gap: 4px;
+          margin-bottom: 7px;
         }
         strong { font-size: 13px; }
         .close {
@@ -1872,7 +1870,13 @@
           background: transparent; color: var(--fm-control-muted); font-size: 20px;
         }
         .close:hover { background: var(--fm-control-soft); color: var(--fm-control-accent); }
-        [data-saved-menus] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        [data-saved-menus] {
+          display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: min-content;
+          align-content: start; gap: 6px; flex: 0 1 auto; min-height: 0;
+          overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+        }
+        [data-menu-empty] { flex: none; }
         [data-saved-menus] a {
           display: flex; align-items: center; min-height: 36px; padding: 7px 10px;
           border: 1px solid transparent; border-radius: 10px;
@@ -1907,9 +1911,9 @@
         .position-toggle .left { color: var(--fm-control-accent); }
         .position-toggle:has(input:checked) .left { color: var(--fm-control-muted); }
         .position-toggle:has(input:checked) .right { color: var(--fm-control-accent); }
-        .position-toggle input:focus-visible { outline: 2px solid var(--fm-control-accent); outline-offset: 3px; }
+        .position-toggle input:focus-visible { outline: none; }
         @media (prefers-reduced-motion: reduce) { .position-toggle input::before { transition: none; } }
-        .copy-area { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line); }
+        .copy-area { flex: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line); }
         .copy-link {
           display: flex; align-items: center; justify-content: center; gap: 7px;
           width: 100%; min-height: 36px; padding: 8px 10px; border: 0; border-radius: 10px;
@@ -1946,7 +1950,6 @@
           </div>
         </section>
         <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴" aria-expanded="false" aria-controls="fm-clean-panel">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
         </button>
       </div>
     `;
