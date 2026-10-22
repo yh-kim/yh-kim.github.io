@@ -60,8 +60,8 @@
           <button class="memo-card" type="button" data-open-note="naver">
             <span class="card-top"><span class="badge">화면 정리</span><span class="arrow" aria-hidden="true">→</span></span>
             <h2>모바일 네이버 메인</h2>
-            <p>모바일 네이버 메인에서 home 클래스가 포함된 피드 요소를 숨깁니다.</p>
-            <span class="card-meta"><span>m.naver.com</span><i aria-hidden="true"></i><span>정적 코드</span></span>
+            <p>상단 메뉴·검색·메일과 카페 바로가기는 남기고, 직접 편집하는 즐겨찾기를 추가합니다.</p>
+            <span class="card-meta"><span>m.naver.com</span><i aria-hidden="true"></i><span>즐겨찾기 편집</span></span>
           </button>
 
           <button class="memo-card" type="button" data-open-note="fmkorea">
@@ -153,11 +153,11 @@
               <h1 id="naver-detail-title">모바일 네이버 메인</h1>
             </div>
           </div>
-          <p class="detail-copy">모바일 네이버 메인에서 피드 영역을 숨기고, 화면 변경 후에도 다시 적용하는 UserScript입니다.</p>
+          <p class="detail-copy">모바일 네이버 메인의 햄버거 메뉴와 검색창, 메일·카페 등 기존 바로가기 메뉴는 그대로 둡니다. 광고와 추천 피드 전체를 숨겨 숏텐츠나 새 추천 카드가 추가돼도 나타나지 않게 합니다. 검색창과 기존 바로가기 사이에는 개인 즐겨찾기를 넣었습니다. 추가 버튼에서 기본 아이콘 8개 중 하나와 이름·URL을 설정할 수 있고, 편집 버튼을 누르면 기존 즐겨찾기를 수정하거나 삭제할 수 있습니다. 저장 전 취소하면 기존 내용이 유지됩니다. 즐겨찾기는 같은 브라우저의 유저스크립트 저장소에 저장되며, 아이콘을 위해 외부 이미지 서버에 접속하지 않습니다.</p>
         </header>
 
         <div class="workspace static-workspace">
-          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/mobile-naver.user.js" aria-labelledby="naver-code-title">
+          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/mobile-naver.user.js?v=1.1.0" aria-labelledby="naver-code-title">
             <header class="code-toolbar">
               <div class="code-identity">
                 <strong id="naver-code-title">mobile-naver.user.js</strong>
