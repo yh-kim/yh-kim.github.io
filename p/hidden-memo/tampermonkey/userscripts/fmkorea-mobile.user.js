@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.12
+// @version      1.5.13
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,11 +21,11 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.12';
+  const SCRIPT_VERSION = '1.5.13';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
-    boardLabel: true, count: true, readingHeader: true, swipeBack: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true
+    boardLabel: true, count: true, readingHeader: true, swipeBack: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true, launcherRight: false
   };
   const options = [
     ['enabled', '전체 기능 켜기'],
@@ -971,9 +971,14 @@
       }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
-        left: max(16px, env(safe-area-inset-left, 0px)) !important;
+        --fm-control-edge: max(36px, env(safe-area-inset-left, 0px));
+        left: var(--fm-control-edge) !important;
         bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
         z-index: 2147483647 !important; pointer-events: none !important;
+      }
+      #${HOST_ID}[data-side="right"] {
+        --fm-control-edge: max(36px, env(safe-area-inset-right, 0px));
+        left: auto !important; right: var(--fm-control-edge) !important;
       }
     `
   ].join('\n');
@@ -1596,6 +1601,37 @@
     return id ? `https://www.fmkorea.com/${id}` : null;
   }
 
+  function menuBoardKey(href) {
+    if (!href) return null;
+    try {
+      const url = new URL(href, location.href);
+      if (!/^https?:$/.test(url.protocol) ||
+        !(url.hostname === location.hostname || /(^|\.)fmkorea\.com$/i.test(url.hostname))) return null;
+      const key = url.searchParams.get('mid') || url.pathname.split('/').filter(Boolean)[0] || 'home';
+      return /^[A-Za-z_][A-Za-z0-9_-]*$/.test(key) ? key.toLowerCase() : null;
+    } catch (error) { return null; }
+  }
+
+  function currentMenuBoard() {
+    const page = menuBoardKey(location.href);
+    const article = document.querySelector('.rd:has(.rd_hd h1)');
+    if (page === 'home' && !article) return null;
+    if (article) {
+      const board = article.closest('.bd');
+      const headingLink = board?.querySelector(':scope > .tl_srch .bd_tl h1 a[href]');
+      const fromHeading = menuBoardKey(headingLink?.getAttribute('href'));
+      if (fromHeading && fromHeading !== 'home') return fromHeading;
+      for (const menu of document.querySelectorAll('nav.fmkorea_navi, #gnb')) {
+        const link = menu.querySelector(
+          'li.on > a, li.active > a, a.on, a.active, a[aria-current]:not([aria-current="false"]), [aria-current]:not([aria-current="false"]) > a'
+        );
+        const fromMenu = menuBoardKey(link?.getAttribute('href'));
+        if (fromMenu && fromMenu !== 'home') return fromMenu;
+      }
+    }
+    return page === 'home' ? null : page;
+  }
+
   function syncMenuPanel() {
     if (!panel) return;
     const list = panel.querySelector('[data-saved-menus]');
@@ -1611,6 +1647,11 @@
       list.replaceChildren(...items);
       list.setAttribute('data-menu-signature', signature);
     }
+    const current = currentMenuBoard();
+    list.querySelectorAll('a').forEach(link => {
+      if (current && menuBoardKey(link.href) === current) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
     panel.querySelector('[data-menu-empty]').hidden = links.length > 0;
     const url = compactDetailLink();
     panel.querySelector('.copy-area').hidden = !url;
@@ -1667,6 +1708,7 @@
     syncSwipeBack();
     if (!launcher) return;
     launcher.toggleAttribute('data-off', !settings.enabled);
+    host.setAttribute('data-side', settings.launcherRight ? 'right' : 'left');
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
     launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴 · 위/아래로 끌면 맨 위/아래, 상세에서 오른쪽으로 끌면 댓글`;
     launcher.setAttribute('aria-label', launcher.title);
@@ -1681,8 +1723,7 @@
     }
     panel.hidden = !open;
     launcher.setAttribute('aria-expanded', String(open));
-    if (open) (panel.querySelector('[data-saved-menus] a') ||
-      (!panel.querySelector('.copy-area').hidden && panel.querySelector('.copy-link')) || panel.querySelector('.close')).focus();
+    if (open) panel.focus({ preventScroll: true });
     else launcher.focus();
   }
 
@@ -1743,7 +1784,7 @@
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
           border: 1px solid var(--fm-control-line); border-radius: 999px;
           background: var(--fm-control-surface); color: var(--fm-control-accent);
-          box-shadow: 0 4px 16px #0003; opacity: .6; touch-action: none;
+          box-shadow: 0 4px 16px #0003; opacity: .85; touch-action: none;
           user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
           transition: transform 180ms ease-out, opacity 120ms, background 120ms;
         }
@@ -1751,6 +1792,7 @@
         .launcher[data-ready] { background: var(--fm-control-soft); border-color: var(--fm-control-accent); }
         .launcher:focus-visible { opacity: .92; }
         @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
+        :host([data-side="right"]) .launcher { margin-left: auto; }
         .launcher svg { display: block; width: 20px; height: 20px; }
         .launcher[data-off] {
           background: var(--fm-control-raised); color: var(--fm-control-muted);
@@ -1761,13 +1803,14 @@
         }
         .panel {
           position: relative; width: 256px; margin-bottom: 8px; pointer-events: auto;
-          max-width: calc(100vw - 24px); max-height: calc(100dvh - 164px - env(safe-area-inset-bottom, 0px));
+          max-width: calc(100vw - var(--fm-control-edge, 36px) - 12px); max-height: calc(100dvh - 164px - env(safe-area-inset-bottom, 0px));
           overflow-y: auto; padding: 13px; border: 1px solid var(--fm-control-line);
           border-radius: 14px; background: var(--fm-control-surface); color: var(--fm-control-text);
           box-shadow: 0 12px 36px #0004;
           font: 13px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         }
         [hidden] { display: none !important; }
+        .panel:focus { outline: none; }
         header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
         strong { font-size: 13px; }
         .close {
@@ -1778,13 +1821,41 @@
         [data-saved-menus] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
         [data-saved-menus] a {
           display: flex; align-items: center; min-height: 36px; padding: 7px 10px;
-          border: 1px solid var(--fm-control-line); border-radius: 10px;
+          border: 1px solid transparent; border-radius: 10px;
           background: var(--fm-control-raised); color: var(--fm-control-text);
           text-decoration: none; overflow-wrap: anywhere; font-size: 12px; font-weight: 500;
         }
-        [data-saved-menus] a:is(:hover, :focus-visible) {
+        [data-saved-menus] a:hover {
           background: var(--fm-control-soft); color: var(--fm-control-accent);
         }
+        [data-saved-menus] a[aria-current="page"] {
+          border-color: var(--fm-control-accent); background: var(--fm-control-soft); color: var(--fm-control-accent);
+        }
+        [data-saved-menus] a:focus-visible {
+          outline: none;
+        }
+        .position-control {
+          display: flex; align-items: center; justify-content: space-between; gap: 10px;
+          margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line);
+          color: var(--fm-control-muted); font-size: 11px;
+        }
+        .position-toggle { display: flex; align-items: center; gap: 6px; min-height: 32px; cursor: pointer; }
+        .position-toggle input {
+          appearance: none; -webkit-appearance: none; position: relative; flex: none;
+          width: 34px; height: 20px; margin: 0; border: 1px solid var(--fm-control-line); border-radius: 999px;
+          background: var(--fm-control-raised); cursor: pointer; accent-color: var(--fm-control-accent);
+        }
+        .position-toggle input::before {
+          content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%;
+          background: var(--fm-control-muted); transition: transform 140ms ease-out;
+        }
+        .position-toggle input:checked { background: var(--fm-control-soft); border-color: var(--fm-control-accent); }
+        .position-toggle input:checked::before { transform: translateX(14px); background: var(--fm-control-accent); }
+        .position-toggle .left { color: var(--fm-control-accent); }
+        .position-toggle:has(input:checked) .left { color: var(--fm-control-muted); }
+        .position-toggle:has(input:checked) .right { color: var(--fm-control-accent); }
+        .position-toggle input:focus-visible { outline: 2px solid var(--fm-control-accent); outline-offset: 3px; }
+        @media (prefers-reduced-motion: reduce) { .position-toggle input::before { transition: none; } }
         .copy-area { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line); }
         .copy-link {
           display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -1798,7 +1869,7 @@
           overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
         }
       </style>
-      <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" hidden>
+      <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
         <header><strong>저장한 메뉴</strong><button class="close" type="button" aria-label="메뉴 닫기">×</button></header>
         <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
         <p data-menu-empty hidden>저장한 메뉴가 없습니다.</p>
@@ -1810,6 +1881,11 @@
         <div hidden data-settings-compat>
           ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
           <p data-save-status>설정이 자동 저장됩니다.</p>
+        </div>
+        <div class="position-control"><span>버튼 위치</span>
+          <label class="position-toggle"><span class="left">왼쪽</span>
+            <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
+            <span class="right">오른쪽</span></label>
         </div>
       </section>
       <button class="launcher" type="button" aria-label="한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴" aria-expanded="false" aria-controls="fm-clean-panel">
