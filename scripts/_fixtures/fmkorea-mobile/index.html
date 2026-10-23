@@ -927,6 +927,57 @@
         record('상세가 없는 홈·목록 아래 드래그는 문서 맨끝으로 이동',
           Math.abs(requestedTop - navigationDoc.scrollingElement.scrollHeight) < 2 &&
           Math.abs(navigationView.scrollY - listPageMaxScroll) < 2);
+
+        const progressMarkup = withComments => `
+          <div class="bd"><div class="rd"><div class="rd_hd">
+            <h1><span class="np_18px_span">읽기 진행률 검사</span></h1></div>
+            <div class="rd_body"><article id="progress-article">본문</article></div></div>
+            ${withComments ? '<div class="fdb_lst_wrp" id="progress-comments">댓글 목록</div>' : ''}
+            <div id="progress-following-list" class="bd_lst_wrp">아래 글 목록</div></div>`;
+        const progressCss = `.rd_hd{height:120px}#progress-article{height:450px}
+          #progress-comments{height:600px}#progress-following-list{height:900px}`;
+        const progressDoc = await makeLayoutFrame(source, '댓글 끝까지 읽기 진행률',
+          progressMarkup(true), progressCss);
+        progressDoc.defaultView.frameElement.style.width = '390px';
+        progressDoc.defaultView.frameElement.style.height = '480px';
+        const progressView = progressDoc.defaultView;
+        const progressShadow = progressDoc.querySelector('#fm-clean-reading-header')?.shadowRoot;
+        const progressBar = progressShadow?.querySelector('.bar');
+        const progressMeter = progressShadow?.querySelector('progress');
+        const scrollEndpointToViewportBottom = (doc, element) => {
+          const view = doc.defaultView;
+          view.scrollTo({ top: view.scrollY + element.getBoundingClientRect().bottom - view.innerHeight,
+            behavior: 'instant' });
+        };
+        scrollEndpointToViewportBottom(progressDoc, progressDoc.querySelector('#progress-article'));
+        await delay(40);
+        record('본문 끝이 화면 하단에 닿아도 댓글이 남으면 진행률은 100% 미만',
+          progressBar && !progressBar.hidden && progressMeter.value > 0 &&
+          progressMeter.value < 100 &&
+          Math.abs(progressDoc.querySelector('#progress-article').getBoundingClientRect().bottom -
+            progressView.innerHeight) < 2);
+        scrollEndpointToViewportBottom(progressDoc, progressDoc.querySelector('#progress-comments'));
+        await delay(40);
+        record('댓글 끝이 화면 하단에 닿으면 아래 글 목록이 남아도 진행률 100%',
+          progressBar && !progressBar.hidden && progressMeter.value === 100 &&
+          Math.abs(progressDoc.querySelector('#progress-comments').getBoundingClientRect().bottom -
+            progressView.innerHeight) < 2 &&
+          progressDoc.querySelector('#progress-following-list').getBoundingClientRect().top >=
+            progressView.innerHeight - 1 &&
+          progressView.scrollY < progressDoc.scrollingElement.scrollHeight - progressView.innerHeight - 600);
+
+        const noCommentDoc = await makeLayoutFrame(source, '댓글 없는 글의 진행률',
+          progressMarkup(false), progressCss);
+        noCommentDoc.defaultView.frameElement.style.width = '390px';
+        noCommentDoc.defaultView.frameElement.style.height = '480px';
+        scrollEndpointToViewportBottom(noCommentDoc, noCommentDoc.querySelector('#progress-article'));
+        await delay(40);
+        const noCommentShadow = noCommentDoc.querySelector('#fm-clean-reading-header')?.shadowRoot;
+        record('댓글이 없는 글은 본문 끝에서 진행률 100%',
+          noCommentShadow && !noCommentShadow.querySelector('.bar').hidden &&
+          noCommentShadow.querySelector('progress').value === 100 &&
+          noCommentDoc.querySelector('#progress-following-list').getBoundingClientRect().top >=
+            noCommentDoc.defaultView.innerHeight - 1);
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }
