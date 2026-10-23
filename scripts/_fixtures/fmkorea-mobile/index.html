@@ -716,11 +716,14 @@
           receivesTouch(menuLink) && receivesTouch(copyButton));
         const positionControl = menuShadow.querySelector('.position-control');
         const positionSwitch = positionControl?.querySelector('input[name="launcherRight"]');
-        const panelHeader = menuPanel.querySelector('header');
+        const copyArea = menuPanel.querySelector('.copy-area');
         const positionBounds = positionControl?.getBoundingClientRect();
-        record('낮은 상세 화면에서도 버튼 위치 전환이 패널 첫 줄에 보이고 터치됨',
-          panelHeader?.contains(positionControl) && positionBounds && positionSwitch &&
-          positionBounds.top >= panelBounds.top && positionBounds.bottom <= panelBounds.bottom &&
+        record('낮은 상세 화면에서도 버튼 위치 전환이 패널 최하단에 보이고 터치됨',
+          positionControl?.parentElement === menuPanel &&
+          positionControl.previousElementSibling === copyArea &&
+          positionBounds && positionSwitch &&
+          positionBounds.top >= copyArea.getBoundingClientRect().bottom &&
+          positionBounds.bottom <= panelBounds.bottom &&
           receivesTouch(positionSwitch));
         const initialLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
         const initialLauncherTop = initialLauncherBounds.top;
@@ -809,6 +812,7 @@
         const longNav = longShadow.querySelector('[data-saved-menus]');
         const longHeader = longPanel.querySelector('header');
         const longCopy = longPanel.querySelector('.copy-link');
+        const longPositionControl = longPanel.querySelector('.position-control');
         const longStyle = longMenuDoc.defaultView.getComputedStyle(longPanel);
         const navStyle = longMenuDoc.defaultView.getComputedStyle(longNav);
         record('좁고 낮은 상세 화면에서 긴 메뉴 목록만 세로 스크롤됨',
@@ -818,9 +822,11 @@
           navStyle.overflowY === 'auto' && longNav.scrollHeight > longNav.clientHeight);
         const headerBefore = longHeader.getBoundingClientRect();
         const copyBefore = longCopy.getBoundingClientRect();
+        const positionBefore = longPositionControl.getBoundingClientRect();
         longNav.scrollTop = 80;
         const headerAfter = longHeader.getBoundingClientRect();
         const copyAfter = longCopy.getBoundingClientRect();
+        const positionAfter = longPositionControl.getBoundingClientRect();
         const longReceivesTouch = element => {
           const bounds = element.getBoundingClientRect();
           const hit = longShadow.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
@@ -830,7 +836,9 @@
           longNav.scrollTop > 0 &&
           Math.abs(headerBefore.top - headerAfter.top) < 1 &&
           Math.abs(copyBefore.top - copyAfter.top) < 1 &&
-          longReceivesTouch(longHeader.querySelector('input[name="launcherRight"]')) &&
+          Math.abs(positionBefore.top - positionAfter.top) < 1 &&
+          longPositionControl.previousElementSibling === longCopy.closest('.copy-area') &&
+          longReceivesTouch(longPositionControl.querySelector('input[name="launcherRight"]')) &&
           longReceivesTouch(longCopy));
 
         const navigationDoc = await makeLayoutFrame(source, '홈 버튼 아래 드래그 이동 위치', `

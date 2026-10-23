@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.25
+// @version      1.5.26
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.25';
+  const SCRIPT_VERSION = '1.5.26';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1876,7 +1876,7 @@
         [hidden] { display: none !important; }
         .panel:focus { outline: none; }
         header {
-          display: flex; flex: none; align-items: center; justify-content: space-between; gap: 4px;
+          display: flex; flex: none; align-items: center; justify-content: flex-end; gap: 4px;
           margin-bottom: 7px;
         }
         strong { font-size: 13px; }
@@ -1908,7 +1908,8 @@
           outline: none;
         }
         .position-control {
-          display: flex; align-items: center; gap: 6px; white-space: nowrap;
+          display: flex; flex: none; align-items: center; justify-content: space-between; gap: 6px; white-space: nowrap;
+          margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--fm-control-line);
           color: var(--fm-control-muted); font-size: 10px;
         }
         .position-toggle { display: flex; align-items: center; gap: 4px; min-height: 32px; cursor: pointer; }
@@ -1945,11 +1946,6 @@
       <div class="control-anchor">
         <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
           <header>
-            <div class="position-control"><span>버튼 위치</span>
-              <label class="position-toggle"><span class="left">왼쪽</span>
-                <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
-                <span class="right">오른쪽</span></label>
-            </div>
             <button class="close" type="button" aria-label="메뉴 닫기">×</button>
           </header>
           <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
@@ -1957,6 +1953,11 @@
           <div class="copy-area" hidden>
             <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
             <p data-copy-status role="status"></p><span data-copy-url></span>
+          </div>
+          <div class="position-control"><span>버튼 위치</span>
+            <label class="position-toggle"><span class="left">왼쪽</span>
+              <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
+              <span class="right">오른쪽</span></label>
           </div>
           <!-- 저장된 설정과 기존 DOM 연동은 유지하되 메뉴 화면에는 설정 UI를 노출하지 않습니다. -->
           <div hidden data-settings-compat>
