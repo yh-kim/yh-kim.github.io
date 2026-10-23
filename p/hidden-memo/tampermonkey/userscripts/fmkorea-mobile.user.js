@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.22
+// @version      1.5.23
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.22';
+  const SCRIPT_VERSION = '1.5.23';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1829,7 +1829,7 @@
           display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
           border: 1.5px solid currentColor; border-radius: 999px;
           background: transparent; color: var(--fm-control-accent);
-          box-shadow: none; opacity: .55; touch-action: none;
+          box-shadow: none; opacity: .35; touch-action: none;
           user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
           transition: transform 180ms ease-out, opacity 120ms;
         }
@@ -1837,7 +1837,7 @@
         .launcher[data-ready] { opacity: .92; }
         @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
         :host([data-side="right"]) .launcher { margin-left: auto; }
-        .launcher[data-off] { color: var(--fm-control-muted); opacity: .4; }
+        .launcher[data-off] { color: var(--fm-control-muted); opacity: .25; }
         button:focus-visible, a:focus-visible {
           outline: none;
         }
