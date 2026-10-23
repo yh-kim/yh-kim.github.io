@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.24
+// @version      1.5.25
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.24';
+  const SCRIPT_VERSION = '1.5.25';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -785,11 +785,9 @@
         color: var(--fm-clean-read) !important; font-weight: 400 !important;
       }
       ${root} #fm_alert {
-        --fm-alert-bottom: 10px;
-        position: fixed !important; right: 12px !important; bottom: var(--fm-alert-bottom) !important;
+        position: fixed !important; right: 12px !important; bottom: 0 !important;
         top: auto !important; transform: none !important; max-width: calc(100vw - 24px) !important;
       }
-      ${root}.document #fm_alert, ${root} .document #fm_alert { --fm-alert-bottom: 50px; }
       ${root} #fm_alert .fm_alert_wrap.best { width: min(280px, calc(100vw - 24px)) !important; }
       ${root} #fm_alert .best .fm_alert {
         padding: 10px 12px !important; border: 1px solid var(--fm-clean-line) !important;
@@ -1350,7 +1348,8 @@
             Array.from(board.querySelectorAll('.bd_m_lst, .bd_lst')).find(afterArticle);
           if (list) {
             const headerHeight = readingState.bar && !readingState.bar.hidden ? readingState.bar.getBoundingClientRect().height : 0;
-            top = window.scrollY + list.getBoundingClientRect().top - Math.max(56, headerHeight + 8);
+            const listTop = window.scrollY + list.getBoundingClientRect().top - Math.max(56, headerHeight + 8);
+            if (listTop > window.scrollY + 2) top = listTop;
           }
         }
       } else if (destination === 'comments') {
@@ -1758,7 +1757,7 @@
     launcher.toggleAttribute('data-off', !settings.enabled);
     host.setAttribute('data-side', settings.launcherRight ? 'right' : 'left');
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
-    const downLabel = document.querySelector('.rd .rd_hd h1') ? '하단 글 목록' : '맨 아래';
+    const downLabel = document.querySelector('.rd .rd_hd h1') ? '하단 글 목록(목록부터는 맨 아래)' : '맨 아래';
     launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴 · 위로 끌면 맨 위, 아래로 끌면 ${downLabel}, ${settings.launcherRight ? '왼쪽' : '오른쪽'}으로 밀면 새로고침 · 상세에서 ${settings.launcherRight ? '오른쪽' : '왼쪽'}으로 끌면 댓글`;
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];

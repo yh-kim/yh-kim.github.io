@@ -641,6 +641,29 @@
           bestLink.getAttribute('href') === '/best/123' && bestClicks === 1 &&
           visiblyRendered(alertDoc.querySelector('#normal-message')) &&
           alertDoc.querySelector('#normal-message').textContent.trim() === '일반 알림');
+        const alertLayer = alertDoc.querySelector('#fm_alert');
+        const alertAtBottom = () => {
+          const style = alertDoc.defaultView.getComputedStyle(alertLayer);
+          return style.position === 'fixed' && Number.parseFloat(style.bottom) === 0 &&
+            Math.abs(alertDoc.defaultView.innerHeight - alertLayer.getBoundingClientRect().bottom) < 1;
+        };
+        const homeAlertAtTop = alertAtBottom();
+        const alertScrollFiller = alertDoc.createElement('div');
+        alertScrollFiller.style.height = '900px';
+        alertDoc.body.append(alertScrollFiller);
+        alertDoc.defaultView.scrollTo({ top: 300, behavior: 'instant' });
+        await delay(20);
+        const homeAlertScrolled = alertDoc.defaultView.scrollY > 100 && alertAtBottom();
+        alertDoc.body.classList.add('document');
+        await delay(20);
+        const detailAlertScrolled = alertAtBottom();
+        alertDoc.defaultView.scrollTo({ top: 0, behavior: 'instant' });
+        await delay(20);
+        const detailAlertAtTop = alertAtBottom();
+        alertDoc.body.classList.remove('document');
+        alertScrollFiller.remove();
+        record('포텐 알림은 홈·상세에서 스크롤 전후 화면 맨 아래에 고정됨',
+          homeAlertAtTop && homeAlertScrolled && detailAlertScrolled && detailAlertAtTop);
         alertDoc.querySelector('#fm_alert').insertAdjacentHTML('beforeend', `
           <div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg">
             <a id="split-best-link" href="/best/789"><b>포텐 </b><span>터짐</span> 분리된 제목</a>
@@ -856,6 +879,32 @@
           Math.abs(requestedTop - listExpectedTop) < 2 &&
           Math.abs(actualList.getBoundingClientRect().top - 56) < 2 &&
           navigationView.scrollY < navigationDoc.scrollingElement.scrollHeight - navigationView.innerHeight - 300);
+        requestedTop = null;
+        dragLauncherDown();
+        await delay(20);
+        const detailMaxScroll = navigationDoc.scrollingElement.scrollHeight - navigationView.innerHeight;
+        record('상세 목록 시작에서 다시 아래로 끌면 문서 끝으로 이동',
+          Math.abs(requestedTop - navigationDoc.scrollingElement.scrollHeight) < 2 &&
+          Math.abs(navigationView.scrollY - detailMaxScroll) < 2);
+        realScrollTo({ top: listExpectedTop + 120, behavior: 'instant' });
+        await delay(20);
+        const alreadyPastList = navigationView.scrollY > listExpectedTop + 100;
+        requestedTop = null;
+        dragLauncherDown();
+        await delay(20);
+        record('목록 시작을 지난 뒤 아래 드래그는 목록으로 되돌아가지 않고 문서 끝으로 이동',
+          alreadyPastList &&
+          Math.abs(requestedTop - navigationDoc.scrollingElement.scrollHeight) < 2 &&
+          Math.abs(navigationView.scrollY - detailMaxScroll) < 2);
+        realScrollTo({ top: listExpectedTop - 80, behavior: 'instant' });
+        await delay(20);
+        const stillBeforeList = navigationView.scrollY < listExpectedTop - 60;
+        requestedTop = null;
+        dragLauncherDown();
+        await delay(20);
+        record('목록 시작 전에서는 아래 드래그가 다시 목록 시작으로 이동',
+          stillBeforeList && Math.abs(requestedTop - listExpectedTop) < 2 &&
+          Math.abs(actualList.getBoundingClientRect().top - 56) < 2);
         navigationDoc.querySelector('.rd').remove();
         await delay(30);
         realScrollTo({ top: 0, behavior: 'instant' });
