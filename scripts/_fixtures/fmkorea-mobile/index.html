@@ -809,6 +809,63 @@
           Math.abs(copyBefore.top - copyAfter.top) < 1 &&
           longReceivesTouch(longHeader.querySelector('input[name="launcherRight"]')) &&
           longReceivesTouch(longCopy));
+
+        const navigationDoc = await makeLayoutFrame(source, '홈 버튼 아래 드래그 이동 위치', `
+          <div class="bd">
+            <div id="before-list" class="bd_lst_wrp">글 앞쪽 목록</div>
+            <div class="rd"><div class="rd_hd"><h1><span class="np_18px_span">상세 글</span></h1></div>
+              <div class="rd_body"><article><div class="xe_content">
+                본문 안의 목록 <ol id="embedded-list" class="bd_m_lst"><li>본문 항목</li></ol>
+              </div></article></div>
+              <div class="fdb_lst_wrp">댓글 영역</div>
+            </div>
+            <div id="hidden-after-list" class="bd_lst_wrp" style="display:none">숨은 목록</div>
+            <div class="fm_best_widget"><div id="widget-list" class="bd_lst_wrp">위젯 목록</div></div>
+            <div id="actual-list" class="bd_lst_wrp"><ol class="bd_m_lst"><li>하단 글 목록 시작</li></ol></div>
+            <div id="list-footer">목록 뒤 푸터</div>
+          </div>`, `#before-list{height:100px}.rd_body{min-height:420px}
+          .fdb_lst_wrp{height:300px}#widget-list{height:90px}#actual-list{height:240px}
+          #list-footer{height:900px}`);
+        navigationDoc.defaultView.frameElement.style.height = '480px';
+        const navigationView = navigationDoc.defaultView;
+        const navigationLauncher = detailLauncher(navigationDoc);
+        const realScrollTo = navigationView.scrollTo.bind(navigationView);
+        let requestedTop = null;
+        navigationView.scrollTo = options => {
+          requestedTop = options.top;
+          realScrollTo({ top: requestedTop, behavior: 'instant' });
+        };
+        for (const method of ['setPointerCapture', 'releasePointerCapture']) {
+          Object.defineProperty(navigationLauncher, method, { configurable: true, value: () => {} });
+        }
+        Object.defineProperty(navigationLauncher, 'hasPointerCapture',
+          { configurable: true, value: () => false });
+        const dragLauncherDown = () => {
+          for (const [type, y] of [['pointerdown', 180], ['pointermove', 240], ['pointerup', 240]]) {
+            navigationLauncher.dispatchEvent(new navigationView.PointerEvent(type, {
+              bubbles: true, composed: true, pointerId: 17, pointerType: 'touch',
+              isPrimary: true, button: 0, clientX: 140, clientY: y
+            }));
+          }
+        };
+        const actualList = navigationDoc.querySelector('#actual-list');
+        const listExpectedTop = navigationView.scrollY + actualList.getBoundingClientRect().top - 56;
+        dragLauncherDown();
+        await delay(30);
+        record('상세 아래 드래그는 본문·위젯·숨은 목록을 건너뛰고 하단 글 목록 시작으로 이동',
+          Math.abs(requestedTop - listExpectedTop) < 2 &&
+          Math.abs(actualList.getBoundingClientRect().top - 56) < 2 &&
+          navigationView.scrollY < navigationDoc.scrollingElement.scrollHeight - navigationView.innerHeight - 300);
+        navigationDoc.querySelector('.rd').remove();
+        await delay(30);
+        realScrollTo({ top: 0, behavior: 'instant' });
+        requestedTop = null;
+        dragLauncherDown();
+        await delay(30);
+        const listPageMaxScroll = navigationDoc.scrollingElement.scrollHeight - navigationView.innerHeight;
+        record('상세가 없는 홈·목록 아래 드래그는 문서 맨끝으로 이동',
+          Math.abs(requestedTop - navigationDoc.scrollingElement.scrollHeight) < 2 &&
+          Math.abs(navigationView.scrollY - listPageMaxScroll) < 2);
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }
