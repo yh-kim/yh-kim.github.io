@@ -810,21 +810,26 @@
         await delay(30);
         const longPanel = longShadow.querySelector('.panel');
         const longNav = longShadow.querySelector('[data-saved-menus]');
-        const longHeader = longPanel.querySelector('header');
         const longCopy = longPanel.querySelector('.copy-link');
         const longPositionControl = longPanel.querySelector('.position-control');
         const longStyle = longMenuDoc.defaultView.getComputedStyle(longPanel);
         const navStyle = longMenuDoc.defaultView.getComputedStyle(longNav);
+        const longPanelBounds = longPanel.getBoundingClientRect();
+        const longNavBounds = longNav.getBoundingClientRect();
+        record('팝업 메뉴 목록이 맨 위에서 시작하고 닫기 버튼은 화면에 없음',
+          longPanel.firstElementChild === longNav && !longPanel.querySelector('header') &&
+          Math.abs(longNavBounds.top - longPanelBounds.top -
+            parseFloat(longStyle.borderTopWidth) - parseFloat(longStyle.paddingTop)) < 1 &&
+          Boolean(longPanel.querySelector('[data-settings-compat] .close')) &&
+          !visiblyRendered(longPanel.querySelector('[data-settings-compat] .close')));
         record('좁고 낮은 상세 화면에서 긴 메뉴 목록만 세로 스크롤됨',
           !longPanel.hidden && longNav.children.length === 30 &&
           longStyle.overflowY === 'hidden' &&
           longPanel.scrollHeight <= longPanel.clientHeight + 1 &&
           navStyle.overflowY === 'auto' && longNav.scrollHeight > longNav.clientHeight);
-        const headerBefore = longHeader.getBoundingClientRect();
         const copyBefore = longCopy.getBoundingClientRect();
         const positionBefore = longPositionControl.getBoundingClientRect();
         longNav.scrollTop = 80;
-        const headerAfter = longHeader.getBoundingClientRect();
         const copyAfter = longCopy.getBoundingClientRect();
         const positionAfter = longPositionControl.getBoundingClientRect();
         const longReceivesTouch = element => {
@@ -834,7 +839,6 @@
         };
         record('메뉴를 스크롤해도 위치 스위치와 링크 복사는 고정되어 터치됨',
           longNav.scrollTop > 0 &&
-          Math.abs(headerBefore.top - headerAfter.top) < 1 &&
           Math.abs(copyBefore.top - copyAfter.top) < 1 &&
           Math.abs(positionBefore.top - positionAfter.top) < 1 &&
           longPositionControl.previousElementSibling === longCopy.closest('.copy-area') &&

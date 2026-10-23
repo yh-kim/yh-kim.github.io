@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.26
+// @version      1.5.27
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.26';
+  const SCRIPT_VERSION = '1.5.27';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1875,16 +1875,6 @@
         }
         [hidden] { display: none !important; }
         .panel:focus { outline: none; }
-        header {
-          display: flex; flex: none; align-items: center; justify-content: flex-end; gap: 4px;
-          margin-bottom: 7px;
-        }
-        strong { font-size: 13px; }
-        .close {
-          width: 34px; height: 34px; padding: 0; border: 0; border-radius: 999px;
-          background: transparent; color: var(--fm-control-muted); font-size: 20px;
-        }
-        .close:hover { background: var(--fm-control-soft); color: var(--fm-control-accent); }
         [data-saved-menus] {
           display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: min-content;
           align-content: start; gap: 6px; flex: 0 1 auto; min-height: 0;
@@ -1945,9 +1935,6 @@
       <div class="backdrop" aria-hidden="true" hidden></div>
       <div class="control-anchor">
         <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
-          <header>
-            <button class="close" type="button" aria-label="메뉴 닫기">×</button>
-          </header>
           <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
           <p data-menu-empty hidden>저장한 메뉴가 없습니다.</p>
           <div class="copy-area" hidden>
@@ -1961,6 +1948,7 @@
           </div>
           <!-- 저장된 설정과 기존 DOM 연동은 유지하되 메뉴 화면에는 설정 UI를 노출하지 않습니다. -->
           <div hidden data-settings-compat>
+            <button class="close" type="button" aria-label="메뉴 닫기">×</button>
             ${options.map(([key, label]) => `<label><input type="checkbox" name="${key}">${label}</label>`).join('')}
             <p data-save-status>설정이 자동 저장됩니다.</p>
           </div>
