@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.28
+// @version      1.5.29
 // @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문·댓글 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.28';
+  const SCRIPT_VERSION = '1.5.29';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1182,10 +1182,10 @@
       return;
     }
     if (wasHidden) bar.removeAttribute('data-ready');
-    // 댓글 끝이 화면 하단에 도달하면 100%이며, 댓글 영역이 없으면 본문 끝을 기준으로 합니다.
+    // 댓글 끝이 화면 상단에 도달하면 100%이며, 댓글 영역이 없으면 본문 끝을 기준으로 합니다.
     const end = readingState.end?.isConnected ? readingState.end : heading;
     const endY = window.scrollY + end.getBoundingClientRect().bottom;
-    const range = Math.max(0, endY - window.innerHeight);
+    const range = Math.max(0, endY);
     const value = range ? Math.round(Math.min(1, Math.max(0, window.scrollY / range)) * 1000) / 10 : 100;
     if (progress.value !== value) progress.value = value;
     const scale = `scaleX(${value / 100})`;
@@ -1263,7 +1263,7 @@
         </style>
         <div class="bar" hidden>
           <div class="row"><button class="title" type="button"></button><span class="percent" aria-hidden="true">0%</span></div>
-          <progress max="100" value="0" aria-label="댓글 끝까지의 스크롤 진행률"></progress>
+          <progress max="100" value="0" aria-label="화면 상단 기준 댓글 끝까지의 스크롤 진행률"></progress>
           <div class="track" aria-hidden="true"><span class="fill"></span></div>
         </div>
       `;
