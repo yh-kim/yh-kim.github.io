@@ -438,6 +438,58 @@
           !visiblyRendered(homeDoc.querySelector('#static-menu')) &&
           visiblyRendered(homeDoc.querySelector('#home-article')));
 
+        const tabletMenus = [
+          ['자동차', 'car'], ['부동산', 'realestate'], ['공지', 'notice'],
+          ['정치/시사', 'politics'], ['디지털', 'digital'], ['영화/TV', 'movietv']
+        ];
+        const tabletRecentItems = tabletMenus.map(([title, mid]) =>
+          `<div class="item recent"><a href="https://m.fmkorea.com/?mid=${mid}">` +
+          `<span class="title">${title}</span><span class="time">어제 방문</span></a></div>`).join('');
+        const tabletDoc = await makeLayoutFrame(source, '태블릿 최근 방문 메뉴', `
+          <div class="main_recent"><div class="fm-recent-visited mobile loaded bookmark_count0"
+            style="display:none"><div class="list swiper-wrapper" id="tablet-slider">${tabletRecentItems}
+              <div class="item feature-disabled"><button type="button" disabled>비활성 메뉴</button></div></div>
+            <div class="list expanded">${tabletRecentItems}
+              <div class="item recent"><a href="https://example.org/outside">
+                <span class="title">외부 사이트</span><span class="time">지금 방문</span></a></div>
+            </div></div></div>
+          <div class="bd bd_mobile"><div class="bd_lst_wrp">태블릿 글 목록</div></div>`);
+        tabletDoc.defaultView.frameElement.style.width = '1024px';
+        tabletDoc.defaultView.frameElement.style.height = '480px';
+        const tabletShadow = tabletDoc.querySelector('#fm-clean-controls')?.shadowRoot;
+        detailLauncher(tabletDoc).dispatchEvent(new tabletDoc.defaultView.KeyboardEvent('keydown',
+          { key: 'ArrowDown', bubbles: true }));
+        await delay(40);
+        const tabletPanel = tabletShadow.querySelector('.panel');
+        const tabletNav = tabletShadow.querySelector('[data-saved-menus]');
+        const tabletEmpty = tabletShadow.querySelector('[data-menu-empty]');
+        record('북마크 0개 태블릿은 최근 방문 6개만 제목으로 표시하고 중복·시간·외부 링크 제외',
+          tabletDoc.defaultView.innerWidth === 1024 && !tabletPanel.hidden &&
+          tabletPanel.getAttribute('aria-label') === '최근 방문 메뉴' &&
+          tabletNav.getAttribute('aria-label') === '최근 방문 메뉴' &&
+          JSON.stringify(Array.from(tabletNav.querySelectorAll('a'), link => link.textContent)) ===
+            JSON.stringify(tabletMenus.map(([title]) => title)) &&
+          !tabletNav.textContent.includes('비활성 메뉴') &&
+          !tabletEmpty.hidden &&
+          tabletEmpty.textContent === '저장한 메뉴가 없어 최근 방문 메뉴를 표시합니다.');
+        tabletDoc.querySelector('#tablet-slider').insertAdjacentHTML('beforeend',
+          '<div class="item bookmark"><a href="https://m.fmkorea.com/football_world">' +
+          '<span class="title">해외축구</span><span class="time">오늘 방문</span></a></div>');
+        await delay(80);
+        record('열린 태블릿 메뉴에 북마크가 늦게 생기면 북마크만 표시하고 안내 숨김',
+          !tabletPanel.hidden && tabletPanel.getAttribute('aria-label') === '저장한 메뉴' &&
+          ['내 게시판 메뉴', '저장한 메뉴'].includes(tabletNav.getAttribute('aria-label')) &&
+          tabletNav.querySelectorAll('a').length === 1 &&
+          tabletNav.querySelector('a')?.textContent === '해외축구' && tabletEmpty.hidden);
+        tabletDoc.querySelectorAll('.fm-recent-visited .item').forEach(item => item.remove());
+        tabletDoc.querySelector('#tablet-slider').insertAdjacentHTML('beforeend',
+          '<div class="item recent"><a href="https://example.org/outside">' +
+          '<span class="title">외부 사이트</span></a></div>');
+        await delay(80);
+        record('북마크·최근 방문이 없거나 외부 링크뿐이면 정확한 빈 안내 표시',
+          tabletNav.querySelectorAll('a').length === 0 && !tabletEmpty.hidden &&
+          tabletEmpty.textContent === '이 브라우저에 저장한 메뉴나 최근 방문이 없습니다.');
+
         const addressDoc = await makeLayoutFrame(source, '상세 본문 앞 주소 영역', `
           <header class="hd">상단 로고</header>
           <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><div class="board">

@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.29
-// @description  홈 버튼 드래그 이동, 저장 메뉴·짧은 링크 복사, 본문·댓글 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
+// @version      1.5.30
+// @description  홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -21,7 +21,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.29';
+  const SCRIPT_VERSION = '1.5.30';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
@@ -1599,11 +1599,11 @@
     document.body.appendChild(host);
   }
 
-  function savedMenuLinks() {
+  function savedMenuLinks(kind = 'bookmark') {
     const seen = new Set();
     const links = [];
-    document.querySelectorAll('.fm-recent-visited .list .item.bookmark > a[href]').forEach(link => {
-      const text = link.textContent.replace(/\s+/g, ' ').trim();
+    document.querySelectorAll(`.fm-recent-visited .list .item.${kind} > a[href]`).forEach(link => {
+      const text = (link.querySelector('.title') || link).textContent.replace(/\s+/g, ' ').trim();
       if (!text) return;
       try {
         const url = new URL(link.getAttribute('href'), location.href);
@@ -1613,7 +1613,7 @@
         if (seen.has(key)) return;
         seen.add(key);
         links.push({ text, href: url.href });
-      } catch (error) { /* 유효한 저장 메뉴만 표시합니다. */ }
+      } catch (error) { /* 유효한 게시판 메뉴만 표시합니다. */ }
     });
     return links;
   }
@@ -1684,7 +1684,11 @@
   function syncMenuPanel() {
     if (!panel) return;
     const list = panel.querySelector('[data-saved-menus]');
-    const links = savedMenuLinks();
+    let links = savedMenuLinks();
+    const useRecent = !links.length;
+    if (useRecent) links = savedMenuLinks('recent');
+    list.setAttribute('aria-label', useRecent ? '최근 방문 메뉴' : '내 게시판 메뉴');
+    panel.setAttribute('aria-label', useRecent ? '최근 방문 메뉴' : '저장한 메뉴');
     const signature = JSON.stringify(links);
     if (list.getAttribute('data-menu-signature') !== signature) {
       const items = links.map(({ text, href }) => {
@@ -1701,7 +1705,11 @@
       if (current && menuBoardKey(link.href) === current) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
-    panel.querySelector('[data-menu-empty]').hidden = links.length > 0;
+    const notice = panel.querySelector('[data-menu-empty]');
+    notice.textContent = links.length
+      ? '저장한 메뉴가 없어 최근 방문 메뉴를 표시합니다.'
+      : '이 브라우저에 저장한 메뉴나 최근 방문이 없습니다.';
+    notice.hidden = links.length > 0 && !useRecent;
     const url = compactDetailLink();
     panel.querySelector('.copy-area').hidden = !url;
     panel.querySelector('[data-copy-url]').textContent = url || '';
@@ -1938,7 +1946,7 @@
       <div class="control-anchor">
         <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
           <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
-          <p data-menu-empty hidden>저장한 메뉴가 없습니다.</p>
+          <p data-menu-empty hidden>이 브라우저에 저장한 메뉴나 최근 방문이 없습니다.</p>
           <div class="copy-area" hidden>
             <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
             <p data-copy-status role="status"></p><span data-copy-url></span>
