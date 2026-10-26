@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.4
+// @version      1.6.5
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.4';
+  const SCRIPT_VERSION = '1.6.5';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -336,6 +336,7 @@
     const home = `${root} body:has(.main_recent)`;
     const commentItem = `${root}[data-fm-clean-commentactions="true"] .fdb_itm:has(> .fdb_nav)`;
     const commentNav = `${root}[data-fm-clean-commentactions="true"] .fdb_itm .fdb_nav`;
+    const articleImage = `${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst) img)`;
     // 본문 작성자 색상·영상·인용 형식은 유지하고 다크 모드 이미지 밝기만 낮춥니다.
     return `
       ${root} { background: transparent !important; }
@@ -478,19 +479,22 @@
       ${root} body.night_mode .rd_body article .xe_content:not([style*="color" i]) {
         color: var(--fm-clean-content) !important;
       }
-      ${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]) {
+      ${articleImage} {
         filter: brightness(.64) !important; transition: none !important;
       }
-      ${root} body.night_mode .rd_body article .xe_content img[data-fm-clean-bright-normal]:not(table.invertl img):not([style*="filter" i]) {
+      ${articleImage}[data-fm-clean-bright-normal] {
         filter: brightness(1) !important; transition: filter 800ms ease-out !important;
       }
-      ${root} body.night_mode .rd_body article .xe_content img:is([data-fm-clean-bright-image], [data-fm-clean-bright-pending]):not(table.invertl img):not([style*="filter" i]) {
+      ${articleImage}:is([data-fm-clean-bright-image], [data-fm-clean-bright-pending]) {
         filter: brightness(.64) !important; transition: none !important;
       }
       @media (prefers-reduced-motion: reduce) {
-        ${root} body.night_mode .rd_body article .xe_content img[data-fm-clean-bright-normal]:not(table.invertl img):not([style*="filter" i]) {
+        ${articleImage}[data-fm-clean-bright-normal] {
           transition: none !important;
         }
+      }
+      ${root} :is(.fm_best_widget, .bd_m_lst, .bd_lst) img {
+        opacity: 1 !important; transition: none !important; animation: none !important;
       }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
         background: transparent !important; border-color: var(--fm-clean-line) !important;
@@ -1002,6 +1006,9 @@
         letter-spacing: 0; text-indent: 0;
       }
       ${scope('count')} [data-fm-clean-original-count] { display: none !important; }
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] {
+        height: auto !important; min-height: 0 !important;
+      }
       html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] :is(img, picture, video) {
         display: none !important;
       }
@@ -1052,12 +1059,29 @@
   ].join('\n');
   const styleText = style.textContent;
 
-  const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i])';
+  const LIST_IMAGE_SELECTOR = '.fm_best_widget img, .bd_m_lst img, .bd_lst img';
+  const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst) img)';
   const MEDIA_PLAYER_SELECTOR = '.auto_media_wrapper, .mejs__container, .video-js, video-js, .fluid_video_wrapper';
   const brightImages = {
     sources: new WeakMap(), tokens: new WeakMap(), cache: new Map(), visible: new WeakSet(), tracked: new Set(),
     observer: null, listening: false, active: false
   };
+
+  function syncListImages() {
+    if (!settings.enabled || document.documentElement.getAttribute('data-fm-clean-mobile') !== 'true') return;
+    document.querySelectorAll(LIST_IMAGE_SELECTOR).forEach(image => {
+      image.removeAttribute('data-fm-clean-bright-image');
+      image.removeAttribute('data-fm-clean-bright-pending');
+      image.removeAttribute('data-fm-clean-bright-normal');
+      if (image.loading !== 'eager') image.loading = 'eager';
+      const source = image.getAttribute('data-original') || image.getAttribute('data-src');
+      if (!source || image.getAttribute('src') === source) return;
+      try {
+        const url = new URL(source, location.href);
+        if (/^https?:$/.test(url.protocol) || /^data:image\//i.test(source)) image.setAttribute('src', source);
+      } catch (error) { /* 유효한 이미지 주소만 앞당겨 불러옵니다. */ }
+    });
+  }
 
   function brightImageModeActive() {
     return settings.enabled && settings.appearance && document.body?.classList.contains('night_mode') &&
@@ -1205,6 +1229,33 @@
     return target;
   }
 
+  function mediaSpaceTargets(root, mediaTargets) {
+    const targets = new Set(mediaTargets);
+    const empty = node => {
+      if (targets.has(node) || node.nodeType === Node.COMMENT_NODE) return true;
+      if (node.nodeType === Node.TEXT_NODE) return !node.textContent.replace(/[\s\u200b]/g, '');
+      if (!(node instanceof Element)) return false;
+      if (node.localName === 'br') return true;
+      return node.matches('div, p, span, figure') && Array.from(node.childNodes).every(empty);
+    };
+    for (const media of mediaTargets) {
+      let box = media;
+      while (box.parentElement && box.parentElement !== root &&
+          box.parentElement.matches('div, p, span, figure') &&
+          Array.from(box.parentElement.childNodes).every(empty)) {
+        box = box.parentElement;
+        targets.add(box);
+      }
+      // 영상 앞뒤의 빈 문단·줄바꿈도 접고, 글이나 링크가 나오면 멈춥니다.
+      for (const direction of ['previousSibling', 'nextSibling']) {
+        for (let sibling = box[direction]; sibling && empty(sibling); sibling = sibling[direction]) {
+          if (sibling instanceof Element) targets.add(sibling);
+        }
+      }
+    }
+    return targets;
+  }
+
   function isContentImage(image, root, state) {
     if (image.closest(`${MEDIA_PLAYER_SELECTOR}, .mejs__poster, .mejs__controls, noscript, template, [${AD_STATE_ATTRIBUTE}]`)) return false;
     for (let node = image; node && node !== root; node = node.parentElement) {
@@ -1255,7 +1306,6 @@
       video.removeEventListener('play', saved.stop);
       if (saved.autoplay === null) video.removeAttribute('autoplay');
       else video.setAttribute('autoplay', saved.autoplay);
-      video.muted = saved.muted;
     }
     state.videos.clear();
   }
@@ -1306,23 +1356,23 @@
       for (const slot of state.frames.keys()) videoTargets.add(detailMediaTarget(slot, root));
       const videoCount = videoTargets.size;
       root.toggleAttribute('data-fm-clean-media-collapsed', images + videoCount > 0);
-      syncMediaHidden(root, state, new Set([...contentImages, ...videos, ...videoTargets]));
+      const spaces = mediaSpaceTargets(root, new Set([...contentImages, ...videoTargets]));
+      syncMediaHidden(root, state, new Set([...contentImages, ...videos, ...spaces]));
       for (const [video, saved] of state.videos) {
         if (root.contains(video)) continue;
         video.removeEventListener('play', saved.stop);
         if (saved.autoplay === null) video.removeAttribute('autoplay');
         else video.setAttribute('autoplay', saved.autoplay);
-        video.muted = saved.muted;
         state.videos.delete(video);
       }
       videos.forEach(video => {
         if (!state.videos.has(video)) {
           const stop = () => { if (root.hasAttribute('data-fm-clean-media-collapsed')) video.pause(); };
-          state.videos.set(video, { autoplay: video.getAttribute('autoplay'), muted: video.muted, stop });
+          state.videos.set(video, { autoplay: video.getAttribute('autoplay'), stop });
           video.addEventListener('play', stop);
         }
         video.autoplay = false;
-        if (!video.muted) video.muted = true;
+        // muted/volume 변경은 사이트의 저장된 음향 설정까지 덮으므로 일시정지만 합니다.
         try { if (!video.paused) video.pause(); } catch (error) { /* 로드 전 영상도 계속 숨깁니다. */ }
       });
       if (!images && !videoCount) {
@@ -2091,6 +2141,7 @@
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
     }
     document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
+    syncListImages();
     syncDetailMedia();
     syncReadHistory();
     syncReadingHeader();

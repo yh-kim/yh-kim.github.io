@@ -773,22 +773,40 @@
           ['#media-image', '#media-picture', '#media-video', '#media-youtube'].every(selector =>
             !visiblyRendered(mediaDoc.querySelector(selector))) &&
           mediaRoot.querySelector('#media-video') === mediaVideo &&
-          !mediaVideo.autoplay && mediaVideo.muted && mediaVideo.paused &&
+          !mediaVideo.autoplay && !mediaVideo.muted && mediaVideo.paused &&
           !youtubeFrame.isConnected &&
           Boolean(mediaRoot.querySelector('template[data-fm-clean-media-frame]')?.content
             .querySelector('#media-youtube') === youtubeFrame) &&
           ['#media-text', '#media-other', '#comment-thumb', '#list-thumb'].every(selector =>
             visiblyRendered(mediaDoc.querySelector(selector))) &&
           mediaDoc.defaultView.__fmSettingsFixture.value.showMedia === false);
+        // 사이트 플레이어가 숨김 중 저장된 음소거 상태를 늦게 적용하는 경우를 재현합니다.
+        mediaVideo.muted = true;
         mediaNotice?.click();
         await delay(40);
-        record('안내 버튼은 현재 글 미디어만 펼치고 저장된 OFF 설정은 유지',
+        record('안내 버튼은 현재 글만 펼치고 사이트가 적용한 음소거·저장된 OFF 설정을 유지',
           !mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
           visiblyRendered(mediaDoc.querySelector('#media-image')) &&
           mediaRoot.querySelector('#media-video') === mediaVideo &&
-          mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay && !mediaVideo.muted &&
+          mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay && mediaVideo.muted &&
           youtubeFrame.isConnected && visiblyRendered(youtubeFrame) &&
           mediaDoc.defaultView.__fmSettingsFixture.value.showMedia === false && !mediaInput.checked);
+        mediaInput.checked = true;
+        mediaInput.dispatchEvent(new mediaDoc.defaultView.Event('change', { bubbles: true }));
+        await delay(30);
+        mediaVideo.muted = false;
+        mediaInput.checked = false;
+        mediaInput.dispatchEvent(new mediaDoc.defaultView.Event('change', { bubbles: true }));
+        await delay(50);
+        const secondMediaNotice = mediaDoc.querySelector('button[data-fm-clean-media-notice]');
+        const unmutedWhileHidden = !mediaVideo.muted &&
+          mediaRoot.hasAttribute('data-fm-clean-media-collapsed');
+        secondMediaNotice?.click();
+        await delay(40);
+        record('다시 숨기고 펼쳐도 사이트가 해제한 음소거 상태를 덮어쓰지 않음',
+          unmutedWhileHidden && !mediaVideo.muted &&
+          !mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay);
 
         const nextMediaDoc = await makeLayoutFrame(source, '다음 상세는 미디어 다시 숨김',
           mediaBody, '', { showMedia: false });
@@ -880,6 +898,53 @@
           playerVideoOne.style.getPropertyPriority('display') === 'important' &&
           visiblyRendered(playerOne) && visiblyRendered(playerTwo));
 
+        const gapDoc = await makeLayoutFrame(source, '고정 높이 공통 영상 부모·빈 줄 접기', `
+          <div class="bd"><div class="rd" data-docsrl="506"><div class="rd_hd"><h1>영상 공백 글</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="gap-content">
+              <p id="gap-text-before">영상 전의 본문</p>
+              <p id="gap-before"><br></p><br id="gap-break">
+              <div id="video-gap" style="height:450px;min-height:450px;padding:20px 10px 35px;aspect-ratio:16/9">
+                <div class="auto_media_wrapper" id="gap-player-one"><div class="height_keep"
+                  style="height:0;padding-bottom:57%"><div class="auto_media"><div class="mejs__container">
+                    <div class="mejs__inner"><div class="mejs__mediaelement"><div>
+                      <video width="80" height="40"></video></div></div></div></div></div></div></div>
+                <div class="auto_media_wrapper" id="gap-player-two"><div class="height_keep"
+                  style="height:0;padding-bottom:57%"><div class="auto_media"><div class="mejs__container">
+                    <div class="mejs__inner"><div class="mejs__mediaelement"><div>
+                      <video width="80" height="40"></video></div></div></div></div></div></div></div>
+              </div>
+              <p id="gap-after">&nbsp;</p><div id="gap-empty"></div>
+              <p id="gap-text-after">영상 후의 본문</p><a id="gap-link" href="#gap-text-after">본문 링크</a>
+            </div></article></div>
+            <div class="fdb_lst_wrp"><img id="gap-comment-image" src="${IMAGE}" width="24" height="24" alt="댓글 아이콘"></div>
+          </div></div>`, '', { showMedia: false });
+        const gapRoot = gapDoc.querySelector('#gap-content');
+        const gapOuter = gapDoc.querySelector('#video-gap');
+        const gapBefore = gapDoc.querySelector('#gap-before');
+        const gapAfter = gapDoc.querySelector('#gap-after');
+        const gapNotice = gapDoc.querySelector('button[data-fm-clean-media-notice]');
+        record('비디오 2개 공통 고정높이 부모와 앞뒤 빈 줄까지 접고 글·링크·댓글 이미지는 유지',
+          gapRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          gapNotice?.textContent.includes('비디오 2개') &&
+          gapOuter.getBoundingClientRect().height === 0 &&
+          gapBefore.getBoundingClientRect().height === 0 &&
+          gapAfter.getBoundingClientRect().height === 0 &&
+          !visiblyRendered(gapDoc.querySelector('#gap-break')) &&
+          ['#gap-text-before', '#gap-text-after', '#gap-link', '#gap-comment-image'].every(selector =>
+            visiblyRendered(gapDoc.querySelector(selector))));
+        gapNotice?.click();
+        await delay(40);
+        record('영상을 펼치면 공통 부모 높이·패딩·비율과 앞뒤 빈 줄을 원래대로 복원',
+          !gapRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          gapDoc.querySelector('#video-gap') === gapOuter &&
+          gapOuter.getBoundingClientRect().height >= 450 &&
+          gapOuter.style.height === '450px' && gapOuter.style.minHeight === '450px' &&
+          gapOuter.style.paddingTop === '20px' && gapOuter.style.aspectRatio === '16 / 9' &&
+          gapDoc.querySelector('#gap-player-one .height_keep').style.paddingBottom === '57%' &&
+          gapBefore.getBoundingClientRect().height > 0 &&
+          gapAfter.getBoundingClientRect().height > 0 &&
+          visiblyRendered(gapDoc.querySelector('#gap-text-after')));
+
         const whiteDoc = await makeLayoutFrame(source, '야간 모드의 숨긴 흰 이미지 펼침', `
           <div class="bd"><div class="rd" data-docsrl="504"><div class="rd_hd"><h1>흰 이미지 글</h1></div>
             <div class="rd_body"><article><div class="xe_content" id="white-content">
@@ -962,6 +1027,32 @@
           dynamicStartsDim && changedSourceDim && appearanceOff &&
           brightDoc.defaultView.getComputedStyle(brightWhite).filter === 'none' &&
           brightDoc.defaultView.getComputedStyle(brightDark).filter === 'none');
+
+        const listThumbDoc = await makeLayoutFrame(source, '야간 목록 작은 썸네일', `
+          <div class="bd"><div class="rd"><div class="rd_hd"><h1>상세 아래 목록</h1></div>
+            <div class="rd_body"><article><div class="xe_content"><p>본문</p></div></article></div></div>
+            <div class="fm_best_widget"><div class="title"><img class="thumb" id="thumb-best"
+              src="${WHITE_IMAGE}" width="24" height="24" alt="베스트 썸네일"></div></div>
+            <ul class="bd_m_lst"><li class="is_tmb"><div class="tmb_wrp"><img id="thumb-mobile"
+              src="${WHITE_IMAGE}" width="24" height="24" alt="모바일 목록 썸네일"></div></li></ul>
+            <ul class="bd_m_lst"><li class="is_tmb"><div class="tmb_wrp"><img id="thumb-lazy"
+              src="${IMAGE}" data-original="${DARK_IMAGE}" loading="lazy"
+              style="opacity:0;transition:opacity 1s" width="24" height="24" alt="늦게 표시되는 썸네일"></div></li></ul>
+            <table class="bd_lst"><tr><td class="thumb"><img id="thumb-table"
+              src="${WHITE_IMAGE}" width="24" height="24" alt="일반 목록 썸네일"></td></tr></table>
+          </div>`, '', {}, { bodyClass: 'night_mode' });
+        const listThumbs = ['#thumb-best', '#thumb-mobile', '#thumb-table', '#thumb-lazy']
+          .map(selector => listThumbDoc.querySelector(selector));
+        record('야간 모드의 홈·모바일·상세 아래 목록 썸네일은 분석·페이드 없이 바로 표시',
+          listThumbs.every(image => image && visiblyRendered(image) &&
+            listThumbDoc.defaultView.getComputedStyle(image).filter === 'none' &&
+            listThumbDoc.defaultView.getComputedStyle(image).transitionDuration === '0s' &&
+            !image.hasAttribute('data-fm-clean-bright-pending') &&
+            !image.hasAttribute('data-fm-clean-bright-image') &&
+            !image.hasAttribute('data-fm-clean-bright-normal')) &&
+          listThumbDoc.querySelector('#thumb-lazy').getAttribute('src') === DARK_IMAGE &&
+          listThumbDoc.querySelector('#thumb-lazy').loading === 'eager' &&
+          listThumbDoc.defaultView.getComputedStyle(listThumbDoc.querySelector('#thumb-lazy')).opacity === '1');
 
         const alertDoc = await makeLayoutFrame(source, '동적 포텐 알림', `
           <header class="hd">상단 로고</header><div class="bd bd_mobile"><p id="alert-article">홈 목록</p></div>
