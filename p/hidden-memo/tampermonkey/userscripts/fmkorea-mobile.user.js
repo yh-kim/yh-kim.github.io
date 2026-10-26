@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.8
+// @version      1.6.9
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.8';
+  const SCRIPT_VERSION = '1.6.9';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1014,16 +1014,43 @@
       html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] {
         height: auto !important; min-height: 0 !important;
       }
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] :is(img, picture):not(.poll_table *),
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] video {
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-hidden] {
         display: none !important;
+      }
+      [data-fm-clean-media-placeholder] { display: none !important; }
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-placeholder] {
+        display: inline-flex !important; align-items: center; justify-content: center; gap: 8px;
+        max-width: 100%; min-height: 40px; box-sizing: border-box;
+        margin: 4px 6px 8px 0 !important; padding: 6px 12px 6px 7px !important;
+        border: 1px solid var(--fm-clean-line, #e7e4de) !important; border-radius: 13px;
+        background: var(--fm-clean-raised, #faf9f7) !important; color: var(--fm-clean-text, #1c1b19) !important;
+        font: 500 12px/1.3 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
+        vertical-align: middle; text-align: left; text-decoration: none !important;
+        box-shadow: none; cursor: pointer; touch-action: manipulation;
+        transition: background-color 160ms ease, border-color 160ms ease;
+      }
+      [data-fm-clean-media-placeholder] [data-fm-clean-media-icon] {
+        display: inline-flex; flex: 0 0 26px; align-items: center; justify-content: center;
+        width: 26px; height: 26px; border-radius: 9px;
+        background: var(--fm-clean-soft, #fff0e7); color: var(--fm-clean-accent, #9a4e26);
+      }
+      [data-fm-clean-media-placeholder] svg { display: block; width: 16px; height: 16px; }
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-placeholder]:is(:hover, :active) {
+        background: var(--fm-clean-soft, #fff0e7) !important; border-color: var(--fm-clean-accent, #9a4e26) !important;
+      }
+      [data-fm-clean-media-placeholder]:focus-visible {
+        outline: 2px solid var(--fm-clean-accent, #9a4e26); outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        [data-fm-clean-media-placeholder] { transition: none !important; }
       }
       [data-fm-clean-media-notice] { display: none !important; }
       html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-notice] {
         display: block !important; width: 100%; box-sizing: border-box;
         margin: 8px 0 12px !important; padding: 10px 12px !important;
-        border: 1px solid var(--fm-clean-line, #e7e4de); border-radius: 10px;
-        background: var(--fm-clean-raised, #faf9f7); color: var(--fm-clean-muted, #6b6862);
+        min-height: 44px; border: 1px solid var(--fm-clean-line, #e7e4de);
+        border-left: 3px solid var(--fm-clean-accent, #9a4e26); border-radius: 12px;
+        background: var(--fm-clean-soft, #fff0e7); color: var(--fm-clean-accent, #9a4e26);
         font: 500 12px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         text-align: left; cursor: pointer; touch-action: manipulation;
       }
@@ -1336,13 +1363,14 @@
       if (targets.has(node) || node.nodeType === Node.COMMENT_NODE) return true;
       if (node.nodeType === Node.TEXT_NODE) return !node.textContent.replace(/[\s\u200b]/g, '');
       if (!(node instanceof Element)) return false;
+      if (node.hasAttribute('data-fm-clean-media-placeholder')) return true;
       if (node.localName === 'br') return true;
-      return node.matches('div, p, span, figure') && Array.from(node.childNodes).every(empty);
+      return node.matches('div, p, span, figure, a') && Array.from(node.childNodes).every(empty);
     };
     for (const media of mediaTargets) {
       let box = media;
       while (box.parentElement && box.parentElement !== root &&
-          box.parentElement.matches('div, p, span, figure') &&
+          box.parentElement.matches('div, p, span, figure, a') &&
           Array.from(box.parentElement.childNodes).every(empty)) {
         box = box.parentElement;
         targets.add(box);
@@ -1350,7 +1378,7 @@
       // 영상 앞뒤의 빈 문단·줄바꿈도 접고, 글이나 링크가 나오면 멈춥니다.
       for (const direction of ['previousSibling', 'nextSibling']) {
         for (let sibling = box[direction]; sibling && empty(sibling); sibling = sibling[direction]) {
-          if (sibling instanceof Element) targets.add(sibling);
+          if (sibling instanceof Element && !sibling.hasAttribute('data-fm-clean-media-placeholder')) targets.add(sibling);
         }
       }
     }
@@ -1389,8 +1417,9 @@
     }
   }
 
-  function restoreDetailMedia(root, state) {
-    if (brightImageModeActive()) root.querySelectorAll('img').forEach(image => {
+  function prepareDetailImages(root, state, images) {
+    if (brightImageModeActive()) images.forEach(image => {
+      if (!(image instanceof HTMLImageElement)) return;
       if (!image.matches(BRIGHT_IMAGE_SELECTOR) || !isContentImage(image, root, state)) return;
       image.setAttribute('data-fm-clean-bright-pending', '');
       brightImages.sources.delete(image);
@@ -1398,8 +1427,71 @@
       image.removeAttribute('data-fm-clean-bright-normal');
       classifyBrightImage(image);
     });
+  }
+
+  function syncMediaPlaceholders(root, state, units, spaces) {
+    const keys = new Set(units.map(unit => unit.key));
+    for (const [key, item] of state.placeholders) {
+      if (keys.has(key)) continue;
+      item.button.remove();
+      state.placeholders.delete(key);
+    }
+    const groups = new Map();
+    for (const unit of units) {
+      let item = state.placeholders.get(unit.key);
+      if (!item) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('data-fm-clean-media-placeholder', unit.kind);
+        const shape = unit.kind === 'image'
+          ? '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/>'
+          : '<rect x="3" y="3" width="18" height="18" rx="5"/><path d="m10 8 6 4-6 4Z"/>';
+        button.innerHTML = `<span data-fm-clean-media-icon aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${shape}</svg></span><span>${unit.kind === 'image' ? '이미지 보기' : '동영상 보기'}</span>`;
+        item = { button, unit };
+        button.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (detailMedia.get(root) !== state || !button.isConnected) return;
+          const sources = new Set(item.unit.sources);
+          sources.forEach(media => state.revealedItems.add(media));
+          prepareDetailImages(root, state, item.unit.sources);
+          for (const [slot, frame] of state.frames) {
+            if (!sources.has(frame)) continue;
+            slot.replaceWith(frame);
+            state.frames.delete(slot);
+          }
+          syncDetailMedia();
+          scheduleRefresh();
+        });
+        state.placeholders.set(unit.key, item);
+      }
+      item.unit = unit;
+      let anchor = unit.target;
+      for (let parent = anchor.parentElement; parent && parent !== root; parent = parent.parentElement) {
+        if (spaces.has(parent)) anchor = parent;
+      }
+      // 사진 링크·picture 내부에 버튼이 들어가지 않게 하고 원래 콘텐츠는 그대로 둡니다.
+      const link = anchor.closest('a');
+      if (link && root.contains(link)) anchor = link;
+      if (!groups.has(anchor)) groups.set(anchor, []);
+      groups.get(anchor).push(item);
+    }
+    for (const [anchor, items] of groups) {
+      items.sort((a, b) => a.unit.target.compareDocumentPosition(b.unit.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+      let next = anchor;
+      for (const item of items.reverse()) {
+        if (item.button.nextSibling !== next) next.before(item.button);
+        next = item.button;
+      }
+    }
+  }
+
+  function restoreDetailMedia(root, state) {
+    prepareDetailImages(root, state, Array.from(root.querySelectorAll('img')));
     root.removeAttribute('data-fm-clean-media-collapsed');
     syncMediaHidden(root, state, new Set());
+    for (const { button } of state.placeholders.values()) button.remove();
+    state.placeholders.clear();
     state.notice?.remove();
     state.notice = null;
     for (const [slot, frame] of state.frames) slot.replaceWith(frame);
@@ -1432,7 +1524,8 @@
         state = null;
       }
       if (!state) {
-        state = { id, revealed: false, notice: null, frames: new Map(), videos: new Map(), hidden: new Map() };
+        state = { id, revealed: false, revealedItems: new WeakSet(), notice: null,
+          frames: new Map(), videos: new Map(), hidden: new Map(), placeholders: new Map() };
         detailMedia.set(root, state);
       }
       if (state.revealed) continue;
@@ -1444,24 +1537,39 @@
         state.frames.delete(slot);
       }
       root.querySelectorAll('iframe').forEach(frame => {
-        if (!isVideoFrame(frame)) return;
+        if (!isVideoFrame(frame) || state.revealedItems.has(frame)) return;
         const slot = document.createElement('template');
         slot.setAttribute('data-fm-clean-media-frame', '');
         frame.replaceWith(slot);
         slot.content.appendChild(frame);
         state.frames.set(slot, frame);
       });
-      const contentImages = Array.from(root.querySelectorAll('img')).filter(image => isContentImage(image, root, state));
+      const contentImages = Array.from(root.querySelectorAll('img')).filter(image =>
+        isContentImage(image, root, state) && !state.revealedItems.has(image));
       const images = contentImages.length;
-      const videos = Array.from(root.querySelectorAll('video'));
-      const videoTargets = new Set(videos.map(video => detailMediaTarget(video, root)));
-      for (const slot of state.frames.keys()) videoTargets.add(detailMediaTarget(slot, root));
-      const videoCount = videoTargets.size;
+      const videos = Array.from(root.querySelectorAll('video')).filter(video => !state.revealedItems.has(video));
+      const videoUnits = new Map();
+      const addVideo = (target, media, key = target) => {
+        if (!videoUnits.has(target)) videoUnits.set(target, { key, target, kind: 'video', sources: [] });
+        videoUnits.get(target).sources.push(media);
+      };
+      videos.forEach(video => addVideo(detailMediaTarget(video, root), video));
+      for (const [slot, frame] of state.frames) {
+        const target = detailMediaTarget(slot, root);
+        addVideo(target, frame, target === slot ? frame : target);
+      }
+      const videoTargets = new Set(videoUnits.keys());
+      const videoCount = videoUnits.size;
       root.toggleAttribute('data-fm-clean-media-collapsed', images + videoCount > 0);
-      const spaces = mediaSpaceTargets(root, new Set([...contentImages, ...videoTargets]));
+      const imageUnits = contentImages.map(image => ({ key: image,
+        target: image.closest('picture') || image, kind: 'image', sources: [image] }));
+      const units = [...imageUnits, ...videoUnits.values()];
+      const spaces = mediaSpaceTargets(root, new Set([...contentImages, ...imageUnits.map(unit => unit.target), ...videoTargets]));
+      syncMediaPlaceholders(root, state, units, spaces);
       syncMediaHidden(root, state, new Set([...contentImages, ...videos, ...spaces]));
+      const hiddenVideos = new Set(videos);
       for (const [video, saved] of state.videos) {
-        if (root.contains(video)) continue;
+        if (root.contains(video) && hiddenVideos.has(video)) continue;
         video.removeEventListener('play', saved.stop);
         if (saved.autoplay === null) video.removeAttribute('autoplay');
         else video.setAttribute('autoplay', saved.autoplay);
@@ -1493,7 +1601,7 @@
         });
       }
       const text = [images && `이미지 ${images}개`, videoCount && `비디오 ${videoCount}개`]
-        .filter(Boolean).join(' · ') + '가 숨겨져 있습니다. 눌러서 보기';
+        .filter(Boolean).join(' · ') + '가 숨겨져 있습니다. 눌러서 모두 보기';
       if (state.notice.textContent !== text) state.notice.textContent = text;
       if (root.previousSibling !== state.notice) root.before(state.notice);
     }

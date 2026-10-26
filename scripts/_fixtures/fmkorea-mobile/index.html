@@ -835,6 +835,70 @@
           !mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
           mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay);
 
+        const inlineDoc = await makeLayoutFrame(source, '본문 속 이미지·동영상 개별 보기',
+          mediaBody, '', { showMedia: false });
+        const inlineRoot = inlineDoc.querySelector('#media-content');
+        const inlineButtons = () => Array.from(inlineRoot.querySelectorAll(
+          'button[data-fm-clean-media-placeholder]'));
+        const inlineNotice = inlineDoc.querySelector('button[data-fm-clean-media-notice]');
+        record('감춘 자리에는 사진 둘·동영상 둘의 아이콘 버튼이 순서대로 나타남',
+          inlineButtons().length === 4 &&
+          inlineButtons().map(button => button.dataset.fmCleanMediaPlaceholder).join(',') ===
+            'image,image,video,video' &&
+          inlineButtons().every(button => visiblyRendered(button) &&
+            button.querySelector('svg') && button.getBoundingClientRect().height >= 28) &&
+          inlineButtons().slice(0, 2).every(button => button.textContent.includes('이미지 보기')) &&
+          inlineButtons().slice(2).every(button => button.textContent.includes('동영상 보기')) &&
+          inlineNotice?.textContent.includes('이미지 2개 · 비디오 2개'));
+        inlineButtons()[0]?.click();
+        await delay(70);
+        record('본문의 이미지 아이콘 하나를 누르면 해당 사진만 보이고 다른 미디어는 감춤 유지',
+          visiblyRendered(inlineDoc.querySelector('#media-image')) &&
+          !visiblyRendered(inlineDoc.querySelector('#media-picture')) &&
+          !visiblyRendered(inlineDoc.querySelector('#media-video')) &&
+          !inlineDoc.querySelector('#media-youtube') &&
+          inlineButtons().length === 3 &&
+          inlineNotice?.textContent.includes('이미지 1개 · 비디오 2개'));
+        inlineDoc.querySelector('#media-video').muted = true;
+        inlineButtons().find(button => button.dataset.fmCleanMediaPlaceholder === 'video')?.click();
+        await delay(70);
+        const inlineVideo = inlineDoc.querySelector('#media-video');
+        record('동영상 아이콘 하나는 원래 영상만 복원하고 음소거 선택·나머지 감춤을 유지',
+          visiblyRendered(inlineVideo) && inlineVideo.muted && inlineVideo.autoplay &&
+          inlineVideo.getAttribute('autoplay') === 'autoplay' &&
+          !inlineDoc.querySelector('#media-youtube') &&
+          inlineButtons().length === 2 &&
+          inlineNotice?.textContent.includes('이미지 1개 · 비디오 1개'));
+        const parkedInlineFrame = inlineRoot.querySelector('template[data-fm-clean-media-frame]')
+          ?.content.querySelector('#media-youtube');
+        inlineButtons().find(button => button.dataset.fmCleanMediaPlaceholder === 'video')?.click();
+        await delay(70);
+        const inlineFrameRevealed = parkedInlineFrame &&
+          inlineDoc.querySelector('#media-youtube') === parkedInlineFrame &&
+          visiblyRendered(parkedInlineFrame) &&
+          !visiblyRendered(inlineDoc.querySelector('#media-picture')) &&
+          inlineButtons().length === 1 &&
+          inlineNotice?.textContent.includes('이미지 1개') &&
+          !inlineNotice?.textContent.includes('비디오');
+        inlineRoot.appendChild(inlineDoc.createTextNode(' 새 댓글 반영 후 본문 유지'));
+        await delay(100);
+        record('개별로 연 영상 iframe은 같은 노드로 남고 이후 화면 갱신에도 다시 감춰지지 않음',
+          inlineFrameRevealed &&
+          inlineDoc.querySelector('#media-youtube') === parkedInlineFrame &&
+          visiblyRendered(parkedInlineFrame) &&
+          !visiblyRendered(inlineDoc.querySelector('#media-picture')) &&
+          inlineButtons().length === 1 &&
+          inlineNotice?.textContent.includes('이미지 1개') &&
+          !inlineNotice?.textContent.includes('비디오'));
+        inlineNotice?.click();
+        await delay(40);
+        record('상단 전체 보기로 나머지를 펼치면 본문 아이콘과 안내가 모두 사라짐',
+          visiblyRendered(inlineDoc.querySelector('#media-picture')) &&
+          visiblyRendered(inlineDoc.querySelector('#media-youtube')) &&
+          !inlineRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          inlineButtons().length === 0 &&
+          !inlineDoc.querySelector('button[data-fm-clean-media-notice]'));
+
         const nextMediaDoc = await makeLayoutFrame(source, '다음 상세는 미디어 다시 숨김',
           mediaBody, '', { showMedia: false });
         const nextMediaRoot = nextMediaDoc.querySelector('#media-content');
@@ -853,6 +917,8 @@
           !lateVimeo.isConnected &&
           Array.from(nextMediaRoot.querySelectorAll('template[data-fm-clean-media-frame]'))
             .some(slot => slot.content.querySelector('#late-vimeo') === lateVimeo) &&
+          nextMediaRoot.querySelectorAll('button[data-fm-clean-media-placeholder="image"]').length === 3 &&
+          nextMediaRoot.querySelectorAll('button[data-fm-clean-media-placeholder="video"]').length === 3 &&
           nextNotice.textContent.includes('이미지 3개') &&
           nextNotice.textContent.includes('비디오 3개'));
         const mediaAllOff = detailOption(nextMediaDoc, 'enabled', false);
@@ -861,6 +927,7 @@
           mediaAllOff && !nextMediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
           visiblyRendered(nextMediaDoc.querySelector('#media-image')) &&
           lateVimeo.isConnected && visiblyRendered(lateVimeo) &&
+          !nextMediaRoot.querySelector('button[data-fm-clean-media-placeholder]') &&
           !visiblyRendered(nextMediaDoc.querySelector('button[data-fm-clean-media-notice]')));
 
         const noMediaDoc = await makeLayoutFrame(source, '미디어 없는 상세', `
@@ -1004,11 +1071,21 @@
           gapRoot.hasAttribute('data-fm-clean-media-collapsed') &&
           gapNotice?.textContent.includes('비디오 2개') &&
           gapOuter.getBoundingClientRect().height === 0 &&
+          gapRoot.querySelectorAll('button[data-fm-clean-media-placeholder="video"]').length === 2 &&
           gapBefore.getBoundingClientRect().height === 0 &&
           gapAfter.getBoundingClientRect().height === 0 &&
           !visiblyRendered(gapDoc.querySelector('#gap-break')) &&
           ['#gap-text-before', '#gap-text-after', '#gap-link', '#gap-comment-image'].every(selector =>
             visiblyRendered(gapDoc.querySelector(selector))));
+        gapRoot.querySelector('button[data-fm-clean-media-placeholder="video"]')?.click();
+        await delay(70);
+        record('공통 고정높이 부모에서도 동영상 하나만 펼치고 남은 버튼을 찾을 수 있음',
+          visiblyRendered(gapDoc.querySelector('#gap-player-one')) &&
+          !visiblyRendered(gapDoc.querySelector('#gap-player-two')) &&
+          gapOuter.getBoundingClientRect().height >= 450 &&
+          gapRoot.querySelectorAll('button[data-fm-clean-media-placeholder="video"]').length === 1 &&
+          gapNotice?.textContent.includes('비디오 1개') &&
+          visiblyRendered(gapDoc.querySelector('#gap-text-after')));
         gapNotice?.click();
         await delay(40);
         record('영상을 펼치면 공통 부모 높이·패딩·비율과 앞뒤 빈 줄을 원래대로 복원',
