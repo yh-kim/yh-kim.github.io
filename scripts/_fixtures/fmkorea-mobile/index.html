@@ -630,7 +630,7 @@
               (authorRect.top + authorRect.height / 2)) <= 4 &&
             Math.abs(chipRect.height - 18) <= 2 &&
             alignedDoc.defaultView.getComputedStyle(chip).fontSize === '10px' &&
-            alignedDoc.defaultView.getComputedStyle(originalTitle).fontSize === '16px' &&
+            alignedDoc.defaultView.getComputedStyle(originalTitle).fontSize === '15px' &&
             alignedDoc.documentElement.scrollWidth <= alignedDoc.defaultView.innerWidth + 1
           ));
         }
@@ -924,6 +924,56 @@
           playerVideoOne.style.getPropertyValue('display') === 'block' &&
           playerVideoOne.style.getPropertyPriority('display') === 'important' &&
           visiblyRendered(playerOne) && visiblyRendered(playerTwo));
+
+        const pollBarImage = 'data:image/svg+xml;base64,' + btoa(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="6"><rect width="100" height="6" fill="#58c011"/></svg>');
+        const pollResult = (count, percent) => `<table class="poll_table"><tbody>
+          <tr><td class="l"><img src="${IMAGE}" width="7" height="7" alt=""></td>
+            <td class="poll_content"><div class="title">설문 결과 (${count})</div>
+              <div class="item_text">7호선 <img src="${IMAGE}" width="7" height="7" alt=""></div>
+              <table class="item_bar_table"><tbody><tr><td class="bar">
+                <img class="poll-graph" src="${pollBarImage}" style="width:${percent}%;height:6px" alt="bar">
+              </td><td class="status">${count} (${percent}%)</td></tr></tbody></table>
+            </td><td class="r"><img src="${IMAGE}" width="7" height="7" alt=""></td></tr>
+          </tbody></table>`;
+        const pollDoc = await makeLayoutFrame(source, '설문 결과와 숨긴 본문 미디어', `
+          <div class="bd"><div class="rd" data-docsrl="507"><div class="rd_hd"><h1>설문 글</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="poll-content">
+              <div id="poll_507">${pollResult(8, 36)}</div>
+              <p>설문 결과 아래의 글입니다.</p>
+              <img id="poll-post-image" src="${IMAGE}" width="24" height="24" alt="본문 사진">
+              <video id="poll-post-video" width="80" height="40"></video>
+            </div></article></div></div></div>`, `
+            .poll_table{width:100%;table-layout:fixed}.poll_table .bar{position:relative;height:16px}
+            .poll_table .bar img{position:absolute;left:0;top:4px}`,
+          { showMedia: false }, { bodyClass: 'night_mode' });
+        const pollRoot = pollDoc.querySelector('#poll-content');
+        const pollHost = pollDoc.querySelector('#poll_507');
+        const pollBar = pollDoc.querySelector('.poll-graph');
+        const pollNotice = pollDoc.querySelector('button[data-fm-clean-media-notice]');
+        const pollGraphVisible = image => image && visiblyRendered(image) &&
+          image.getBoundingClientRect().width > 0;
+        record('이미지 숨김 중에도 설문 그래프와 장식은 표시하고 본문 사진·영상만 숨김',
+          pollRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          pollNotice?.textContent.includes('이미지 1개 · 비디오 1개') &&
+          pollGraphVisible(pollBar) &&
+          visiblyRendered(pollDoc.querySelector('.poll_table .item_text img')) &&
+          !visiblyRendered(pollDoc.querySelector('#poll-post-image')) &&
+          !visiblyRendered(pollDoc.querySelector('#poll-post-video')));
+        record('야간 모드에서도 설문 그래프의 밝기·길이는 투표 원본대로 유지',
+          pollDoc.defaultView.getComputedStyle(pollBar).filter === 'none' &&
+          !pollBar.hasAttribute('data-fm-clean-bright-pending') &&
+          !pollBar.hasAttribute('data-fm-clean-bright-image') &&
+          pollBar.style.width === '36%' && pollBar.getBoundingClientRect().height === 6);
+        // 사이트의 결과 보기는 투표 영역 HTML을 통째로 교체합니다.
+        pollHost.innerHTML = pollResult(12, 54);
+        await delay(100);
+        const updatedBar = pollDoc.querySelector('.poll-graph');
+        record('설문 결과가 갱신되어도 새 그래프가 표시되고 숨김 개수는 그대로 유지',
+          pollGraphVisible(updatedBar) && updatedBar.style.width === '54%' &&
+          pollDoc.defaultView.getComputedStyle(updatedBar).filter === 'none' &&
+          pollNotice?.textContent.includes('이미지 1개 · 비디오 1개') &&
+          visiblyRendered(pollDoc.querySelector('.poll_table .item_text img')));
 
         const gapDoc = await makeLayoutFrame(source, '고정 높이 공통 영상 부모·빈 줄 접기', `
           <div class="bd"><div class="rd" data-docsrl="506"><div class="rd_hd"><h1>영상 공백 글</h1></div>

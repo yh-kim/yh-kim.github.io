@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.6
+// @version      1.6.8
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.6';
+  const SCRIPT_VERSION = '1.6.8';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -336,7 +336,7 @@
     const home = `${root} body:has(.main_recent)`;
     const commentItem = `${root}[data-fm-clean-commentactions="true"] .fdb_itm:has(> .fdb_nav)`;
     const commentNav = `${root}[data-fm-clean-commentactions="true"] .fdb_itm .fdb_nav`;
-    const articleImage = `${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst) img)`;
+    const articleImage = `${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst, .poll_table) img)`;
     // 본문 작성자 색상·영상·인용 형식은 유지하고 다크 모드 이미지 밝기만 낮춥니다.
     return `
       ${root} { background: transparent !important; }
@@ -429,7 +429,7 @@
       ${root} .rd_hd .board .btm_area { margin: 0 !important; padding: 0 !important; }
       ${root} .rd_hd h1 {
         padding: 0 !important; margin: 4px 0 6px !important;
-        color: var(--fm-clean-title) !important; font-size: 16px !important;
+        color: var(--fm-clean-title) !important; font-size: 15px !important;
         font-weight: 600 !important; line-height: 1.5 !important; letter-spacing: -.2px !important;
         text-shadow: none !important;
       }
@@ -463,6 +463,7 @@
       }
       ${detail} > .btm_area > .side.fr :is(span, b) { font-size: 11px !important; margin: 0 !important; }
       ${root} .rd_body { padding: 0 !important; margin-left: 0 !important; margin-right: 0 !important; }
+      ${root} .rd:has(.rd_hd h1) .rd_body > article { padding-top: 12px !important; }
       ${root} .rd_body .document_address {
         margin: 0 !important; padding: 10px 12px !important;
         border-bottom: 1px solid var(--fm-clean-line) !important;
@@ -1013,7 +1014,8 @@
       html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] {
         height: auto !important; min-height: 0 !important;
       }
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] :is(img, picture, video) {
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] :is(img, picture):not(.poll_table *),
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] video {
         display: none !important;
       }
       [data-fm-clean-media-notice] { display: none !important; }
@@ -1064,7 +1066,7 @@
   const styleText = style.textContent;
 
   const LIST_IMAGE_SELECTOR = '.fm_best_widget img, .bd_m_lst img, .bd_lst img';
-  const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst) img)';
+  const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst, .poll_table) img)';
   const MEDIA_PLAYER_SELECTOR = '.auto_media_wrapper, .mejs__container, .video-js, video-js, .fluid_video_wrapper';
   const listImages = { observer: null, tracked: new Set(), listening: false };
   const brightImages = {
@@ -1356,7 +1358,8 @@
   }
 
   function isContentImage(image, root, state) {
-    if (image.closest(`${MEDIA_PLAYER_SELECTOR}, .mejs__poster, .mejs__controls, noscript, template, [${AD_STATE_ATTRIBUTE}]`)) return false;
+    // 설문 막대·테두리는 본문 사진이 아닌 결과 표시용 UI입니다.
+    if (image.closest(`${MEDIA_PLAYER_SELECTOR}, .mejs__poster, .mejs__controls, .poll_table, noscript, template, [${AD_STATE_ATTRIBUTE}]`)) return false;
     for (let node = image; node && node !== root; node = node.parentElement) {
       const display = state.hidden.get(node)?.value ?? node.style.getPropertyValue('display');
       if (node.hidden || display === 'none') return false;

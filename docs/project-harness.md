@@ -64,18 +64,18 @@ Use this sequence for any prompt or change request:
    - Mention changed files.
    - Mention the expected URL if a page was added.
    - Include the verification output and any skipped checks.
-   - Stop before committing unless the user explicitly asks for a commit or push.
+   - Commit and push after successful verification under the user's standing instruction for this repository, unless the user asks to stop or exclude those actions for the current task.
 
 ## Commit Boundary
 
-Default stopping point:
+Default completion point under the user's standing instruction for this repository:
 
 1. Apply the requested file changes.
 2. Run the relevant verification commands.
-3. Report changed files, test results, and any remaining risks.
-4. Leave the working tree uncommitted.
+3. Commit and push the verified task changes.
+4. Report changed files, test results, any remaining risks, the commit hash, and push status.
 
-Only stage, commit, or push when the user explicitly asks for that action.
+The user's standing authorization covers commits and pushes for completed work in this repository. A task-specific instruction to stop or omit those actions takes precedence. Deployment still requires a separate request.
 
 ## Known Jekyll Pitfalls
 
@@ -656,7 +656,7 @@ When the user says they are adding an HTML file or asks to publish an HTML docum
 6. Use `/daily/p/` as the visible Daily entry point.
 7. Preserve or create a direct Daily compatibility page only when there is already a shared URL or the user asks for one.
 8. Run `scripts/verify-all.sh` and `ruby scripts/test-harness.rb`.
-9. Stop before commit and report the changed files and verification output.
+9. Commit and push after successful verification under this repository's standing authorization, then report the changed files, verification output, commit hash, and push status.
 
 Harness self-tests:
 
