@@ -33,6 +33,8 @@
       const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
       const WHITE_IMAGE = 'data:image/svg+xml;base64,' + btoa(
         '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" fill="white"/></svg>');
+      const DARK_IMAGE = 'data:image/svg+xml;base64,' + btoa(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" fill="#202020"/></svg>');
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
       let passed = 0;
       let failed = 0;
@@ -227,6 +229,9 @@
         const readHistoryKey = 'pimi.fmkorea.read-history.v1';
         const storedHistory = Object.hasOwn(gmOptions, 'history')
           ? JSON.stringify(gmOptions.history) : 'undefined';
+        const captureFilters = gmOptions.captureFilters
+          ? `<script>window.__fmInitialFilters=Object.fromEntries(${JSON.stringify(gmOptions.captureFilters)}
+              .map(id=>[id,getComputedStyle(document.getElementById(id)).filter]));<\/script>` : '';
         frame.srcdoc = `<!doctype html><html lang="ko"><head>
           <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
           <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
@@ -251,7 +256,7 @@
           <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
             .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
             ${css}</style>
-          </head><body class="${gmOptions.bodyClass || ''}">${body}</body></html>`;
+          </head><body class="${gmOptions.bodyClass || ''}">${body}${captureFilters}</body></html>`;
         box.append(heading, frame);
         frames.append(box);
         await Promise.race([
@@ -900,6 +905,63 @@
           whiteImage.complete && whiteImage.naturalWidth === 128 && whiteWasHidden &&
           visiblyRendered(whiteImage) && dimmedImmediately &&
           whiteImage.hasAttribute('data-fm-clean-bright-image') && isDimmed());
+
+        const brightDoc = await makeLayoutFrame(source, '야간 이미지 첫 프레임과 밝기 전환', `
+          <div class="bd"><div class="rd" data-docsrl="505"><div class="rd_hd"><h1>밝기 검사</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="bright-content">
+              <img id="bright-white" src="${WHITE_IMAGE}" width="128" height="128" alt="흰 이미지">
+              <img id="bright-dark" src="${DARK_IMAGE}" width="128" height="128" alt="어두운 이미지">
+            </div></article></div></div></div>`, '', { showMedia: true },
+          { bodyClass: 'night_mode', captureFilters: ['bright-white', 'bright-dark'] });
+        brightDoc.defaultView.frameElement.style.height = '480px';
+        brightDoc.defaultView.frameElement.scrollIntoView({ block: 'center' });
+        await delay(100);
+        const brightWhite = brightDoc.querySelector('#bright-white');
+        const brightDark = brightDoc.querySelector('#bright-dark');
+        const brightness = image => {
+          const value = brightDoc.defaultView.getComputedStyle(image).filter.match(/brightness\(([\d.]+)\)/);
+          return value ? Number(value[1]) : 1;
+        };
+        for (let attempt = 0; attempt < 40 &&
+          !brightDark.hasAttribute('data-fm-clean-bright-normal'); attempt++) await delay(50);
+        const darkHasNormal = brightDark.hasAttribute('data-fm-clean-bright-normal');
+        await delay(120);
+        const midwayBrightness = brightness(brightDark);
+        const fadeDuration = brightDoc.defaultView.getComputedStyle(brightDark).transitionDuration;
+        await delay(850);
+        const brightEvidence = `initial=${JSON.stringify(brightDoc.defaultView.__fmInitialFilters)}, ` +
+          `natural=${brightWhite.naturalWidth}/${brightDark.naturalWidth}, ` +
+          `attrs=${brightWhite.hasAttribute('data-fm-clean-bright-image')}/` +
+          `${brightDark.hasAttribute('data-fm-clean-bright-normal')}, ` +
+          `filter=${brightness(brightWhite)}/${brightness(brightDark)}, ` +
+          `mid=${midwayBrightness}, duration=${fadeDuration}`;
+        const firstBrightnessPass = brightWhite.naturalWidth === 128 && brightDark.naturalWidth === 128 &&
+          /brightness\(0?\.64\)/.test(brightDoc.defaultView.__fmInitialFilters?.['bright-white']) &&
+          /brightness\(0?\.64\)/.test(brightDoc.defaultView.__fmInitialFilters?.['bright-dark']) &&
+          brightWhite.hasAttribute('data-fm-clean-bright-image') &&
+          Math.abs(brightness(brightWhite) - .64) < .01;
+        record('처음 표시된 흰·어두운 이미지 모두 첫 CSS 프레임 64%, 흰 이미지는 계속 64%',
+          firstBrightnessPass, firstBrightnessPass ? '' : brightEvidence);
+        const fadePass = darkHasNormal && /0\.8s/.test(fadeDuration) &&
+          midwayBrightness > .64 && midwayBrightness < 1 &&
+          Math.abs(brightness(brightDark) - 1) < .01;
+        record('어두운 이미지는 800ms ease-out 중간 밝기를 거쳐 원래 100%로 복원',
+          fadePass, fadePass ? '' : brightEvidence);
+        const lateDark = brightDoc.createElement('img');
+        lateDark.id = 'bright-late';
+        lateDark.src = DARK_IMAGE;
+        lateDark.width = lateDark.height = 128;
+        brightDoc.querySelector('#bright-content').append(lateDark);
+        const dynamicStartsDim = Math.abs(brightness(lateDark) - .64) < .01;
+        brightDark.src = WHITE_IMAGE;
+        await delay(30);
+        const changedSourceDim = Math.abs(brightness(brightDark) - .64) < .01;
+        const appearanceOff = detailOption(brightDoc, 'appearance', false);
+        await delay(40);
+        record('동적 이미지·src 변경은 64%로 시작하고 밝기 기능 OFF는 원본 필터 복원',
+          dynamicStartsDim && changedSourceDim && appearanceOff &&
+          brightDoc.defaultView.getComputedStyle(brightWhite).filter === 'none' &&
+          brightDoc.defaultView.getComputedStyle(brightDark).filter === 'none');
 
         const alertDoc = await makeLayoutFrame(source, '동적 포텐 알림', `
           <header class="hd">상단 로고</header><div class="bd bd_mobile"><p id="alert-article">홈 목록</p></div>
