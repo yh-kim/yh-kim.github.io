@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.1
-// @description  읽은 글 7일 기록, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
+// @version      1.6.2
+// @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -22,14 +22,14 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.1';
+  const SCRIPT_VERSION = '1.6.2';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
-    boardLabel: true, count: true, readingHeader: true, readHistory: true, swipeBack: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true, launcherRight: false
+    boardLabel: true, count: true, readingHeader: true, readHistory: true, showMedia: true, swipeBack: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true, launcherRight: false
   };
   const options = [
     ['enabled', '전체 기능 켜기'],
@@ -59,6 +59,7 @@
   let readHistory = null;
   let recordedReadId = null;
   let readHistoryListening = false;
+  const detailMedia = new Map();
   const hiddenElements = { header: new Map(), ads: new Map() };
   const knownAdTargets = new Set();
   const headerSelectors = [
@@ -993,6 +994,21 @@
         letter-spacing: 0; text-indent: 0;
       }
       ${scope('count')} [data-fm-clean-original-count] { display: none !important; }
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] :is(img, picture, video) {
+        display: none !important;
+      }
+      [data-fm-clean-media-notice] { display: none !important; }
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-notice] {
+        display: block !important; width: 100%; box-sizing: border-box;
+        margin: 8px 0 12px !important; padding: 10px 12px !important;
+        border: 1px solid var(--fm-clean-line, #e7e4de); border-radius: 10px;
+        background: var(--fm-clean-raised, #faf9f7); color: var(--fm-clean-muted, #6b6862);
+        font: 500 12px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+        text-align: left; cursor: pointer; touch-action: manipulation;
+      }
+      [data-fm-clean-media-notice]:focus-visible {
+        outline: 2px solid var(--fm-clean-accent, #9a4e26); outline-offset: 2px;
+      }
       ${scope('commentComposer')} details[data-fm-clean-comment-composer] {
         margin: 8px 10px; border: 1px solid var(--fm-clean-line, #8885); border-radius: 10px;
         color: inherit; font: 500 13px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
@@ -1128,6 +1144,115 @@
       }
       if (!brightImages.observer || brightImages.visible.has(image)) classifyBrightImage(image);
     });
+  }
+
+  function isVideoFrame(frame) {
+    return ['src', 'data-src'].some(attribute => {
+      const source = frame.getAttribute(attribute);
+      if (!source) return false;
+      try {
+        const url = new URL(source, location.href);
+        return /^https?:$/.test(url.protocol) && /^(?:(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com|youtu\.be|dailymotion\.com|streamable\.com|tv\.naver\.com)|geo\.dailymotion\.com|serviceapi\.nmv\.naver\.com|player\.vimeo\.com|(?:clips|player)\.twitch\.tv|(?:vod|play)\.afreecatv\.com|(?:vod|play)\.sooplive\.co\.kr|chzzk\.naver\.com)$/i.test(url.hostname);
+      } catch (error) { return false; }
+    });
+  }
+
+  function restoreDetailMedia(root, state) {
+    root.removeAttribute('data-fm-clean-media-collapsed');
+    state.notice?.remove();
+    state.notice = null;
+    for (const [slot, frame] of state.frames) slot.replaceWith(frame);
+    state.frames.clear();
+    for (const [video, saved] of state.videos) {
+      video.removeEventListener('play', saved.stop);
+      if (saved.autoplay === null) video.removeAttribute('autoplay');
+      else video.setAttribute('autoplay', saved.autoplay);
+      video.muted = saved.muted;
+    }
+    state.videos.clear();
+  }
+
+  function syncDetailMedia() {
+    const active = settings.enabled && !settings.showMedia &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    const roots = new Set(active ? Array.from(document.querySelectorAll('.rd:has(.rd_hd h1) .rd_body article'))
+      .filter(article => !article.parentElement.closest('article'))
+      .map(article => article.querySelector('.xe_content') || article) : []);
+    for (const [root, state] of detailMedia) {
+      if (roots.has(root)) continue;
+      restoreDetailMedia(root, state);
+      detailMedia.delete(root);
+    }
+    for (const root of roots) {
+      const id = root.closest('.rd').getAttribute('data-docsrl') || compactDetailLink() || '';
+      let state = detailMedia.get(root);
+      if (state && state.id !== id) {
+        restoreDetailMedia(root, state);
+        detailMedia.delete(root);
+        state = null;
+      }
+      if (!state) {
+        state = { id, revealed: false, notice: null, frames: new Map(), videos: new Map() };
+        detailMedia.set(root, state);
+      }
+      if (state.revealed) continue;
+
+      // 영상 iframe은 DOM에서 분리해 숨긴 상태의 소리와 자동 재생을 중단합니다.
+      for (const [slot, frame] of state.frames) {
+        if (root.contains(slot)) continue;
+        slot.replaceWith(frame);
+        state.frames.delete(slot);
+      }
+      root.querySelectorAll('iframe').forEach(frame => {
+        if (!isVideoFrame(frame)) return;
+        const slot = document.createElement('template');
+        slot.setAttribute('data-fm-clean-media-frame', '');
+        frame.replaceWith(slot);
+        slot.content.appendChild(frame);
+        state.frames.set(slot, frame);
+      });
+      const images = root.querySelectorAll('img').length;
+      const videos = root.querySelectorAll('video');
+      const videoCount = videos.length + state.frames.size;
+      root.toggleAttribute('data-fm-clean-media-collapsed', images + videoCount > 0);
+      for (const [video, saved] of state.videos) {
+        if (root.contains(video)) continue;
+        video.removeEventListener('play', saved.stop);
+        if (saved.autoplay === null) video.removeAttribute('autoplay');
+        else video.setAttribute('autoplay', saved.autoplay);
+        video.muted = saved.muted;
+        state.videos.delete(video);
+      }
+      videos.forEach(video => {
+        if (!state.videos.has(video)) {
+          const stop = () => { if (root.hasAttribute('data-fm-clean-media-collapsed')) video.pause(); };
+          state.videos.set(video, { autoplay: video.getAttribute('autoplay'), muted: video.muted, stop });
+          video.addEventListener('play', stop);
+        }
+        video.autoplay = false;
+        if (!video.muted) video.muted = true;
+        try { if (!video.paused) video.pause(); } catch (error) { /* 로드 전 영상도 계속 숨깁니다. */ }
+      });
+      if (!images && !videoCount) {
+        state.notice?.remove();
+        state.notice = null;
+        continue;
+      }
+      if (!state.notice) {
+        state.notice = document.createElement('button');
+        state.notice.type = 'button';
+        state.notice.setAttribute('data-fm-clean-media-notice', '');
+        state.notice.addEventListener('click', () => {
+          state.revealed = true;
+          restoreDetailMedia(root, state);
+          scheduleRefresh();
+        });
+      }
+      const text = [images && `이미지 ${images}개`, videoCount && `비디오 ${videoCount}개`]
+        .filter(Boolean).join(' · ') + '가 숨겨져 있습니다. 눌러서 보기';
+      if (state.notice.textContent !== text) state.notice.textContent = text;
+      if (root.previousSibling !== state.notice) root.before(state.notice);
+    }
   }
 
   function syncCommentCounts() {
@@ -1823,6 +1948,7 @@
     const url = compactDetailLink();
     panel.querySelector('.copy-area').hidden = !url;
     panel.querySelector('[data-copy-url]').textContent = url || '';
+    panel.querySelector('.media-control').hidden = !document.querySelector('.rd .rd_hd h1');
   }
 
   async function copyDetailLink() {
@@ -1868,6 +1994,7 @@
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
     }
     document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
+    syncDetailMedia();
     syncReadHistory();
     syncReadingHeader();
     syncBrightImages();
@@ -2018,7 +2145,7 @@
         [data-saved-menus] a:focus-visible {
           outline: none;
         }
-        .position-control {
+        .position-control, .media-control {
           display: flex; flex: none; align-items: center; justify-content: space-between; gap: 6px; white-space: nowrap;
           margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--fm-control-line);
           color: var(--fm-control-muted); font-size: 10px;
@@ -2038,6 +2165,9 @@
         .position-toggle .left { color: var(--fm-control-accent); }
         .position-toggle:has(input:checked) .left { color: var(--fm-control-muted); }
         .position-toggle:has(input:checked) .right { color: var(--fm-control-accent); }
+        .media-toggle .media-off { color: var(--fm-control-accent); }
+        .media-toggle:has(input:checked) .media-off { color: var(--fm-control-muted); }
+        .media-toggle:has(input:checked) .media-on { color: var(--fm-control-accent); }
         .position-toggle input:focus-visible { outline: none; }
         @media (prefers-reduced-motion: reduce) { .position-toggle input::before { transition: none; } }
         .copy-area { flex: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line); }
@@ -2061,6 +2191,11 @@
           <div class="copy-area" hidden>
             <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
             <p data-copy-status role="status"></p><span data-copy-url></span>
+          </div>
+          <div class="media-control" hidden><span>이미지·비디오 표시</span>
+            <label class="position-toggle media-toggle"><span class="media-off">끔</span>
+              <input type="checkbox" role="switch" name="showMedia" aria-label="이미지·비디오 기본 표시">
+              <span class="media-on">켬</span></label>
           </div>
           <div class="position-control"><span>버튼 위치</span>
             <label class="position-toggle"><span class="left">왼쪽</span>

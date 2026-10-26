@@ -229,11 +229,14 @@
           <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
           <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
           <title>레이아웃 회귀 검사 - 에펨코리아</title>
-          <script>window.__fmReadFixture={value:${storedHistory},writes:[],listeners:[],failWrites:${Boolean(gmOptions.failWrites)}};
+          <script>window.__fmSettingsFixture={value:${JSON.stringify(settings)},writes:[]};
+            window.__fmReadFixture={value:${storedHistory},writes:[],listeners:[],failWrites:${Boolean(gmOptions.failWrites)}};
             window.GM_getValue=(key,fallback)=>key===${JSON.stringify(readHistoryKey)}
               ? (window.__fmReadFixture.value===undefined?fallback:window.__fmReadFixture.value)
-              : Object.assign({},fallback,${JSON.stringify(settings)});
-            window.GM_setValue=(key,value)=>{if(key!==${JSON.stringify(readHistoryKey)})return;
+              : Object.assign({},fallback,window.__fmSettingsFixture.value);
+            window.GM_setValue=(key,value)=>{if(key!==${JSON.stringify(readHistoryKey)}){
+                const saved=JSON.parse(JSON.stringify(value));window.__fmSettingsFixture.value=saved;
+                window.__fmSettingsFixture.writes.push(saved);return;}
               if(window.__fmReadFixture.failWrites)throw new Error('fixture storage write failure');
               const old=window.__fmReadFixture.value;
               const saved=JSON.parse(JSON.stringify(value));window.__fmReadFixture.value=saved;
@@ -725,6 +728,104 @@
           !composerDoc.querySelector('details[data-fm-clean-comment-composer]') &&
           originalCommentText.value === '작성 중인 댓글');
 
+        const mediaBody = `
+          <div class="bd bd_mobile"><div class="rd" data-docsrl="501">
+            <div class="rd_hd"><h1><span class="np_18px_span">미디어 있는 글</span></h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="media-content">
+              <p id="media-text">글 본문 텍스트는 계속 읽을 수 있습니다.</p>
+              <img id="media-image" src="${IMAGE}" width="24" height="24" alt="본문 이미지">
+              <picture id="media-picture"><img src="${IMAGE}" width="24" height="24" alt="본문 사진"></picture>
+              <video id="media-video" autoplay="autoplay" width="80" height="40"></video>
+              <iframe id="media-youtube" src="https://www.youtube.com/embed/fixture" width="80" height="40"></iframe>
+              <iframe id="media-other" src="https://example.org/embed/fixture" width="80" height="40"></iframe>
+            </div></article></div>
+            <div class="fdb_lst_wrp"><img id="comment-thumb" src="${IMAGE}" width="24" height="24" alt="댓글 썸네일"></div>
+          </div><img id="list-thumb" src="${IMAGE}" width="24" height="24" alt="목록 썸네일"></div>`;
+        const mediaDoc = await makeLayoutFrame(source, '상세 본문 이미지·비디오 표시', mediaBody);
+        const mediaRoot = mediaDoc.querySelector('#media-content');
+        const mediaVideo = mediaDoc.querySelector('#media-video');
+        const youtubeFrame = mediaDoc.querySelector('#media-youtube');
+        const mediaShadow = mediaDoc.querySelector('#fm-clean-controls')?.shadowRoot;
+        detailLauncher(mediaDoc).dispatchEvent(new mediaDoc.defaultView.KeyboardEvent('keydown',
+          { key: 'ArrowDown', bubbles: true }));
+        const mediaInput = mediaShadow.querySelector('.media-control input[name="showMedia"]');
+        record('상세 팝업의 미디어 토글은 기본 ON이며 본문 미디어가 보임',
+          mediaInput?.checked && visiblyRendered(mediaDoc.querySelector('#media-image')) &&
+          visiblyRendered(mediaDoc.querySelector('#media-video')) &&
+          !mediaRoot.hasAttribute('data-fm-clean-media-collapsed'));
+        mediaInput.checked = false;
+        mediaInput.dispatchEvent(new mediaDoc.defaultView.Event('change', { bubbles: true }));
+        await delay(60);
+        const mediaNotice = mediaDoc.querySelector('button[data-fm-clean-media-notice]');
+        record('미디어 OFF는 본문 이미지 2개·비디오 2개만 숨기고 텍스트·댓글·목록을 보존',
+          mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          mediaNotice?.nextElementSibling === mediaRoot &&
+          mediaNotice.textContent.includes('이미지 2개') &&
+          mediaNotice.textContent.includes('비디오 2개') &&
+          ['#media-image', '#media-picture', '#media-video', '#media-youtube'].every(selector =>
+            !visiblyRendered(mediaDoc.querySelector(selector))) &&
+          mediaRoot.querySelector('#media-video') === mediaVideo &&
+          !mediaVideo.autoplay && mediaVideo.muted && mediaVideo.paused &&
+          !youtubeFrame.isConnected &&
+          Boolean(mediaRoot.querySelector('template[data-fm-clean-media-frame]')?.content
+            .querySelector('#media-youtube') === youtubeFrame) &&
+          ['#media-text', '#media-other', '#comment-thumb', '#list-thumb'].every(selector =>
+            visiblyRendered(mediaDoc.querySelector(selector))) &&
+          mediaDoc.defaultView.__fmSettingsFixture.value.showMedia === false);
+        mediaNotice?.click();
+        await delay(40);
+        record('안내 버튼은 현재 글 미디어만 펼치고 저장된 OFF 설정은 유지',
+          !mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          visiblyRendered(mediaDoc.querySelector('#media-image')) &&
+          mediaRoot.querySelector('#media-video') === mediaVideo &&
+          mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay && !mediaVideo.muted &&
+          youtubeFrame.isConnected && visiblyRendered(youtubeFrame) &&
+          mediaDoc.defaultView.__fmSettingsFixture.value.showMedia === false && !mediaInput.checked);
+
+        const nextMediaDoc = await makeLayoutFrame(source, '다음 상세는 미디어 다시 숨김',
+          mediaBody, '', { showMedia: false });
+        const nextMediaRoot = nextMediaDoc.querySelector('#media-content');
+        const nextNotice = nextMediaDoc.querySelector('button[data-fm-clean-media-notice]');
+        record('설정 OFF로 새 상세에 들어오면 펼침 상태는 이월되지 않음',
+          nextMediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          !visiblyRendered(nextMediaDoc.querySelector('#media-image')) &&
+          visiblyRendered(nextNotice));
+        nextMediaRoot.insertAdjacentHTML('beforeend', `
+          <img id="late-image" src="${IMAGE}" width="24" height="24" alt="늦게 추가된 이미지">
+          <iframe id="late-vimeo" src="https://player.vimeo.com/video/123" width="80" height="40"></iframe>`);
+        const lateVimeo = nextMediaRoot.querySelector('#late-vimeo');
+        await delay(100);
+        record('늦게 추가된 이미지·Vimeo 영상도 숨기고 안내 개수를 갱신',
+          !visiblyRendered(nextMediaDoc.querySelector('#late-image')) &&
+          !lateVimeo.isConnected &&
+          Array.from(nextMediaRoot.querySelectorAll('template[data-fm-clean-media-frame]'))
+            .some(slot => slot.content.querySelector('#late-vimeo') === lateVimeo) &&
+          nextNotice.textContent.includes('이미지 3개') &&
+          nextNotice.textContent.includes('비디오 3개'));
+        const mediaAllOff = detailOption(nextMediaDoc, 'enabled', false);
+        await delay(40);
+        record('전체 기능 OFF는 본문 미디어와 원래 화면을 복원',
+          mediaAllOff && !nextMediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          visiblyRendered(nextMediaDoc.querySelector('#media-image')) &&
+          lateVimeo.isConnected && visiblyRendered(lateVimeo) &&
+          !visiblyRendered(nextMediaDoc.querySelector('button[data-fm-clean-media-notice]')));
+
+        const noMediaDoc = await makeLayoutFrame(source, '미디어 없는 상세', `
+          <div class="bd"><div class="rd" data-docsrl="502"><div class="rd_hd"><h1>글 제목</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="plain-content">
+              <p id="plain-media-text">텍스트만 있는 본문</p></div></article></div></div></div>`,
+          '', { showMedia: false });
+        const homeMediaDoc = await makeLayoutFrame(source, '홈 미디어 설정은 숨김', `
+          <div class="bd"><div class="fm_best_widget"><div class="title">홈 목록</div></div></div>`,
+          '', { showMedia: false });
+        detailLauncher(homeMediaDoc).dispatchEvent(new homeMediaDoc.defaultView.KeyboardEvent('keydown',
+          { key: 'ArrowDown', bubbles: true }));
+        record('미디어가 없으면 안내가 없고 홈 팝업에는 미디어 토글이 보이지 않음',
+          !noMediaDoc.querySelector('button[data-fm-clean-media-notice]') &&
+          visiblyRendered(noMediaDoc.querySelector('#plain-media-text')) &&
+          !visiblyRendered(homeMediaDoc.querySelector('#fm-clean-controls')?.shadowRoot
+            ?.querySelector('.media-control')));
+
         const alertDoc = await makeLayoutFrame(source, '동적 포텐 알림', `
           <header class="hd">상단 로고</header><div class="bd bd_mobile"><p id="alert-article">홈 목록</p></div>
           <div id="fm_alert"></div>`, `
@@ -831,14 +932,16 @@
         const positionControl = menuShadow.querySelector('.position-control');
         const positionSwitch = positionControl?.querySelector('input[name="launcherRight"]');
         const copyArea = menuPanel.querySelector('.copy-area');
+        const mediaControl = menuPanel.querySelector('.media-control');
         const positionBounds = positionControl?.getBoundingClientRect();
-        record('낮은 상세 화면에서도 버튼 위치 전환이 패널 최하단에 보이고 터치됨',
+        record('낮은 상세 화면에서 미디어 토글 위아래 순서와 버튼 위치 전환이 터치됨',
           positionControl?.parentElement === menuPanel &&
-          positionControl.previousElementSibling === copyArea &&
+          mediaControl?.previousElementSibling === copyArea &&
+          positionControl.previousElementSibling === mediaControl &&
           positionBounds && positionSwitch &&
           positionBounds.top >= copyArea.getBoundingClientRect().bottom &&
           positionBounds.bottom <= panelBounds.bottom &&
-          receivesTouch(positionSwitch));
+          receivesTouch(positionSwitch) && receivesTouch(mediaControl.querySelector('input[name="showMedia"]')));
         const initialLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
         const initialLauncherTop = initialLauncherBounds.top;
         positionSwitch.checked = true;
@@ -926,6 +1029,7 @@
         const longNav = longShadow.querySelector('[data-saved-menus]');
         const longCopy = longPanel.querySelector('.copy-link');
         const longPositionControl = longPanel.querySelector('.position-control');
+        const longMediaControl = longPanel.querySelector('.media-control');
         const longStyle = longMenuDoc.defaultView.getComputedStyle(longPanel);
         const navStyle = longMenuDoc.defaultView.getComputedStyle(longNav);
         const longPanelBounds = longPanel.getBoundingClientRect();
@@ -955,7 +1059,8 @@
           longNav.scrollTop > 0 &&
           Math.abs(copyBefore.top - copyAfter.top) < 1 &&
           Math.abs(positionBefore.top - positionAfter.top) < 1 &&
-          longPositionControl.previousElementSibling === longCopy.closest('.copy-area') &&
+          longMediaControl?.previousElementSibling === longCopy.closest('.copy-area') &&
+          longPositionControl.previousElementSibling === longMediaControl &&
           longReceivesTouch(longPositionControl.querySelector('input[name="launcherRight"]')) &&
           longReceivesTouch(longCopy));
 
