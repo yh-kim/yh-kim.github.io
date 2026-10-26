@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.5
+// @version      1.6.6
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.5';
+  const SCRIPT_VERSION = '1.6.6';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -483,7 +483,7 @@
         filter: brightness(.64) !important; transition: none !important;
       }
       ${articleImage}[data-fm-clean-bright-normal] {
-        filter: brightness(1) !important; transition: filter 800ms ease-out !important;
+        filter: none !important; transition: filter 800ms ease-out !important;
       }
       ${articleImage}:is([data-fm-clean-bright-image], [data-fm-clean-bright-pending]) {
         filter: brightness(.64) !important; transition: none !important;
@@ -965,7 +965,11 @@
     hideRule('siteFooter', ['body > footer .cr', 'body > footer .crhome', '#footer']),
     cleanAppearance(),
     `
-      html[data-fm-clean-boot="true"] body { opacity: 0 !important; pointer-events: none !important; }
+      ${scope('appearance')}[data-fm-clean-boot="true"] { background: #fff !important; }
+      @media (prefers-color-scheme: dark) {
+        ${scope('appearance')}[data-fm-clean-boot="true"] { background: #1b1b1a !important; }
+      }
+      ${scope('appearance')}[data-fm-clean-boot="true"]:has(body.night_mode) { background: #1b1b1a !important; }
       /* 홈은 즐겨찾기를 CSS로, 최근 방문이 없으면 JS로 부모까지 숨깁니다. 실제 저장 링크가 있을 때만 복원합니다. */
       ${scope('header')} .main_recent .fm-recent-visited:has(.list.swiper-wrapper .item.bookmark a[href]) {
         display: block !important;
@@ -1062,24 +1066,66 @@
   const LIST_IMAGE_SELECTOR = '.fm_best_widget img, .bd_m_lst img, .bd_lst img';
   const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst) img)';
   const MEDIA_PLAYER_SELECTOR = '.auto_media_wrapper, .mejs__container, .video-js, video-js, .fluid_video_wrapper';
+  const listImages = { observer: null, tracked: new Set(), listening: false };
   const brightImages = {
     sources: new WeakMap(), tokens: new WeakMap(), cache: new Map(), visible: new WeakSet(), tracked: new Set(),
-    observer: null, listening: false, active: false
+    observer: null, listening: false, active: false,
+    requests: new Map(), queue: [], running: null, inflight: new Set()
   };
 
+  function imageNearViewport(image, margin) {
+    if (!image.isConnected || !image.getClientRects().length || image.closest(`[${AD_STATE_ATTRIBUTE}]`)) return false;
+    const rect = image.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0 && rect.bottom >= -margin && rect.top <= window.innerHeight + margin &&
+      rect.right >= -margin && rect.left <= window.innerWidth + margin && getComputedStyle(image).visibility !== 'hidden';
+  }
+
+  function loadListImage(image) {
+    if (document.hidden || !settings.enabled || document.documentElement.getAttribute('data-fm-clean-mobile') !== 'true' ||
+        !imageNearViewport(image, 360)) return false;
+    if (image.loading !== 'eager') image.loading = 'eager';
+    const source = image.getAttribute('data-original') || image.getAttribute('data-src');
+    if (source && image.getAttribute('src') !== source) try {
+      const url = new URL(source, location.href);
+      if (/^https?:$/.test(url.protocol) || /^data:image\//i.test(source)) image.setAttribute('src', source);
+    } catch (error) { /* 유효한 이미지 주소만 앞당겨 불러옵니다. */ }
+    listImages.observer?.unobserve(image);
+    listImages.tracked.delete(image);
+    return true;
+  }
+
   function syncListImages() {
-    if (!settings.enabled || document.documentElement.getAttribute('data-fm-clean-mobile') !== 'true') return;
+    if (!settings.enabled || document.documentElement.getAttribute('data-fm-clean-mobile') !== 'true') {
+      listImages.observer?.disconnect();
+      listImages.tracked.clear();
+      return;
+    }
+    if (!listImages.listening) {
+      listImages.listening = true;
+      if (window.IntersectionObserver) listImages.observer = new IntersectionObserver(entries => {
+        for (const { target, isIntersecting } of entries) if (isIntersecting) loadListImage(target);
+      }, { rootMargin: '360px 0px' });
+      window.addEventListener('pagehide', () => {
+        listImages.observer?.disconnect();
+        listImages.tracked.clear();
+      });
+    }
+    for (const image of listImages.tracked) if (!image.isConnected || !image.matches(LIST_IMAGE_SELECTOR)) {
+      listImages.observer?.unobserve(image);
+      listImages.tracked.delete(image);
+    }
     document.querySelectorAll(LIST_IMAGE_SELECTOR).forEach(image => {
       image.removeAttribute('data-fm-clean-bright-image');
       image.removeAttribute('data-fm-clean-bright-pending');
       image.removeAttribute('data-fm-clean-bright-normal');
-      if (image.loading !== 'eager') image.loading = 'eager';
       const source = image.getAttribute('data-original') || image.getAttribute('data-src');
-      if (!source || image.getAttribute('src') === source) return;
-      try {
-        const url = new URL(source, location.href);
-        if (/^https?:$/.test(url.protocol) || /^data:image\//i.test(source)) image.setAttribute('src', source);
-      } catch (error) { /* 유효한 이미지 주소만 앞당겨 불러옵니다. */ }
+      if (image.complete && image.naturalWidth > 0 && (!source || image.getAttribute('src') === source)) return;
+      if (loadListImage(image)) return;
+      if (image.loading !== 'lazy') image.loading = 'lazy';
+      if (!listImages.tracked.has(image)) {
+        listImages.tracked.add(image);
+        listImages.observer?.observe(image);
+      }
     });
   }
 
@@ -1089,66 +1135,111 @@
   }
 
   function inspectBrightImage(url) {
-    return new Promise(resolve => {
-      // 원본 이미지의 CORS·로딩 속성은 바꾸지 않고 분석용 복사본만 읽습니다.
-      const probe = new Image();
-      const finish = value => {
-        window.clearTimeout(timeout);
-        probe.onload = probe.onerror = null;
-        resolve(value);
-      };
-      const timeout = window.setTimeout(() => finish(false), 8000);
-      probe.crossOrigin = 'anonymous';
-      probe.decoding = 'async';
-      probe.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = canvas.height = 32;
-          const context = canvas.getContext('2d', { willReadFrequently: true });
-          if (!context) return finish(false);
-          context.drawImage(probe, 0, 0, 32, 32);
-          const pixels = context.getImageData(0, 0, 32, 32).data;
-          let white = 0;
-          for (let i = 0; i < pixels.length; i += 4) {
-            const low = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
-            const high = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
-            if (pixels[i + 3] >= 230 && low >= 220 && high - low <= 30) white++;
-          }
-          finish(white / (32 * 32) >= .5);
-        } catch (error) {
-          // 픽셀 읽기를 허용하지 않는 외부 이미지는 원래 밝기를 유지합니다.
-          finish(false);
+    if (brightImages.cache.has(url)) {
+      const value = brightImages.cache.get(url);
+      brightImages.cache.delete(url);
+      brightImages.cache.set(url, value);
+      return Promise.resolve(value);
+    }
+    if (brightImages.requests.has(url)) return brightImages.requests.get(url).promise;
+    let resolve;
+    const promise = new Promise(done => { resolve = done; });
+    const job = { url, promise, resolve };
+    brightImages.requests.set(url, job);
+    brightImages.queue.push(job);
+    pumpBrightImageQueue();
+    return promise;
+  }
+
+  function pumpBrightImageQueue() {
+    if (brightImages.running || document.hidden || !brightImageModeActive()) return;
+    const job = brightImages.queue.shift();
+    if (!job) return;
+    brightImages.running = job;
+    // 큰 원본을 분석용으로 동시에 여러 장 디코딩하지 않습니다.
+    const probe = new Image();
+    let canvas;
+    let finished = false;
+    const finish = (value, remember = true) => {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(timeout);
+      probe.onload = probe.onerror = null;
+      probe.removeAttribute('src');
+      if (canvas) canvas.width = canvas.height = 0;
+      brightImages.requests.delete(job.url);
+      if (remember) {
+        brightImages.cache.set(job.url, value);
+        while (brightImages.cache.size > 64) brightImages.cache.delete(brightImages.cache.keys().next().value);
+      }
+      brightImages.running = null;
+      job.resolve(value);
+      queueMicrotask(pumpBrightImageQueue);
+    };
+    const timeout = window.setTimeout(() => finish(false), 8000);
+    job.cancel = () => finish(false, false);
+    probe.crossOrigin = 'anonymous';
+    probe.decoding = 'async';
+    probe.onload = () => {
+      try {
+        canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 32;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) return finish(false);
+        context.drawImage(probe, 0, 0, 32, 32);
+        const pixels = context.getImageData(0, 0, 32, 32).data;
+        let white = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          const low = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
+          const high = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
+          if (pixels[i + 3] >= 230 && low >= 220 && high - low <= 30) white++;
         }
-      };
-      probe.onerror = () => finish(false);
-      probe.src = url;
-    });
+        finish(white / (32 * 32) >= .5);
+      } catch (error) { finish(false); }
+    };
+    probe.onerror = () => finish(false);
+    probe.src = job.url;
+  }
+
+  function cancelBrightImageWork() {
+    for (const image of brightImages.inflight) {
+      brightImages.sources.delete(image);
+      brightImages.tokens.delete(image);
+    }
+    brightImages.inflight.clear();
+    for (const job of brightImages.queue.splice(0)) {
+      brightImages.requests.delete(job.url);
+      job.resolve(false);
+    }
+    brightImages.running?.cancel();
   }
 
   function classifyBrightImage(image) {
-    if (!brightImageModeActive() || !image.isConnected || !image.complete) return;
+    if (!brightImageModeActive() || document.hidden || !image.complete || !imageNearViewport(image, 600)) return;
     const url = image.currentSrc || image.src;
     if (!url || brightImages.sources.get(image) === url) return;
     const token = {};
     brightImages.sources.set(image, url);
     brightImages.tokens.set(image, token);
+    brightImages.inflight.add(image);
     image.removeAttribute('data-fm-clean-bright-image');
     image.removeAttribute('data-fm-clean-bright-normal');
     const current = () => brightImageModeActive() && image.isConnected &&
       brightImages.tokens.get(image) === token && brightImages.sources.get(image) === url &&
       (image.currentSrc || image.src) === url;
-    const result = image.naturalWidth < 64 || image.naturalHeight < 64 ? Promise.resolve(false) :
-      brightImages.cache.get(url) || inspectBrightImage(url);
-    if (image.naturalWidth >= 64 && image.naturalHeight >= 64) brightImages.cache.set(url, result);
+    const result = image.naturalWidth < 64 || image.naturalHeight < 64 ? Promise.resolve(false) : inspectBrightImage(url);
     result.then(bright => {
       if (!current()) return;
       image.toggleAttribute('data-fm-clean-bright-image', bright);
       image.removeAttribute('data-fm-clean-bright-pending');
-      if (bright) return;
+      if (bright) { brightImages.inflight.delete(image); return; }
       // 초기의 낮은 밝기를 한 프레임 그린 뒤 일반 사진만 부드럽게 밝힙니다.
       window.requestAnimationFrame(() => {
         if (current()) window.requestAnimationFrame(() => {
-          if (current()) image.setAttribute('data-fm-clean-bright-normal', '');
+          if (current()) {
+            image.setAttribute('data-fm-clean-bright-normal', '');
+            brightImages.inflight.delete(image);
+          }
         });
       });
     });
@@ -1156,6 +1247,7 @@
 
   function syncBrightImages() {
     if (!brightImageModeActive()) {
+      cancelBrightImageWork();
       if (brightImages.active) for (const image of brightImages.tracked) {
         brightImages.sources.delete(image);
         brightImages.tokens.delete(image);
@@ -1169,6 +1261,11 @@
     brightImages.active = true;
     if (!brightImages.listening) {
       brightImages.listening = true;
+      window.addEventListener('pagehide', cancelBrightImageWork);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelBrightImageWork();
+        else pumpBrightImageQueue();
+      });
       if (window.IntersectionObserver) {
         brightImages.observer = new IntersectionObserver(entries => {
           for (const { target, isIntersecting } of entries) {
@@ -1182,7 +1279,7 @@
       document.addEventListener('load', event => {
         const image = event.target;
         if (image instanceof HTMLImageElement && image.matches(BRIGHT_IMAGE_SELECTOR) &&
-            (image.hasAttribute('data-fm-clean-bright-pending') || !brightImages.observer || brightImages.visible.has(image))) classifyBrightImage(image);
+            (!brightImages.observer || brightImages.visible.has(image))) classifyBrightImage(image);
       }, true);
     }
     for (const image of brightImages.tracked) {
@@ -1191,6 +1288,7 @@
       brightImages.tracked.delete(image);
       brightImages.sources.delete(image);
       brightImages.tokens.delete(image);
+      brightImages.inflight.delete(image);
       image.removeAttribute('data-fm-clean-bright-image');
       image.removeAttribute('data-fm-clean-bright-pending');
       image.removeAttribute('data-fm-clean-bright-normal');
@@ -1199,6 +1297,7 @@
       if (brightImages.sources.get(image) !== (image.currentSrc || image.src)) {
         brightImages.sources.delete(image);
         brightImages.tokens.delete(image);
+        brightImages.inflight.delete(image);
         image.removeAttribute('data-fm-clean-bright-image');
         image.removeAttribute('data-fm-clean-bright-normal');
       }
@@ -1206,7 +1305,7 @@
         brightImages.tracked.add(image);
         brightImages.observer?.observe(image);
       }
-      if (image.hasAttribute('data-fm-clean-bright-pending') || !brightImages.observer || brightImages.visible.has(image)) classifyBrightImage(image);
+      if (!brightImages.observer || brightImages.visible.has(image)) classifyBrightImage(image);
     });
   }
 

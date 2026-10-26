@@ -232,6 +232,32 @@
         const captureFilters = gmOptions.captureFilters
           ? `<script>window.__fmInitialFilters=Object.fromEntries(${JSON.stringify(gmOptions.captureFilters)}
               .map(id=>[id,getComputedStyle(document.getElementById(id)).filter]));<\/script>` : '';
+        const captureBoot = gmOptions.captureBoot
+          ? `<script>window.__fmBootCapture={
+              opacity:getComputedStyle(document.body).opacity,
+              pointerEvents:getComputedStyle(document.body).pointerEvents,
+              background:getComputedStyle(document.documentElement).backgroundColor,
+              boot:document.documentElement.getAttribute('data-fm-clean-boot')};<\/script>` : '';
+        const trackProbes = gmOptions.trackProbes ? `<script>(()=>{
+          const NativeImage=window.Image;
+          const descriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');
+          const stats=window.__fmProbeStats={count:0,active:0,max:0,urls:[]};
+          window.Image=function(...args){
+            const image=new NativeImage(...args);
+            let busy=false;
+            const done=()=>{if(busy){busy=false;stats.active--;}};
+            image.addEventListener('load',done);image.addEventListener('error',done);
+            Object.defineProperty(image,'src',{configurable:true,
+              get(){return descriptor.get.call(image)},
+              set(value){
+                done();busy=true;stats.count++;stats.active++;
+                stats.max=Math.max(stats.max,stats.active);stats.urls.push(String(value));
+                descriptor.set.call(image,value);
+              }});
+            return image;
+          };
+          window.Image.prototype=NativeImage.prototype;
+        })();<\/script>` : '';
         frame.srcdoc = `<!doctype html><html lang="ko"><head>
           <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
           <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
@@ -252,11 +278,12 @@
             window.GM_addValueChangeListener=(key,listener)=>{
               if(key===${JSON.stringify(readHistoryKey)})window.__fmReadFixture.listeners.push(listener);
               return window.__fmReadFixture.listeners.length;};<\/script>
+          ${trackProbes}
           <script>${escapeScript(source)}<\/script>
           <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
             .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
             ${css}</style>
-          </head><body class="${gmOptions.bodyClass || ''}">${body}${captureFilters}</body></html>`;
+          </head><body class="${gmOptions.bodyClass || ''}">${body}${captureFilters}${captureBoot}</body></html>`;
         box.append(heading, frame);
         frames.append(box);
         await Promise.race([
@@ -945,12 +972,23 @@
           gapAfter.getBoundingClientRect().height > 0 &&
           visiblyRendered(gapDoc.querySelector('#gap-text-after')));
 
+        const bootDoc = await makeLayoutFrame(source, '야간 모드의 새로고침 첫 화면', `
+          <div class="bd"><p id="boot-text">본문은 처음부터 읽을 수 있어야 합니다.</p></div>`,
+          '', {}, { bodyClass: 'night_mode', captureBoot: true });
+        const bootCapture = bootDoc.defaultView.__fmBootCapture;
+        record('야간 모드 새로고침 중 본문 입력·표시는 열어 두고 초기 배경은 어둡게 유지',
+          bootCapture?.opacity === '1' && bootCapture.pointerEvents !== 'none' &&
+          bootCapture.background === 'rgb(27, 27, 26)' &&
+          visiblyRendered(bootDoc.querySelector('#boot-text')),
+          bootCapture ? JSON.stringify(bootCapture) : '초기 화면 측정 없음');
+
         const whiteDoc = await makeLayoutFrame(source, '야간 모드의 숨긴 흰 이미지 펼침', `
           <div class="bd"><div class="rd" data-docsrl="504"><div class="rd_hd"><h1>흰 이미지 글</h1></div>
             <div class="rd_body"><article><div class="xe_content" id="white-content">
               <p>이미지 앞의 글</p><img id="white-image" src="${WHITE_IMAGE}" width="128" height="128" alt="흰 이미지">
             </div></article></div></div></div>`, '', { showMedia: false }, { bodyClass: 'night_mode' });
         whiteDoc.defaultView.frameElement.style.height = '480px';
+        whiteDoc.defaultView.frameElement.scrollIntoView({ block: 'center' });
         const whiteImage = whiteDoc.querySelector('#white-image');
         if (!whiteImage.complete) await Promise.race([
           new Promise(resolve => {
@@ -1028,6 +1066,27 @@
           brightDoc.defaultView.getComputedStyle(brightWhite).filter === 'none' &&
           brightDoc.defaultView.getComputedStyle(brightDark).filter === 'none');
 
+        const probeDoc = await makeLayoutFrame(source, '이미지 밝기 분석 동시성·URL 공유', `
+          <div class="bd"><div class="rd" data-docsrl="506"><div class="rd_hd"><h1>분석 검사</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="probe-content">
+              <img src="${WHITE_IMAGE}" width="128" height="128" alt="흰 이미지 첫 번째">
+              <img src="${DARK_IMAGE}" width="128" height="128" alt="어두운 이미지">
+              <img src="${WHITE_IMAGE}" width="128" height="128" alt="흰 이미지 두 번째">
+            </div></article></div></div></div>`, '', {},
+          { bodyClass: 'night_mode', trackProbes: true });
+        probeDoc.defaultView.frameElement.style.height = '480px';
+        probeDoc.defaultView.frameElement.scrollIntoView({ block: 'center' });
+        await delay(800);
+        const probeStats = probeDoc.defaultView.__fmProbeStats;
+        const probesBeforeReuse = probeStats.count;
+        probeDoc.querySelector('#probe-content').insertAdjacentHTML('beforeend',
+          `<img src="${WHITE_IMAGE}" width="128" height="128" alt="재사용 이미지">`);
+        await delay(250);
+        record('본문 이미지 분석은 한 번에 한 장이고 같은 URL은 결과를 공유',
+          probeStats.max === 1 && probesBeforeReuse === 2 && probeStats.count === 2 &&
+          probeStats.urls.includes(WHITE_IMAGE) && probeStats.urls.includes(DARK_IMAGE),
+          `count=${probeStats.count}, before=${probesBeforeReuse}, max=${probeStats.max}`);
+
         const listThumbDoc = await makeLayoutFrame(source, '야간 목록 작은 썸네일', `
           <div class="bd"><div class="rd"><div class="rd_hd"><h1>상세 아래 목록</h1></div>
             <div class="rd_body"><article><div class="xe_content"><p>본문</p></div></article></div></div>
@@ -1041,6 +1100,9 @@
             <table class="bd_lst"><tr><td class="thumb"><img id="thumb-table"
               src="${WHITE_IMAGE}" width="24" height="24" alt="일반 목록 썸네일"></td></tr></table>
           </div>`, '', {}, { bodyClass: 'night_mode' });
+        listThumbDoc.defaultView.frameElement.style.height = '480px';
+        listThumbDoc.defaultView.frameElement.scrollIntoView({ block: 'center' });
+        await delay(160);
         const listThumbs = ['#thumb-best', '#thumb-mobile', '#thumb-table', '#thumb-lazy']
           .map(selector => listThumbDoc.querySelector(selector));
         record('야간 모드의 홈·모바일·상세 아래 목록 썸네일은 분석·페이드 없이 바로 표시',
@@ -1053,6 +1115,31 @@
           listThumbDoc.querySelector('#thumb-lazy').getAttribute('src') === DARK_IMAGE &&
           listThumbDoc.querySelector('#thumb-lazy').loading === 'eager' &&
           listThumbDoc.defaultView.getComputedStyle(listThumbDoc.querySelector('#thumb-lazy')).opacity === '1');
+
+        const distantListDoc = await makeLayoutFrame(source, '목록 썸네일 화면 거리별 로딩', `
+          <div class="bd_m_lst"><img id="near-thumb" src="${IMAGE}" data-original="${DARK_IMAGE}"
+            loading="lazy" width="24" height="24" alt="가까운 썸네일">
+            <div style="height:1400px"></div>
+            <img id="far-thumb" src="${IMAGE}" data-original="${DARK_IMAGE}"
+              loading="lazy" width="24" height="24" alt="먼 썸네일">
+            <div style="display:none"><img id="hidden-thumb" src="${IMAGE}" data-original="${DARK_IMAGE}"
+              loading="lazy" width="24" height="24" alt="숨긴 복제 썸네일"></div>
+          </div>`, '', {}, { bodyClass: 'night_mode' });
+        distantListDoc.defaultView.frameElement.style.height = '480px';
+        distantListDoc.defaultView.frameElement.scrollIntoView({ block: 'center' });
+        await delay(160);
+        const nearThumb = distantListDoc.querySelector('#near-thumb');
+        const farThumb = distantListDoc.querySelector('#far-thumb');
+        const hiddenThumb = distantListDoc.querySelector('#hidden-thumb');
+        const nearReady = nearThumb.getAttribute('src') === DARK_IMAGE && nearThumb.loading === 'eager';
+        const farDeferred = farThumb.getAttribute('src') === IMAGE && farThumb.loading === 'lazy';
+        const hiddenDeferred = hiddenThumb.getAttribute('src') === IMAGE && hiddenThumb.loading === 'lazy';
+        farThumb.scrollIntoView({ block: 'center' });
+        await delay(160);
+        record('목록 썸네일은 화면 가까이 온 것만 앞당기고 먼 행·숨긴 복제는 보류',
+          nearReady && farDeferred && hiddenDeferred &&
+          farThumb.getAttribute('src') === DARK_IMAGE && farThumb.loading === 'eager' &&
+          hiddenThumb.getAttribute('src') === IMAGE && hiddenThumb.loading === 'lazy');
 
         const alertDoc = await makeLayoutFrame(source, '동적 포텐 알림', `
           <header class="hd">상단 로고</header><div class="bd bd_mobile"><p id="alert-article">홈 목록</p></div>
