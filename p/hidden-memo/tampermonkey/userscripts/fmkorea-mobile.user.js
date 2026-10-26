@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.2
+// @version      1.6.3
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.2';
+  const SCRIPT_VERSION = '1.6.3';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -428,7 +428,7 @@
       ${root} .rd_hd .board .btm_area { margin: 0 !important; padding: 0 !important; }
       ${root} .rd_hd h1 {
         padding: 0 !important; margin: 4px 0 6px !important;
-        color: var(--fm-clean-title) !important; font-size: 18px !important;
+        color: var(--fm-clean-title) !important; font-size: 16px !important;
         font-weight: 600 !important; line-height: 1.5 !important; letter-spacing: -.2px !important;
         text-shadow: none !important;
       }
@@ -481,7 +481,7 @@
       ${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]) {
         filter: none !important;
       }
-      ${root} body.night_mode .rd_body article .xe_content img[data-fm-clean-bright-image]:not(table.invertl img):not([style*="filter" i]) {
+      ${root} body.night_mode .rd_body article .xe_content img:is([data-fm-clean-bright-image], [data-fm-clean-bright-pending]):not(table.invertl img):not([style*="filter" i]) {
         filter: brightness(.64) !important;
       }
       ${root} :is(.fdb_tag, .fdb_lst, .fdb_itm, .bd_lst, .bd_lst > li, .bd_lst td, .bd_m_lst, .bd_m_lst > li) {
@@ -1045,6 +1045,7 @@
   const styleText = style.textContent;
 
   const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i])';
+  const MEDIA_PLAYER_SELECTOR = '.auto_media_wrapper, .mejs__container, .video-js, video-js, .fluid_video_wrapper';
   const brightImages = {
     sources: new WeakMap(), cache: new Map(), visible: new WeakSet(), tracked: new Set(),
     observer: null, listening: false
@@ -1093,8 +1094,11 @@
   }
 
   function classifyBrightImage(image) {
-    if (!brightImageModeActive() || !image.isConnected || !image.complete ||
-        image.naturalWidth < 64 || image.naturalHeight < 64) return;
+    if (!brightImageModeActive() || !image.isConnected || !image.complete) return;
+    if (image.naturalWidth < 64 || image.naturalHeight < 64) {
+      image.removeAttribute('data-fm-clean-bright-pending');
+      return;
+    }
     const url = image.currentSrc || image.src;
     if (!url || brightImages.sources.get(image) === url) return;
     brightImages.sources.set(image, url);
@@ -1103,6 +1107,7 @@
     brightImages.cache.get(url).then(bright => {
       if (image.isConnected && brightImages.sources.get(image) === url && (image.currentSrc || image.src) === url) {
         image.toggleAttribute('data-fm-clean-bright-image', bright);
+        image.removeAttribute('data-fm-clean-bright-pending');
       }
     });
   }
@@ -1124,7 +1129,7 @@
       document.addEventListener('load', event => {
         const image = event.target;
         if (image instanceof HTMLImageElement && image.matches(BRIGHT_IMAGE_SELECTOR) &&
-            (!brightImages.observer || brightImages.visible.has(image))) classifyBrightImage(image);
+            (image.hasAttribute('data-fm-clean-bright-pending') || !brightImages.observer || brightImages.visible.has(image))) classifyBrightImage(image);
       }, true);
     }
     for (const image of brightImages.tracked) {
@@ -1142,7 +1147,7 @@
         brightImages.tracked.add(image);
         brightImages.observer?.observe(image);
       }
-      if (!brightImages.observer || brightImages.visible.has(image)) classifyBrightImage(image);
+      if (image.hasAttribute('data-fm-clean-bright-pending') || !brightImages.observer || brightImages.visible.has(image)) classifyBrightImage(image);
     });
   }
 
@@ -1157,8 +1162,54 @@
     });
   }
 
+  function detailMediaTarget(media, root) {
+    let target = media;
+    for (let parent = media.parentElement; parent && parent !== root; parent = parent.parentElement) {
+      if (parent.matches(MEDIA_PLAYER_SELECTOR)) target = parent;
+    }
+    return target;
+  }
+
+  function isContentImage(image, root, state) {
+    if (image.closest(`${MEDIA_PLAYER_SELECTOR}, .mejs__poster, .mejs__controls, noscript, template, [${AD_STATE_ATTRIBUTE}]`)) return false;
+    for (let node = image; node && node !== root; node = node.parentElement) {
+      const display = state.hidden.get(node)?.value ?? node.style.getPropertyValue('display');
+      if (node.hidden || display === 'none') return false;
+    }
+    const width = Number(image.getAttribute('width'));
+    const height = Number(image.getAttribute('height'));
+    return !(width > 0 && width <= 2 && height > 0 && height <= 2 &&
+      !image.hasAttribute('data-original') && !image.hasAttribute('data-src') && !image.hasAttribute('srcset'));
+  }
+
+  function syncMediaHidden(root, state, targets) {
+    for (const [element, saved] of state.hidden) {
+      if (targets.has(element) && root.contains(element)) continue;
+      if (saved.value) element.style.setProperty('display', saved.value, saved.priority);
+      else element.style.removeProperty('display');
+      element.removeAttribute('data-fm-clean-media-hidden');
+      state.hidden.delete(element);
+    }
+    for (const element of targets) {
+      const value = element.style.getPropertyValue('display');
+      const priority = element.style.getPropertyPriority('display');
+      if (!state.hidden.has(element) || value !== 'none' || priority !== 'important') {
+        state.hidden.set(element, { value, priority });
+      }
+      if (value !== 'none' || priority !== 'important') element.style.setProperty('display', 'none', 'important');
+      element.setAttribute('data-fm-clean-media-hidden', '');
+    }
+  }
+
   function restoreDetailMedia(root, state) {
+    if (brightImageModeActive()) root.querySelectorAll('img').forEach(image => {
+      if (!image.matches(BRIGHT_IMAGE_SELECTOR) || !isContentImage(image, root, state)) return;
+      image.setAttribute('data-fm-clean-bright-pending', '');
+      brightImages.sources.delete(image);
+      classifyBrightImage(image);
+    });
     root.removeAttribute('data-fm-clean-media-collapsed');
+    syncMediaHidden(root, state, new Set());
     state.notice?.remove();
     state.notice = null;
     for (const [slot, frame] of state.frames) slot.replaceWith(frame);
@@ -1192,7 +1243,7 @@
         state = null;
       }
       if (!state) {
-        state = { id, revealed: false, notice: null, frames: new Map(), videos: new Map() };
+        state = { id, revealed: false, notice: null, frames: new Map(), videos: new Map(), hidden: new Map() };
         detailMedia.set(root, state);
       }
       if (state.revealed) continue;
@@ -1211,10 +1262,14 @@
         slot.content.appendChild(frame);
         state.frames.set(slot, frame);
       });
-      const images = root.querySelectorAll('img').length;
-      const videos = root.querySelectorAll('video');
-      const videoCount = videos.length + state.frames.size;
+      const contentImages = Array.from(root.querySelectorAll('img')).filter(image => isContentImage(image, root, state));
+      const images = contentImages.length;
+      const videos = Array.from(root.querySelectorAll('video'));
+      const videoTargets = new Set(videos.map(video => detailMediaTarget(video, root)));
+      for (const slot of state.frames.keys()) videoTargets.add(detailMediaTarget(slot, root));
+      const videoCount = videoTargets.size;
       root.toggleAttribute('data-fm-clean-media-collapsed', images + videoCount > 0);
+      syncMediaHidden(root, state, new Set([...contentImages, ...videos, ...videoTargets]));
       for (const [video, saved] of state.videos) {
         if (root.contains(video)) continue;
         video.removeEventListener('play', saved.stop);
@@ -1947,14 +2002,17 @@
     notice.hidden = links.length > 0 && !useRecent;
     const url = compactDetailLink();
     panel.querySelector('.copy-area').hidden = !url;
-    panel.querySelector('[data-copy-url]').textContent = url || '';
-    panel.querySelector('.media-control').hidden = !document.querySelector('.rd .rd_hd h1');
+    const detail = Boolean(document.querySelector('.rd .rd_hd h1'));
+    panel.querySelector('.detail-actions').hidden = !detail;
+    panel.querySelector('.media-control').hidden = !detail;
   }
 
   async function copyDetailLink() {
     const url = compactDetailLink();
     if (!url) return;
     const status = panel.querySelector('[data-copy-status]');
+    const button = panel.querySelector('.copy-link');
+    button.removeAttribute('data-copied');
     let copied = false;
     try {
       if (navigator.clipboard?.writeText) {
@@ -1986,7 +2044,9 @@
         }
       }
     }
-    status.textContent = copied ? '링크를 복사했습니다.' : '복사하지 못했습니다. 아래 주소를 길게 눌러 복사해 주세요.';
+    button.toggleAttribute('data-copied', copied);
+    button.setAttribute('aria-label', copied ? '링크 복사 완료' : '링크 복사');
+    status.textContent = copied ? '' : '복사하지 못했습니다. 다시 눌러 주세요.';
   }
 
   function applySettings() {
@@ -2016,6 +2076,8 @@
     if (open) {
       syncMenuPanel();
       panel.querySelector('[data-copy-status]').textContent = '';
+      panel.querySelector('.copy-link').removeAttribute('data-copied');
+      panel.querySelector('.copy-link').setAttribute('aria-label', '링크 복사');
     }
     panel.hidden = !open;
     backdrop.hidden = !open;
@@ -2145,12 +2207,12 @@
         [data-saved-menus] a:focus-visible {
           outline: none;
         }
-        .position-control, .media-control {
+        .position-control {
           display: flex; flex: none; align-items: center; justify-content: space-between; gap: 6px; white-space: nowrap;
-          margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--fm-control-line);
+          margin-top: 4px; padding-top: 4px; min-height: 28px; border-top: 1px solid var(--fm-control-line);
           color: var(--fm-control-muted); font-size: 10px;
         }
-        .position-toggle { display: flex; align-items: center; gap: 4px; min-height: 32px; cursor: pointer; }
+        .position-toggle { display: flex; align-items: center; min-height: 28px; cursor: pointer; }
         .position-toggle input {
           appearance: none; -webkit-appearance: none; position: relative; flex: none;
           width: 34px; height: 20px; margin: 0; border: 1px solid var(--fm-control-line); border-radius: 999px;
@@ -2162,45 +2224,45 @@
         }
         .position-toggle input:checked { background: var(--fm-control-soft); border-color: var(--fm-control-accent); }
         .position-toggle input:checked::before { transform: translateX(14px); background: var(--fm-control-accent); }
-        .position-toggle .left { color: var(--fm-control-accent); }
-        .position-toggle:has(input:checked) .left { color: var(--fm-control-muted); }
-        .position-toggle:has(input:checked) .right { color: var(--fm-control-accent); }
-        .media-toggle .media-off { color: var(--fm-control-accent); }
-        .media-toggle:has(input:checked) .media-off { color: var(--fm-control-muted); }
-        .media-toggle:has(input:checked) .media-on { color: var(--fm-control-accent); }
         .position-toggle input:focus-visible { outline: none; }
         @media (prefers-reduced-motion: reduce) { .position-toggle input::before { transition: none; } }
-        .copy-area { flex: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--fm-control-line); }
-        .copy-link {
-          display: flex; align-items: center; justify-content: center; gap: 7px;
-          width: 100%; min-height: 36px; padding: 8px 10px; border: 0; border-radius: 10px;
-          background: var(--fm-control-soft); color: var(--fm-control-accent); font-size: 12px; font-weight: 600;
+        .detail-actions {
+          display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; flex: none;
+          margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--fm-control-line);
         }
+        .copy-area { min-width: 0; }
+        .media-control {
+          display: flex; align-items: center; justify-content: space-between; gap: 4px;
+          min-width: 0; min-height: 28px; white-space: nowrap;
+          color: var(--fm-control-muted); font-size: 10px;
+        }
+        .copy-link {
+          display: flex; align-items: center; justify-content: center; gap: 4px;
+          width: 100%; min-height: 28px; padding: 4px 6px; border: 0; border-radius: 8px;
+          background: var(--fm-control-soft); color: var(--fm-control-accent); font-size: 11px; font-weight: 600;
+        }
+        .copy-link[data-copied] { background: var(--fm-control-accent); color: var(--fm-control-surface); }
         p { font-size: 11px; color: var(--fm-control-muted); margin: 8px 0 0; }
         [data-copy-status]:empty { display: none; }
-        [data-copy-url] {
-          display: block; margin-top: 7px; color: var(--fm-control-muted); font-size: 10px;
-          overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
-        }
       </style>
       <div class="backdrop" aria-hidden="true" hidden></div>
       <div class="control-anchor">
         <section class="panel" id="fm-clean-panel" aria-label="저장한 메뉴" tabindex="-1" hidden>
           <nav data-saved-menus aria-label="내 게시판 메뉴"></nav>
           <p data-menu-empty hidden>이 브라우저에 저장한 메뉴나 최근 방문이 없습니다.</p>
-          <div class="copy-area" hidden>
+          <div class="detail-actions" hidden><div class="copy-area" hidden>
             <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
-            <p data-copy-status role="status"></p><span data-copy-url></span>
+            <p data-copy-status role="status"></p>
           </div>
-          <div class="media-control" hidden><span>이미지·비디오 표시</span>
-            <label class="position-toggle media-toggle"><span class="media-off">끔</span>
+          <div class="media-control" hidden><span>이미지 표시</span>
+            <label class="position-toggle media-toggle">
               <input type="checkbox" role="switch" name="showMedia" aria-label="이미지·비디오 기본 표시">
-              <span class="media-on">켬</span></label>
-          </div>
+            </label>
+          </div></div>
           <div class="position-control"><span>버튼 위치</span>
-            <label class="position-toggle"><span class="left">왼쪽</span>
+            <label class="position-toggle">
               <input type="checkbox" role="switch" name="launcherRight" aria-label="홈 버튼 오른쪽에 두기">
-              <span class="right">오른쪽</span></label>
+            </label>
           </div>
           <!-- 저장된 설정과 기존 DOM 연동은 유지하되 메뉴 화면에는 설정 UI를 노출하지 않습니다. -->
           <div hidden data-settings-compat>

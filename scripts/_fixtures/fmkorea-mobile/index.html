@@ -31,6 +31,8 @@
       const summary = document.querySelector('#summary');
       const frames = document.querySelector('#frames');
       const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+      const WHITE_IMAGE = 'data:image/svg+xml;base64,' + btoa(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" fill="white"/></svg>');
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
       let passed = 0;
       let failed = 0;
@@ -249,7 +251,7 @@
           <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
             .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
             ${css}</style>
-          </head><body>${body}</body></html>`;
+          </head><body class="${gmOptions.bodyClass || ''}">${body}</body></html>`;
         box.append(heading, frame);
         frames.append(box);
         await Promise.race([
@@ -596,6 +598,7 @@
               (authorRect.top + authorRect.height / 2)) <= 4 &&
             Math.abs(chipRect.height - 18) <= 2 &&
             alignedDoc.defaultView.getComputedStyle(chip).fontSize === '10px' &&
+            alignedDoc.defaultView.getComputedStyle(originalTitle).fontSize === '16px' &&
             alignedDoc.documentElement.scrollWidth <= alignedDoc.defaultView.innerWidth + 1
           ));
         }
@@ -826,6 +829,78 @@
           !visiblyRendered(homeMediaDoc.querySelector('#fm-clean-controls')?.shadowRoot
             ?.querySelector('.media-control')));
 
+        const playerDoc = await makeLayoutFrame(source, '실제 mejs 비디오 플레이어 두 개', `
+          <div class="bd"><div class="rd" data-docsrl="503"><div class="rd_hd"><h1>영상 글</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="player-content">
+              <p id="player-text">영상 앞뒤의 글은 보입니다.</p>
+              <a id="player-link" href="#player-text">본문 링크</a>
+              <div class="auto_media_wrapper" id="player-one" style="display:block!important">
+                <div class="mejs__container"><div class="mejs__mediaelement">
+                  <video id="player-video-one" style="display:block!important" width="80" height="40"></video>
+                </div><div class="mejs__poster"><img src="${IMAGE}" width="24" height="24" alt="영상 표지"></div>
+                  <div class="mejs__controls"><img src="${IMAGE}" width="16" height="16" alt="재생 아이콘"></div>
+                </div>
+              </div>
+              <div class="auto_media_wrapper" id="player-two"><div class="mejs__container">
+                <div class="mejs__mediaelement"><video id="player-video-two" width="80" height="40"></video></div>
+                <div class="mejs__poster"><img src="${IMAGE}" width="24" height="24" alt="두 번째 영상 표지"></div>
+              </div></div>
+            </div></article></div></div></div>`, '', { showMedia: false });
+        const playerRoot = playerDoc.querySelector('#player-content');
+        const playerOne = playerDoc.querySelector('#player-one');
+        const playerTwo = playerDoc.querySelector('#player-two');
+        const playerVideoOne = playerDoc.querySelector('#player-video-one');
+        const playerNotice = playerDoc.querySelector('button[data-fm-clean-media-notice]');
+        record('mejs 플레이어 두 개는 표지·제어 이미지 3개를 제외하고 영상 2개로 숨김',
+          playerRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          playerNotice?.textContent.includes('비디오 2개') &&
+          !playerNotice.textContent.includes('이미지') &&
+          [playerOne, playerTwo].every(player =>
+            player.hasAttribute('data-fm-clean-media-hidden') &&
+            playerDoc.defaultView.getComputedStyle(player).display === 'none') &&
+          !visiblyRendered(playerVideoOne) &&
+          visiblyRendered(playerDoc.querySelector('#player-text')) &&
+          visiblyRendered(playerDoc.querySelector('#player-link')));
+        playerNotice?.click();
+        await delay(40);
+        record('플레이어 펼침은 같은 노드와 inline !important 표시값을 원복',
+          !playerRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          !playerOne.hasAttribute('data-fm-clean-media-hidden') &&
+          !playerTwo.hasAttribute('data-fm-clean-media-hidden') &&
+          playerDoc.querySelector('#player-one') === playerOne &&
+          playerDoc.querySelector('#player-video-one') === playerVideoOne &&
+          playerOne.style.getPropertyValue('display') === 'block' &&
+          playerOne.style.getPropertyPriority('display') === 'important' &&
+          playerVideoOne.style.getPropertyValue('display') === 'block' &&
+          playerVideoOne.style.getPropertyPriority('display') === 'important' &&
+          visiblyRendered(playerOne) && visiblyRendered(playerTwo));
+
+        const whiteDoc = await makeLayoutFrame(source, '야간 모드의 숨긴 흰 이미지 펼침', `
+          <div class="bd"><div class="rd" data-docsrl="504"><div class="rd_hd"><h1>흰 이미지 글</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="white-content">
+              <p>이미지 앞의 글</p><img id="white-image" src="${WHITE_IMAGE}" width="128" height="128" alt="흰 이미지">
+            </div></article></div></div></div>`, '', { showMedia: false }, { bodyClass: 'night_mode' });
+        whiteDoc.defaultView.frameElement.style.height = '480px';
+        const whiteImage = whiteDoc.querySelector('#white-image');
+        if (!whiteImage.complete) await Promise.race([
+          new Promise(resolve => {
+            whiteImage.addEventListener('load', resolve, { once: true });
+            whiteImage.addEventListener('error', resolve, { once: true });
+          }), delay(600)
+        ]);
+        const whiteWasHidden = !visiblyRendered(whiteImage);
+        const whiteNotice = whiteDoc.querySelector('button[data-fm-clean-media-notice]');
+        whiteNotice?.click();
+        const isDimmed = () => /brightness\((?:0?\.64)\)/.test(
+          whiteDoc.defaultView.getComputedStyle(whiteImage).filter);
+        const dimmedImmediately = isDimmed();
+        for (let attempt = 0; attempt < 20 &&
+          !whiteImage.hasAttribute('data-fm-clean-bright-image'); attempt++) await delay(50);
+        record('야간 모드에서 숨긴 흰 이미지를 펼친 직후와 분류 완료 후 모두 밝기 제한',
+          whiteImage.complete && whiteImage.naturalWidth === 128 && whiteWasHidden &&
+          visiblyRendered(whiteImage) && dimmedImmediately &&
+          whiteImage.hasAttribute('data-fm-clean-bright-image') && isDimmed());
+
         const alertDoc = await makeLayoutFrame(source, '동적 포텐 알림', `
           <header class="hd">상단 로고</header><div class="bd bd_mobile"><p id="alert-article">홈 목록</p></div>
           <div id="fm_alert"></div>`, `
@@ -931,16 +1006,31 @@
           receivesTouch(menuLink) && receivesTouch(copyButton));
         const positionControl = menuShadow.querySelector('.position-control');
         const positionSwitch = positionControl?.querySelector('input[name="launcherRight"]');
+        const detailActions = menuPanel.querySelector('.detail-actions');
         const copyArea = menuPanel.querySelector('.copy-area');
         const mediaControl = menuPanel.querySelector('.media-control');
         const positionBounds = positionControl?.getBoundingClientRect();
-        record('낮은 상세 화면에서 미디어 토글 위아래 순서와 버튼 위치 전환이 터치됨',
+        const copyBounds = copyArea?.getBoundingClientRect();
+        const mediaBounds = mediaControl?.getBoundingClientRect();
+        const positionStyle = tapDoc.defaultView.getComputedStyle(positionControl);
+        record('상세 팝업은 링크 복사·이미지 표시를 같은 줄 반반 배치하고 URL 문구를 제거',
+          detailActions?.parentElement === menuPanel &&
+          copyArea?.parentElement === detailActions && mediaControl?.parentElement === detailActions &&
+          mediaControl.previousElementSibling === copyArea &&
+          copyBounds && mediaBounds && Math.abs(copyBounds.top - mediaBounds.top) < 1 &&
+          Math.abs(copyBounds.width - mediaBounds.width) <= 2 &&
+          !menuPanel.querySelector('[data-copy-url]') &&
+          mediaControl.textContent.includes('이미지 표시'));
+        record('낮은 상세 화면에서 압축된 위치 전환이 하단에 보이고 터치됨',
           positionControl?.parentElement === menuPanel &&
-          mediaControl?.previousElementSibling === copyArea &&
-          positionControl.previousElementSibling === mediaControl &&
+          positionControl.previousElementSibling === detailActions &&
           positionBounds && positionSwitch &&
-          positionBounds.top >= copyArea.getBoundingClientRect().bottom &&
+          positionBounds.top >= detailActions.getBoundingClientRect().bottom &&
           positionBounds.bottom <= panelBounds.bottom &&
+          positionStyle.marginTop === '4px' && positionStyle.paddingTop === '4px' &&
+          Number.parseFloat(positionStyle.minHeight) >= 28 &&
+          !/왼쪽|오른쪽/.test(positionControl.textContent) &&
+          !/켜짐|꺼짐|켬|끔/.test(mediaControl.textContent) &&
           receivesTouch(positionSwitch) && receivesTouch(mediaControl.querySelector('input[name="showMedia"]')));
         const initialLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
         const initialLauncherTop = initialLauncherBounds.top;
@@ -975,6 +1065,7 @@
         let copiedLink = '';
         Object.defineProperty(tapDoc.defaultView.navigator, 'clipboard', { configurable: true,
           value: { writeText: async value => { copiedLink = value; } } });
+        const copyBeforeColor = tapDoc.defaultView.getComputedStyle(copyButton).backgroundColor;
         tapDoc.addEventListener('pointerdown', () => leakedEvents++);
         tapDoc.addEventListener('click', () => leakedEvents++);
         menuLink.addEventListener('click', event => { event.preventDefault(); menuActivations++; });
@@ -984,10 +1075,12 @@
           target.click();
         }
         await delay(30);
-        record('패널 터치는 사이트로 전파되지 않고 메뉴 활성화와 짧은 링크 복사 실행',
+        record('패널 터치는 전파되지 않고 링크 복사 성공을 버튼 색상으로만 표시',
           !menuPanel.hidden && leakedEvents === 0 && menuActivations === 1 &&
           copiedLink === 'https://www.fmkorea.com/123456' &&
-          menuShadow.querySelector('[data-copy-status]').textContent === '링크를 복사했습니다.');
+          copyButton.hasAttribute('data-copied') &&
+          tapDoc.defaultView.getComputedStyle(copyButton).backgroundColor !== copyBeforeColor &&
+          menuShadow.querySelector('[data-copy-status]').textContent === '');
 
         const outsideLink = tapDoc.createElement('a');
         outsideLink.href = '#background-link';
@@ -1028,6 +1121,7 @@
         const longPanel = longShadow.querySelector('.panel');
         const longNav = longShadow.querySelector('[data-saved-menus]');
         const longCopy = longPanel.querySelector('.copy-link');
+        const longActions = longPanel.querySelector('.detail-actions');
         const longPositionControl = longPanel.querySelector('.position-control');
         const longMediaControl = longPanel.querySelector('.media-control');
         const longStyle = longMenuDoc.defaultView.getComputedStyle(longPanel);
@@ -1060,7 +1154,8 @@
           Math.abs(copyBefore.top - copyAfter.top) < 1 &&
           Math.abs(positionBefore.top - positionAfter.top) < 1 &&
           longMediaControl?.previousElementSibling === longCopy.closest('.copy-area') &&
-          longPositionControl.previousElementSibling === longMediaControl &&
+          longMediaControl.parentElement === longActions &&
+          longPositionControl.previousElementSibling === longActions &&
           longReceivesTouch(longPositionControl.querySelector('input[name="launcherRight"]')) &&
           longReceivesTouch(longCopy));
 
