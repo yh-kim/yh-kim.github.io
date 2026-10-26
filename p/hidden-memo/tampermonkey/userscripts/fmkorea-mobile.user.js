@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.5.30
-// @description  홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 살구색 모바일 UI, 광고·상단·댓글 정리
+// @version      1.6.0
+// @description  읽은 글 7일 기록, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -10,6 +10,7 @@
 // @updateURL    https://blog.pickth.com/p/hidden-memo/tampermonkey/userscripts/fmkorea-mobile.user.js
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        GM_addValueChangeListener
 // @run-at       document-start
 // @noframes
 // ==/UserScript==
@@ -21,11 +22,14 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.5.30';
+  const SCRIPT_VERSION = '1.6.0';
+  const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
+  const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
+  const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const defaults = {
     enabled: true, header: true, ads: true, icons: true, votes: true,
-    boardLabel: true, count: true, readingHeader: true, swipeBack: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true, launcherRight: false
+    boardLabel: true, count: true, readingHeader: true, readHistory: true, swipeBack: true, footer: true, commentActions: true, commentComposer: true, siteFooter: true, appearance: true, launcherRight: false
   };
   const options = [
     ['enabled', '전체 기능 켜기'],
@@ -36,6 +40,7 @@
     ['boardLabel', '상세 제목 왼쪽 현재 메뉴 표시'],
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['readingHeader', '스크롤 시 제목·진행 바 표시'],
+    ['readHistory', '읽은 글 일주일 표시'],
     ['swipeBack', '오른쪽 스와이프로 뒤로가기'],
     ['footer', '상세 주소·하단 도구 숨김'],
     ['commentActions', '댓글 추천 수만 표시·이동 버튼 정리'],
@@ -51,6 +56,9 @@
   let pending = false;
   let launcherClickTimer = null;
   let primaryContentRoot = null;
+  let readHistory = null;
+  let recordedReadId = null;
+  let readHistoryListening = false;
   const hiddenElements = { header: new Map(), ads: new Map() };
   const knownAdTargets = new Set();
   const headerSelectors = [
@@ -784,6 +792,10 @@
       ${root} .bd_lst td.title a:is(.visited, :visited) .comment_count {
         color: var(--fm-clean-read) !important; font-weight: 400 !important;
       }
+      ${root} :is(.fm_best_widget .title > a, .bd_m_lst > li .rt_area h3 > a, .bd_lst td.title a)[data-fm-clean-read],
+      ${root} :is(.fm_best_widget .title > a, .bd_m_lst > li .rt_area h3 > a, .bd_lst td.title a)[data-fm-clean-read] * {
+        color: var(--fm-clean-read) !important; font-weight: 400 !important;
+      }
       ${root} #fm_alert {
         position: fixed !important; right: 12px !important; bottom: 0 !important;
         top: auto !important; transform: none !important; max-width: calc(100vw - 24px) !important;
@@ -1157,6 +1169,98 @@
       label.setAttribute('data-fm-clean-author', '');
       label.textContent = '작성자';
       name.after(label);
+    });
+  }
+
+  function readDocumentId(href) {
+    if (!href) return null;
+    try {
+      const url = new URL(href, MAIN_URL);
+      if (!/^https?:$/.test(url.protocol) || !/^(?:m\.|www\.)?fmkorea\.com$/i.test(url.hostname)) return null;
+      const queryId = url.searchParams.get('document_srl');
+      if (queryId !== null) return /^[1-9]\d{0,19}$/.test(queryId) ? queryId : null;
+      return url.pathname.match(/^\/(?:[A-Za-z_][A-Za-z0-9_-]*\/)?([1-9]\d{0,19})\/?$/)?.[1] || null;
+    } catch (error) { return null; }
+  }
+
+  function readHistoryEntries(saved, now) {
+    const entries = new Map();
+    if (saved?.version !== 1 || !Array.isArray(saved.entries)) return entries;
+    for (const entry of saved.entries) {
+      if (!Array.isArray(entry) || entry.length !== 2) continue;
+      const [id, timestamp] = entry;
+      if (typeof id !== 'string' || !/^[1-9]\d{0,19}$/.test(id) ||
+          typeof timestamp !== 'number' || !Number.isFinite(timestamp) ||
+          timestamp > now || now - timestamp >= READ_HISTORY_AGE) continue;
+      if (timestamp > (entries.get(id) || 0)) entries.set(id, timestamp);
+    }
+    return entries;
+  }
+
+  function loadReadHistory(now) {
+    try { return readHistoryEntries(GM_getValue(READ_HISTORY_KEY, {}), now); }
+    catch (error) { return new Map(); }
+  }
+
+  function saveReadHistory(now) {
+    // 다른 탭이 저장한 글도 합치며, 개수로 자르지 않고 지난 7일 기록을 유지합니다.
+    const merged = loadReadHistory(now);
+    for (const [id, timestamp] of readHistory) {
+      if (timestamp <= now && now - timestamp < READ_HISTORY_AGE && timestamp > (merged.get(id) || 0)) {
+        merged.set(id, timestamp);
+      }
+    }
+    readHistory = merged;
+    try { GM_setValue(READ_HISTORY_KEY, { version: 1, entries: Array.from(merged) }); }
+    catch (error) { /* 저장이 막혀도 현재 화면의 읽음 표시와 글 읽기는 유지합니다. */ }
+  }
+
+  function syncReadHistory() {
+    const active = settings.enabled && settings.readHistory &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    if (!active) {
+      document.querySelectorAll('[data-fm-clean-read]').forEach(link => link.removeAttribute('data-fm-clean-read'));
+      recordedReadId = null;
+      return;
+    }
+    const now = Date.now();
+    if (!readHistory) readHistory = loadReadHistory(now);
+    if (!readHistoryListening) {
+      readHistoryListening = true;
+      window.addEventListener('pageshow', event => {
+        if (!event.persisted) return;
+        readHistory = null;
+        recordedReadId = null;
+        scheduleRefresh();
+      });
+      try {
+        if (typeof GM_addValueChangeListener === 'function') GM_addValueChangeListener(READ_HISTORY_KEY,
+          (_key, _old, saved, remote) => {
+            if (!remote) return;
+            const updatedAt = Date.now();
+            const incoming = readHistoryEntries(saved, updatedAt);
+            const missing = Array.from(readHistory || []).some(([id, timestamp]) => timestamp <= updatedAt &&
+              updatedAt - timestamp < READ_HISTORY_AGE && timestamp > (incoming.get(id) || 0));
+            if (missing && saved?.version === 1) saveReadHistory(updatedAt);
+            else readHistory = incoming;
+            scheduleRefresh();
+          });
+      } catch (error) { /* 원격 변경 알림이 없으면 다음 글 저장 때 최신 기록을 합칩니다. */ }
+    }
+    const detailId = readDocumentId(compactDetailLink());
+    if (detailId && detailId !== recordedReadId) {
+      recordedReadId = detailId;
+      readHistory.set(detailId, now);
+      saveReadHistory(now);
+    } else if (!detailId) recordedReadId = null;
+    // 사이트의 읽음 클래스를 가져오거나 덮어쓰지 않아 목록을 볼 때마다 보관 기한이 늘어나지 않습니다.
+    document.querySelectorAll(`${READ_LINK_SELECTOR}, a[data-fm-clean-read]`).forEach(link => {
+      const id = readDocumentId(link.getAttribute('href'));
+      const timestamp = readHistory.get(id);
+      const read = link.matches(READ_LINK_SELECTOR) && timestamp !== undefined &&
+        timestamp <= now && now - timestamp < READ_HISTORY_AGE;
+      if (read && link.getAttribute('data-fm-clean-read') !== id) link.setAttribute('data-fm-clean-read', id);
+      else if (!read && link.hasAttribute('data-fm-clean-read')) link.removeAttribute('data-fm-clean-read');
     });
   }
 
@@ -1758,6 +1862,7 @@
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
     }
     document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
+    syncReadHistory();
     syncReadingHeader();
     syncBrightImages();
     syncCommentCounts();

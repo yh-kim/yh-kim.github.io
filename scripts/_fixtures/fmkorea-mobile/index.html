@@ -214,19 +214,33 @@
       }
 
       // 사이트 CSS와 늦게 채워지는 메뉴를 함께 재현합니다. 스크립트는 문서 시작에 배치합니다.
-      async function makeLayoutFrame(source, label, body, css = '', settings = {}) {
+      async function makeLayoutFrame(source, label, body, css = '', settings = {}, gmOptions = {}) {
         const box = document.createElement('section');
         box.className = 'fixture';
         const heading = document.createElement('h2');
         heading.textContent = label;
         const frame = document.createElement('iframe');
         frame.title = label;
+        const readHistoryKey = 'pimi.fmkorea.read-history.v1';
+        const storedHistory = Object.hasOwn(gmOptions, 'history')
+          ? JSON.stringify(gmOptions.history) : 'undefined';
         frame.srcdoc = `<!doctype html><html lang="ko"><head>
           <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
           <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
           <title>레이아웃 회귀 검사 - 에펨코리아</title>
-          <script>window.GM_getValue=(_key,fallback)=>Object.assign({},fallback,${JSON.stringify(settings)});
-            window.GM_setValue=()=>{};<\/script>
+          <script>window.__fmReadFixture={value:${storedHistory},writes:[],listeners:[],failWrites:${Boolean(gmOptions.failWrites)}};
+            window.GM_getValue=(key,fallback)=>key===${JSON.stringify(readHistoryKey)}
+              ? (window.__fmReadFixture.value===undefined?fallback:window.__fmReadFixture.value)
+              : Object.assign({},fallback,${JSON.stringify(settings)});
+            window.GM_setValue=(key,value)=>{if(key!==${JSON.stringify(readHistoryKey)})return;
+              if(window.__fmReadFixture.failWrites)throw new Error('fixture storage write failure');
+              const old=window.__fmReadFixture.value;
+              const saved=JSON.parse(JSON.stringify(value));window.__fmReadFixture.value=saved;
+              window.__fmReadFixture.writes.push(saved);
+              window.__fmReadFixture.listeners.forEach(listener=>listener(key,old,saved,false));};
+            window.GM_addValueChangeListener=(key,listener)=>{
+              if(key===${JSON.stringify(readHistoryKey)})window.__fmReadFixture.listeners.push(listener);
+              return window.__fmReadFixture.listeners.length;};<\/script>
           <script>${escapeScript(source)}<\/script>
           <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
             .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
@@ -1041,6 +1055,105 @@
           Math.abs(noCommentDoc.querySelector('#progress-article').getBoundingClientRect().bottom) < 2 &&
           noCommentDoc.querySelector('#progress-following-list').getBoundingClientRect().bottom >
             noCommentDoc.defaultView.innerHeight + 300);
+
+        const readDay = 24 * 60 * 60 * 1000;
+        const readNow = Date.now();
+        const readListMarkup = `
+          <div class="fm_best_widget"><div class="li"><span class="title">
+            <a id="read-best" href="https://m.fmkorea.com/best/123">홈 포텐 글</a></span></div></div>
+          <ul class="bd_m_lst"><li><div class="rt_area"><h3>
+            <a id="read-mobile" href="https://m.fmkorea.com/board/123">모바일 목록 글</a>
+          </h3></div></li></ul>
+          <table class="bd_lst"><tr><td class="title">
+            <a id="read-table" href="https://m.fmkorea.com/123">일반 목록 글</a>
+            <a id="read-query" href="https://m.fmkorea.com/?document_srl=123">쿼리 링크</a>
+            <a id="read-expired" href="https://m.fmkorea.com/456">만료된 글</a>
+            <a id="read-external" href="https://example.org/123">외부 링크</a>
+          </td></tr></table>`;
+        const readListDoc = await makeLayoutFrame(source, '읽은 글 7일 표시와 링크 정규화',
+          `<div class="bd">${readListMarkup}</div>`, '', {},
+          { history: { version: 1, entries: [['123', readNow - 6 * readDay],
+            ['456', readNow - 8 * readDay]] } });
+        const readAttr = id => readListDoc.querySelector(`#${id}`)?.getAttribute('data-fm-clean-read');
+        record('6일 읽은 글은 홈·모바일·일반 목록과 URL 네 형태에서 같은 ID로 표시',
+          ['read-best', 'read-mobile', 'read-table', 'read-query'].every(id => readAttr(id) === '123') &&
+          readListDoc.defaultView.getComputedStyle(readListDoc.querySelector('#read-best')).color !==
+            readListDoc.defaultView.getComputedStyle(readListDoc.querySelector('#read-expired')).color &&
+          !readListDoc.querySelector('#read-best').classList.contains('visited'));
+        record('8일 지난 글과 외부 사이트의 같은 숫자 URL은 읽음 처리하지 않음',
+          !readAttr('read-expired') && !readAttr('read-external'));
+        const readOff = detailOption(readListDoc, 'readHistory', false);
+        await delay(40);
+        const readHidden = !readAttr('read-best') && !readAttr('read-mobile');
+        const readOn = detailOption(readListDoc, 'readHistory', true);
+        await delay(40);
+        record('읽은 글 표시 OFF는 속성을 제거하고 ON은 저장된 6일 기록을 복원',
+          readOff && readHidden && readOn && readAttr('read-best') === '123' &&
+          readAttr('read-mobile') === '123');
+        const remoteHistory = readListDoc.defaultView.__fmReadFixture;
+        const remoteOld = remoteHistory.value;
+        remoteHistory.value = { version: 1, entries: [['456', Date.now()]] };
+        remoteHistory.listeners.forEach(listener =>
+          listener('pimi.fmkorea.read-history.v1', remoteOld, remoteHistory.value, true));
+        await delay(80);
+        record('다른 탭의 읽음 기록을 반영하면서 기존 6일 기록도 보존',
+          readAttr('read-expired') === '456' && readAttr('read-best') === '123' &&
+          remoteHistory.value.entries.length === 2 && remoteHistory.writes.length === 1);
+        readListDoc.querySelector('td.title').insertAdjacentHTML('beforeend',
+          '<a id="read-back" href="https://www.fmkorea.com/best/654">뒤로 온 목록의 새 기록</a>');
+        remoteHistory.value.entries.push(['654', Date.now()]);
+        await delay(40);
+        const beforeBack = !readAttr('read-back');
+        readListDoc.defaultView.dispatchEvent(new readListDoc.defaultView.PageTransitionEvent('pageshow',
+          { persisted: true }));
+        await delay(80);
+        record('뒤로 가기로 복원된 목록은 저장소를 다시 읽어 새 읽음 기록 표시',
+          beforeBack && readAttr('read-back') === '654' && readAttr('read-best') === '123');
+
+        const readDetailDoc = await makeLayoutFrame(source, '상세 읽음 기록은 새 방문 한 번만', `
+          <div class="bd"><div class="rd" data-docsrl="789">
+            <div class="rd_hd"><h1><span class="np_18px_span">상세 읽음 글</span></h1></div>
+            <div class="rd_body"><article id="read-detail-body">본문 유지</article></div>
+          </div></div>`);
+        const detailHistory = readDetailDoc.defaultView.__fmReadFixture;
+        const readTimestamp = () => detailHistory.value?.entries?.find(([id]) => String(id) === '789')?.[1];
+        const firstReadTimestamp = readTimestamp();
+        readDetailDoc.querySelector('.rd').classList.add('site-updated');
+        readDetailDoc.querySelector('#read-detail-body').style.paddingTop = '1px';
+        await delay(100);
+        record('상세 최초 방문만 기록하고 DOM 갱신은 7일 만료 시각을 연장하지 않음',
+          Number.isFinite(firstReadTimestamp) &&
+          Math.abs(firstReadTimestamp - Date.now()) < 2000 &&
+          readTimestamp() === firstReadTimestamp &&
+          visiblyRendered(readDetailDoc.querySelector('#read-detail-body')));
+
+        const bulkEntries = Array.from({ length: 2000 }, (_, index) =>
+          [String(10000 + index), readNow - 2 * readDay]);
+        const bulkDoc = await makeLayoutFrame(source, '읽은 글 기록 개수 제한 없음', `
+          <div class="bd"><div class="fm_best_widget"><span class="title">
+            <a id="read-first" href="https://m.fmkorea.com/10000">처음 기록</a>
+            <a id="read-last" href="https://m.fmkorea.com/11999">마지막 기록</a>
+          </span></div><div class="rd" data-docsrl="12000">
+            <div class="rd_hd"><h1><span class="np_18px_span">새 글</span></h1></div>
+            <div class="rd_body"><article>본문</article></div></div></div>`, '', {},
+          { history: { version: 1, entries: bulkEntries } });
+        const bulkSaved = bulkDoc.defaultView.__fmReadFixture.value?.entries || [];
+        record('기록 2000개가 있어도 앞·뒤 기록을 유지하고 새 방문을 추가',
+          bulkDoc.querySelector('#read-first')?.getAttribute('data-fm-clean-read') === '10000' &&
+          bulkDoc.querySelector('#read-last')?.getAttribute('data-fm-clean-read') === '11999' &&
+          bulkSaved.length === 2001 &&
+          bulkSaved.some(([id]) => String(id) === '12000'));
+
+        const badHistoryMarkup = `<div class="bd"><div class="rd" data-docsrl="900">
+          <div class="rd_hd"><h1><span class="np_18px_span">오류 복구 글</span></h1></div>
+          <div class="rd_body"><article id="bad-history-body">본문 유지</article></div></div></div>`;
+        const malformedDoc = await makeLayoutFrame(source, '잘못된 읽음 저장값',
+          badHistoryMarkup, '', {}, { history: { version: 1, entries: 'broken' } });
+        const writeFailDoc = await makeLayoutFrame(source, '읽음 저장 쓰기 실패',
+          badHistoryMarkup, '', {}, { failWrites: true });
+        record('저장값 형식 오류와 쓰기 실패에도 상세 본문·제어 버튼 유지',
+          [malformedDoc, writeFailDoc].every(doc =>
+            visiblyRendered(doc.querySelector('#bad-history-body')) && detailLauncher(doc)));
       } catch (error) {
         record('검사 실행', false, error?.message || String(error));
       }
