@@ -166,7 +166,8 @@
           <div id="detail-board" class="bd bd_mobile">${activeMenu}${boardHeading}
             <div class="rd"><div class="rd_hd"><div class="top_area">
               <h1 class="np_18px"><span class="np_18px_span">상세 제목</span></h1>
-            </div><div class="btm_area"><div class="side"><span>추천 수 <b>238</b></span></div></div></div>
+            </div><div class="btm_area"><div class="side"><a class="member_plate" href="#author">작성자</a>
+              <span>추천 수 <b>238</b></span></div></div></div>
               <div class="rd_body"><article id="detail-content">실제 글 내용</article></div>
               <div class="fm_vote"><div class="vote"><span class="new_voted_count">238</span></div></div>
             </div></div></body></html>`;
@@ -199,7 +200,7 @@
       }
 
       function detailChip(doc) {
-        return doc.querySelector('.rd > .rd_hd h1 > [data-fm-clean-board]');
+        return doc.querySelector('.rd > .rd_hd .btm_area [data-fm-clean-board]');
       }
 
       function detailCount(doc) {
@@ -345,6 +346,7 @@
         const detailDoc = await makeDetailFrame(source, '상세 제목 게시판 배지·설정',
           { boardLabel: true, count: true });
         const titleHeading = detailDoc.querySelector('.rd > .rd_hd h1');
+        const detailAuthor = detailDoc.querySelector('.rd > .rd_hd .member_plate');
         const boardChip = detailChip(detailDoc);
         const launcher = detailLauncher(detailDoc);
         const launcherStyle = launcher && detailDoc.defaultView.getComputedStyle(launcher);
@@ -354,8 +356,10 @@
           Number.parseFloat(launcherStyle.borderTopWidth) >= 1 &&
           ['transparent', 'rgba(0, 0, 0, 0)'].includes(launcherStyle.backgroundColor) &&
           launcherStyle.backgroundImage === 'none'));
-        record('상세 제목 첫 요소가 해외축구 게시판 배지', Boolean(boardChip &&
-          titleHeading?.firstElementChild === boardChip && boardChip.textContent.trim() === '해외축구' &&
+        record('게시판 배지는 작성자 바로 앞에 있고 제목은 왼쪽에서 시작', Boolean(boardChip &&
+          boardChip.nextElementSibling === detailAuthor &&
+          titleHeading?.firstElementChild?.classList.contains('np_18px_span') &&
+          !titleHeading.contains(boardChip) && boardChip.textContent.trim() === '해외축구' &&
           visiblyRendered(boardChip) && visiblyRendered(detailDoc.querySelector('#detail-content'))));
 
         const boardOff = detailOption(detailDoc, 'boardLabel', false);
@@ -402,6 +406,17 @@
         record('메뉴가 없으면 document.title의 해외축구 사용',
           detailChip(titleDoc)?.textContent.trim() === '해외축구' &&
           visiblyRendered(detailChip(titleDoc)) && visiblyRendered(titleDoc.querySelector('#detail-content')));
+
+        const noAuthorDoc = await makeLayoutFrame(source, '작성자 없는 상세', `
+          <div class="bd bd_mobile"><div class="tl_srch"><div class="bd_tl">
+            <h1><a href="/football_world">해외축구</a></h1></div></div>
+            <div class="rd"><div class="rd_hd"><h1 id="no-author-title">
+              <span class="np_18px_span">작성자 없는 제목</span></h1>
+              <div class="btm_area"><div class="side">조회 1</div></div></div>
+              <div class="rd_body"><article>본문</article></div></div></div>`);
+        record('작성자 정보가 없으면 게시판 배지를 제목으로 옮기지 않음',
+          !noAuthorDoc.querySelector('[data-fm-clean-board]') &&
+          noAuthorDoc.querySelector('#no-author-title')?.textContent.trim() === '작성자 없는 제목');
 
         const headingMenu = detailDoc.querySelector('.tl_srch');
         headingMenu?.remove();
@@ -547,9 +562,12 @@
             .rd_hd .board .date{float:right;display:inline!important}
             .rd_hd .board h1{font-size:17px;line-height:18px}
           `);
+          alignedDoc.defaultView.frameElement.style.width = '400px';
+          await delay(20);
           const heading = alignedDoc.querySelector('.rd_hd h1');
           const originalTitle = alignedDoc.querySelector('#original-title');
           const chip = detailChip(alignedDoc);
+          const author = alignedDoc.querySelector('.rd_hd .member_plate');
           const badge = detailCount(alignedDoc);
           const date = alignedDoc.querySelector('#detail-date');
           let clickCount = 0;
@@ -559,27 +577,36 @@
           const titleWraps = originalTitle?.getBoundingClientRect().height > titleLineHeight * 1.8;
           const center = firstLineCenter(originalTitle);
           const chipRect = chip?.getBoundingClientRect();
+          const authorRect = author?.getBoundingClientRect();
           const badgeRect = badge?.getBoundingClientRect();
-          record(`${label} 게시판·제목·추천수 첫 줄 정렬과 원본 제목 유지`, Boolean(
-            heading && originalTitle && chip && badge && date &&
-            heading.contains(originalTitle) && heading.firstElementChild === chip && clickCount === 1 &&
+          const headingRect = heading?.getBoundingClientRect();
+          record(`${label} 400px에서 제목은 왼쪽·추천수는 오른쪽, 작은 게시판 배지는 저자 앞`, Boolean(
+            heading && originalTitle && chip && author && badge && date &&
+            heading.contains(originalTitle) && heading.firstElementChild === originalTitle &&
+            !heading.contains(chip) && chip.nextElementSibling === author && clickCount === 1 &&
             (expectWrap ? titleWraps : !titleWraps) &&
             alignedDoc.defaultView.getComputedStyle(date).float === 'none' &&
-            Math.abs((chipRect.top + chipRect.height / 2) - center) <= 4 &&
             Math.abs((badgeRect.top + badgeRect.height / 2) - center) <= 4 &&
-            chipRect.right <= originalTitle.getBoundingClientRect().left + 1 &&
-            originalTitle.getBoundingClientRect().right <= badgeRect.left + 1
+            Math.abs(originalTitle.getBoundingClientRect().left - headingRect.left) <= 1 &&
+            originalTitle.getBoundingClientRect().right <= badgeRect.left + 1 &&
+            Math.abs((chipRect.top + chipRect.height / 2) -
+              (authorRect.top + authorRect.height / 2)) <= 4 &&
+            Math.abs(chipRect.height - 18) <= 2 &&
+            alignedDoc.defaultView.getComputedStyle(chip).fontSize === '10px' &&
+            alignedDoc.documentElement.scrollWidth <= alignedDoc.defaultView.innerWidth + 1
           ));
         }
 
         const compactDoc = await makeLayoutFrame(source, '상세 날짜·좌우 여백', `
           <header class="hd">상단 로고</header>
-          <div class="bd bd_mobile" id="compact-board"><div class="rd"><div class="rd_hd">
+          <div class="bd bd_mobile" id="compact-board">
+            <div class="tl_srch"><div class="bd_tl"><h1><a href="/house">부동산</a></h1></div></div>
+            <div class="rd"><div class="rd_hd">
             <div class="board" id="compact-header"><div class="top_area" id="compact-top">
               <span class="date m_no" id="compact-date">2026.10.20 19:13</span>
-              <h1 class="np_18px"><span class="np_18px_span">제목 한 줄</span></h1><div class="clear"></div>
+              <h1 class="np_18px"><span class="np_18px_span" id="compact-title">제목 한 줄</span></h1><div class="clear"></div>
             </div><div class="btm_area" id="compact-meta">
-              <div class="side"><a class="member_plate" href="#author">작성자</a></div>
+              <div class="side"><a class="member_plate" id="compact-author" href="#author">작성자</a></div>
               <div class="side fr"><span id="view-count">조회 수 <b>255</b></span>
                 <span id="comment-count">댓글 <b>7</b></span></div>
             </div></div></div><div class="rd_body"><article>본문</article></div></div></div>`, `
@@ -594,6 +621,22 @@
         const compactBoard = compactDoc.querySelector('#compact-header');
         const compactView = compactDoc.querySelector('#view-count');
         const compactComments = compactDoc.querySelector('#comment-count');
+        const compactChip = detailChip(compactDoc);
+        const compactAuthor = compactDoc.querySelector('#compact-author');
+        const compactTitle = compactDoc.querySelector('#compact-title');
+        function chipSharesAuthorRow() {
+          const chipRect = compactChip?.getBoundingClientRect();
+          const authorRect = compactAuthor?.getBoundingClientRect();
+          const headingRect = compactTitle?.parentElement.getBoundingClientRect();
+          const titleRect = compactTitle?.getBoundingClientRect();
+          return Boolean(chipRect && authorRect && headingRect && titleRect &&
+            compactChip.nextElementSibling === compactAuthor &&
+            Math.abs((chipRect.top + chipRect.bottom) / 2 -
+              (authorRect.top + authorRect.bottom) / 2) <= 4 &&
+            Math.abs(titleRect.left - headingRect.left) <= 1 &&
+            Math.abs(chipRect.height - 18) <= 2 &&
+            compactDoc.defaultView.getComputedStyle(compactChip).fontSize === '10px');
+        }
         function dateSharesMetaRow() {
           const dateRect = compactDate.getBoundingClientRect();
           const viewRect = compactView.getBoundingClientRect();
@@ -608,15 +651,20 @@
             dateRect.right <= boardRect.right + 1 &&
             boardRect.right - dateRect.right <= 24;
         }
-        record('상세 날짜가 조회·댓글과 같은 줄 오른쪽에 정렬', dateSharesMetaRow());
+        compactDoc.defaultView.frameElement.style.width = '400px';
+        await delay(20);
+        record('400px에서 날짜·조회·댓글 정렬과 알약·작성자 한 줄 유지',
+          dateSharesMetaRow() && chipSharesAuthorRow() &&
+          compactDoc.documentElement.scrollWidth <= compactDoc.defaultView.innerWidth + 1);
         compactDoc.defaultView.frameElement.style.width = '320px';
         await delay(40);
-        record('320px에서도 날짜·조회·댓글 정렬과 가로 넘침 방지',
-          dateSharesMetaRow() &&
+        record('320px에서도 날짜·조회·댓글 및 알약·작성자 정렬과 가로 넘침 방지',
+          dateSharesMetaRow() && chipSharesAuthorRow() &&
           compactDoc.documentElement.scrollWidth <= compactDoc.defaultView.innerWidth + 1);
         const compactOff = detailOption(compactDoc, 'appearance', false);
         await delay(40);
-        record('화면 디자인 OFF면 날짜 원위치와 원본 배치 복원', compactOff &&
+        record('화면 디자인 OFF여도 작은 알약은 작성자 앞, 날짜는 원본 배치', compactOff &&
+          chipSharesAuthorRow() &&
           compactDate.parentElement === compactTop &&
           compactDoc.defaultView.getComputedStyle(compactTop).display !== 'contents' &&
           compactDoc.defaultView.getComputedStyle(compactDate).float === 'right');

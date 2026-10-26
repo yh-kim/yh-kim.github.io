@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.0
+// @version      1.6.1
 // @description  읽은 글 7일 기록, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.0';
+  const SCRIPT_VERSION = '1.6.1';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -37,7 +37,7 @@
     ['ads', '광고 영역 숨김'],
     ['icons', '글·댓글 닉네임 아이콘 숨김'],
     ['votes', '포텐·방출 버튼 숨김'],
-    ['boardLabel', '상세 제목 왼쪽 현재 메뉴 표시'],
+    ['boardLabel', '상세 닉네임 왼쪽 현재 메뉴 표시'],
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['readingHeader', '스크롤 시 제목·진행 바 표시'],
     ['readHistory', '읽은 글 일주일 표시'],
@@ -959,24 +959,30 @@
       }
       ${scope('header')} .main_recent .fm-recent-visited .list .item.bookmark { display: inline-flex !important; }
       [data-fm-clean-badge], [data-fm-clean-board] { display: none !important; }
-      ${scope('count')} [data-fm-clean-title],
-      ${scope('boardLabel')} [data-fm-clean-title] {
+      ${scope('count')} [data-fm-clean-title] {
         display: flex !important; align-items: flex-start; gap: 6px;
         width: 100% !important; box-sizing: border-box; clear: both; overflow-wrap: anywhere;
       }
-      ${scope('count')} [data-fm-clean-title] .np_18px_span,
-      ${scope('boardLabel')} [data-fm-clean-title] .np_18px_span {
+      ${scope('count')} [data-fm-clean-title] .np_18px_span {
         flex: 1 1 auto; min-width: 0; width: auto !important;
         white-space: normal !important; overflow-wrap: anywhere;
       }
-      ${scope('boardLabel')} [data-fm-clean-board] {
-        display: inline-block !important; flex: 0 1 auto; align-self: flex-start;
-        max-width: 40%; height: 22px; box-sizing: border-box; margin-top: 2px; padding: 0 8px;
+      ${scope('boardLabel')} .rd_hd .btm_area [data-fm-clean-board] {
+        display: inline-block !important; flex: 0 1 auto; vertical-align: middle;
+        max-width: 40%; min-width: 0; height: 18px !important; box-sizing: border-box;
+        margin: 0 !important; padding: 0 6px !important;
         border: 0; border-radius: 999px; background: var(--fm-clean-soft, #fff0e7);
         color: var(--fm-clean-accent, #9a4e26) !important; text-decoration: none !important;
         overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-        font: 600 12px/22px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+        font: 500 10px/18px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
         letter-spacing: 0; text-indent: 0;
+      }
+      ${scope('boardLabel')} .rd_hd .btm_area .side:has(> [data-fm-clean-board]) {
+        display: inline-flex !important; align-items: center; gap: 5px;
+        min-width: 0; max-width: 100%; vertical-align: middle;
+      }
+      ${scope('boardLabel')} .rd_hd .btm_area .side:has(> [data-fm-clean-board]) > .member_plate {
+        min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
       }
       ${scope('count')} [data-fm-clean-badge] {
         display: inline-block !important; flex: 0 0 auto; align-self: flex-start;
@@ -2119,10 +2125,7 @@
   }
 
   function syncDetailTitle(title) {
-    const active = settings.enabled && (
-      (settings.boardLabel && title.querySelector('[data-fm-clean-board]')) ||
-      (settings.count && title.querySelector('[data-fm-clean-badge]'))
-    );
+    const active = settings.enabled && settings.count && title.querySelector('[data-fm-clean-badge]');
     title.toggleAttribute('data-fm-clean-title', Boolean(active));
   }
 
@@ -2156,8 +2159,10 @@
       }
 
       article.querySelectorAll('.rd_hd h1').forEach(title => {
-        let chip = title.querySelector('[data-fm-clean-board]');
-        if (!identity) {
+        const header = title.closest('.rd_hd');
+        const author = header.querySelector('.btm_area .member_plate');
+        let chip = header.querySelector('[data-fm-clean-board]');
+        if (!identity || !author) {
           chip?.remove();
           syncDetailTitle(title);
           return;
@@ -2171,7 +2176,7 @@
         }
         if (chip.textContent !== identity.text) chip.textContent = identity.text;
         if (identity.href && chip.getAttribute('href') !== identity.href) chip.setAttribute('href', identity.href);
-        if (title.firstChild !== chip) title.insertBefore(chip, title.firstChild);
+        if (author.previousSibling !== chip) author.before(chip);
         syncDetailTitle(title);
       });
     });
