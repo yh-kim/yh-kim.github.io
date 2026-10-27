@@ -707,6 +707,79 @@
           compactDoc.defaultView.getComputedStyle(compactTop).display !== 'contents' &&
           compactDoc.defaultView.getComputedStyle(compactDate).float === 'right');
 
+        for (const mode of ['라이트', '다크']) {
+          const urlText = 'https://shop.example.test/products/very-long-hotdeal-product-name-with-many-details-and-options';
+          const hotdealDoc = await makeLayoutFrame(source, `${mode} 핫딜 상세 헤더`, `
+            <div class="bd bd_mobile"><div class="tl_srch"><div class="bd_tl"><h1>
+              <a href="/hotdeal">핫딜</a></h1></div></div>
+              <div class="rd"><div class="rd_hd"><div class="board clear" id="hotdeal-board">
+                <div class="top_area"><span class="date m_no" id="hotdeal-date">2026.10.27 14:30</span>
+                  <h1 class="np_18px"><span class="np_18px_span">[예시 상점] 삼성 갤럭시 버즈 온 SM-U600 (279,000원) (무료배송)</span></h1>
+                  <div class="clear"></div></div>
+                <div class="btm_area"><div class="side"><a class="member_plate" id="hotdeal-author"
+                  href="#author">작성자</a></div><div class="side fr" id="hotdeal-stats">
+                  <span>조회 수 <b>1478920</b></span><span>추천 수 <b>2398</b></span><span>댓글 <b>28746</b></span></div></div>
+                <table class="hotdeal_table" id="hotdeal-table"><tbody>
+                  <tr><th scope="row">링크</th><td class="hotdeal_url"><div class="xe_content" id="hotdeal-link-cell">
+                    <a class="hotdeal_url" id="hotdeal-link" href="https://shop.example.test/#detail">${urlText}</a>
+                  </div></td></tr>
+                  <tr><th scope="row">쇼핑몰</th><td><div class="xe_content" id="hotdeal-store">예시 상점</div></td></tr>
+                  <tr><th scope="row">상품명</th><td><div class="xe_content" id="hotdeal-name">실사용 상품명</div></td></tr>
+                  <tr><th scope="row">가격</th><td><div class="xe_content" id="hotdeal-price">19,900원</div></td></tr>
+                  <tr><th scope="row">배송</th><td><div class="xe_content" id="hotdeal-shipping">무료배송</div></td></tr>
+                </tbody></table></div></div>
+                <div class="rd_body"><article>핫딜 글 본문</article></div>
+                <div class="fm_vote"><div class="vote"><span class="new_voted_count">2398</span></div></div>
+              </div></div>`, `
+            .rd_hd .board .date{float:right;display:inline!important}
+            .hotdeal_table{position:relative;margin:-1px 0 0;padding:0;border-collapse:collapse}
+            .hotdeal_table th{padding:5px 10px;white-space:nowrap;background:#f3f3f3;border:1px solid #ddd}
+            .hotdeal_table td{padding:5px 10px;width:100%;word-break:break-all;border:1px solid #ddd}
+          `, {}, { bodyClass: mode === '다크' ? 'night_mode' : '' });
+          const hotdealBoard = hotdealDoc.querySelector('#hotdeal-board');
+          const hotdealTable = hotdealDoc.querySelector('#hotdeal-table');
+          const hotdealLink = hotdealDoc.querySelector('#hotdeal-link');
+          const hotdealFields = ['hotdeal-link-cell', 'hotdeal-store', 'hotdeal-name',
+            'hotdeal-price', 'hotdeal-shipping'].map(id => hotdealDoc.getElementById(id));
+          hotdealDoc.defaultView.frameElement.style.height = '360px';
+          for (const width of [390, 320]) {
+            hotdealDoc.defaultView.frameElement.style.width = `${width}px`;
+            await delay(30);
+            const boardRect = hotdealBoard.getBoundingClientRect();
+            const tableRect = hotdealTable.getBoundingClientRect();
+            const authorRect = hotdealDoc.querySelector('#hotdeal-author').getBoundingClientRect();
+            const dateRect = hotdealDoc.querySelector('#hotdeal-date').getBoundingClientRect();
+            const statsRect = hotdealDoc.querySelector('#hotdeal-stats').getBoundingClientRect();
+            const chipRect = detailChip(hotdealDoc)?.getBoundingClientRect();
+            const linkCell = hotdealDoc.querySelector('#hotdeal-link-cell');
+            const linkStyle = hotdealDoc.defaultView.getComputedStyle(hotdealLink);
+            const linkLineHeight = Number.parseFloat(hotdealDoc.defaultView.getComputedStyle(linkCell).lineHeight) || 17;
+            record(`${mode} 핫딜 ${width}px: 표가 헤더 전체 폭의 다음 줄에 있고 긴 링크가 줄바꿈됨`,
+              Math.abs(tableRect.left - boardRect.left) <= 1 &&
+              Math.abs(tableRect.right - boardRect.right) <= 1 &&
+              Math.abs((authorRect.top + authorRect.bottom) / 2 -
+                (dateRect.top + dateRect.bottom) / 2) <= 5 &&
+              authorRect.right <= dateRect.left + 1 &&
+              statsRect.top >= Math.max(authorRect.bottom, dateRect.bottom) - 1 &&
+              tableRect.top >= statsRect.bottom - 1 &&
+              authorRect.width > 0 &&
+              hotdealDoc.querySelector('#hotdeal-author').parentElement.scrollWidth <=
+                hotdealDoc.querySelector('#hotdeal-author').parentElement.clientWidth + 1 &&
+              chipRect?.width >= 20 &&
+              chipRect.right <= authorRect.left + 1 && visiblyRendered(detailChip(hotdealDoc)) &&
+              linkCell.getBoundingClientRect().height > linkLineHeight * 1.6 &&
+              linkStyle.textOverflow !== 'ellipsis' && linkStyle.whiteSpace !== 'nowrap' &&
+              hotdealDoc.querySelector('.rd_hd').scrollWidth <= hotdealDoc.querySelector('.rd_hd').clientWidth + 1 &&
+              hotdealDoc.documentElement.scrollWidth <= hotdealDoc.defaultView.innerWidth + 1 &&
+              hotdealFields.every(node => node?.isConnected && hotdealDoc.getElementById(node.id) === node) &&
+              hotdealLink.textContent.trim() === urlText &&
+              hotdealLink.getAttribute('href') === 'https://shop.example.test/#detail',
+              `board=${Math.round(boardRect.width)}, table=${Math.round(tableRect.width)}, ` +
+                `cell=${Math.round(linkCell.getBoundingClientRect().height)}, ` +
+                `overflow=${hotdealDoc.documentElement.scrollWidth}/${hotdealDoc.defaultView.innerWidth}`);
+          }
+        }
+
         const homeBody = homeDoc.body;
         const homeBoard = homeDoc.querySelector('.bd');
         const homeBodyStyle = homeDoc.defaultView.getComputedStyle(homeBody);
