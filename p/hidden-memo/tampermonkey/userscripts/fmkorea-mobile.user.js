@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.10
+// @version      1.6.11
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.10';
+  const SCRIPT_VERSION = '1.6.11';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1109,16 +1109,21 @@
       ${scope('commentComposer')} details[data-fm-clean-comment-composer] > .cmt_editor {
         margin: 0 !important; padding: 8px 10px !important;
       }
+      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] body::after {
+        content: '' !important; display: block !important; clear: both;
+        height: var(--fm-clean-bottom-space, 0px);
+        pointer-events: none;
+      }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
-        --fm-control-edge: max(112px, env(safe-area-inset-left, 0px));
+        --fm-control-edge: max(124px, env(safe-area-inset-left, 0px));
         --fm-menu-left: max(12px, env(safe-area-inset-left, 0px));
         --fm-menu-right: max(12px, env(safe-area-inset-right, 0px));
         inset: 0 !important;
         z-index: 2147483647 !important; pointer-events: none !important;
       }
       #${HOST_ID}[data-side="right"] {
-        --fm-control-edge: max(112px, env(safe-area-inset-right, 0px));
+        --fm-control-edge: max(124px, env(safe-area-inset-right, 0px));
       }
     `
   ].join('\n');
@@ -2378,6 +2383,65 @@
     status.textContent = copied ? '' : '복사하지 못했습니다. 다시 눌러 주세요.';
   }
 
+  const bottomSpace = { frame: 0, observer: null, body: null, listening: false };
+
+  function scheduleBottomSpace() {
+    if (!bottomSpace.frame) bottomSpace.frame = window.requestAnimationFrame(updateBottomSpace);
+  }
+
+  function updateBottomSpace() {
+    bottomSpace.frame = 0;
+    if (!settings.enabled || document.documentElement.getAttribute('data-fm-clean-mobile') !== 'true' ||
+        !document.body || !launcher?.isConnected) return;
+    const visible = element => element.getClientRects().length > 0 &&
+      getComputedStyle(element).visibility !== 'hidden' && !element.closest(`[${AD_STATE_ATTRIBUTE}]`);
+    const forms = Array.from(document.querySelectorAll('.fm_navi2 a.direction2[href]')).filter(visible);
+    const others = Array.from(document.querySelectorAll(
+      '.fm_navi a.js_next[href], .bd_pg a.next[href], .bd_pg a[rel="next"][href]'
+    )).filter(visible);
+    const target = forms[forms.length - 1] || others[others.length - 1];
+    let height = 0;
+    if (target && document.scrollingElement) {
+      const currentSpace = Number.parseFloat(getComputedStyle(document.body, '::after').height) || 0;
+      const naturalHeight = document.scrollingElement.scrollHeight - currentSpace;
+      const targetTop = window.scrollY + target.getBoundingClientRect().top;
+      const anchorBottom = launcher.parentElement.getBoundingClientRect().bottom;
+      // 최대 스크롤에서 다음 페이지가 둥근 버튼 바로 아래에 오도록 푸터 높이를 빼 줍니다.
+      height = Math.max(0, Math.round(window.innerHeight - anchorBottom - 8 - (naturalHeight - targetTop)));
+    }
+    const value = `${height}px`;
+    if (document.documentElement.style.getPropertyValue('--fm-clean-bottom-space') !== value) {
+      document.documentElement.style.setProperty('--fm-clean-bottom-space', value);
+    }
+  }
+
+  function syncBottomSpace() {
+    const active = settings.enabled && document.documentElement.getAttribute('data-fm-clean-mobile') === 'true' &&
+      document.body && launcher?.isConnected;
+    if (!active) {
+      if (bottomSpace.frame) window.cancelAnimationFrame(bottomSpace.frame);
+      bottomSpace.frame = 0;
+      bottomSpace.observer?.disconnect();
+      bottomSpace.body = null;
+      if (document.documentElement.style.getPropertyValue('--fm-clean-bottom-space')) {
+        document.documentElement.style.removeProperty('--fm-clean-bottom-space');
+      }
+      return;
+    }
+    if (!bottomSpace.listening) {
+      bottomSpace.listening = true;
+      window.addEventListener('resize', scheduleBottomSpace, { passive: true });
+      window.visualViewport?.addEventListener('resize', scheduleBottomSpace, { passive: true });
+      if (window.ResizeObserver) bottomSpace.observer = new ResizeObserver(scheduleBottomSpace);
+    }
+    if (bottomSpace.body !== document.body) {
+      bottomSpace.observer?.disconnect();
+      bottomSpace.observer?.observe(document.body);
+      bottomSpace.body = document.body;
+    }
+    scheduleBottomSpace();
+  }
+
   function applySettings() {
     for (const [key, value] of Object.entries(settings)) {
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
@@ -2400,6 +2464,7 @@
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];
     if (!panel.hidden) syncMenuPanel();
+    syncBottomSpace();
   }
 
   function setPanelOpen(open) {
@@ -2472,19 +2537,19 @@
           position: absolute; inset: 0; z-index: 0; pointer-events: auto; touch-action: none;
         }
         .control-anchor {
-          position: absolute; left: var(--fm-control-edge, 112px); width: 44px; z-index: 1; pointer-events: none;
+          position: absolute; left: var(--fm-control-edge, 124px); width: 48px; z-index: 1; pointer-events: none;
           /* svh와 정적 안전 영역으로 주소창 변화에 따른 좌표 이동을 막습니다. */
           top: calc(100vh - 272px - env(safe-area-max-inset-bottom, 0px));
           top: calc(100svh - 272px - env(safe-area-max-inset-bottom, 0px));
           transform: translateY(-100%);
         }
-        :host([data-side="right"]) .control-anchor { left: auto; right: var(--fm-control-edge, 112px); }
+        :host([data-side="right"]) .control-anchor { left: auto; right: var(--fm-control-edge, 124px); }
         .launcher {
           pointer-events: auto;
-          display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0;
+          display: grid; place-items: center; width: 48px; min-width: 48px; height: 48px; padding: 0;
           border: 1.5px solid currentColor; border-radius: 999px;
           background: transparent; color: var(--fm-control-accent);
-          box-shadow: none; opacity: .35; touch-action: none;
+          box-shadow: none; opacity: .55; touch-action: none;
           user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
           transition: transform 180ms ease-out, opacity 120ms;
         }
@@ -2498,7 +2563,7 @@
         }
         .launcher:focus, .launcher:focus-visible { outline: none; }
         .panel {
-          position: absolute; bottom: calc(100% + 8px); left: calc(var(--fm-menu-left, 12px) - var(--fm-control-edge, 112px));
+          position: absolute; bottom: calc(100% + 8px); left: calc(var(--fm-menu-left, 12px) - var(--fm-control-edge, 124px));
           display: flex; flex-direction: column; width: 256px; margin: 0; pointer-events: auto;
           max-width: calc(100vw - var(--fm-menu-left, 12px) - var(--fm-menu-right, 12px));
           max-height: calc(100svh - 356px - env(safe-area-max-inset-bottom, 0px));
@@ -2508,7 +2573,7 @@
           font: 13px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         }
         :host([data-side="right"]) .panel {
-          left: auto; right: calc(var(--fm-menu-right, 12px) - var(--fm-control-edge, 112px));
+          left: auto; right: calc(var(--fm-menu-right, 12px) - var(--fm-control-edge, 124px));
         }
         @media (max-height: 600px) {
           .panel { bottom: auto; top: calc(100% + 8px); max-height: 252px; }
@@ -2542,6 +2607,7 @@
           margin-top: 4px; padding-top: 4px; min-height: 28px; border-top: 1px solid var(--fm-control-line);
           color: var(--fm-control-muted); font-size: 10px;
         }
+        :host([data-side="right"]) .position-control { flex-direction: row-reverse; }
         .position-toggle { display: flex; align-items: center; min-height: 28px; cursor: pointer; }
         .position-toggle input {
           appearance: none; -webkit-appearance: none; position: relative; flex: none;

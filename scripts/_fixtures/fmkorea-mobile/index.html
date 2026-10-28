@@ -1446,6 +1446,7 @@
           receivesTouch(menuLink) && receivesTouch(copyButton));
         const positionControl = menuShadow.querySelector('.position-control');
         const positionSwitch = positionControl?.querySelector('input[name="launcherRight"]');
+        const positionLabel = positionControl?.querySelector('span');
         const detailActions = menuPanel.querySelector('.detail-actions');
         const copyArea = menuPanel.querySelector('.copy-area');
         const mediaControl = menuPanel.querySelector('.media-control');
@@ -1474,11 +1475,21 @@
           receivesTouch(positionSwitch) && receivesTouch(mediaControl.querySelector('input[name="showMedia"]')));
         const initialLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
         const initialLauncherTop = initialLauncherBounds.top;
+        const leftSwitchBounds = positionSwitch.getBoundingClientRect();
+        const leftLabelBounds = positionLabel.getBoundingClientRect();
+        record('버튼이 왼쪽일 때 위치 스위치는 설명 오른쪽에 있고 터치됨',
+          menuHost.getAttribute('data-side') === 'left' &&
+          leftSwitchBounds.left > leftLabelBounds.right && receivesTouch(positionSwitch));
         positionSwitch.checked = true;
         positionSwitch.dispatchEvent(new tapDoc.defaultView.Event('change', { bubbles: true }));
         const rightLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
         const rightPanelBounds = menuPanel.getBoundingClientRect();
         const rightLauncherTop = rightLauncherBounds.top;
+        const rightSwitchBounds = positionSwitch.getBoundingClientRect();
+        const rightLabelBounds = positionLabel.getBoundingClientRect();
+        record('버튼이 오른쪽일 때 왼쪽 이동 스위치는 설명 왼쪽에 있고 터치됨',
+          menuHost.getAttribute('data-side') === 'right' &&
+          rightSwitchBounds.right < rightLabelBounds.left && receivesTouch(positionSwitch));
         const rightPositionWorks = menuHost.getAttribute('data-side') === 'right' &&
           rightLauncherBounds.left > initialLauncherBounds.left &&
           !menuPanel.hidden && receivesTouch(positionSwitch);
@@ -1486,6 +1497,11 @@
         positionSwitch.dispatchEvent(new tapDoc.defaultView.Event('change', { bubbles: true }));
         const restoredLauncherBounds = detailLauncher(tapDoc).getBoundingClientRect();
         const restoredLauncherTop = restoredLauncherBounds.top;
+        const restoredSwitchBounds = positionSwitch.getBoundingClientRect();
+        const restoredLabelBounds = positionLabel.getBoundingClientRect();
+        record('버튼을 다시 왼쪽으로 옮기면 위치 스위치도 설명 오른쪽으로 돌아옴',
+          menuHost.getAttribute('data-side') === 'left' &&
+          restoredSwitchBounds.left > restoredLabelBounds.right && receivesTouch(positionSwitch));
         record('상세 메뉴에서 좌우 전환 후에도 높이와 열린 패널이 유지됨',
           rightPositionWorks && menuHost.getAttribute('data-side') === 'left' &&
           !menuPanel.hidden && receivesTouch(positionSwitch) &&
@@ -1500,6 +1516,14 @@
           Math.abs(tapDoc.defaultView.innerWidth - rightPanelBounds.right - 12) < 1 &&
           panelGapIsEight(initialLauncherBounds, panelBounds) &&
           panelGapIsEight(rightLauncherBounds, rightPanelBounds));
+        record('48px 홈 버튼은 좌우 모두 화면 가장자리에서 124px 안쪽에 놓임',
+          Math.abs(initialLauncherBounds.width - 48) < 1 &&
+          Math.abs(initialLauncherBounds.height - 48) < 1 &&
+          Math.abs(rightLauncherBounds.width - 48) < 1 &&
+          Math.abs(rightLauncherBounds.height - 48) < 1 &&
+          Math.abs(initialLauncherBounds.left - 124) < 1 &&
+          Math.abs(tapDoc.defaultView.innerWidth - rightLauncherBounds.right - 124) < 1 &&
+          Math.abs(Number.parseFloat(tapDoc.defaultView.getComputedStyle(detailLauncher(tapDoc)).opacity) - .55) < .02);
         let menuActivations = 0;
         let leakedEvents = 0;
         let copiedLink = '';
@@ -1598,6 +1622,83 @@
           longPositionControl.previousElementSibling === longActions &&
           longReceivesTouch(longPositionControl.querySelector('input[name="launcherRight"]')) &&
           longReceivesTouch(longCopy));
+
+        const bottomPageDoc = await makeLayoutFrame(source, '하단 다음 페이지 한손 터치 영역', `
+          <div class="bd"><div id="page-tail">목록 마지막 글</div>
+            <nav class="fm_navi2"><a id="bottom-next" class="direction2" href="#page-2">다음 페이지</a></nav></div>
+          <footer><p class="cr" id="bottom-footer">숨겨지는 사이트 푸터</p></footer>`,
+          '#page-tail{height:850px}#bottom-next{display:block;width:160px;height:44px;line-height:44px}' +
+          'footer p{margin:0;height:48px}');
+        bottomPageDoc.defaultView.frameElement.style.width = '390px';
+        bottomPageDoc.defaultView.frameElement.style.height = '480px';
+        const bottomPageView = bottomPageDoc.defaultView;
+        const bottomNext = bottomPageDoc.querySelector('#bottom-next');
+        const bottomLauncher = detailLauncher(bottomPageDoc);
+        const bottomAlignment = async () => {
+          bottomPageView.scrollTo({ top: bottomPageDoc.scrollingElement.scrollHeight,
+            behavior: 'instant' });
+          await delay(30);
+          const link = bottomNext.getBoundingClientRect();
+          const button = bottomLauncher.getBoundingClientRect();
+          const hit = bottomPageDoc.elementFromPoint(link.left + link.width / 2,
+            link.top + link.height / 2);
+          return Math.abs(bottomPageView.scrollY -
+              (bottomPageDoc.scrollingElement.scrollHeight - bottomPageView.innerHeight)) < 2 &&
+            Math.abs(link.top - button.bottom - 8) < 2 &&
+            link.top >= 0 && link.bottom <= bottomPageView.innerHeight &&
+            (hit === bottomNext || bottomNext.contains(hit));
+        };
+        const hiddenFooterAligned = await bottomAlignment();
+        record('480px 화면 맨끝에서 다음 페이지가 버튼 바로 아래 8px에 보이고 터치됨',
+          !visiblyRendered(bottomPageDoc.querySelector('#bottom-footer')) && hiddenFooterAligned);
+        const showBottomFooter = detailOption(bottomPageDoc, 'siteFooter', false);
+        bottomPageDoc.querySelector('#fm-clean-controls').shadowRoot.querySelector('.close').click();
+        await delay(90);
+        const visibleFooterAligned = await bottomAlignment();
+        const bottomFooter = bottomPageDoc.querySelector('#bottom-footer');
+        const footerSnapshot = () => {
+          const link = bottomNext.getBoundingClientRect();
+          const hit = bottomPageDoc.elementFromPoint(link.left + link.width / 2,
+            link.top + link.height / 2);
+          return {
+            link: [link.left, link.top, link.right, link.bottom]
+              .map(value => value.toFixed(1)).join('/'),
+            hit: hit ? `${hit.tagName.toLowerCase()}#${hit.id || ''}` : 'none',
+            buttonBottom: bottomLauncher.getBoundingClientRect().bottom,
+            scrollY: bottomPageView.scrollY,
+            innerHeight: bottomPageView.innerHeight,
+            scrollHeight: bottomPageDoc.scrollingElement.scrollHeight,
+            space: bottomPageView.getComputedStyle(bottomPageDoc.body, '::after').height
+          };
+        };
+        const footer48 = footerSnapshot();
+        bottomFooter.style.height = '96px';
+        await delay(90);
+        const resizedFooterAligned = await bottomAlignment();
+        const footer96 = footerSnapshot();
+        const footerRendered = visiblyRendered(bottomFooter);
+        const footerAlignmentOk = showBottomFooter && footerRendered &&
+          visibleFooterAligned && resizedFooterAligned;
+        record('푸터가 나타나고 높이가 바뀌어도 다음 페이지가 버튼 바로 아래에 유지됨',
+          footerAlignmentOk, footerAlignmentOk ? '' :
+            `show=${showBottomFooter}, rendered=${footerRendered}, 48px=${visibleFooterAligned}, ` +
+            `96px=${resizedFooterAligned}, rect48=${footer48.link}, hit48=${footer48.hit}, ` +
+            `button48=${footer48.buttonBottom.toFixed(1)}, y48=${footer48.scrollY}, ` +
+            `view48=${footer48.innerHeight}, scroll48=${footer48.scrollHeight}, space48=${footer48.space}, ` +
+            `rect96=${footer96.link}, hit96=${footer96.hit}, ` +
+            `button96=${footer96.buttonBottom.toFixed(1)}, y96=${footer96.scrollY}, ` +
+            `view96=${footer96.innerHeight}, scroll96=${footer96.scrollHeight}, space96=${footer96.space}`);
+        const withBottomSpace = bottomPageDoc.scrollingElement.scrollHeight;
+        const bottomAppearanceOff = detailOption(bottomPageDoc, 'appearance', false);
+        await delay(90);
+        const withoutAppearanceHeight = bottomPageDoc.scrollingElement.scrollHeight;
+        const bottomEnabledOff = detailOption(bottomPageDoc, 'enabled', false);
+        await delay(90);
+        const withoutEnabledHeight = bottomPageDoc.scrollingElement.scrollHeight;
+        record('디자인 OFF에도 하단 여백은 유지하고 전체 기능 OFF에서는 제거됨',
+          bottomAppearanceOff && bottomEnabledOff &&
+          Math.abs(withBottomSpace - withoutAppearanceHeight) < 2 &&
+          withoutAppearanceHeight - withoutEnabledHeight >= 80);
 
         const navigationDoc = await makeLayoutFrame(source, '홈 버튼 아래 드래그 이동 위치', `
           <div class="bd">
