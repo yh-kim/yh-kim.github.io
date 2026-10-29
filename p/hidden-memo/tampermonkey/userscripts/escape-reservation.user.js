@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.7
+// @version         3.8
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
 // @match           *://*.xn--2e0b040a4xj.com/*
 // @match           *://*.play33.kr/*
@@ -46,7 +46,9 @@
         { selector: 'input[name="policy"]', checked: true },
         { selector: 'input[type="radio"][value="21"]', checked: true, optional: true }
       ],
-      hideSelectors: ['div.reservation-form-desc']
+      collapseSections: [
+        { selector: 'div.reservation-form-desc', label: '주의사항' }
+      ]
     },
     {
       id: 'play33',
@@ -61,7 +63,10 @@
         { selector: 'select[name="people"]', kind: 'people' },
         { selector: 'input[name="policy"]', checked: true }
       ],
-      hideSelectors: ['div.resform-desc', 'div.title2']
+      collapseSections: [
+        { selector: 'div.resform-desc', label: '주의사항' },
+        { selector: 'div.title2', label: '예약 안내' }
+      ]
     },
     {
       id: 'clever-town',
@@ -80,7 +85,10 @@
         { selector: 'select[name="person"]', kind: 'people' },
         { selector: 'input[name="ck_agree"]', index: 0, checked: true }
       ],
-      hideSelectors: ['div.sub_visual', 'textarea'],
+      collapseSections: [
+        { selector: 'div.sub_visual', label: '상단 안내' },
+        { selector: 'textarea', label: '약관' }
+      ],
       scrollSelector: 'input[name="input_captcha"]'
     },
     {
@@ -99,7 +107,9 @@
         { selector: 'select[name="person"]', kind: 'people' },
         { selector: 'input[name="ck_agree"]', index: 0, checked: true }
       ],
-      hideSelectors: ['div.sub_tit']
+      collapseSections: [
+        { selector: 'div.sub_tit', label: '예약 안내' }
+      ]
     },
     {
       id: 'key-escape',
@@ -119,7 +129,9 @@
         { selector: 'input[name="agree_2"]', checked: true },
         { selector: 'input[name="agree_3"]', checked: true, optional: true }
       ],
-      hideSelectors: ['div.stepList'],
+      collapseSections: [
+        { selector: 'div.stepList', label: '예약 단계' }
+      ],
       scrollSelector: '#captcha'
     },
     {
@@ -139,7 +151,10 @@
         { selector: 'select[name="person"]', kind: 'people' },
         { selector: 'input[name="ck_agree"]', index: 0, checked: true }
       ],
-      hideSelectors: ['div.sub_visual', 'div.sub_tit'],
+      collapseSections: [
+        { selector: 'div.sub_visual', label: '상단 안내' },
+        { selector: 'div.sub_tit', label: '예약 안내' }
+      ],
       scrollSelector: 'input[name="input_captcha"]'
     },
     {
@@ -155,7 +170,11 @@
         { selector: 'select[name="people"]', kind: 'people' },
         { selector: 'input[name="policy"]', checked: true }
       ],
-      hideSelectors: ['#header', '#eveLayerToggleBtn', '#footer'],
+      collapseSections: [
+        { selector: '#header, #eveLayerToggleBtn', label: '상단 메뉴' },
+        { selector: '#footer', label: '하단 정보' },
+        { selector: 'div.reservation-form-desc', label: '주의사항' }
+      ],
       scrollSelector: 'input[name="name"]'
     }
   ];
@@ -503,11 +522,68 @@
     });
   }
 
-  function hideElements(selectors) {
-    (selectors || []).forEach(selector => {
-      document.querySelectorAll(selector).forEach(element => {
-        element.style.setProperty('display', 'none', 'important');
+  function collapseElements(sections) {
+    let nextId = 0;
+
+    (sections || []).forEach(({ selector, label }) => {
+      const elements = Array.from(document.querySelectorAll(selector))
+        .filter(element => !element.hasAttribute('data-tm-reservation-collapsible'));
+      if (!elements.length) return;
+
+      const originals = elements.map(element => {
+        if (!element.id) {
+          let id;
+          do { id = 'tm-reservation-section-' + (++nextId); } while (document.getElementById(id));
+          element.id = id;
+        }
+        element.setAttribute('data-tm-reservation-collapsible', '');
+        return {
+          element,
+          display: element.style.getPropertyValue('display'),
+          priority: element.style.getPropertyPriority('display')
+        };
       });
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'tm-reservation-collapse-toggle';
+      toggle.setAttribute('aria-controls', elements.map(element => element.id).join(' '));
+      Object.assign(toggle.style, {
+        position: 'relative',
+        zIndex: '2147483645',
+        display: 'block',
+        boxSizing: 'border-box',
+        width: 'fit-content',
+        maxWidth: '100%',
+        minHeight: '40px',
+        margin: '8px 0',
+        padding: '9px 14px',
+        border: '1px solid #d1d5db',
+        borderRadius: '8px',
+        background: '#f8fafc',
+        color: '#1f2937',
+        font: '600 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        textAlign: 'left',
+        cursor: 'pointer',
+        appearance: 'none',
+        touchAction: 'manipulation'
+      });
+
+      function setExpanded(expanded) {
+        originals.forEach(({ element, display, priority }) => {
+          if (!expanded) element.style.setProperty('display', 'none', 'important');
+          else if (display) element.style.setProperty('display', display, priority);
+          else element.style.removeProperty('display');
+        });
+        toggle.setAttribute('aria-expanded', String(expanded));
+        toggle.textContent = label + (expanded ? ' 접기' : ' 펼치기');
+      }
+
+      toggle.addEventListener('click', () => {
+        setExpanded(toggle.getAttribute('aria-expanded') !== 'true');
+      });
+      elements[0].before(toggle);
+      setExpanded(false);
     });
   }
 
@@ -564,7 +640,7 @@
       return;
     }
 
-    hideElements(profile.hideSelectors);
+    collapseElements(profile.collapseSections);
     const succeeded = profile.fields.map(field => applyField(field, profile)).every(Boolean);
     await scrollToTarget(profile.scrollSelector);
 
