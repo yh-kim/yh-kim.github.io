@@ -2,9 +2,11 @@
 // ==UserScript==
 // @name         BlackScreen Clock + Minimal Text (Clock Bottom 40vh, Auto-Expand Fix, Hidden Scrollbar, No Zoom)
 // @namespace    http://tampermonkey.net/
-// @version      1.13
+// @version      1.14
 // @description  Clock at bottom of 40vh; text area 60vh; textarea auto-expands without stretching; hidden scrollbar; tap clock→input, click outside→read; zoom disabled
 // @match        https://blackscreen.app/*
+// @downloadURL  https://blog.pickth.com/p/hidden-memo/tampermonkey/userscripts/blackscreen-clock.user.js
+// @updateURL    https://blog.pickth.com/p/hidden-memo/tampermonkey/userscripts/blackscreen-clock.user.js
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==
