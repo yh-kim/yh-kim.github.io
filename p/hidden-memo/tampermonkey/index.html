@@ -53,7 +53,7 @@
           <button class="memo-card" type="button" data-open-note="escape">
             <span class="card-top"><span class="badge">자동 입력</span><span class="arrow" aria-hidden="true">→</span></span>
             <h2>방탈출 예약 자동 입력</h2>
-            <p>예약자 정보를 한 번 입력해 일곱 예약 사이트에서 사용하는 통합 코드입니다.</p>
+            <p>예약 페이지의 상태 버튼에서 예약자 정보를 저장해 일곱 사이트에서 사용할 수 있습니다.</p>
             <span class="card-meta"><span>통합 UserScript</span><i aria-hidden="true"></i><span>7개 사이트</span></span>
           </button>
 
@@ -89,33 +89,15 @@
               <h1 id="escape-detail-title">방탈출 예약 자동 입력</h1>
             </div>
           </div>
-          <p class="detail-copy">예약자 정보를 한 번 입력하면 일곱 사이트에서 동작하는 통합 UserScript 코드가 완성됩니다.</p>
+          <p class="detail-copy">코드를 설치한 뒤 예약 페이지의 왼쪽 아래 버튼을 길게 눌러 이름과 전화번호를 저장하세요. 이후 버전은 Tampermonkey에서 자동 업데이트됩니다.</p>
         </header>
 
         <div class="workspace">
           <section class="panel settings" aria-labelledby="settings-title">
-            <h2 class="panel-title" id="settings-title">코드 설정</h2>
-            <p class="panel-note">이름과 전화번호만 입력하세요. 예약 인원은 각 사이트의 최소 인원으로 선택됩니다. 자동 제출 초기값은 저장된 설정이 없을 때만 사용되며, 이후에는 예약 사이트의 왼쪽 아래 상태 버튼을 길게 눌러 변경합니다.</p>
+            <h2 class="panel-title" id="settings-title">사용 방법</h2>
+            <p class="panel-note">코드를 복사해 Tampermonkey에 설치하세요. 예약자 정보가 없으면 왼쪽 아래 버튼에 ‘예약자 정보 없음’이 표시되고 자동 입력은 시작되지 않습니다. 버튼을 길게 눌러 이름과 전화번호를 입력하세요. 정보가 저장된 뒤에는 같은 버튼을 길게 눌러 자동 제출을 켜거나 끌 수 있습니다. 자동 제출은 기본으로 꺼져 있습니다.</p>
 
-            <label class="field">
-              <span>이름</span>
-              <input id="guest-name" type="text" autocomplete="off" placeholder="예약자 이름" spellcheck="false">
-            </label>
-
-            <label class="field">
-              <span>전화번호</span>
-              <input id="guest-phone" type="tel" inputmode="tel" autocomplete="off" placeholder="01000000000" spellcheck="false">
-            </label>
-
-            <label class="field">
-              <span>자동 제출 초기값</span>
-              <select id="auto-submit" aria-label="예약 버튼 자동 클릭 초기값">
-                <option value="false" selected>꺼짐</option>
-                <option value="true">켜짐</option>
-              </select>
-            </label>
-
-            <div class="privacy-note">입력한 이름과 전화번호는 저장하거나 전송하지 않고, 현재 화면의 코드에만 반영됩니다. 자동 제출 설정만 각 예약 사이트의 로컬 저장소에 보관됩니다.</div>
+            <div class="privacy-note">이름과 전화번호는 예약 페이지에서 입력받아 Tampermonkey의 유저스크립트 저장소에 보관하며, 스크립트가 업데이트돼도 유지됩니다. 자동 제출 설정은 각 예약 사이트의 로컬 저장소에 보관됩니다.</div>
 
             <div class="site-support" aria-label="지원 사이트">
               <strong>지원 사이트</strong>
@@ -131,7 +113,7 @@
             </div>
           </section>
 
-          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/escape-reservation.user.js?v=3.8" data-generator="escape" aria-labelledby="escape-code-title">
+          <section class="panel code-panel" data-script-panel data-script-source="/p/hidden-memo/tampermonkey/userscripts/escape-reservation.user.js?v=3.9" aria-labelledby="escape-code-title">
             <header class="code-toolbar">
               <div class="code-identity">
                 <strong id="escape-code-title">escape-reservation.user.js</strong>
@@ -224,6 +206,6 @@
     </main>
   </div>
 
-  <script src="/p/hidden-memo/assets/memo.js?v=3.1"></script>
+  <script src="/p/hidden-memo/assets/memo.js?v=3.2"></script>
 </body>
 </html>

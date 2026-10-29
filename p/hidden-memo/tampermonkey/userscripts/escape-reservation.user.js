@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.8
+// @version         3.9
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
 // @match           *://*.xn--2e0b040a4xj.com/*
 // @match           *://*.play33.kr/*
@@ -10,174 +10,216 @@
 // @match           *://*.keyescape.com/*
 // @match           *://*.nabijam.com/*
 // @match           *://*.seoul-escape.com/*
+// @downloadURL     https://blog.pickth.com/p/hidden-memo/tampermonkey/userscripts/escape-reservation.user.js
+// @updateURL       https://blog.pickth.com/p/hidden-memo/tampermonkey/userscripts/escape-reservation.user.js
 // @run-at          document-idle
-// @grant           none
+// @grant           GM_getValue
+// @grant           GM_setValue
+// @grant           GM_registerMenuCommand
+// @noframes
 // ==/UserScript==
 
 (function () {
   'use strict';
 
-  const USER = {
-    name: __GUEST_NAME__,
-    phone: __GUEST_PHONE__
-  };
-
-  const DEFAULT_AUTO_SUBMIT_ENABLED = __AUTO_SUBMIT__;
+  const USER_STORAGE_KEY = 'tm-escape-reservation-user';
+  const DEFAULT_AUTO_SUBMIT_ENABLED = false;
   const AUTO_SUBMIT_STORAGE_KEY = 'tm-escape-auto-submit';
   const LONG_PRESS_DURATION_MS = 650;
   const THEME_PEOPLE_OVERRIDES = {
     // '테마명': 4
   };
 
-  const PHONE = splitPhone(USER.phone);
+  let currentUser = loadUser();
+  let activeRun = 0;
 
-  const PROFILES = [
-    {
-      id: 'earth-star',
-      label: '지구별',
-      domain: 'xn--2e0b040a4xj.com',
-      pathPrefix: '/reservation/create',
-      waitSelector: 'div.reservation-form-table',
-      autoSubmitSelector: '#eveReservationBtn',
-      fields: [
-        { selector: 'input[name="name"]', value: USER.name },
-        { selector: 'input[name="phone"]', value: PHONE.formatted },
-        { selector: 'select[name="people"]', kind: 'people' },
-        { selector: 'input[name="policy"]', checked: true },
-        { selector: 'input[type="radio"][value="21"]', checked: true, optional: true }
-      ],
-      collapseSections: [
-        { selector: 'div.reservation-form-desc', label: '주의사항' }
-      ]
-    },
-    {
-      id: 'play33',
-      label: 'play33',
-      domain: 'play33.kr',
-      pathPrefix: '/reservation/create',
-      waitSelector: 'div.resform-table',
-      autoSubmitSelector: '#eveReservationBtn',
-      fields: [
-        { selector: 'input[name="name"]', value: USER.name },
-        { selector: 'input[name="phone"]', value: PHONE.formatted },
-        { selector: 'select[name="people"]', kind: 'people' },
-        { selector: 'input[name="policy"]', checked: true }
-      ],
-      collapseSections: [
-        { selector: 'div.resform-desc', label: '주의사항' },
-        { selector: 'div.title2', label: '예약 안내' }
-      ]
-    },
-    {
-      id: 'clever-town',
-      label: '클레버타운',
-      domain: 'clevertown.co.kr',
-      pathPrefix: '/layout/res/home.php',
-      requiredQuery: { go: 'rev.make.input' },
-      waitSelector: 'form[name="register"]',
-      autoSubmitSelector: 'button.write_ok',
-      manualInputSelector: 'input[name="input_captcha"]',
-      fields: [
-        { selector: 'input[name="name"]', value: USER.name },
-        { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
-        { selector: 'input[name="mobile2"]', value: PHONE.middle },
-        { selector: 'input[name="mobile3"]', value: PHONE.last },
-        { selector: 'select[name="person"]', kind: 'people' },
-        { selector: 'input[name="ck_agree"]', index: 0, checked: true }
-      ],
-      collapseSections: [
-        { selector: 'div.sub_visual', label: '상단 안내' },
-        { selector: 'textarea', label: '약관' }
-      ],
-      scrollSelector: 'input[name="input_captcha"]'
-    },
-    {
-      id: 'doom-escape',
-      label: '둠이스케이프',
-      domain: 'doomescape.com',
-      pathPrefix: '/layout/res/home.php',
-      requiredQuery: { go: 'rev.make.input' },
-      waitSelector: 'form[name="register"]',
-      autoSubmitSelector: 'a[href="javascript:fun_submit()"]',
-      fields: [
-        { selector: 'input[name="name"]', value: USER.name },
-        { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
-        { selector: 'input[name="mobile2"]', value: PHONE.middle },
-        { selector: 'input[name="mobile3"]', value: PHONE.last },
-        { selector: 'select[name="person"]', kind: 'people' },
-        { selector: 'input[name="ck_agree"]', index: 0, checked: true }
-      ],
-      collapseSections: [
-        { selector: 'div.sub_tit', label: '예약 안내' }
-      ]
-    },
-    {
-      id: 'key-escape',
-      label: '키이스케이프',
-      domain: 'keyescape.com',
-      pathPrefix: '/reservation2.php',
-      waitSelector: 'div.reservationForm',
-      autoSubmitSelector: '',
-      manualInputSelector: '#captcha',
-      fields: [
-        { selector: 'input[name="name"]', value: USER.name },
-        { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
-        { selector: 'input[name="mobile2"]', value: PHONE.middle },
-        { selector: 'input[name="mobile3"]', value: PHONE.last },
-        { selector: 'select[name="person"]', kind: 'people' },
-        { selector: 'input[name="agree_1"]', checked: true },
-        { selector: 'input[name="agree_2"]', checked: true },
-        { selector: 'input[name="agree_3"]', checked: true, optional: true }
-      ],
-      collapseSections: [
-        { selector: 'div.stepList', label: '예약 단계' }
-      ],
-      scrollSelector: '#captcha'
-    },
-    {
-      id: 'nabi-jam',
-      label: '나비잠',
-      domain: 'nabijam.com',
-      pathPrefix: '/layout/res/home.php',
-      requiredQuery: { go: 'rev.make.input' },
-      waitSelector: 'form[name="register"]',
-      autoSubmitSelector: '',
-      manualInputSelector: 'input[name="input_captcha"]',
-      fields: [
-        { selector: 'input[name="name"]', value: USER.name },
-        { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
-        { selector: 'input[name="mobile2"]', value: PHONE.middle },
-        { selector: 'input[name="mobile3"]', value: PHONE.last },
-        { selector: 'select[name="person"]', kind: 'people' },
-        { selector: 'input[name="ck_agree"]', index: 0, checked: true }
-      ],
-      collapseSections: [
-        { selector: 'div.sub_visual', label: '상단 안내' },
-        { selector: 'div.sub_tit', label: '예약 안내' }
-      ],
-      scrollSelector: 'input[name="input_captcha"]'
-    },
-    {
-      id: 'seoul-escape-room',
-      label: '서울이스케이프룸',
-      domain: 'seoul-escape.com',
-      pathPrefix: '/reservation/create',
-      waitSelector: 'article.reservation-from-wrap',
-      autoSubmitSelector: '#eveReservationBtn',
-      fields: [
-        { selector: 'input[name="name"]', value: USER.name },
-        { selector: 'input[name="phone"]', value: PHONE.formatted },
-        { selector: 'select[name="people"]', kind: 'people' },
-        { selector: 'input[name="policy"]', checked: true }
-      ],
-      collapseSections: [
-        { selector: '#header, #eveLayerToggleBtn', label: '상단 메뉴' },
-        { selector: '#footer', label: '하단 정보' },
-        { selector: 'div.reservation-form-desc', label: '주의사항' }
-      ],
-      scrollSelector: 'input[name="name"]'
+  function createProfiles(USER = { name: '', phone: '' }) {
+    const PHONE = splitPhone(USER.phone);
+    return [
+      {
+        id: 'earth-star',
+        label: '지구별',
+        domain: 'xn--2e0b040a4xj.com',
+        pathPrefix: '/reservation/create',
+        waitSelector: 'div.reservation-form-table',
+        autoSubmitSelector: '#eveReservationBtn',
+        fields: [
+          { selector: 'input[name="name"]', value: USER.name },
+          { selector: 'input[name="phone"]', value: PHONE.formatted },
+          { selector: 'select[name="people"]', kind: 'people' },
+          { selector: 'input[name="policy"]', checked: true },
+          { selector: 'input[type="radio"][value="21"]', checked: true, optional: true }
+        ],
+        collapseSections: [
+          { selector: 'div.reservation-form-desc', label: '주의사항' }
+        ]
+      },
+      {
+        id: 'play33',
+        label: 'play33',
+        domain: 'play33.kr',
+        pathPrefix: '/reservation/create',
+        waitSelector: 'div.resform-table',
+        autoSubmitSelector: '#eveReservationBtn',
+        fields: [
+          { selector: 'input[name="name"]', value: USER.name },
+          { selector: 'input[name="phone"]', value: PHONE.formatted },
+          { selector: 'select[name="people"]', kind: 'people' },
+          { selector: 'input[name="policy"]', checked: true }
+        ],
+        collapseSections: [
+          { selector: 'div.resform-desc', label: '주의사항' },
+          { selector: 'div.title2', label: '예약 안내' }
+        ]
+      },
+      {
+        id: 'clever-town',
+        label: '클레버타운',
+        domain: 'clevertown.co.kr',
+        pathPrefix: '/layout/res/home.php',
+        requiredQuery: { go: 'rev.make.input' },
+        waitSelector: 'form[name="register"]',
+        autoSubmitSelector: 'button.write_ok',
+        manualInputSelector: 'input[name="input_captcha"]',
+        fields: [
+          { selector: 'input[name="name"]', value: USER.name },
+          { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
+          { selector: 'input[name="mobile2"]', value: PHONE.middle },
+          { selector: 'input[name="mobile3"]', value: PHONE.last },
+          { selector: 'select[name="person"]', kind: 'people' },
+          { selector: 'input[name="ck_agree"]', index: 0, checked: true }
+        ],
+        collapseSections: [
+          { selector: 'div.sub_visual', label: '상단 안내' },
+          { selector: 'textarea', label: '약관' }
+        ],
+        scrollSelector: 'input[name="input_captcha"]'
+      },
+      {
+        id: 'doom-escape',
+        label: '둠이스케이프',
+        domain: 'doomescape.com',
+        pathPrefix: '/layout/res/home.php',
+        requiredQuery: { go: 'rev.make.input' },
+        waitSelector: 'form[name="register"]',
+        autoSubmitSelector: 'a[href="javascript:fun_submit()"]',
+        fields: [
+          { selector: 'input[name="name"]', value: USER.name },
+          { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
+          { selector: 'input[name="mobile2"]', value: PHONE.middle },
+          { selector: 'input[name="mobile3"]', value: PHONE.last },
+          { selector: 'select[name="person"]', kind: 'people' },
+          { selector: 'input[name="ck_agree"]', index: 0, checked: true }
+        ],
+        collapseSections: [
+          { selector: 'div.sub_tit', label: '예약 안내' }
+        ]
+      },
+      {
+        id: 'key-escape',
+        label: '키이스케이프',
+        domain: 'keyescape.com',
+        pathPrefix: '/reservation2.php',
+        waitSelector: 'div.reservationForm',
+        autoSubmitSelector: '',
+        manualInputSelector: '#captcha',
+        fields: [
+          { selector: 'input[name="name"]', value: USER.name },
+          { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
+          { selector: 'input[name="mobile2"]', value: PHONE.middle },
+          { selector: 'input[name="mobile3"]', value: PHONE.last },
+          { selector: 'select[name="person"]', kind: 'people' },
+          { selector: 'input[name="agree_1"]', checked: true },
+          { selector: 'input[name="agree_2"]', checked: true },
+          { selector: 'input[name="agree_3"]', checked: true, optional: true }
+        ],
+        collapseSections: [
+          { selector: 'div.stepList', label: '예약 단계' }
+        ],
+        scrollSelector: '#captcha'
+      },
+      {
+        id: 'nabi-jam',
+        label: '나비잠',
+        domain: 'nabijam.com',
+        pathPrefix: '/layout/res/home.php',
+        requiredQuery: { go: 'rev.make.input' },
+        waitSelector: 'form[name="register"]',
+        autoSubmitSelector: '',
+        manualInputSelector: 'input[name="input_captcha"]',
+        fields: [
+          { selector: 'input[name="name"]', value: USER.name },
+          { selector: 'select[name="mobile1"], input[name="mobile1"]', value: PHONE.first },
+          { selector: 'input[name="mobile2"]', value: PHONE.middle },
+          { selector: 'input[name="mobile3"]', value: PHONE.last },
+          { selector: 'select[name="person"]', kind: 'people' },
+          { selector: 'input[name="ck_agree"]', index: 0, checked: true }
+        ],
+        collapseSections: [
+          { selector: 'div.sub_visual', label: '상단 안내' },
+          { selector: 'div.sub_tit', label: '예약 안내' }
+        ],
+        scrollSelector: 'input[name="input_captcha"]'
+      },
+      {
+        id: 'seoul-escape-room',
+        label: '서울이스케이프룸',
+        domain: 'seoul-escape.com',
+        pathPrefix: '/reservation/create',
+        waitSelector: 'article.reservation-from-wrap',
+        autoSubmitSelector: '#eveReservationBtn',
+        fields: [
+          { selector: 'input[name="name"]', value: USER.name },
+          { selector: 'input[name="phone"]', value: PHONE.formatted },
+          { selector: 'select[name="people"]', kind: 'people' },
+          { selector: 'input[name="policy"]', checked: true }
+        ],
+        collapseSections: [
+          { selector: '#header, #eveLayerToggleBtn', label: '상단 메뉴' },
+          { selector: '#footer', label: '하단 정보' },
+          { selector: 'div.reservation-form-desc', label: '주의사항' }
+        ],
+        scrollSelector: 'input[name="name"]'
+      }
+    ];
+  }
+
+  function normalizeUser(value) {
+    const name = typeof value?.name === 'string' ? value.name.trim() : '';
+    const phone = typeof value?.phone === 'string' ? value.phone.replace(/\D/g, '') : '';
+    return name && /^\d{10,11}$/.test(phone) ? { name, phone } : null;
+  }
+
+  function loadUser() {
+    try {
+      return normalizeUser(GM_getValue(USER_STORAGE_KEY, null));
+    } catch (error) {
+      console.warn('[방탈출 자동 입력] 예약자 정보를 읽지 못했습니다.');
+      return null;
     }
-  ];
+  }
+
+  function requestUser() {
+    const name = window.prompt('예약자 이름을 입력하세요.', currentUser?.name || '');
+    if (name === null) return false;
+    const phone = window.prompt('예약자 전화번호를 입력하세요.', currentUser?.phone || '');
+    if (phone === null) return false;
+
+    const user = normalizeUser({ name, phone });
+    if (!user) {
+      window.alert('이름과 숫자 10~11자리 전화번호를 입력하세요.');
+      return false;
+    }
+
+    try {
+      GM_setValue(USER_STORAGE_KEY, user);
+      currentUser = user;
+      return true;
+    } catch (error) {
+      window.alert('예약자 정보를 저장하지 못했습니다. 다시 시도해 주세요.');
+      return false;
+    }
+  }
 
   function splitPhone(value) {
     const digits = String(value).replace(/\D/g, '');
@@ -375,20 +417,23 @@
   }
 
   function renderAutoSubmitStatus(status, dot, label, profile) {
+    const hasUser = Boolean(currentUser);
     const supported = supportsAutoSubmit(profile);
-    const enabled = getAutoSubmitEnabled(profile);
-    const message = enabled ? '자동 제출 켜짐' : '자동 제출 꺼짐';
+    const enabled = hasUser && getAutoSubmitEnabled(profile);
+    const message = !hasUser ? '예약자 정보 없음' : enabled ? '자동 제출 켜짐' : '자동 제출 꺼짐';
 
     label.textContent = message;
-    status.disabled = !supported;
+    status.disabled = hasUser && !supported;
     status.setAttribute('aria-pressed', String(enabled));
     status.setAttribute(
       'aria-label',
-      supported ? message + '. 길게 눌러 변경' : message + '. 이 사이트는 자동 제출을 지원하지 않음'
+      !hasUser ? message + '. 자동 입력 중지. 길게 눌러 입력' :
+        supported ? message + '. 길게 눌러 변경' : message + '. 이 사이트는 자동 제출을 지원하지 않음'
     );
-    status.title = supported ? message + ' · 길게 눌러 변경' : message + ' · 자동 제출 미지원';
-    status.style.cursor = supported ? 'pointer' : 'default';
-    status.style.background = enabled
+    status.title = !hasUser ? message + ' · 길게 눌러 입력' :
+      supported ? message + ' · 길게 눌러 변경' : message + ' · 자동 제출 미지원';
+    status.style.cursor = !hasUser || supported ? 'pointer' : 'default';
+    status.style.background = !hasUser ? '#92400e' : enabled
       ? 'linear-gradient(135deg, #ef4444, #c81e1e)'
       : 'linear-gradient(135deg, #30343a, #111315)';
     status.style.boxShadow = enabled
@@ -449,7 +494,7 @@
     status.append(dot, label);
     renderAutoSubmitStatus(status, dot, label, profile);
 
-    if (supported) {
+    if (!currentUser || supported) {
       let pressTimer = null;
       let startX = 0;
       let startY = 0;
@@ -469,12 +514,16 @@
         status.style.transform = 'scale(.96)';
         pressTimer = setTimeout(() => {
           pressTimer = null;
+          status.style.transform = 'scale(1)';
+          if (!currentUser) {
+            if (requestUser()) run({ autoSubmit: false });
+            return;
+          }
           const nextEnabled = !getAutoSubmitEnabled(profile);
           if (setAutoSubmitEnabled(profile, nextEnabled)) {
             renderAutoSubmitStatus(status, dot, label, profile);
             try { navigator.vibrate?.(30); } catch (error) { /* 진동 미지원 */ }
           }
-          status.style.transform = 'scale(1)';
         }, LONG_PRESS_DURATION_MS);
       };
 
@@ -604,7 +653,7 @@
     });
   }
 
-  async function submitIfEnabled(profile) {
+  async function submitIfEnabled(profile, runId) {
     if (!getAutoSubmitEnabled(profile)) return;
 
     await waitForPaint();
@@ -617,17 +666,19 @@
       return;
     }
 
-    button.click();
+    if (runId === activeRun && currentUser && getAutoSubmitEnabled(profile)) button.click();
   }
 
-  async function run() {
+  async function run({ autoSubmit = true } = {}) {
+    const runId = ++activeRun;
     const url = new URL(location.href);
-    const siteProfile = PROFILES.find(candidate => hostnameMatches(url.hostname, candidate.domain));
+    const profiles = createProfiles(currentUser || undefined);
+    const siteProfile = profiles.find(candidate => hostnameMatches(url.hostname, candidate.domain));
     if (!siteProfile) return;
 
     showAutoSubmitStatus(siteProfile);
 
-    const profile = PROFILES.find(candidate => matchesProfile(candidate, url));
+    const profile = profiles.find(candidate => matchesProfile(candidate, url));
     if (!profile) return;
 
     console.info('[' + profile.label + '] 자동 입력 스크립트 시작:', location.href);
@@ -635,18 +686,29 @@
     try {
       await waitFor(profile.waitSelector);
     } catch (error) {
+      if (runId !== activeRun) return;
       console.warn('[' + profile.label + '] 예약 입력 폼을 찾지 못했습니다:', error);
       showResultToast(false);
       return;
     }
 
+    if (runId !== activeRun) return;
     collapseElements(profile.collapseSections);
+    if (!currentUser) return;
+
     const succeeded = profile.fields.map(field => applyField(field, profile)).every(Boolean);
     await scrollToTarget(profile.scrollSelector);
+    if (runId !== activeRun) return;
 
     showResultToast(succeeded);
     console.info('[' + profile.label + '] 입력 ' + (succeeded ? '완료' : '실패') + '.');
-    if (succeeded) await submitIfEnabled(profile);
+    if (succeeded && autoSubmit) await submitIfEnabled(profile, runId);
+  }
+
+  if (typeof GM_registerMenuCommand === 'function') {
+    GM_registerMenuCommand('예약자 정보 변경', () => {
+      if (requestUser()) run({ autoSubmit: false });
+    });
   }
 
   run();

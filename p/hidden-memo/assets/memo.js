@@ -6,7 +6,6 @@
   var noteButtons = Array.from(document.querySelectorAll('[data-open-note]'));
   var backButtons = Array.from(document.querySelectorAll('[data-back-to-category]'));
   var panels = Array.from(document.querySelectorAll('[data-script-panel]'));
-  var panelStates = new Map();
 
   function showCategory() {
     categoryView.hidden = false;
@@ -25,9 +24,7 @@
     document.title = view.querySelector('h1').textContent + ' · Memo';
     window.scrollTo(0, 0);
 
-    var focusTarget = note === 'escape'
-      ? document.getElementById('guest-name')
-      : view.querySelector('[data-copy-button]');
+    var focusTarget = view.querySelector('[data-copy-button]');
     if (focusTarget) window.setTimeout(function () { focusTarget.focus(); }, 80);
   }
 
@@ -47,39 +44,12 @@
     }
   }
 
-  function buildPanel(panel) {
-    var state = panelStates.get(panel);
-    if (!state || !state.template) return;
-
-    if (panel.dataset.generator !== 'escape') {
-      state.currentCode = state.template;
-      state.output.textContent = state.currentCode;
-      state.copyButton.disabled = false;
-      state.help.textContent = 'Tampermonkey에 바로 복사할 수 있습니다.';
-      return;
-    }
-
-    var name = state.nameInput.value.trim();
-    var phone = state.phoneInput.value.trim();
-    var phoneDigits = phone.replace(/\D/g, '');
-    var autoSubmit = state.autoSubmitInput.value;
-    var validPhone = phoneDigits.length === 10 || phoneDigits.length === 11;
-
-    state.currentCode = state.template
-      .replace('__GUEST_NAME__', JSON.stringify(name))
-      .replace('__GUEST_PHONE__', JSON.stringify(phone))
-      .replace('__AUTO_SUBMIT__', autoSubmit);
-
+  function buildPanel(state) {
+    if (!state.template) return;
+    state.currentCode = state.template;
     state.output.textContent = state.currentCode;
-    state.copyButton.disabled = !name || !validPhone;
-
-    if (!name || !phone) {
-      state.help.textContent = '이름과 전화번호를 입력하면 복사할 수 있습니다.';
-    } else if (!validPhone) {
-      state.help.textContent = '전화번호는 숫자 10~11자리로 입력하세요.';
-    } else {
-      state.help.textContent = '7개 사이트에 입력값이 반영되었습니다.';
-    }
+    state.copyButton.disabled = false;
+    state.help.textContent = 'Tampermonkey에 바로 복사할 수 있습니다.';
   }
 
   function initPanel(panel) {
@@ -88,12 +58,8 @@
       currentCode: '',
       output: panel.querySelector('[data-code-output]'),
       copyButton: panel.querySelector('[data-copy-button]'),
-      help: panel.querySelector('[data-copy-help]'),
-      nameInput: document.getElementById('guest-name'),
-      phoneInput: document.getElementById('guest-phone'),
-      autoSubmitInput: document.getElementById('auto-submit')
+      help: panel.querySelector('[data-copy-help]')
     };
-    panelStates.set(panel, state);
 
     state.copyButton.addEventListener('click', async function () {
       if (state.copyButton.disabled || !state.currentCode) return;
@@ -103,12 +69,6 @@
       window.setTimeout(function () { state.copyButton.textContent = '코드 복사'; }, 1400);
     });
 
-    if (panel.dataset.generator === 'escape') {
-      state.nameInput.addEventListener('input', function () { buildPanel(panel); });
-      state.phoneInput.addEventListener('input', function () { buildPanel(panel); });
-      state.autoSubmitInput.addEventListener('change', function () { buildPanel(panel); });
-    }
-
     fetch(panel.dataset.scriptSource, { cache: 'no-store' })
       .then(function (response) {
         if (!response.ok) throw new Error('script load failed: ' + response.status);
@@ -116,7 +76,7 @@
       })
       .then(function (source) {
         state.template = source.trim();
-        buildPanel(panel);
+        buildPanel(state);
       })
       .catch(function () {
         state.output.textContent = '코드를 불러오지 못했습니다.';
