@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.12
+// @version      1.6.13
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.12';
+  const SCRIPT_VERSION = '1.6.13';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1125,14 +1125,14 @@
       }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
-        --fm-control-edge: max(124px, env(safe-area-inset-left, 0px));
+        --fm-control-edge: max(132px, env(safe-area-inset-left, 0px));
         --fm-menu-left: max(12px, env(safe-area-inset-left, 0px));
         --fm-menu-right: max(12px, env(safe-area-inset-right, 0px));
         inset: 0 !important;
         z-index: 2147483647 !important; pointer-events: none !important;
       }
       #${HOST_ID}[data-side="right"] {
-        --fm-control-edge: max(124px, env(safe-area-inset-right, 0px));
+        --fm-control-edge: max(132px, env(safe-area-inset-right, 0px));
       }
     `
   ].join('\n');
@@ -1946,11 +1946,10 @@
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const direction = (dx, dy) => {
-      const inwardX = settings.launcherRight ? -dx : dx;
-      if (inwardX >= 20 && inwardX > Math.abs(dy) * 1.2) return 'reload';
+      if (dx >= 20 && dx > Math.abs(dy) * 1.2) return 'reload';
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 32) return null;
       if (Math.abs(dy) > Math.abs(dx) * 1.2) return dy < 0 ? 'top' : 'bottom';
-      return -inwardX > Math.abs(dy) * 1.2 ? 'comments' : null;
+      return -dx > Math.abs(dy) * 1.2 ? 'comments' : null;
     };
     const reset = () => {
       const pointer = gesture?.id;
@@ -2469,7 +2468,7 @@
     host.setAttribute('data-side', settings.launcherRight ? 'right' : 'left');
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
     const downLabel = document.querySelector('.rd .rd_hd h1') ? '하단 글 목록(목록부터는 맨 아래)' : '맨 아래';
-    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴 · 위로 끌면 맨 위, 아래로 끌면 ${downLabel}, ${settings.launcherRight ? '왼쪽' : '오른쪽'}으로 밀면 새로고침 · 상세에서 ${settings.launcherRight ? '오른쪽' : '왼쪽'}으로 끌면 댓글`;
+    launcher.title = `${settings.enabled ? '' : '화면 정리 꺼짐 · '}한 번 누르면 FM코리아 메인, 두 번 누르면 저장 메뉴 · 위로 끌면 맨 위, 아래로 끌면 ${downLabel}, 오른쪽으로 밀면 새로고침 · 상세에서 왼쪽으로 끌면 댓글`;
     launcher.setAttribute('aria-label', launcher.title);
     for (const input of panel.querySelectorAll('input')) input.checked = settings[input.name];
     if (!panel.hidden) syncMenuPanel();
@@ -2546,13 +2545,13 @@
           position: absolute; inset: 0; z-index: 0; pointer-events: auto; touch-action: none;
         }
         .control-anchor {
-          position: absolute; left: var(--fm-control-edge, 124px); width: 48px; z-index: 1; pointer-events: none;
+          position: absolute; left: var(--fm-control-edge, 132px); width: 48px; z-index: 1; pointer-events: none;
           /* svh와 정적 안전 영역으로 주소창 변화에 따른 좌표 이동을 막습니다. */
           top: calc(100vh - 272px - env(safe-area-max-inset-bottom, 0px));
           top: calc(100svh - 272px - env(safe-area-max-inset-bottom, 0px));
           transform: translateY(-100%);
         }
-        :host([data-side="right"]) .control-anchor { left: auto; right: var(--fm-control-edge, 124px); }
+        :host([data-side="right"]) .control-anchor { left: auto; right: var(--fm-control-edge, 132px); }
         .launcher {
           pointer-events: auto;
           display: grid; place-items: center; width: 48px; min-width: 48px; height: 48px; padding: 0;
@@ -2572,7 +2571,7 @@
         }
         .launcher:focus, .launcher:focus-visible { outline: none; }
         .panel {
-          position: absolute; bottom: calc(100% + 8px); left: calc(var(--fm-menu-left, 12px) - var(--fm-control-edge, 124px));
+          position: absolute; bottom: calc(100% + 8px); left: calc(var(--fm-menu-left, 12px) - var(--fm-control-edge, 132px));
           display: flex; flex-direction: column; width: 256px; margin: 0; pointer-events: auto;
           max-width: calc(100vw - var(--fm-menu-left, 12px) - var(--fm-menu-right, 12px));
           max-height: calc(100svh - 356px - env(safe-area-max-inset-bottom, 0px));
@@ -2582,7 +2581,7 @@
           font: 13px/1.5 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         }
         :host([data-side="right"]) .panel {
-          left: auto; right: calc(var(--fm-menu-right, 12px) - var(--fm-control-edge, 124px));
+          left: auto; right: calc(var(--fm-menu-right, 12px) - var(--fm-control-edge, 132px));
         }
         @media (max-height: 600px) {
           .panel { bottom: auto; top: calc(100% + 8px); max-height: 252px; }

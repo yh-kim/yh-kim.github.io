@@ -1560,14 +1560,72 @@
           Math.abs(tapDoc.defaultView.innerWidth - rightPanelBounds.right - 12) < 1 &&
           panelGapIsEight(initialLauncherBounds, panelBounds) &&
           panelGapIsEight(rightLauncherBounds, rightPanelBounds));
-        record('48px 홈 버튼은 좌우 모두 화면 가장자리에서 124px 안쪽에 놓임',
+        record('48px 홈 버튼은 좌우 모두 화면 가장자리에서 132px 안쪽에 놓임',
           Math.abs(initialLauncherBounds.width - 48) < 1 &&
           Math.abs(initialLauncherBounds.height - 48) < 1 &&
           Math.abs(rightLauncherBounds.width - 48) < 1 &&
           Math.abs(rightLauncherBounds.height - 48) < 1 &&
-          Math.abs(initialLauncherBounds.left - 124) < 1 &&
-          Math.abs(tapDoc.defaultView.innerWidth - rightLauncherBounds.right - 124) < 1 &&
+          Math.abs(initialLauncherBounds.left - 132) < 1 &&
+          Math.abs(tapDoc.defaultView.innerWidth - rightLauncherBounds.right - 132) < 1 &&
           Math.abs(Number.parseFloat(tapDoc.defaultView.getComputedStyle(detailLauncher(tapDoc)).opacity) - .55) < .02);
+        const reloadCall = 'window.location.reload(); return;';
+        const gestureSource = source.replace(reloadCall,
+          'window.__fmFixtureReloads = (window.__fmFixtureReloads || 0) + 1; return;');
+        record('새로고침 동작을 검사 프레임에서만 계측', gestureSource !== source);
+        for (const side of ['left', 'right']) {
+          const gestureDoc = await makeLayoutFrame(gestureSource, `${side} 버튼 좌우 드래그`, `
+            <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><h1>동작 검사 글</h1></div>
+              <div class="rd_body"><article>본문</article></div>
+              <div class="fdb_lst_wrp" id="gesture-comments">댓글 목록</div></div>
+              <div id="gesture-tail">아래 글 목록</div></div>`,
+            '.rd_body{height:700px}.fdb_lst_wrp{height:260px}#gesture-tail{height:700px}',
+            { launcherRight: side === 'right' });
+          gestureDoc.defaultView.frameElement.style.width = '390px';
+          gestureDoc.defaultView.frameElement.style.height = '480px';
+          const gestureView = gestureDoc.defaultView;
+          const gestureLauncher = detailLauncher(gestureDoc);
+          const gestureTitle = gestureLauncher.getAttribute('aria-label');
+          const comments = gestureDoc.querySelector('#gesture-comments');
+          const realScrollToGesture = gestureView.scrollTo.bind(gestureView);
+          let gestureScrollTop = null;
+          gestureView.scrollTo = options => {
+            gestureScrollTop = options.top;
+            realScrollToGesture({ top: options.top, behavior: 'instant' });
+          };
+          for (const method of ['setPointerCapture', 'releasePointerCapture']) {
+            Object.defineProperty(gestureLauncher, method, { configurable: true, value: () => {} });
+          }
+          Object.defineProperty(gestureLauncher, 'hasPointerCapture',
+            { configurable: true, value: () => false });
+          const dragSide = dx => {
+            const bounds = gestureLauncher.getBoundingClientRect();
+            const x = bounds.left + bounds.width / 2;
+            const y = bounds.top + bounds.height / 2;
+            let ready = false;
+            for (const type of ['pointerdown', 'pointermove', 'pointerup']) {
+              gestureLauncher.dispatchEvent(new gestureView.PointerEvent(type, {
+                bubbles: true, composed: true, pointerId: 29, pointerType: 'touch',
+                isPrimary: true, button: 0, clientX: x + (type === 'pointerdown' ? 0 : dx), clientY: y
+              }));
+              if (type === 'pointermove') ready = gestureLauncher.hasAttribute('data-ready');
+            }
+            return ready;
+          };
+          const expectedCommentsTop = gestureView.scrollY + comments.getBoundingClientRect().top - 56;
+          const leftReady = dragSide(-80);
+          await delay(30);
+          record(`${side} 버튼: 왼쪽으로 끌면 댓글로 이동`, leftReady &&
+            gestureTitle.includes('오른쪽으로 밀면 새로고침') &&
+            gestureTitle.includes('왼쪽으로 끌면 댓글') &&
+            Math.abs(gestureScrollTop - expectedCommentsTop) < 2 &&
+            Math.abs(comments.getBoundingClientRect().top - 56) < 2 &&
+            !gestureView.__fmFixtureReloads);
+          const rightReady = dragSide(80);
+          await delay(20);
+          record(`${side} 버튼: 오른쪽으로 밀면 새로고침`,
+            rightReady && gestureView.__fmFixtureReloads === 1 &&
+            Math.abs(gestureScrollTop - expectedCommentsTop) < 2);
+        }
         let menuActivations = 0;
         let leakedEvents = 0;
         let copiedLink = '';
