@@ -1394,6 +1394,50 @@
         alertScrollFiller.remove();
         record('포텐 알림은 홈·상세에서 스크롤 전후 화면 맨 아래에 고정됨',
           homeAlertAtTop && homeAlertScrolled && detailAlertScrolled && detailAlertAtTop);
+        const whiteAlertCss = `
+          html{background:#fff}
+          #fm_alert{position:fixed;right:8px;bottom:8px;padding:24px;background:#fff;
+            border:7px solid #fff;box-shadow:0 0 20px #fff}
+          #fm_alert .fm_alert_wrap.best{padding:18px;background:#fff;
+            border:4px solid #fff;box-shadow:0 0 12px #fff}
+          #fm_alert .best .fm_alert{background:#fff}`;
+        for (const parent of ['body', 'html']) {
+          const darkAlertDoc = await makeLayoutFrame(source, `다크 포텐 알림 ${parent} 부착`, `
+            <div class="bd bd_mobile">홈 목록</div>
+            <div id="fm_alert"><div class="fm_alert_wrap best"><div class="fm_alert">
+              <div class="msg"><a href="/best/123">[포텐 터짐] 알림 제목</a></div>
+            </div></div></div>`, whiteAlertCss, {}, { bodyClass: 'night_mode' });
+          const darkAlert = darkAlertDoc.querySelector('#fm_alert');
+          if (parent === 'html') {
+            darkAlertDoc.documentElement.append(darkAlert);
+            await delay(80);
+          }
+          const darkWrap = darkAlert.querySelector('.fm_alert_wrap.best');
+          const darkView = darkAlertDoc.defaultView;
+          const color = element => darkView.getComputedStyle(element).backgroundColor;
+          const clearWhiteShell = element => {
+            const computed = darkView.getComputedStyle(element);
+            return computed.backgroundColor === 'rgba(0, 0, 0, 0)' &&
+              Number.parseFloat(computed.paddingTop) === 0 &&
+              Number.parseFloat(computed.borderTopWidth) === 0 &&
+              computed.boxShadow === 'none';
+          };
+          record(`다크 포텐 알림 ${parent} 부착: 사이트의 흰색 바깥 배경·여백 제거`,
+            darkAlert.parentElement === (parent === 'html' ? darkAlertDoc.documentElement : darkAlertDoc.body) &&
+            clearWhiteShell(darkAlert) && clearWhiteShell(darkWrap) &&
+            color(darkAlertDoc.documentElement) === 'rgb(27, 27, 26)' &&
+            color(darkAlert.querySelector('.fm_alert')) === 'rgb(27, 27, 26)' &&
+            darkAlert.querySelector('a').hasAttribute('data-fm-clean-alert-title') &&
+            darkAlert.querySelector('a').textContent.trim() === '알림 제목');
+          darkAlertDoc.body.classList.remove('night_mode');
+          await delay(30);
+          const lightBackground = color(darkAlertDoc.documentElement) === 'rgb(255, 255, 255)';
+          darkAlertDoc.body.classList.add('night_mode');
+          await delay(30);
+          record(`포텐 알림 ${parent} 부착: 테마 전환 후 HTML 바탕이 다시 어두워짐`,
+            lightBackground && color(darkAlertDoc.documentElement) === 'rgb(27, 27, 26)' &&
+            clearWhiteShell(darkAlert) && clearWhiteShell(darkWrap));
+        }
         alertDoc.querySelector('#fm_alert').insertAdjacentHTML('beforeend', `
           <div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg">
             <a id="split-best-link" href="/best/789"><b>포텐 </b><span>터짐</span> 분리된 제목</a>

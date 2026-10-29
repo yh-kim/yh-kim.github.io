@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.11
+// @version      1.6.12
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.11';
+  const SCRIPT_VERSION = '1.6.12';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -339,8 +339,7 @@
     const articleImage = `${root} body.night_mode .rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst, .poll_table) img)`;
     // 본문 작성자 색상·영상·인용 형식은 유지하고 다크 모드 이미지 밝기만 낮춥니다.
     return `
-      ${root} { background: transparent !important; }
-      ${root} body {
+      ${root} {
         --fm-clean-bg: #f6f5f2; --fm-clean-surface: #fff; --fm-clean-raised: #faf9f7;
         --fm-clean-text: #1c1b19; --fm-clean-muted: #6b6862; --fm-clean-line: #e7e4de;
         --fm-clean-title: #1c1b19;
@@ -349,11 +348,9 @@
         --fm-clean-comment: #8b5a3c;
         --fm-clean-accent: #9a4e26; --fm-clean-soft: #fff0e7;
         color-scheme: light;
-        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
-        margin: 0 4px !important; padding: 0 !important; box-sizing: border-box;
-        font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
+        background: var(--fm-clean-surface) !important;
       }
-      ${root} body.night_mode {
+      ${root}:has(body.night_mode) {
         --fm-clean-bg: #121211; --fm-clean-surface: #1b1b1a; --fm-clean-raised: #232321;
         --fm-clean-text: #f0efeb; --fm-clean-muted: #b0ada6; --fm-clean-line: #2f2e2b;
         --fm-clean-title: #dad7d1; --fm-clean-content: #d5d2cc;
@@ -361,6 +358,11 @@
         --fm-clean-comment: #b69a86;
         --fm-clean-accent: #f0b58f; --fm-clean-soft: #3b2a23;
         color-scheme: dark;
+      }
+      ${root} body {
+        background: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
+        margin: 0 4px !important; padding: 0 !important; box-sizing: border-box;
+        font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
       }
       ${root} :where(.bd, .fm_best_widget, nav.fmkorea_navi, .fmkorea_m_navi, #gnb, body > footer) a:not(:where(.xe_content *, article *)) {
         color: var(--fm-clean-text) !important;
@@ -846,7 +848,14 @@
         position: fixed !important; right: 12px !important; bottom: 0 !important;
         top: auto !important; transform: none !important; max-width: calc(100vw - 24px) !important;
       }
-      ${root} #fm_alert .fm_alert_wrap.best { width: min(280px, calc(100vw - 24px)) !important; }
+      ${root} #fm_alert:has(.fm_alert_wrap.best) {
+        padding: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important;
+      }
+      ${root} #fm_alert .fm_alert_wrap.best {
+        width: min(280px, calc(100vw - 24px)) !important;
+        padding: 0 !important; border: 0 !important; background: transparent !important;
+        box-shadow: none !important;
+      }
       ${root} #fm_alert .best .fm_alert {
         padding: 10px 12px !important; border: 1px solid var(--fm-clean-line) !important;
         border-left: 2px solid var(--fm-clean-accent) !important; border-radius: 10px !important;
