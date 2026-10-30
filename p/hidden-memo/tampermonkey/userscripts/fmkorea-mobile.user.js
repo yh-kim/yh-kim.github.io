@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.14
+// @version      1.6.15
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.14';
+  const SCRIPT_VERSION = '1.6.15';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1134,13 +1134,6 @@
       #${HOST_ID}[data-side="right"] {
         --fm-control-edge: max(132px, env(safe-area-inset-right, 0px));
       }
-      /* 사이트 회원 메뉴가 고정 읽기 바나 둥근 버튼에 가려지지 않도록 합니다. */
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] #popup_menu_area {
-        z-index: 2147483647 !important;
-      }
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"]:has(#popup_menu_area:not([style*="display: none" i]):not([style*="display:none" i]):not([hidden])) #${HOST_ID} {
-        z-index: 2147483646 !important;
-      }
     `
   ].join('\n');
   const styleText = style.textContent;
@@ -2155,7 +2148,7 @@
     };
     const ignoredTarget = event => event.composedPath().some(element => {
       if (!(element instanceof Element)) return false;
-      if (element.matches(`#${HOST_ID}, #fm-clean-reading-header, #popup_menu_area, nav, #gnb, .fm-recent-visited,
+      if (element.matches(`#${HOST_ID}, #fm-clean-reading-header, nav, #gnb, .fm-recent-visited,
         input, textarea, select, button, summary, video, audio, iframe, canvas,
         [contenteditable]:not([contenteditable="false"]), [role="slider"], a[download],
         .swiper, .swiper-container, .swiper-wrapper, .slick-slider, [data-fm-clean-swipe-ignore]`)) return true;
@@ -2843,6 +2836,30 @@
     });
   }
 
+  const boundMemberPopups = new WeakSet();
+
+  function bindMemberPopupLinks() {
+    const area = document.getElementById('popup_menu_area');
+    if (!area || boundMemberPopups.has(area)) return;
+    boundMemberPopups.add(area);
+    area.addEventListener('click', event => {
+      if (!settings.enabled || document.documentElement.getAttribute('data-fm-clean-mobile') !== 'true' || event.button !== 0) return;
+      const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+      if (!link || !area.contains(link)) return;
+      // 사이트의 document 클릭 핸들러가 링크 기본 동작보다 먼저 메뉴를 숨기지 않게 합니다.
+      // 링크의 href, target, onclick은 원본 그대로 실행하고 다음 작업에서 메뉴를 닫습니다.
+      const menu = area.firstElementChild;
+      const menuId = area.getAttribute('data-menu-id');
+      event.stopPropagation();
+      window.setTimeout(() => {
+        if (area.isConnected && area.firstElementChild === menu &&
+            area.getAttribute('data-menu-id') === menuId && area.contains(link)) {
+          area.style.display = 'none';
+        }
+      }, 0);
+    });
+  }
+
   const bestAlertOriginalText = new Map();
 
   function updateBestAlerts(active) {
@@ -2962,6 +2979,7 @@
     const headerTargets = collectHeaderTargets(adTargets);
     syncHiddenElements('header', mobile && settings.enabled && settings.header, headerTargets);
     syncHiddenElements('ads', mobile && settings.enabled && settings.ads, adTargets);
+    bindMemberPopupLinks();
     updateBestAlerts(mobile && settings.enabled && settings.appearance);
     updateCommentComposers(mobile && settings.enabled && settings.commentComposer);
     if (mobile) {

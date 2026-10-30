@@ -1462,82 +1462,84 @@
         record('사이트가 갱신한 알림 내용은 비활성화 시 오래된 제목으로 되돌리지 않음',
           plainBestMessage.textContent === '사이트가 갱신한 새 제목');
 
-        // 가상 사이트 팝업: 실제 사이트의 동작이나 DOM을 그대로 복제한 것은 아닙니다.
-        const nicknameDoc = await makeLayoutFrame(source, '닉네임 팝업 겹침', `
-          <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><h1>게시글 제목</h1></div>
-            <div class="rd_body"><article style="height:1000px">본문</article></div></div>
-            <div style="height:500px">댓글</div></div>
-          <div id="popup_menu_area" style="display:none;position:fixed;z-index:9999">
-            <a id="nickname-menu-link" href="#nickname-info">정보 보기</a></div>`, `
-          #popup_menu_area { background: #fff; }
-          #nickname-menu-link { display: block; width: 100px; height: 30px; line-height: 30px; }
-        `);
-        nicknameDoc.defaultView.frameElement.style.width = '390px';
-        nicknameDoc.defaultView.frameElement.style.height = '480px';
-        const nicknameView = nicknameDoc.defaultView;
-        nicknameView.scrollTo({ top: 300, behavior: 'instant' });
-        await delay(80);
-        const nicknamePopup = nicknameDoc.querySelector('#popup_menu_area');
-        const nicknameLink = nicknameDoc.querySelector('#nickname-menu-link');
-        const nicknameHost = nicknameDoc.querySelector('#fm-clean-controls');
-        const nicknameShadow = nicknameHost.shadowRoot;
-        const nicknameLauncher = detailLauncher(nicknameDoc);
-        const nicknameReader = nicknameDoc.querySelector('#fm-clean-reading-header').shadowRoot.querySelector('.title');
-        let nicknameClicks = 0;
-        nicknameLink.addEventListener('click', event => { event.preventDefault(); nicknameClicks++; });
-        const hitNicknamePopupOver = async element => {
-          const rect = element.getBoundingClientRect();
-          const x = rect.left + rect.width / 2;
-          const y = rect.top + rect.height / 2;
-          nicknamePopup.style.left = `${x - 50}px`;
-          nicknamePopup.style.top = `${y - 15}px`;
-          nicknamePopup.style.display = 'block';
-          await delay(40);
-          const hit = nicknameDoc.elementFromPoint(x, y);
-          const before = nicknameClicks;
-          hit?.click();
-          return hit === nicknameLink && nicknameClicks === before + 1;
-        };
-        record('가상 닉네임 팝업은 읽기 헤더와 겹쳐도 메뉴 링크가 클릭됨',
-          visiblyRendered(nicknameReader) && await hitNicknamePopupOver(nicknameReader));
-        nicknamePopup.style.display = 'none';
-        record('가상 닉네임 팝업은 둥근 버튼과 겹쳐도 메뉴 링크가 클릭됨',
-          await hitNicknamePopupOver(nicknameLauncher));
-        nicknamePopup.style.left = '120px';
-        nicknamePopup.style.top = '120px';
-        Object.defineProperty(nicknameView.history, 'length', { configurable: true, value: 2 });
-        const makeNicknameTouch = x => new nicknameView.Touch({
-          identifier: 12, target: nicknameLink, clientX: x, clientY: 135
+        // 사이트와 같은 ul > li > a 구조 및 document click의 동기 숨김을 재현합니다.
+        const memberPopupDoc = await makeLayoutFrame(source, '닉네임 메뉴 링크와 닫기 순서', `
+          <div class="bd bd_mobile"><p id="member-outside">메뉴 바깥 본문</p></div>
+          <div id="popup_menu_area" style="position:absolute;z-index:9999;display:block;left:25px;top:65px">
+            <ul><li><a id="member-menu-first" href="#member-menu-destination-one">정보 보기</a></li></ul>
+          </div>`, `#popup_menu_area { background: white; padding: 8px; }
+            #popup_menu_area a { display: block; padding: 8px; }`);
+        const memberView = memberPopupDoc.defaultView;
+        const memberPopup = memberPopupDoc.querySelector('#popup_menu_area');
+        const memberDiagnosis = () => JSON.stringify({
+          linkClicks: existingLinkClicks, popupClicks: existingPopupClicks,
+          documentCloses, hash: memberView.location.hash,
+          display: memberView.getComputedStyle(memberPopup).display,
+          inlineDisplay: memberPopup.style.getPropertyValue('display'),
+          inlinePriority: memberPopup.style.getPropertyPriority('display'),
+          javascript: memberView.__memberJavascript, inline: memberView.__memberInline,
+          href: memberLink?.href, location: memberView.location.href,
+          enabled: memberPopupDoc.documentElement.getAttribute('data-fm-clean-enabled'),
+          mobile: memberPopupDoc.documentElement.getAttribute('data-fm-clean-mobile')
         });
-        const sendNicknameTouch = (type, touches, changedTouches) => nicknameLink.dispatchEvent(
-          new nicknameView.TouchEvent(type, { bubbles: true, cancelable: true, touches, changedTouches }));
-        const initialNicknameTouch = makeNicknameTouch(160);
-        const movedNicknameTouch = makeNicknameTouch(178);
-        sendNicknameTouch('touchstart', [initialNicknameTouch], [initialNicknameTouch]);
-        sendNicknameTouch('touchmove', [movedNicknameTouch], [movedNicknameTouch]);
-        sendNicknameTouch('touchend', [], [movedNicknameTouch]);
-        const clicksBeforeWobble = nicknameClicks;
-        nicknameLink.dispatchEvent(new nicknameView.MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
-        record('가상 닉네임 메뉴에서 오른쪽 터치 흔들림은 메뉴 클릭을 막지 않음',
-          nicknameClicks === clicksBeforeWobble + 1);
-        nicknamePopup.style.display = 'none';
-        const launcherRect = nicknameLauncher.getBoundingClientRect();
-        const launcherX = launcherRect.left + launcherRect.width / 2;
-        const launcherY = launcherRect.top + launcherRect.height / 2;
-        const launcherHit = nicknameDoc.elementFromPoint(launcherX, launcherY) === nicknameHost &&
-          nicknameShadow.elementFromPoint(launcherX, launcherY) === nicknameLauncher;
-        nicknameLauncher.dispatchEvent(new nicknameView.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        let documentCloses = 0;
+        let existingPopupClicks = 0;
+        let existingLinkClicks = 0;
+        memberPopupDoc.addEventListener('click', () => {
+          documentCloses++;
+          memberPopup.style.display = 'none';
+        });
+        memberPopup.addEventListener('click', () => { existingPopupClicks++; });
+        let memberLinkUnblocked = false;
+        const bindMemberLink = link => link.addEventListener('click', event => {
+          existingLinkClicks++;
+          memberLinkUnblocked = !event.defaultPrevented && memberView.getComputedStyle(memberPopup).display !== 'none';
+          // 해시 탐색이 srcdoc iframe을 외부 URL로 바꾸지 않도록 검사에서만 취소합니다.
+          event.preventDefault();
+        });
+        let memberLink = memberPopupDoc.querySelector('#member-menu-first');
+        bindMemberLink(memberLink);
+        memberLink.click();
+        await delay(100);
+        record('닉네임 메뉴 링크는 기존 클릭 핸들러가 실행될 때 보이고 기본 동작이 차단되지 않음',
+          existingLinkClicks === 1 && existingPopupClicks === 1 && documentCloses === 0 && memberLinkUnblocked &&
+          memberLink.getAttribute('href') === '#member-menu-destination-one' &&
+          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
+
+        memberPopup.style.display = 'block';
+        memberPopup.querySelector('ul').innerHTML = '<li><a id="member-menu-replaced" href="#member-menu-destination-two">작성글 보기</a></li>';
+        memberLink = memberPopupDoc.querySelector('#member-menu-replaced');
+        bindMemberLink(memberLink);
         await delay(30);
-        const nicknamePanel = nicknameShadow.querySelector('.panel');
-        const nicknameSwitch = nicknamePanel.querySelector('input[name="launcherRight"]');
-        const switchBounds = nicknameSwitch.getBoundingClientRect();
-        const switchX = switchBounds.left + switchBounds.width / 2;
-        const switchY = switchBounds.top + switchBounds.height / 2;
-        const switchHit = nicknameShadow.elementFromPoint(switchX, switchY) === nicknameSwitch;
-        if (switchHit) nicknameSwitch.click();
-        record('가상 닉네임 팝업이 닫히면 둥근 버튼과 설정 메뉴가 동작함',
-          launcherHit && !nicknamePanel.hidden && switchHit && nicknameSwitch.checked);
-        nicknameShadow.querySelector('.close').click();
+        memberLink.click();
+        await delay(100);
+        record('닉네임 메뉴 항목을 다시 불러와도 원래 링크와 핸들러가 동작함',
+          existingLinkClicks === 2 && existingPopupClicks === 2 && documentCloses === 0 && memberLinkUnblocked &&
+          memberLink.getAttribute('href') === '#member-menu-destination-two' &&
+          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
+
+        memberPopup.style.display = 'block';
+        memberPopup.querySelector('ul').innerHTML = '<li><a id="member-menu-js" href="javascript:window.__memberJavascript=(window.__memberJavascript||0)+1;void(0)">스크립트 항목</a></li>';
+        memberPopupDoc.querySelector('#member-menu-js').click();
+        await delay(100);
+        record('닉네임 메뉴의 javascript 링크는 사이트 동작을 그대로 실행함',
+          memberView.__memberJavascript === 1 && existingPopupClicks === 3 && documentCloses === 0 &&
+          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
+
+        memberPopup.style.display = 'block';
+        memberPopup.querySelector('ul').innerHTML = '<li><a id="member-menu-inline" href="#inline-link" target="_blank" onclick="window.__memberInline=(window.__memberInline||0)+1;return false">원래 핸들러</a></li>';
+        memberLink = memberPopupDoc.querySelector('#member-menu-inline');
+        memberLink.click();
+        await delay(100);
+        record('닉네임 메뉴의 onclick과 새 창 대상은 원래대로 유지함',
+          memberView.__memberInline === 1 && memberLink.getAttribute('target') === '_blank' &&
+          existingPopupClicks === 4 && documentCloses === 0 &&
+          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
+
+        memberPopup.style.display = 'block';
+        memberPopupDoc.querySelector('#member-outside').click();
+        record('닉네임 메뉴 밖 클릭은 사이트의 원래 닫기 동작을 유지함',
+          documentCloses === 1 && memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
 
         const tapDoc = await makeLayoutFrame(source, '저장 메뉴 패널 터치 영역', `
           <div class="fm-recent-visited"><div class="list"><div class="item bookmark">
