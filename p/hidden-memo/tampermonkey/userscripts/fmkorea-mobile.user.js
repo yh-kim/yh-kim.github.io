@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.16
+// @version      1.6.17
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.16';
+  const SCRIPT_VERSION = '1.6.17';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -2073,6 +2073,7 @@
   function syncSwipeBack() {
     const enabled = () => settings.enabled && settings.swipeBack && document.body &&
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    const zoomed = () => (window.visualViewport?.scale || 1) > 1.01;
     if (!enabled()) {
       swipeBackState.reset?.();
       return;
@@ -2153,7 +2154,7 @@
         `translate3d(${commit ? 62 : -64}px, 0, 0) scale(${commit ? 1.04 : .9})`;
       cue.style.opacity = '0';
       if (commit) backTimer = window.setTimeout(() => {
-        if (enabled() && history.length > 1) history.back();
+        if (enabled() && !zoomed() && history.length > 1) history.back();
         // 동일 문서의 history 항목이나 이동이 취소된 경우에도 다시 사용할 수 있습니다.
         backTimer = window.setTimeout(reset, 700);
       }, reducedMotion.matches ? 0 : 150);
@@ -2170,6 +2171,7 @@
     });
     document.addEventListener('touchstart', event => {
       clickTarget = null;
+      if (zoomed()) { reset(); return; }
       if (event.touches.length !== 1) { settle(false); return; }
       if (!enabled() || backTimer || history.length < 2 || document.hidden ||
         (panel && !panel.hidden) || document.querySelector('dialog[open], [aria-modal="true"]') ||
@@ -2185,6 +2187,7 @@
     }, { passive: true, capture: true });
     document.addEventListener('touchmove', event => {
       if (!gesture) return;
+      if (zoomed()) { reset(); return; }
       const touch = Array.from(event.touches).find(item => item.identifier === gesture.id);
       if (!enabled() || event.touches.length !== 1 || !touch) { settle(false); return; }
       gesture.dx = touch.clientX - gesture.x;
@@ -2211,6 +2214,7 @@
     }, { passive: false, capture: true });
     document.addEventListener('touchend', event => {
       if (!gesture) return;
+      if (zoomed()) { reset(); return; }
       const touch = Array.from(event.changedTouches).find(item => item.identifier === gesture.id);
       if (!touch) return;
       gesture.dx = touch.clientX - gesture.x;
@@ -2237,6 +2241,7 @@
       // Safari 주소창이 접히는 높이 변화로 진행 중인 스와이프를 취소하지 않습니다.
       if (window.innerWidth !== viewportWidth) { viewportWidth = window.innerWidth; reset(); }
     }, { passive: true });
+    window.visualViewport?.addEventListener('resize', () => { if (zoomed()) reset(); }, { passive: true });
     document.addEventListener('visibilitychange', () => { if (document.hidden) reset(); });
     swipeBackState.host = host;
     swipeBackState.reset = reset;

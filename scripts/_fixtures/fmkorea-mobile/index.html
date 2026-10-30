@@ -2005,6 +2005,61 @@
           noCommentDoc.querySelector('#progress-following-list').getBoundingClientRect().bottom >
             noCommentDoc.defaultView.innerHeight + 300);
 
+        const zoomDoc = await makeLayoutFrame(source, '확대 중 뒤로가기 스와이프', `
+          <div class="bd bd_mobile"><div id="zoom-swipe-target" style="height:700px">본문 터치 영역</div></div>`);
+        zoomDoc.defaultView.frameElement.style.width = '390px';
+        zoomDoc.defaultView.frameElement.style.height = '480px';
+        const zoomView = zoomDoc.defaultView;
+        const zoomTarget = zoomDoc.querySelector('#zoom-swipe-target');
+        let simulatedScale = 1;
+        let zoomBackCalls = 0;
+        Object.defineProperty(zoomView.visualViewport, 'scale', { configurable: true, get: () => simulatedScale });
+        Object.defineProperty(zoomView.history, 'length', { configurable: true, value: 2 });
+        Object.defineProperty(zoomView.history, 'back', { configurable: true, value: () => { zoomBackCalls++; } });
+        const zoomTouch = x => new zoomView.Touch({ identifier: 22, target: zoomTarget, clientX: x, clientY: 120 });
+        const zoomEvent = (type, x) => {
+          const touch = zoomTouch(x);
+          const event = new zoomView.TouchEvent(type, { bubbles: true, cancelable: true,
+            touches: type === 'touchend' ? [] : [touch], changedTouches: [touch] });
+          zoomTarget.dispatchEvent(event);
+          return event.defaultPrevented;
+        };
+        simulatedScale = 2;
+        zoomEvent('touchstart', 100);
+        const enlargedMovePrevented = zoomEvent('touchmove', 200);
+        const enlargedEndPrevented = zoomEvent('touchend', 200);
+        await delay(200);
+        record('확대 중에는 오른쪽 이동을 가로채지 않고 뒤로가지 않음',
+          !enlargedMovePrevented && !enlargedEndPrevented && zoomBackCalls === 0);
+
+        simulatedScale = 1;
+        zoomEvent('touchstart', 100);
+        const claimedMovePrevented = zoomEvent('touchmove', 115);
+        simulatedScale = 2;
+        const afterZoomMovePrevented = zoomEvent('touchmove', 200);
+        const afterZoomEndPrevented = zoomEvent('touchend', 200);
+        await delay(200);
+        record('스와이프 도중 확대되면 진행을 취소하고 이동을 허용함',
+          claimedMovePrevented && !afterZoomMovePrevented && !afterZoomEndPrevented && zoomBackCalls === 0);
+
+        simulatedScale = 1;
+        zoomEvent('touchstart', 100);
+        const pendingMovePrevented = zoomEvent('touchmove', 200);
+        const pendingEndPrevented = zoomEvent('touchend', 200);
+        simulatedScale = 2;
+        zoomView.visualViewport.dispatchEvent(new zoomView.Event('resize'));
+        await delay(220);
+        record('손을 뗀 직후 확대되면 예약된 뒤로가기를 취소함',
+          pendingMovePrevented && pendingEndPrevented && zoomBackCalls === 0);
+
+        simulatedScale = 1;
+        zoomEvent('touchstart', 100);
+        const ordinaryMovePrevented = zoomEvent('touchmove', 200);
+        const ordinaryEndPrevented = zoomEvent('touchend', 200);
+        await delay(220);
+        record('확대를 해제하면 기존 오른쪽 스와이프 뒤로가기가 작동함',
+          ordinaryMovePrevented && ordinaryEndPrevented && zoomBackCalls === 1);
+
         const readDay = 24 * 60 * 60 * 1000;
         const readNow = Date.now();
         const readListMarkup = `
