@@ -1462,84 +1462,63 @@
         record('사이트가 갱신한 알림 내용은 비활성화 시 오래된 제목으로 되돌리지 않음',
           plainBestMessage.textContent === '사이트가 갱신한 새 제목');
 
-        // 사이트와 같은 ul > li > a 구조 및 document click의 동기 숨김을 재현합니다.
-        const memberPopupDoc = await makeLayoutFrame(source, '닉네임 메뉴 링크와 닫기 순서', `
-          <div class="bd bd_mobile"><p id="member-outside">메뉴 바깥 본문</p></div>
-          <div id="popup_menu_area" style="position:absolute;z-index:9999;display:block;left:25px;top:65px">
-            <ul><li><a id="member-menu-first" href="#member-menu-destination-one">정보 보기</a></li></ul>
-          </div>`, `#popup_menu_area { background: white; padding: 8px; }
-            #popup_menu_area a { display: block; padding: 8px; }`);
-        const memberView = memberPopupDoc.defaultView;
-        const memberPopup = memberPopupDoc.querySelector('#popup_menu_area');
-        const memberDiagnosis = () => JSON.stringify({
-          linkClicks: existingLinkClicks, popupClicks: existingPopupClicks,
-          documentCloses, hash: memberView.location.hash,
-          display: memberView.getComputedStyle(memberPopup).display,
-          inlineDisplay: memberPopup.style.getPropertyValue('display'),
-          inlinePriority: memberPopup.style.getPropertyPriority('display'),
-          javascript: memberView.__memberJavascript, inline: memberView.__memberInline,
-          href: memberLink?.href, location: memberView.location.href,
-          enabled: memberPopupDoc.documentElement.getAttribute('data-fm-clean-enabled'),
-          mobile: memberPopupDoc.documentElement.getAttribute('data-fm-clean-mobile')
+        // FM코리아 회원 메뉴의 ul > li > a 구조와 원본 CSS를 재현합니다.
+        const memberHitDoc = await makeLayoutFrame(source, '회원 메뉴 터치 영역', `
+          <div class="bd bd_mobile"><p id="member-hit-outside">메뉴 바깥</p></div>
+          <div id="popup_menu_area" style="position:absolute;z-index:9999;display:block;left:25px;top:55px">
+            <ul><li style="background-image:url('data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=')"><a id="member-hit-info" href="#member-info" onclick="window.__memberHitInfo=(window.__memberHitInfo||0)+1;return false">정보 보기</a></li>
+            <li><a id="member-hit-written" href="#member-written" target="_blank" onclick="window.__memberHitWritten=(window.__memberHitWritten||0)+1;return false">작성 글 보기</a></li></ul>
+          </div>`, `
+          #popup_menu_area { position:absolute;background:#fff;border:2px solid #eee;border-radius:5px;margin:0;padding:0; }
+          #popup_menu_area * { margin:0;padding:0;list-style:none;font-size:13px;line-height:normal; }
+          #popup_menu_area ul { border:1px solid #ddd;border-radius:5px;padding:10px 10px 5px 10px; }
+          #popup_menu_area li { padding:0;background-repeat:no-repeat;background-position:left center;margin-bottom:3px;white-space:nowrap;border-radius:3px;background-size:16px 16px; }
+          #popup_menu_area li a { display:block;padding:2px 4px 2px 20px;text-decoration:none;color:#000; }
+          #popup_menu_area li:hover { background-color:#f0f2f5; }
+          #popup_menu_area li:focus-within { background-color:#f0f2f5; }
+        `);
+        memberHitDoc.defaultView.frameElement.style.height = '480px';
+        const memberHitView = memberHitDoc.defaultView;
+        const memberHitPopup = memberHitDoc.querySelector('#popup_menu_area');
+        const memberHitLinks = [...memberHitPopup.querySelectorAll('li > a')];
+        let memberHitOutsideCloses = 0;
+        memberHitDoc.addEventListener('click', () => { memberHitPopup.style.display = 'none'; memberHitOutsideCloses++; });
+        const memberHitRows = memberHitLinks.map(link => {
+          const row = link.parentElement.getBoundingClientRect();
+          return { link, row, hitPoints: [
+            [row.left + 1, row.top + row.height / 2],
+            [row.left + Math.min(12, row.width / 2), row.top + row.height / 2],
+            [row.left + row.width / 2, row.top + 1],
+            [row.right - 1, row.top + row.height / 2],
+            [row.left + row.width / 2, row.bottom - 1]
+          ] };
         });
-        let documentCloses = 0;
-        let existingPopupClicks = 0;
-        let existingLinkClicks = 0;
-        memberPopupDoc.addEventListener('click', () => {
-          documentCloses++;
-          memberPopup.style.display = 'none';
-        });
-        memberPopup.addEventListener('click', () => { existingPopupClicks++; });
-        let memberLinkUnblocked = false;
-        const bindMemberLink = link => link.addEventListener('click', event => {
-          existingLinkClicks++;
-          memberLinkUnblocked = !event.defaultPrevented && memberView.getComputedStyle(memberPopup).display !== 'none';
-          // 해시 탐색이 srcdoc iframe을 외부 URL로 바꾸지 않도록 검사에서만 취소합니다.
-          event.preventDefault();
-        });
-        let memberLink = memberPopupDoc.querySelector('#member-menu-first');
-        bindMemberLink(memberLink);
-        memberLink.click();
-        await delay(100);
-        record('닉네임 메뉴 링크는 기존 클릭 핸들러가 실행될 때 보이고 기본 동작이 차단되지 않음',
-          existingLinkClicks === 1 && existingPopupClicks === 1 && documentCloses === 0 && memberLinkUnblocked &&
-          memberLink.getAttribute('href') === '#member-menu-destination-one' &&
-          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
-
-        memberPopup.style.display = 'block';
-        memberPopup.querySelector('ul').innerHTML = '<li><a id="member-menu-replaced" href="#member-menu-destination-two">작성글 보기</a></li>';
-        memberLink = memberPopupDoc.querySelector('#member-menu-replaced');
-        bindMemberLink(memberLink);
-        await delay(30);
-        memberLink.click();
-        await delay(100);
-        record('닉네임 메뉴 항목을 다시 불러와도 원래 링크와 핸들러가 동작함',
-          existingLinkClicks === 2 && existingPopupClicks === 2 && documentCloses === 0 && memberLinkUnblocked &&
-          memberLink.getAttribute('href') === '#member-menu-destination-two' &&
-          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
-
-        memberPopup.style.display = 'block';
-        memberPopup.querySelector('ul').innerHTML = '<li><a id="member-menu-js" href="javascript:window.__memberJavascript=(window.__memberJavascript||0)+1;void(0)">스크립트 항목</a></li>';
-        memberPopupDoc.querySelector('#member-menu-js').click();
-        await delay(100);
-        record('닉네임 메뉴의 javascript 링크는 사이트 동작을 그대로 실행함',
-          memberView.__memberJavascript === 1 && existingPopupClicks === 3 && documentCloses === 0 &&
-          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
-
-        memberPopup.style.display = 'block';
-        memberPopup.querySelector('ul').innerHTML = '<li><a id="member-menu-inline" href="#inline-link" target="_blank" onclick="window.__memberInline=(window.__memberInline||0)+1;return false">원래 핸들러</a></li>';
-        memberLink = memberPopupDoc.querySelector('#member-menu-inline');
-        memberLink.click();
-        await delay(100);
-        record('닉네임 메뉴의 onclick과 새 창 대상은 원래대로 유지함',
-          memberView.__memberInline === 1 && memberLink.getAttribute('target') === '_blank' &&
-          existingPopupClicks === 4 && documentCloses === 0 &&
-          memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
-
-        memberPopup.style.display = 'block';
-        memberPopupDoc.querySelector('#member-outside').click();
-        record('닉네임 메뉴 밖 클릭은 사이트의 원래 닫기 동작을 유지함',
-          documentCloses === 1 && memberView.getComputedStyle(memberPopup).display === 'none', memberDiagnosis());
+        record('회원 메뉴의 두 항목은 각각 44px 이상 터치할 수 있음',
+          memberHitRows.every(({ link, row }) => link.getBoundingClientRect().height >= 44 && row.height >= 44),
+          memberHitRows.map(({ link }) => Math.round(link.getBoundingClientRect().height)).join(', '));
+        record('회원 메뉴 아이콘과 각 항목 가장자리도 원래 링크가 터치 대상임',
+          memberHitRows.every(({ link, hitPoints }) => hitPoints.every(([x, y]) => {
+            const hit = memberHitDoc.elementFromPoint(x, y);
+            return hit === link || link.contains(hit);
+          })), memberHitRows.map(({ hitPoints }) => hitPoints.map(([x, y]) =>
+            memberHitDoc.elementFromPoint(x, y)?.id || memberHitDoc.elementFromPoint(x, y)?.tagName || 'none').join('/')).join(', '));
+        for (const { link, hitPoints } of memberHitRows) {
+          memberHitPopup.style.display = 'block';
+          const [x, y] = hitPoints[0];
+          memberHitDoc.elementFromPoint(x, y)?.click();
+        }
+        record('회원 메뉴 확장 영역을 누르면 기존 onclick과 대상이 그대로 동작함',
+          memberHitView.__memberHitInfo === 1 && memberHitView.__memberHitWritten === 1 &&
+          memberHitLinks[0].getAttribute('href') === '#member-info' &&
+          memberHitLinks[1].getAttribute('href') === '#member-written' &&
+          memberHitLinks[1].getAttribute('target') === '_blank' &&
+          memberHitLinks.every(link => link.getAttribute('onclick')?.includes('return false')));
+        memberHitPopup.style.display = 'block';
+        const memberHitBeforeOutside = memberHitOutsideCloses;
+        memberHitDoc.querySelector('#member-hit-outside').click();
+        record('회원 메뉴 밖 클릭은 사이트의 원래 닫기 동작을 유지함',
+          memberHitOutsideCloses === memberHitBeforeOutside + 1 &&
+          memberHitView.getComputedStyle(memberHitPopup).display === 'none');
 
         const tapDoc = await makeLayoutFrame(source, '저장 메뉴 패널 터치 영역', `
           <div class="fm-recent-visited"><div class="list"><div class="item bookmark">
