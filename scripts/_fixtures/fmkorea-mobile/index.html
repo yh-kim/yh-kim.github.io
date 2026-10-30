@@ -1462,6 +1462,83 @@
         record('사이트가 갱신한 알림 내용은 비활성화 시 오래된 제목으로 되돌리지 않음',
           plainBestMessage.textContent === '사이트가 갱신한 새 제목');
 
+        // 가상 사이트 팝업: 실제 사이트의 동작이나 DOM을 그대로 복제한 것은 아닙니다.
+        const nicknameDoc = await makeLayoutFrame(source, '닉네임 팝업 겹침', `
+          <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><h1>게시글 제목</h1></div>
+            <div class="rd_body"><article style="height:1000px">본문</article></div></div>
+            <div style="height:500px">댓글</div></div>
+          <div id="popup_menu_area" style="display:none;position:fixed;z-index:9999">
+            <a id="nickname-menu-link" href="#nickname-info">정보 보기</a></div>`, `
+          #popup_menu_area { background: #fff; }
+          #nickname-menu-link { display: block; width: 100px; height: 30px; line-height: 30px; }
+        `);
+        nicknameDoc.defaultView.frameElement.style.width = '390px';
+        nicknameDoc.defaultView.frameElement.style.height = '480px';
+        const nicknameView = nicknameDoc.defaultView;
+        nicknameView.scrollTo({ top: 300, behavior: 'instant' });
+        await delay(80);
+        const nicknamePopup = nicknameDoc.querySelector('#popup_menu_area');
+        const nicknameLink = nicknameDoc.querySelector('#nickname-menu-link');
+        const nicknameHost = nicknameDoc.querySelector('#fm-clean-controls');
+        const nicknameShadow = nicknameHost.shadowRoot;
+        const nicknameLauncher = detailLauncher(nicknameDoc);
+        const nicknameReader = nicknameDoc.querySelector('#fm-clean-reading-header').shadowRoot.querySelector('.title');
+        let nicknameClicks = 0;
+        nicknameLink.addEventListener('click', event => { event.preventDefault(); nicknameClicks++; });
+        const hitNicknamePopupOver = async element => {
+          const rect = element.getBoundingClientRect();
+          const x = rect.left + rect.width / 2;
+          const y = rect.top + rect.height / 2;
+          nicknamePopup.style.left = `${x - 50}px`;
+          nicknamePopup.style.top = `${y - 15}px`;
+          nicknamePopup.style.display = 'block';
+          await delay(40);
+          const hit = nicknameDoc.elementFromPoint(x, y);
+          const before = nicknameClicks;
+          hit?.click();
+          return hit === nicknameLink && nicknameClicks === before + 1;
+        };
+        record('가상 닉네임 팝업은 읽기 헤더와 겹쳐도 메뉴 링크가 클릭됨',
+          visiblyRendered(nicknameReader) && await hitNicknamePopupOver(nicknameReader));
+        nicknamePopup.style.display = 'none';
+        record('가상 닉네임 팝업은 둥근 버튼과 겹쳐도 메뉴 링크가 클릭됨',
+          await hitNicknamePopupOver(nicknameLauncher));
+        nicknamePopup.style.left = '120px';
+        nicknamePopup.style.top = '120px';
+        Object.defineProperty(nicknameView.history, 'length', { configurable: true, value: 2 });
+        const makeNicknameTouch = x => new nicknameView.Touch({
+          identifier: 12, target: nicknameLink, clientX: x, clientY: 135
+        });
+        const sendNicknameTouch = (type, touches, changedTouches) => nicknameLink.dispatchEvent(
+          new nicknameView.TouchEvent(type, { bubbles: true, cancelable: true, touches, changedTouches }));
+        const initialNicknameTouch = makeNicknameTouch(160);
+        const movedNicknameTouch = makeNicknameTouch(178);
+        sendNicknameTouch('touchstart', [initialNicknameTouch], [initialNicknameTouch]);
+        sendNicknameTouch('touchmove', [movedNicknameTouch], [movedNicknameTouch]);
+        sendNicknameTouch('touchend', [], [movedNicknameTouch]);
+        const clicksBeforeWobble = nicknameClicks;
+        nicknameLink.dispatchEvent(new nicknameView.MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+        record('가상 닉네임 메뉴에서 오른쪽 터치 흔들림은 메뉴 클릭을 막지 않음',
+          nicknameClicks === clicksBeforeWobble + 1);
+        nicknamePopup.style.display = 'none';
+        const launcherRect = nicknameLauncher.getBoundingClientRect();
+        const launcherX = launcherRect.left + launcherRect.width / 2;
+        const launcherY = launcherRect.top + launcherRect.height / 2;
+        const launcherHit = nicknameDoc.elementFromPoint(launcherX, launcherY) === nicknameHost &&
+          nicknameShadow.elementFromPoint(launcherX, launcherY) === nicknameLauncher;
+        nicknameLauncher.dispatchEvent(new nicknameView.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        await delay(30);
+        const nicknamePanel = nicknameShadow.querySelector('.panel');
+        const nicknameSwitch = nicknamePanel.querySelector('input[name="launcherRight"]');
+        const switchBounds = nicknameSwitch.getBoundingClientRect();
+        const switchX = switchBounds.left + switchBounds.width / 2;
+        const switchY = switchBounds.top + switchBounds.height / 2;
+        const switchHit = nicknameShadow.elementFromPoint(switchX, switchY) === nicknameSwitch;
+        if (switchHit) nicknameSwitch.click();
+        record('가상 닉네임 팝업이 닫히면 둥근 버튼과 설정 메뉴가 동작함',
+          launcherHit && !nicknamePanel.hidden && switchHit && nicknameSwitch.checked);
+        nicknameShadow.querySelector('.close').click();
+
         const tapDoc = await makeLayoutFrame(source, '저장 메뉴 패널 터치 영역', `
           <div class="fm-recent-visited"><div class="list"><div class="item bookmark">
             <a href="https://m.fmkorea.com/football_world">해외축구</a></div></div></div>
