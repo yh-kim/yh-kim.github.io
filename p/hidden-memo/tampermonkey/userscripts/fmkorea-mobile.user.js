@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.17
+// @version      1.6.18
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.17';
+  const SCRIPT_VERSION = '1.6.18';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -849,6 +849,7 @@
         top: auto !important; transform: none !important; max-width: calc(100vw - 24px) !important;
       }
       ${root} #fm_alert:has(.fm_alert_wrap.best) {
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
         padding: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important;
       }
       ${root} #fm_alert .fm_alert_wrap.best {
@@ -864,6 +865,9 @@
       }
       ${root} #fm_alert .best .msg {
         color: var(--fm-clean-text) !important; font-size: 13px !important; line-height: 1.45 !important;
+      }
+      ${root} #fm_alert .best .msg * {
+        color: var(--fm-clean-text) !important; text-shadow: none !important;
       }
       ${root} #fm_alert .best .msg[data-fm-clean-alert="linked"] { font-size: 0 !important; line-height: 0 !important; }
       ${root} #fm_alert .best .msg [data-fm-clean-alert-hidden] { display: none !important; }

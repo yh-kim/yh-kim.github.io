@@ -1374,8 +1374,8 @@
         const alertLayer = alertDoc.querySelector('#fm_alert');
         const alertAtBottom = () => {
           const style = alertDoc.defaultView.getComputedStyle(alertLayer);
-          return style.position === 'fixed' && Number.parseFloat(style.bottom) === 0 &&
-            Math.abs(alertDoc.defaultView.innerHeight - alertLayer.getBoundingClientRect().bottom) < 1;
+          return style.position === 'fixed' && Number.parseFloat(style.bottom) >= 16 &&
+            Math.abs(alertDoc.defaultView.innerHeight - alertLayer.getBoundingClientRect().bottom - Number.parseFloat(style.bottom)) < 1;
         };
         const homeAlertAtTop = alertAtBottom();
         const alertScrollFiller = alertDoc.createElement('div');
@@ -1392,7 +1392,7 @@
         const detailAlertAtTop = alertAtBottom();
         alertDoc.body.classList.remove('document');
         alertScrollFiller.remove();
-        record('포텐 알림은 홈·상세에서 스크롤 전후 화면 맨 아래에 고정됨',
+        record('포텐 알림은 홈·상세에서 스크롤 전후 화면 아래 여백을 두고 고정됨',
           homeAlertAtTop && homeAlertScrolled && detailAlertScrolled && detailAlertAtTop);
         const whiteAlertCss = `
           html{background:#fff}
@@ -1438,6 +1438,49 @@
             lightBackground && color(darkAlertDoc.documentElement) === 'rgb(27, 27, 26)' &&
             clearWhiteShell(darkAlert) && clearWhiteShell(darkWrap));
         }
+        const themeAlertDoc = await makeLayoutFrame(source, '동적 알림 테마색', `
+          <header class="hd">상단</header><div class="bd bd_mobile">본문</div>
+          <div id="fm_alert"></div>`, `
+          #fm_alert .fm_alert_wrap { display:block }
+          #fm_alert .best .fm_alert { background:#f6ecec; border:2px solid #c45353 }
+          #fm_alert .best .fm_alert .msg, #fm_alert .best .fm_alert a { color:#a11d1d }
+          #fm_alert .comment .fm_alert { background:#123456;color:#abcdef }
+          #fm_alert .comment .msg { color:#abcdef }
+        `);
+        const themeAlertView = themeAlertDoc.defaultView;
+        const themeAlertLayer = themeAlertDoc.querySelector('#fm_alert');
+        const addThemeAlert = html => {
+          themeAlertLayer.innerHTML = `<div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg">${html}</span></div></div>
+            <div class="fm_alert_wrap comment"><div class="fm_alert"><span class="msg" id="theme-normal">일반 알림</span></div></div>`;
+        };
+        const themeColors = (text, surface, accent) => {
+          const card = themeAlertLayer.querySelector('.best .fm_alert');
+          const message = card.querySelector('.msg');
+          const colored = message.querySelector('[data-theme-colored]');
+          const css = element => themeAlertView.getComputedStyle(element);
+          return css(card).backgroundColor === surface && css(card).borderLeftColor === accent &&
+            css(message).color === text && colored && css(colored).color === text &&
+            css(themeAlertLayer.querySelector('.comment .fm_alert')).backgroundColor === 'rgb(18, 52, 86)' &&
+            css(themeAlertLayer.querySelector('#theme-normal')).color === 'rgb(171, 205, 239)';
+        };
+        addThemeAlert('<span data-theme-colored style="color:#ff0000">링크 없는 인기글 제목</span>');
+        await delay(60);
+        record('늦게 추가된 평문 인기글은 라이트 테마색을 사용하고 일반 알림은 유지',
+          themeColors('rgb(28, 27, 25)', 'rgb(255, 255, 255)', 'rgb(154, 78, 38)'));
+        themeAlertDoc.body.classList.add('night_mode');
+        await delay(60);
+        record('평문 인기글의 인라인 글자색도 야간 테마에 맞게 전환',
+          themeColors('rgb(240, 239, 235)', 'rgb(27, 27, 26)', 'rgb(240, 181, 143)'));
+        addThemeAlert('<b>포텐 터짐</b><br><a href="/best/123"><span data-theme-colored style="color:#ff0000">링크 인기글 제목</span></a>');
+        await delay(60);
+        record('늦게 추가된 링크 인기글도 야간 테마색을 사용하고 일반 알림은 유지',
+          themeColors('rgb(240, 239, 235)', 'rgb(27, 27, 26)', 'rgb(240, 181, 143)') &&
+          themeAlertLayer.querySelector('.best a').hasAttribute('data-fm-clean-alert-title'));
+        themeAlertDoc.body.classList.remove('night_mode');
+        await delay(60);
+        record('링크 인기글은 라이트 모드로 바뀔 때 색상도 갱신됨',
+          themeColors('rgb(28, 27, 25)', 'rgb(255, 255, 255)', 'rgb(154, 78, 38)'));
+
         alertDoc.querySelector('#fm_alert').insertAdjacentHTML('beforeend', `
           <div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg">
             <a id="split-best-link" href="/best/789"><b>포텐 </b><span>터짐</span> 분리된 제목</a>
