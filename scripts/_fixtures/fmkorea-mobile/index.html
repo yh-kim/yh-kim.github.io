@@ -1526,6 +1526,32 @@
         record('링크 인기글은 라이트 모드로 바뀔 때 색상도 갱신됨',
           themeColors('rgb(28, 27, 25)', 'rgb(255, 255, 255)', 'rgb(154, 78, 38)'));
 
+        const boardAlertDoc = await makeLayoutFrame(source, '게시판 인기글 알림', `
+          <div class="bd bd_mobile">본문</div><div id="fm_alert"></div>`, `
+          #fm_alert .pop .fm_alert { background:#eee; border:2px solid #ddd }
+          #fm_alert .pop .msg, #fm_alert .pop a { color:#4f7ac0 }
+          #fm_alert .mid .fm_alert { background:#123456 }
+        `, {}, { bodyClass: 'night_mode' });
+        const boardAlertLayer = boardAlertDoc.querySelector('#fm_alert');
+        boardAlertLayer.innerHTML = `<div class="fm_alert_wrap pop"><div class="fm_alert"><span class="msg">
+          <b>게시판 인기글</b><br><a href="/humor/123" id="board-pop-link">게시판 인기글 제목</a>
+          </span></div></div><div class="fm_alert_wrap mid"><div class="fm_alert" id="ordinary-mid">일반 게시판 알림</div></div>`;
+        await delay(80);
+        const boardPop = boardAlertLayer.querySelector('.pop .fm_alert');
+        const boardPopLink = boardAlertDoc.querySelector('#board-pop-link');
+        const boardStyle = element => boardAlertDoc.defaultView.getComputedStyle(element);
+        record('게시판 인기글 알림은 야간 테마와 아래 여백을 적용하고 일반 게시판 알림은 유지',
+          boardStyle(boardPop).backgroundColor === 'rgb(27, 27, 26)' &&
+          boardStyle(boardPopLink).color === 'rgb(240, 239, 235)' &&
+          boardPopLink.hasAttribute('data-fm-clean-alert-title') &&
+          Number.parseFloat(boardStyle(boardAlertLayer).bottom) >= 16 &&
+          boardStyle(boardAlertDoc.querySelector('#ordinary-mid')).backgroundColor === 'rgb(18, 52, 86)');
+        boardAlertDoc.body.classList.remove('night_mode');
+        await delay(40);
+        record('게시판 인기글 알림은 라이트 테마로 바뀔 때 색상도 갱신됨',
+          boardStyle(boardPop).backgroundColor === 'rgb(255, 255, 255)' &&
+          boardStyle(boardPopLink).color === 'rgb(28, 27, 25)');
+
         alertDoc.querySelector('#fm_alert').insertAdjacentHTML('beforeend', `
           <div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg">
             <a id="split-best-link" href="/best/789"><b>포텐 </b><span>터짐</span> 분리된 제목</a>

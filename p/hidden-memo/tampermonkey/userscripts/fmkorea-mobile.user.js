@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.19
+// @version      1.6.20
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.19';
+  const SCRIPT_VERSION = '1.6.20';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -855,37 +855,37 @@
         position: fixed !important; right: 12px !important; bottom: 0 !important;
         top: auto !important; transform: none !important; max-width: calc(100vw - 24px) !important;
       }
-      ${root} #fm_alert:has(.fm_alert_wrap.best) {
+      ${root} #fm_alert:has(.fm_alert_wrap:is(.best, .pop)) {
         bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
         padding: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important;
       }
-      ${root} #fm_alert .fm_alert_wrap.best {
+      ${root} #fm_alert .fm_alert_wrap:is(.best, .pop) {
         width: min(280px, calc(100vw - 24px)) !important;
         padding: 0 !important; border: 0 !important; background: transparent !important;
         box-shadow: none !important;
       }
-      ${root} #fm_alert .best .fm_alert {
+      ${root} #fm_alert :is(.best, .pop) .fm_alert {
         padding: 10px 12px !important; border: 1px solid var(--fm-clean-line) !important;
         border-left: 2px solid var(--fm-clean-accent) !important; border-radius: 10px !important;
         background: var(--fm-clean-surface) !important; background-image: none !important;
         box-shadow: 0 4px 16px #0002 !important;
       }
-      ${root} #fm_alert .best .msg {
+      ${root} #fm_alert :is(.best, .pop) .msg {
         color: var(--fm-clean-text) !important; font-size: 13px !important; line-height: 1.45 !important;
       }
-      ${root} #fm_alert .best .msg * {
+      ${root} #fm_alert :is(.best, .pop) .msg * {
         color: var(--fm-clean-text) !important; text-shadow: none !important;
       }
-      ${root} #fm_alert .best .msg[data-fm-clean-alert="linked"] { font-size: 0 !important; line-height: 0 !important; }
-      ${root} #fm_alert .best .msg [data-fm-clean-alert-hidden] { display: none !important; }
-      ${root} #fm_alert .best .msg [data-fm-clean-alert-path]:not([data-fm-clean-alert-title]) { display: contents !important; }
-      ${root} #fm_alert .best .msg [data-fm-clean-alert-title] {
+      ${root} #fm_alert :is(.best, .pop) .msg[data-fm-clean-alert="linked"] { font-size: 0 !important; line-height: 0 !important; }
+      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-hidden] { display: none !important; }
+      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-path]:not([data-fm-clean-alert-title]) { display: contents !important; }
+      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-title] {
         display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         overflow: hidden; white-space: normal !important; color: var(--fm-clean-text) !important;
         font: 500 13px/1.45 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
         text-decoration: none !important; text-shadow: none !important;
       }
-      ${root} #fm_alert .best .msg [data-fm-clean-alert-title] * { color: inherit !important; font: inherit !important; }
+      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-title] * { color: inherit !important; font: inherit !important; }
       ${root} .bd_faq_srch {
         background: var(--fm-clean-surface) !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important;
@@ -2874,7 +2874,7 @@
       } else if (node.nodeValue !== record.cleaned) bestAlertOriginalText.delete(node);
     }
 
-    const messages = document.querySelectorAll('#fm_alert .fm_alert_wrap.best .fm_alert .msg');
+    const messages = document.querySelectorAll('#fm_alert .fm_alert_wrap:is(.best, .pop) .fm_alert .msg');
     messages.forEach(message => {
       const elements = message.querySelectorAll('*');
       if (!active) {
