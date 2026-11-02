@@ -504,6 +504,51 @@
           !visiblyRendered(homeDoc.querySelector('#static-menu')) &&
           visiblyRendered(homeDoc.querySelector('#home-article')));
 
+        const longPoliticalTitle = '정치 게시글의 긴 제목이 화면 폭을 넘어갈 때도 한 줄로만 표시되는지 확인하는 예시 문장입니다 '.repeat(5).trim();
+        const longNormalTitle = '일반 게시글의 긴 제목은 예전처럼 여러 줄로 모두 표시되어야 합니다 '.repeat(5).trim();
+        const homeTitleDoc = await makeLayoutFrame(source, '홈 정치글 한 줄 제목', `
+          <header class="hd">상단 로고</header><div class="bd bd_mobile">
+            <div class="main_recent"></div><div class="fm_best_widget _bd_mobile"><ul>
+              <li class="li li_best2_politics1"><div class="li"><h3 class="title" id="political-title">
+                <a href="/politics/123"><span class="ellipsis-target">${longPoliticalTitle}</span> <span class="comment_count">[123]</span></a>
+              </h3><div>정치 / 1분 전</div></div></li>
+              <li class="li li_best2_politics1"><div class="li"><a href="/politics/456"><img class="thumb" src="${IMAGE}" alt="정치글 썸네일"></a>
+                <h3 class="title" id="political-thumb-title"><a href="/politics/456"><span class="ellipsis-target">${longPoliticalTitle}</span> <span class="comment_count">[42]</span></a></h3>
+                <div>정치 / 2분 전</div></div></li>
+              <li class="li li_best2_politics0"><div class="li"><h3 class="title" id="normal-home-title">
+                <a href="/humor/789"><span class="ellipsis-target">${longNormalTitle}</span> <span class="comment_count">[8]</span></a>
+              </h3><div>유머 / 3분 전</div></div></li>
+            </ul></div>
+          </div>`, `
+            .fm_best_widget ul { list-style:none; margin:0; padding:0 }
+            .fm_best_widget li > .li { position:relative }
+            .fm_best_widget img.thumb { position:absolute }
+            .fm_best_widget li.li_best2_politics1 .title::before { content:'정치'; margin-right:4px }
+          `);
+        const homeTitleView = homeTitleDoc.defaultView;
+        const politicalTitles = ['political-title', 'political-thumb-title'].map(id => homeTitleDoc.getElementById(id));
+        const normalHomeTitle = homeTitleDoc.getElementById('normal-home-title');
+        for (const width of [320, 390]) {
+          homeTitleView.frameElement.style.width = `${width}px`;
+          await delay(60);
+          const oneLineEllipsis = title => {
+            const style = homeTitleView.getComputedStyle(title);
+            const line = Number.parseFloat(style.lineHeight);
+            return style.whiteSpace === 'nowrap' && style.overflowX === 'hidden' &&
+              style.textOverflow === 'ellipsis' && title.scrollWidth > title.clientWidth &&
+              title.getBoundingClientRect().height <= line * 1.3 &&
+              title.querySelector('.ellipsis-target').textContent === longPoliticalTitle &&
+              title.querySelector('a').getAttribute('href').startsWith('/politics/');
+          };
+          const normalStyle = homeTitleView.getComputedStyle(normalHomeTitle);
+          record(`홈 ${width}px: 정치 제목은 썸네일 유무와 관계없이 한 줄 말줄임`,
+            politicalTitles.every(oneLineEllipsis));
+          record(`홈 ${width}px: 일반 제목은 여러 줄로 표시하고 전체 텍스트 유지`,
+            normalHomeTitle.getBoundingClientRect().height > Number.parseFloat(normalStyle.lineHeight) * 1.8 &&
+            normalHomeTitle.querySelector('.ellipsis-target').textContent === longNormalTitle &&
+            normalHomeTitle.querySelector('.comment_count').textContent === '[8]');
+        }
+
         const tabletMenus = [
           ['자동차', 'car'], ['부동산', 'realestate'], ['공지', 'notice'],
           ['정치/시사', 'politics'], ['디지털', 'digital'], ['영화/TV', 'movietv']
