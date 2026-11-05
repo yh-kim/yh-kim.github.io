@@ -435,7 +435,9 @@
       const listUrl = new URL(node.href);
       listUrl.search = "";
       listUrl.hash = "";
-      if (searchParams.has("cards") && searchParams.has("s")) {
+      if (searchParams.has("c")) {
+        listUrl.searchParams.set("c", searchParams.get("c"));
+      } else if (searchParams.has("cards") && searchParams.has("s")) {
         listUrl.searchParams.set("cards", searchParams.get("cards"));
         listUrl.searchParams.set("s", searchParams.get("s"));
       }

@@ -20,6 +20,16 @@
   const selectionToken = (ids, tokens) => digest("escape-selection-v1|" + ids
     .map((id) => `${id}:${tokens[`${id}.html`]}`).join("|"));
 
+  const selectionCode = async (ids, tokens) => `${ids.join(".")}-${(await selectionToken(ids, tokens)).slice(0, 10)}`;
+
+  const readSelection = async (params, tokens) => {
+    const compact = params.get("c")?.match(/^(\d+(?:\.\d+)*)-([a-f0-9]{10})$/);
+    const ids = parseCards(params.has("c") ? compact?.[1].replaceAll(".", ",") : params.get("cards"), tokens);
+    if (!ids.length) return { ids, valid: false };
+    const expected = await selectionToken(ids, tokens);
+    return { ids, valid: params.has("c") ? compact[2] === expected.slice(0, 10) : params.get("s") === expected };
+  };
+
   const copyText = async (text) => {
     if (navigator.clipboard?.writeText) {
       try {
@@ -48,5 +58,5 @@
     if (!copied) throw new Error("Clipboard write failed");
   };
 
-  window.escapeListAccess = { masterToken, parseCards, selectionToken, copyText };
+  window.escapeListAccess = { masterToken, parseCards, selectionToken, selectionCode, readSelection, copyText };
 })();

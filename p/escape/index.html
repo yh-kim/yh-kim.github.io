@@ -800,7 +800,7 @@
     </div>
   </main>
   <div class="list-snackbar" role="status" aria-live="polite" hidden></div>
-  <script src="/p/escape/assets/escape-room-list-access.js?v=20261105-2"></script>
+  <script src="/p/escape/assets/escape-room-list-access.js?v=20261105-3"></script>
   <script>
   (async () => {
     const reservationQueryKey = "m";
@@ -838,11 +838,11 @@
     };
     const params = new URLSearchParams(window.location.search);
     const isMaster = params.get(reservationQueryKey) === listReservationQueryValue;
-    const selectedIds = access.parseCards(params.get("cards"), cardReservationTokens);
-    const isShared = selectedIds.length > 0
-      && params.get("s") === await access.selectionToken(selectedIds, cardReservationTokens);
+    const selection = await access.readSelection(params, cardReservationTokens);
+    const selectedIds = selection.ids;
+    const isShared = selection.valid;
     const showReservation = isMaster || isShared;
-    const hasSelection = params.has("cards");
+    const hasSelection = params.has("c") || params.has("cards");
     const visibleIds = new Set(selectedIds);
     document.querySelector(".master-tools").hidden = !isMaster;
     const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -905,8 +905,11 @@
       const cardUrl = new URL(href, window.location.href);
       if (showReservation && cardToken) cardUrl.searchParams.set(reservationQueryKey, cardToken);
       if (isShared) {
-        cardUrl.searchParams.set("cards", selectedIds.join(","));
-        cardUrl.searchParams.set("s", params.get("s"));
+        if (params.has("c")) cardUrl.searchParams.set("c", params.get("c"));
+        else {
+          cardUrl.searchParams.set("cards", selectedIds.join(","));
+          cardUrl.searchParams.set("s", params.get("s"));
+        }
       }
       link.href = cardUrl.toString();
       if (hasSelection && !isMaster && (!isShared || !visibleIds.has(cardFileFromHref(href).replace(".html", "")))) {
@@ -988,11 +991,10 @@
         const ids = access.parseCards(Array.from(selected).join(","), cardReservationTokens);
         if (!ids.length) return;
         try {
-          const signature = await access.selectionToken(ids, cardReservationTokens);
+          const code = await access.selectionCode(ids, cardReservationTokens);
           if (version !== selectionVersion) return;
           const url = new URL(window.location.pathname, window.location.origin);
-          url.searchParams.set("cards", ids.join(","));
-          url.searchParams.set("s", signature);
+          url.searchParams.set("c", code);
           selectionUrl = url.toString();
           copy.disabled = false;
         } catch {
