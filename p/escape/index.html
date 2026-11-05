@@ -318,10 +318,7 @@
     .sort-options button::after { content: ""; display: inline-block; width: 10px; }
     .sort-options button[data-direction="desc"]::after { content: "↓"; }
     .sort-options button[data-direction="asc"]::after { content: "↑"; }
-    .sort-toolbar button:disabled { opacity: .35; cursor: default; }
     .sort-toolbar button:focus-visible { outline: 2px solid #f3b99d; outline-offset: 2px; }
-    .sort-toolbar [data-sort-reset] { padding: 0; font-size: 19px; }
-    .sort-toolbar [data-sort-reset] { border: 1px solid #ffffff1f; height: 40px; width: 36px; }
 
     .master-tools, .selection-actions {
       display: flex;
@@ -442,7 +439,6 @@
               <button type="button" data-sort-key="fear" aria-pressed="false">공포</button>
               <button type="button" data-sort-key="activity" aria-pressed="false">활동</button>
             </div>
-            <button type="button" data-sort-reset aria-label="정렬 초기화" title="정렬 초기화" disabled>↺</button>
           </div>
         </div>
         <div class="master-tools" hidden>
@@ -1189,21 +1185,22 @@
           button.dataset.direction = active ? direction : "";
           const orderLabel = direction === "asc" ? "오름차순" : "내림차순";
           button.setAttribute("aria-label", active ? `${button.textContent} ${orderLabel}` : `${button.textContent}순 정렬`);
-          button.title = active ? `${orderLabel} · 다시 누르면 ${direction === "asc" ? "내림차순" : "오름차순"}` : `${button.textContent} 높은 순`;
+          button.title = active ? `${orderLabel} · 다시 누르면 ${direction === "asc" ? "정렬 해제" : "오름차순"}` : `${button.textContent} 높은 순`;
         });
-        document.querySelector("[data-sort-reset]").disabled = !sortKey;
       };
       document.querySelectorAll("[data-sort-key]").forEach((button) => {
         button.addEventListener("click", () => {
-          direction = sortKey === button.dataset.sortKey && direction === "desc" ? "asc" : "desc";
-          sortKey = button.dataset.sortKey;
+          if (sortKey !== button.dataset.sortKey) {
+            sortKey = button.dataset.sortKey;
+            direction = "desc";
+          } else if (direction === "desc") {
+            direction = "asc";
+          } else {
+            sortKey = "";
+            direction = "desc";
+          }
           applySort();
         });
-      });
-      document.querySelector("[data-sort-reset]").addEventListener("click", () => {
-        sortKey = "";
-        direction = "desc";
-        applySort();
       });
       applySort();
       document.querySelector(".sort-toolbar").hidden = sortedCards.length === 0;
