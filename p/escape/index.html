@@ -65,7 +65,11 @@
     }
 
     .hero-title-row {
-      display: block;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 20px;
     }
 
     .hero h1 {
@@ -285,13 +289,13 @@
       display: none !important;
     }
 
-    .sort-toolbar, .sort-options, .sort-directions {
+    .sort-toolbar, .sort-options {
       display: flex;
       align-items: center;
       gap: 4px;
     }
-    .sort-toolbar { flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-    .sort-options, .sort-directions { padding: 3px; border: 1px solid #ffffff1f; border-radius: 6px; }
+    .sort-toolbar { flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-left: auto; }
+    .sort-options { padding: 3px; border: 1px solid #ffffff1f; border-radius: 6px; }
     .sort-toolbar button {
       display: inline-flex;
       align-items: center;
@@ -310,9 +314,13 @@
       touch-action: manipulation;
     }
     .sort-toolbar button[aria-pressed="true"] { background: #f7f2eb; color: #302c2d; }
+    .sort-options button { gap: 4px; }
+    .sort-options button::after { content: ""; display: inline-block; width: 10px; }
+    .sort-options button[data-direction="desc"]::after { content: "↓"; }
+    .sort-options button[data-direction="asc"]::after { content: "↑"; }
     .sort-toolbar button:disabled { opacity: .35; cursor: default; }
     .sort-toolbar button:focus-visible { outline: 2px solid #f3b99d; outline-offset: 2px; }
-    .sort-directions button, .sort-toolbar [data-sort-reset] { width: 32px; padding: 0; font-size: 19px; }
+    .sort-toolbar [data-sort-reset] { padding: 0; font-size: 19px; }
     .sort-toolbar [data-sort-reset] { border: 1px solid #ffffff1f; height: 40px; width: 36px; }
 
     .master-tools, .selection-actions {
@@ -424,20 +432,18 @@
     <div class="list-shell">
       <header class="hero">
         <div class="hero-title-row">
-          <h1>방탈출 정보</h1>
-        </div>
-        <p>방탈출 테마 카드를 모아두는 곳</p>
-        <div class="sort-toolbar" role="group" aria-label="목록 정렬" hidden>
-          <div class="sort-options" role="group" aria-label="정렬 기준">
-            <button type="button" data-sort-key="difficulty" aria-pressed="false">난이도</button>
-            <button type="button" data-sort-key="fear" aria-pressed="false">공포</button>
-            <button type="button" data-sort-key="activity" aria-pressed="false">활동</button>
+          <div class="hero-heading">
+            <h1>방탈출 정보</h1>
+            <p>방탈출 테마 카드를 모아두는 곳</p>
           </div>
-          <div class="sort-directions" role="group" aria-label="정렬 방향">
-            <button type="button" data-sort-direction="desc" aria-label="내림차순" title="내림차순 · 높은 순" aria-pressed="true" disabled>↓</button>
-            <button type="button" data-sort-direction="asc" aria-label="오름차순" title="오름차순 · 낮은 순" aria-pressed="false" disabled>↑</button>
+          <div class="sort-toolbar" role="group" aria-label="목록 정렬" hidden>
+            <div class="sort-options" role="group" aria-label="정렬 기준">
+              <button type="button" data-sort-key="difficulty" aria-pressed="false">난이도</button>
+              <button type="button" data-sort-key="fear" aria-pressed="false">공포</button>
+              <button type="button" data-sort-key="activity" aria-pressed="false">활동</button>
+            </div>
+            <button type="button" data-sort-reset aria-label="정렬 초기화" title="정렬 초기화" disabled>↺</button>
           </div>
-          <button type="button" data-sort-reset aria-label="정렬 초기화" title="정렬 초기화" disabled>↺</button>
         </div>
         <div class="master-tools" hidden>
           <button type="button" data-select-toggle aria-pressed="false">
@@ -1178,23 +1184,19 @@
         });
         list.append(...ordered);
         document.querySelectorAll("[data-sort-key]").forEach((button) => {
-          button.setAttribute("aria-pressed", String(button.dataset.sortKey === sortKey));
-        });
-        document.querySelectorAll("[data-sort-direction]").forEach((button) => {
-          button.disabled = !sortKey;
-          button.setAttribute("aria-pressed", String(button.dataset.sortDirection === direction));
+          const active = button.dataset.sortKey === sortKey;
+          button.setAttribute("aria-pressed", String(active));
+          button.dataset.direction = active ? direction : "";
+          const orderLabel = direction === "asc" ? "오름차순" : "내림차순";
+          button.setAttribute("aria-label", active ? `${button.textContent} ${orderLabel}` : `${button.textContent}순 정렬`);
+          button.title = active ? `${orderLabel} · 다시 누르면 ${direction === "asc" ? "내림차순" : "오름차순"}` : `${button.textContent} 높은 순`;
         });
         document.querySelector("[data-sort-reset]").disabled = !sortKey;
       };
       document.querySelectorAll("[data-sort-key]").forEach((button) => {
         button.addEventListener("click", () => {
+          direction = sortKey === button.dataset.sortKey && direction === "desc" ? "asc" : "desc";
           sortKey = button.dataset.sortKey;
-          applySort();
-        });
-      });
-      document.querySelectorAll("[data-sort-direction]").forEach((button) => {
-        button.addEventListener("click", () => {
-          direction = button.dataset.sortDirection;
           applySort();
         });
       });
