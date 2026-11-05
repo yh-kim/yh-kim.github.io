@@ -33,6 +33,19 @@ scripts/stop-site.sh 8080
 
 ## 작업 후 검증
 
+테마의 LESS와 JavaScript를 다시 빌드할 때는 Node.js 18 이상과 npm 8.3 이상을 사용합니다.
+
+```bash
+npm ci
+npm run build
+npm audit
+```
+
+빌드는 `less/hux-blog.less`와 `js/hux-blog.js`에서 테마 CSS와 압축 자산을 생성합니다.
+기존 CSS에는 LESS에 없는 수동 수정이 있으므로, 재생성한 파일은 diff를 확인한 뒤 반영합니다.
+의존성은 `package-lock.json`으로 고정합니다. 파일 감시 도구의 `globule`이 오래된
+`minimatch`를 요구하므로, `overrides`로 보안 패치가 포함된 3.1.5 이상을 사용합니다.
+
 전체 검증:
 
 ```bash
