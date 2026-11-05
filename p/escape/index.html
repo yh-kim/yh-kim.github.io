@@ -253,6 +253,85 @@
       display: none !important;
     }
 
+    .master-tools, .selection-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .master-tools {
+      margin-top: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 248, 237, .12);
+    }
+    .master-tools button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 36px;
+      padding: 8px 13px;
+      border: 1px solid rgba(255, 248, 237, .16);
+      border-radius: 6px;
+      color: #ede8e2;
+      background: #25272e;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background .15s, border-color .15s;
+    }
+    .master-tools button[aria-pressed="true"] {
+      color: #2e211c;
+      background: #f3b99d;
+      border-color: #f3b99d;
+    }
+    .master-tools [data-copy-selection] { color: #2d2b30; background: #f7f2eb; border-color: #f7f2eb; }
+    .master-tools button:focus-visible { outline: 2px solid #f3b99d; outline-offset: 3px; }
+    .master-tools button:disabled { opacity: .45; cursor: default; }
+    .master-tools svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .selection-count { color: #bcb7b3; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .selectable-card { position: relative; min-width: 0; display: grid; }
+    .card-selection {
+      position: absolute;
+      inset: 0;
+      border: 0;
+      border-radius: 16px;
+      cursor: pointer;
+    }
+    .selectable-card:has(input:checked) .escape-card-link {
+      border-color: #efb294;
+      box-shadow: 0 0 0 2px #efb294;
+    }
+    .card-selection:has(input:focus-visible) { outline: 2px solid #fff8ed; outline-offset: 5px; }
+    .selectable-card:has(.card-selection:not([hidden])) .summary > span:first-child { padding-right: 20px; }
+    .card-selection input {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 19px;
+      height: 19px;
+      margin: 0;
+      accent-color: #9d4c2e;
+      cursor: pointer;
+    }
+    .selection-message { color: #fff8ed; font-size: 14px; }
+    .list-snackbar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 10px 18px;
+      border-radius: 6px;
+      background: #fff8ed;
+      color: #252330;
+      font-size: 14px;
+    }
+
     @media (max-width: 380px) {
       .card-list {
         grid-template-columns: 1fr;
@@ -286,6 +365,19 @@
           <h1>방탈출 정보</h1>
         </div>
         <p>방탈출 테마 카드를 모아두는 곳</p>
+        <div class="master-tools" hidden>
+          <button type="button" data-select-toggle aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m7 12 3 3 7-7"/></svg>
+            선택
+          </button>
+          <div class="selection-actions" hidden>
+            <span class="selection-count" role="status" data-selection-count>0개 선택</span>
+            <button type="button" data-copy-selection disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg>
+              링크 복사
+            </button>
+          </div>
+        </div>
       </header>
 
       <section class="card-list" aria-label="방탈출 카드 목록">
@@ -707,9 +799,13 @@
       </section>
     </div>
   </main>
+  <div class="list-snackbar" role="status" aria-live="polite" hidden></div>
+  <script src="/p/escape/assets/escape-room-list-access.js"></script>
   <script>
+  (async () => {
     const reservationQueryKey = "m";
-    const listReservationQueryValue = "l8s2";
+    const access = window.escapeListAccess;
+    const listReservationQueryValue = await access.masterToken();
     const cardReservationTokens = {
       "1.html": "v8k2",
       "2.html": "q4n7",
@@ -740,7 +836,15 @@
       "29.html": "z6b4",
       "30.html": "n7w3"
     };
-    const showReservation = new URLSearchParams(window.location.search).get(reservationQueryKey) === listReservationQueryValue;
+    const params = new URLSearchParams(window.location.search);
+    const isMaster = params.get(reservationQueryKey) === listReservationQueryValue;
+    const selectedIds = access.parseCards(params.get("cards"), cardReservationTokens);
+    const isShared = selectedIds.length > 0
+      && params.get("s") === await access.selectionToken(selectedIds, cardReservationTokens);
+    const showReservation = isMaster || isShared;
+    const hasSelection = params.has("cards");
+    const visibleIds = new Set(selectedIds);
+    document.querySelector(".master-tools").hidden = !isMaster;
     const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const cardFileFromHref = (href) => {
       const normalize = (value) => {
@@ -798,7 +902,17 @@
         ["활동", link.dataset.activity]
       ].filter(([, value]) => value);
 
-      link.href = showReservation && cardToken ? `${href}?${reservationQueryKey}=${cardToken}` : href;
+      const cardUrl = new URL(href, window.location.href);
+      if (showReservation && cardToken) cardUrl.searchParams.set(reservationQueryKey, cardToken);
+      if (isShared) {
+        cardUrl.searchParams.set("cards", selectedIds.join(","));
+        cardUrl.searchParams.set("s", params.get("s"));
+      }
+      link.href = cardUrl.toString();
+      if (hasSelection && !isMaster && (!isShared || !visibleIds.has(cardFileFromHref(href).replace(".html", "")))) {
+        link.remove();
+        return;
+      }
       link.classList.add("reservation-status", reservationStatus(link.dataset.reservedDate));
 
       if (summary && stats.length && !summary.querySelector(".list-stats")) {
@@ -822,13 +936,14 @@
       }
     });
 
-    const toggleReservationQuery = () => {
+    const toggleReservationQuery = async () => {
       const url = new URL(window.location.href);
-      const isShowingReservation = url.searchParams.get(reservationQueryKey) === listReservationQueryValue;
+      const currentToken = await access.masterToken();
+      const isShowingReservation = url.searchParams.get(reservationQueryKey) === currentToken;
       if (isShowingReservation) {
         url.searchParams.delete(reservationQueryKey);
       } else {
-        url.searchParams.set(reservationQueryKey, listReservationQueryValue);
+        url.searchParams.set(reservationQueryKey, currentToken);
       }
       window.location.replace(url.toString());
     };
@@ -858,8 +973,74 @@
 
     bindTripleClick(document.querySelector(".hero h1"), toggleReservationQuery);
 
+    if (isMaster) {
+      const selected = new Set();
+      const toggle = document.querySelector("[data-select-toggle]");
+      const actions = document.querySelector(".selection-actions");
+      const copy = document.querySelector("[data-copy-selection]");
+      let selecting = false;
+      document.querySelectorAll(".escape-card-link").forEach((link) => {
+        const id = cardFileFromHref(link.href).replace(".html", "");
+        const wrapper = document.createElement("div");
+        wrapper.className = "selectable-card";
+        wrapper.dataset.reservedDate = link.dataset.reservedDate;
+        link.replaceWith(wrapper);
+        wrapper.append(link);
+        const label = document.createElement("label");
+        label.className = "card-selection";
+        label.hidden = true;
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.setAttribute("aria-label", `${link.querySelector("h2").textContent} 선택`);
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) selected.add(id);
+          else selected.delete(id);
+          document.querySelector("[data-selection-count]").textContent = `${selected.size}개 선택`;
+          copy.disabled = selected.size === 0;
+        });
+        label.append(checkbox);
+        wrapper.append(label);
+      });
+      toggle.addEventListener("click", () => {
+        selecting = !selecting;
+        toggle.setAttribute("aria-pressed", String(selecting));
+        actions.hidden = !selecting;
+        document.querySelectorAll(".card-selection").forEach((label) => { label.hidden = !selecting; });
+        document.querySelectorAll(".escape-card-link").forEach((link) => { link.tabIndex = selecting ? -1 : 0; });
+      });
+      copy.addEventListener("click", async () => {
+        const ids = access.parseCards(Array.from(selected).join(","), cardReservationTokens);
+        if (!ids.length) return;
+        copy.disabled = true;
+        const url = new URL(window.location.pathname, window.location.origin);
+        url.searchParams.set("cards", ids.join(","));
+        url.searchParams.set("s", await access.selectionToken(ids, cardReservationTokens));
+        const snackbar = document.querySelector(".list-snackbar");
+        try {
+          if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(url.toString());
+          else {
+            const input = document.createElement("textarea");
+            input.value = url.toString();
+            document.body.append(input);
+            input.select();
+            const copied = document.execCommand("copy");
+            input.remove();
+            if (!copied) throw new Error("copy failed");
+          }
+          snackbar.textContent = "복사 완료";
+        } catch {
+          snackbar.textContent = "복사하지 못했습니다. 다시 시도해 주세요.";
+        } finally {
+          copy.disabled = selected.size === 0;
+          snackbar.hidden = false;
+          clearTimeout(copy.snackbarTimer);
+          copy.snackbarTimer = setTimeout(() => { snackbar.hidden = true; }, 2000);
+        }
+      });
+    }
+
     document.querySelectorAll(".card-list").forEach((list) => {
-      const cards = Array.from(list.querySelectorAll("[data-reserved-date]"));
+      const cards = Array.from(list.children);
       const sortedCards = cards
         .sort((a, b) => {
           const aDate = a.dataset.reservedDate;
@@ -876,6 +1057,15 @@
       list.append(...sortedCards);
       list.classList.add("is-ready");
     });
+    if (hasSelection && !isMaster && !isShared) {
+      const message = document.createElement("p");
+      message.className = "selection-message";
+      message.textContent = "유효하지 않은 공유 링크입니다.";
+      document.querySelector(".card-list").after(message);
+    }
+  })().catch(() => {
+    document.querySelector(".card-list")?.classList.add("is-ready");
+  });
   </script>
   <script src="/js/html-document-scroll.js"></script>
 </body>
