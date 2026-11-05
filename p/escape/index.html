@@ -979,6 +979,29 @@
       const actions = document.querySelector(".selection-actions");
       const copy = document.querySelector("[data-copy-selection]");
       let selecting = false;
+      let selectionUrl = "";
+      let selectionVersion = 0;
+      const prepareSelectionUrl = async () => {
+        const version = ++selectionVersion;
+        selectionUrl = "";
+        copy.disabled = true;
+        const ids = access.parseCards(Array.from(selected).join(","), cardReservationTokens);
+        if (!ids.length) return;
+        try {
+          const signature = await access.selectionToken(ids, cardReservationTokens);
+          if (version !== selectionVersion) return;
+          const url = new URL(window.location.pathname, window.location.origin);
+          url.searchParams.set("cards", ids.join(","));
+          url.searchParams.set("s", signature);
+          selectionUrl = url.toString();
+          copy.disabled = false;
+        } catch {
+          if (version !== selectionVersion) return;
+          const snackbar = document.querySelector(".list-snackbar");
+          snackbar.textContent = "공유 링크를 만들지 못했습니다. 다시 선택해 주세요.";
+          snackbar.hidden = false;
+        }
+      };
       document.querySelectorAll(".escape-card-link").forEach((link) => {
         const id = cardFileFromHref(link.href).replace(".html", "");
         const wrapper = document.createElement("div");
@@ -996,7 +1019,7 @@
           if (checkbox.checked) selected.add(id);
           else selected.delete(id);
           document.querySelector("[data-selection-count]").textContent = `${selected.size}개 선택`;
-          copy.disabled = selected.size === 0;
+          prepareSelectionUrl();
         });
         label.append(checkbox);
         wrapper.append(label);
@@ -1009,29 +1032,16 @@
         document.querySelectorAll(".escape-card-link").forEach((link) => { link.tabIndex = selecting ? -1 : 0; });
       });
       copy.addEventListener("click", async () => {
-        const ids = access.parseCards(Array.from(selected).join(","), cardReservationTokens);
-        if (!ids.length) return;
+        if (!selectionUrl) return;
         copy.disabled = true;
-        const url = new URL(window.location.pathname, window.location.origin);
-        url.searchParams.set("cards", ids.join(","));
-        url.searchParams.set("s", await access.selectionToken(ids, cardReservationTokens));
         const snackbar = document.querySelector(".list-snackbar");
         try {
-          if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(url.toString());
-          else {
-            const input = document.createElement("textarea");
-            input.value = url.toString();
-            document.body.append(input);
-            input.select();
-            const copied = document.execCommand("copy");
-            input.remove();
-            if (!copied) throw new Error("copy failed");
-          }
+          await access.copyText(selectionUrl);
           snackbar.textContent = "복사 완료";
         } catch {
           snackbar.textContent = "복사하지 못했습니다. 다시 시도해 주세요.";
         } finally {
-          copy.disabled = selected.size === 0;
+          copy.disabled = !selectionUrl;
           snackbar.hidden = false;
           clearTimeout(copy.snackbarTimer);
           copy.snackbarTimer = setTimeout(() => { snackbar.hidden = true; }, 2000);

@@ -20,5 +20,33 @@
   const selectionToken = (ids, tokens) => digest("escape-selection-v1|" + ids
     .map((id) => `${id}:${tokens[`${id}.html`]}`).join("|"));
 
-  window.escapeListAccess = { masterToken, parseCards, selectionToken };
+  const copyText = async (text) => {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {
+        // Some mobile browsers expose the API but deny clipboard writes.
+      }
+    }
+    const previousFocus = document.activeElement;
+    const input = document.createElement("textarea");
+    input.value = text;
+    input.readOnly = true;
+    input.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px;";
+    document.body.append(input);
+    let copied = false;
+    try {
+      input.focus({ preventScroll: true });
+      input.select();
+      input.setSelectionRange(0, text.length);
+      copied = document.execCommand("copy");
+    } finally {
+      input.remove();
+      previousFocus?.focus({ preventScroll: true });
+    }
+    if (!copied) throw new Error("Clipboard write failed");
+  };
+
+  window.escapeListAccess = { masterToken, parseCards, selectionToken, copyText };
 })();
