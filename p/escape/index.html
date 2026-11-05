@@ -217,15 +217,19 @@
     }
 
     .list-stat {
+      --stat-bg: rgba(255, 255, 255, .58);
+      --stat-border: rgba(48, 42, 51, .08);
+      --stat-label: #807985;
+      --stat-value: #34313d;
       display: inline-flex;
       align-items: center;
       gap: 3px;
       min-width: 0;
       padding: 4px 6px;
-      border: 1px solid rgba(48, 42, 51, .08);
+      border: 1px solid var(--stat-border);
       border-radius: 999px;
-      color: #34313d;
-      background: rgba(255, 255, 255, .58);
+      color: var(--stat-value);
+      background: var(--stat-bg);
       font-size: 9.5px;
       font-weight: 900;
       line-height: 1;
@@ -233,8 +237,36 @@
     }
 
     .list-stat span {
-      color: #807985;
+      color: var(--stat-label);
       font-weight: 800;
+    }
+
+    .list-stat.stat-none {
+      --stat-bg: #edf3fb;
+      --stat-border: rgba(77, 126, 216, .22);
+      --stat-label: #5f718f;
+      --stat-value: #39598f;
+    }
+
+    .list-stat.stat-low {
+      --stat-bg: #eaf5f1;
+      --stat-border: rgba(110, 169, 155, .26);
+      --stat-label: #587d73;
+      --stat-value: #2d6055;
+    }
+
+    .list-stat.stat-mid {
+      --stat-bg: #fff4df;
+      --stat-border: rgba(213, 168, 79, .32);
+      --stat-label: #82652c;
+      --stat-value: #6b501d;
+    }
+
+    .list-stat.stat-high {
+      --stat-bg: #fff0ea;
+      --stat-border: rgba(230, 107, 88, .3);
+      --stat-label: #a04b3e;
+      --stat-value: #833a30;
     }
 
     .badge.time {
@@ -888,6 +920,15 @@
       return reservedDay < today ? 2 : 0;
     };
 
+    const statTone = (label, value) => {
+      const text = String(value || "").replace(/\s/g, "");
+      if (text.includes("없음") || text.includes("낮음")) return "stat-none";
+      if (text.includes("쉬움") || text.includes("적음")) return "stat-low";
+      if (text.includes("보통") || text.includes("중간")) return "stat-mid";
+      if (text.includes("높음") || text.includes("어려움") || text.includes("많음")) return "stat-high";
+      return label === "공포" ? "stat-none" : "stat-mid";
+    };
+
     document.querySelectorAll(".reservation-badge, [data-reserved-badge]").forEach((badge) => {
       badge.hidden = !showReservation;
     });
@@ -928,7 +969,7 @@
           const name = document.createElement("span");
           const text = document.createElement("strong");
 
-          item.className = "list-stat";
+          item.className = `list-stat ${statTone(label, value)}`;
           name.textContent = label;
           text.textContent = value;
           item.append(name, text);
