@@ -246,6 +246,8 @@ Use this workflow when the user asks to create or update a 방탈출 카드, 방
 
 ### Source of Truth
 
+빠방 조회 변경 사항 (2026-11 확인): 기존 공개 Meilisearch 직접 조회 대신 Firebase callable `meiliSearch`가 App Check 인증을 요구한다. 직접 호출로 인증을 우회하거나 토큰을 저장하지 않는다. 빠방 웹에서 `모든 테마` 검색 후 상세 정보를 확인하고, 브라우저의 페이지 리소스 목록에서 해당 테마와 지점이 일치하는 `cdn.keigon.net` 이미지 주소를 찾아 내려받는다. 검색 결과의 `thumb_` 이미지도 원본 포스터가 따로 확인되지 않을 때 사용할 수 있다. 이미지 파일의 실제 형식을 확인한다. 아래 예전 Meilisearch fast path는 더 이상 동작하지 않을 수 있다.
+
 1. Look up the theme on 빠방 first.
    - 빠방 primary site: `https://bbabang.net/`.
    - 빠방 service identity: `빠방 - 빠른 방탈출 예약/평점 조회`.
