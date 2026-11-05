@@ -8,7 +8,7 @@
     timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit"
   }).format(date);
 
-  const masterToken = (date = new Date()) => digest(`escape-master-v1|l8s2|${koreaDate(date)}`);
+  const masterToken = async (date = new Date()) => (await digest(`escape-master-v1|l8s2|${koreaDate(date)}`)).slice(0, 10);
 
   const parseCards = (value, tokens) => {
     if (!value || !/^\d+(,\d+)*$/.test(value)) return [];

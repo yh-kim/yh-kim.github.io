@@ -800,7 +800,7 @@
     </div>
   </main>
   <div class="list-snackbar" role="status" aria-live="polite" hidden></div>
-  <script src="/p/escape/assets/escape-room-list-access.js"></script>
+  <script src="/p/escape/assets/escape-room-list-access.js?v=20261105-2"></script>
   <script>
   (async () => {
     const reservationQueryKey = "m";
@@ -1038,7 +1038,8 @@
         try {
           await access.copyText(selectionUrl);
           snackbar.textContent = "복사 완료";
-        } catch {
+        } catch (error) {
+          console.error("Selection link copy failed", error);
           snackbar.textContent = "복사하지 못했습니다. 다시 시도해 주세요.";
         } finally {
           copy.disabled = !selectionUrl;
