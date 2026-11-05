@@ -285,6 +285,36 @@
       display: none !important;
     }
 
+    .sort-toolbar, .sort-options, .sort-directions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sort-toolbar { flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .sort-options, .sort-directions { padding: 3px; border: 1px solid #ffffff1f; border-radius: 6px; }
+    .sort-toolbar button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 4px;
+      color: #c8c4c1;
+      background: transparent;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .sort-toolbar button[aria-pressed="true"] { background: #f7f2eb; color: #302c2d; }
+    .sort-toolbar button:disabled { opacity: .35; cursor: default; }
+    .sort-toolbar button:focus-visible { outline: 2px solid #f3b99d; outline-offset: 2px; }
+    .sort-directions button, .sort-toolbar [data-sort-reset] { width: 32px; padding: 0; font-size: 19px; }
+    .sort-toolbar [data-sort-reset] { border: 1px solid #ffffff1f; height: 40px; width: 36px; }
+
     .master-tools, .selection-actions {
       display: flex;
       align-items: center;
@@ -397,6 +427,18 @@
           <h1>방탈출 정보</h1>
         </div>
         <p>방탈출 테마 카드를 모아두는 곳</p>
+        <div class="sort-toolbar" role="group" aria-label="목록 정렬" hidden>
+          <div class="sort-options" role="group" aria-label="정렬 기준">
+            <button type="button" data-sort-key="difficulty" aria-pressed="false">난이도</button>
+            <button type="button" data-sort-key="fear" aria-pressed="false">공포</button>
+            <button type="button" data-sort-key="activity" aria-pressed="false">활동</button>
+          </div>
+          <div class="sort-directions" role="group" aria-label="정렬 방향">
+            <button type="button" data-sort-direction="desc" aria-label="내림차순" title="내림차순 · 높은 순" aria-pressed="true" disabled>↓</button>
+            <button type="button" data-sort-direction="asc" aria-label="오름차순" title="오름차순 · 낮은 순" aria-pressed="false" disabled>↑</button>
+          </div>
+          <button type="button" data-sort-reset aria-label="정렬 초기화" title="정렬 초기화" disabled>↺</button>
+        </div>
         <div class="master-tools" hidden>
           <button type="button" data-select-toggle aria-pressed="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m7 12 3 3 7-7"/></svg>
@@ -1108,7 +1150,61 @@
           return bDate.localeCompare(aDate);
         });
 
-      list.append(...sortedCards);
+      const ranks = {
+        difficulty: { 매우쉬움: 1, 쉬움: 2, 보통: 3, 중간: 3, 어려움: 4, 매우어려움: 5 },
+        fear: { 없음: 0, 거의없음: 0, 매우낮음: 1, 낮음: 2, 보통: 3, 중간: 3, 높음: 4, 매우높음: 5 },
+        activity: { 없음: 0, 거의없음: 0, 매우적음: 1, 적음: 2, 보통: 3, 중간: 3, 많음: 4, 매우많음: 5 }
+      };
+      const statRank = (key, value) => {
+        const parts = String(value || "").replace(/\s/g, "").split("~");
+        const scores = parts.map((part) => ranks[key]?.[part]);
+        if (scores.some((score) => score === undefined)) return null;
+        return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+      };
+      const getStat = (card, key) => {
+        const link = card.matches(".escape-card-link") ? card : card.querySelector(".escape-card-link");
+        return statRank(key, link?.dataset[key]);
+      };
+      let sortKey = "";
+      let direction = "desc";
+      const applySort = () => {
+        const ordered = [...sortedCards];
+        if (sortKey) ordered.sort((a, b) => {
+          const aRank = getStat(a, sortKey);
+          const bRank = getStat(b, sortKey);
+          if (aRank === null) return bRank === null ? 0 : 1;
+          if (bRank === null) return -1;
+          return direction === "asc" ? aRank - bRank : bRank - aRank;
+        });
+        list.append(...ordered);
+        document.querySelectorAll("[data-sort-key]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.sortKey === sortKey));
+        });
+        document.querySelectorAll("[data-sort-direction]").forEach((button) => {
+          button.disabled = !sortKey;
+          button.setAttribute("aria-pressed", String(button.dataset.sortDirection === direction));
+        });
+        document.querySelector("[data-sort-reset]").disabled = !sortKey;
+      };
+      document.querySelectorAll("[data-sort-key]").forEach((button) => {
+        button.addEventListener("click", () => {
+          sortKey = button.dataset.sortKey;
+          applySort();
+        });
+      });
+      document.querySelectorAll("[data-sort-direction]").forEach((button) => {
+        button.addEventListener("click", () => {
+          direction = button.dataset.sortDirection;
+          applySort();
+        });
+      });
+      document.querySelector("[data-sort-reset]").addEventListener("click", () => {
+        sortKey = "";
+        direction = "desc";
+        applySort();
+      });
+      applySort();
+      document.querySelector(".sort-toolbar").hidden = sortedCards.length === 0;
       list.classList.add("is-ready");
     });
     if (hasSelection && !isMaster && !isShared) {
