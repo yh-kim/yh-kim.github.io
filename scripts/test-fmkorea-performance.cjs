@@ -12,7 +12,7 @@ class Element {
   removeAttribute(key) { this.attributes.delete(key); }
   querySelectorAll(selector) { return selector === 'source' ? this.children : []; }
   querySelector() { return null; }
-  matches(selector) { return selector === 'picture' && this.tag === 'picture'; }
+  matches(selector) { return selector === 'picture' ? this.tag === 'picture' : selector.startsWith('.') && (this.getAttribute('class') || '').split(/\s+/).includes(selector.slice(1)); }
   closest() { return null; }
 }
 class Video extends Element {
@@ -160,8 +160,8 @@ test('brightness sampling frees its canvas after readable and CORS-blocked resul
   assert.equal(canvas.width, 0); assert.equal(canvas.height, 0);
 });
 
-test('the actual reveal button only shows the video and leaves playback to the player button', () => {
-  const video = new Video({ preload: 'none', poster: '/preview.webp' });
+for (const [className, expectedPlays] of [['video-with-sound', 0], ['video-without-sound', 1], ['video-with-sound video-without-sound', 0], ['', 0]]) test(`reveal playback: ${className || 'unknown'} requests play ${expectedPlays} time(s)`, () => {
+  const video = new Video({ class: className, preload: 'none', poster: '/preview.webp' });
   const source = new Element({ src: '/movie.mp4', type: 'video/mp4' }, 'source');
   source.parentElement = video; video.children.push(source);
   const root = { contains: () => true };
@@ -181,29 +181,34 @@ test('the actual reveal button only shows the video and leaves playback to the p
     detailMedia: new Map([[root, state]]), prepareDetailImages() {},
     syncDetailMedia() { shown = true; }, scheduleRefresh() { refreshes++; }
   });
-  vm.runInContext(between('  function syncMediaPlaceholders(', '  function restoreDetailMedia('), context);
+  vm.runInContext(between('  function isSilentVideo(', '  function restoreDetailMedia('), context);
   context.suspendMediaResources(video, state);
   // Mirrors the site's deferred initializer: the original source is present before reveal.
   assert.equal(source.getAttribute('src'), '/movie.mp4');
   context.syncMediaPlaceholders(root, state, [{ key: video, target: video, kind: 'video', sources: [video] }], new Set());
   const button = state.placeholders.get(video).button;
   button.click({ preventDefault() {}, stopPropagation() {} });
-  assert.equal(shown, true); assert.equal(plays, 0); assert.equal(refreshes, 1); assert.equal(video.loads, 0);
+  assert.equal(shown, true); assert.equal(plays, expectedPlays); assert.equal(refreshes, 1); assert.equal(video.loads, 0);
   assert.equal(state.revealedItems.has(video), true);
 });
 
 test('native and site viewport autoplay are disabled, while manual playback survives later refreshes', () => {
-  const video = new Video({ autoplay: '', 'data-autoplay': 'true', src: '/movie.mp4' });
+  const video = new Video({ class: 'video-with-sound', autoplay: '', 'data-autoplay': 'true', src: '/movie.mp4' });
+  const silent = new Video({ class: 'video-without-sound', autoplay: '', 'data-autoplay': 'true' });
+  silent.paused = false;
   video.paused = false;
   const settings = { enabled: true };
-  const context = vm.createContext({ Map, Set, settings,
-    manualVideos: new Map(), document: { documentElement: { getAttribute: () => 'true' }, querySelectorAll: () => [video] }
+  const context = vm.createContext({ Map, Set, settings, HTMLVideoElement: Video,
+    manualVideos: new Map(), document: { documentElement: { getAttribute: () => 'true' }, querySelectorAll: () => [video, silent] }
   });
-  vm.runInContext(between('  function syncManualVideos(', '  function syncDetailMedia('), context);
+  vm.runInContext(between('  function isSilentVideo(', '  function syncMediaPlaceholders(') + between('  function syncManualVideos(', '  function syncDetailMedia('), context);
   context.syncManualVideos();
   assert.equal(video.getAttribute('autoplay'), null);
   assert.equal(video.getAttribute('data-autoplay'), 'false');
   assert.equal(video.pauses, 1);
+  assert.equal(silent.getAttribute('autoplay'), '');
+  assert.equal(silent.getAttribute('data-autoplay'), 'true');
+  assert.equal(silent.pauses, 0);
   context.syncManualVideos(); assert.equal(video.pauses, 1);
   assert.equal(video.getAttribute('src'), '/movie.mp4'); assert.equal(video.muted, true);
   settings.enabled = false; context.syncManualVideos();

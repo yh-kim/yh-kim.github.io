@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.23
+// @version      1.6.24
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.23';
+  const SCRIPT_VERSION = '1.6.24';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1516,6 +1516,11 @@
     });
   }
 
+  function isSilentVideo(media) {
+    // 음소거한 유음 영상과 사이트가 무음으로 분류한 영상을 구분합니다.
+    return media instanceof HTMLVideoElement && media.matches('.video-without-sound') && !media.matches('.video-with-sound');
+  }
+
   function syncMediaPlaceholders(root, state, units, spaces) {
     const keys = new Set(units.map(unit => unit.key));
     for (const [key, item] of state.placeholders) {
@@ -1548,6 +1553,9 @@
             state.frames.delete(slot);
           }
           syncDetailMedia();
+          for (const media of sources) if (isSilentVideo(media)) {
+            try { media.play()?.catch(() => {}); } catch (error) { /* 재생이 제한되면 원래 플레이어 버튼을 사용합니다. */ }
+          }
           scheduleRefresh();
         });
         state.placeholders.set(unit.key, item);
@@ -1629,7 +1637,7 @@
 
   function syncManualVideos() {
     const active = settings.enabled && document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
-    const videos = new Set(active ? document.querySelectorAll('.rd:has(.rd_hd h1) .rd_body article video') : []);
+    const videos = new Set(active ? Array.from(document.querySelectorAll('.rd:has(.rd_hd h1) .rd_body article video')).filter(video => !isSilentVideo(video)) : []);
     for (const [video, saved] of manualVideos) {
       if (videos.has(video)) continue;
       for (const [attribute, value] of saved) {
@@ -1644,7 +1652,7 @@
         try { if (!video.paused) video.pause(); } catch (error) { /* 초기 자동 재생만 중지합니다. */ }
       }
       video.removeAttribute('autoplay');
-      // 사이트의 IntersectionObserver 자동 재생도 막고 실제 재생 버튼은 그대로 사용합니다.
+      // 소리 있는 영상은 사이트의 자동 재생도 막고 실제 재생 버튼을 사용합니다.
       if (video.getAttribute('data-autoplay') !== 'false') video.setAttribute('data-autoplay', 'false');
     }
   }
