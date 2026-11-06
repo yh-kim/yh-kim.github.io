@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.20
+// @version      1.6.21
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.20';
+  const SCRIPT_VERSION = '1.6.21';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -54,6 +54,8 @@
   let backdrop;
   let launcher;
   let pending = false;
+  let refreshFrame = 0;
+  const dirtySections = new Set();
   let launcherClickTimer = null;
   let primaryContentRoot = null;
   let readHistory = null;
@@ -1232,14 +1234,48 @@
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
   }
 
-  function inspectBrightImage(url) {
+  const MAX_BRIGHT_IMAGE_PIXELS = 4_000_000;
+
+  function sampleImageBrightness(image) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 32;
+    try {
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) return null;
+      context.drawImage(image, 0, 0, 32, 32);
+      const pixels = context.getImageData(0, 0, 32, 32).data;
+      let white = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        const low = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
+        const high = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
+        if (pixels[i + 3] >= 230 && low >= 220 && high - low <= 30) white++;
+      }
+      return white / (32 * 32) >= .5;
+    } catch (error) { return null; } // CORS로 읽을 수 없으면 작은 원본만 별도 분석합니다.
+    finally { canvas.width = canvas.height = 0; }
+  }
+
+  function rememberImageBrightness(url, value) {
+    brightImages.cache.set(url, value);
+    while (brightImages.cache.size > 64) brightImages.cache.delete(brightImages.cache.keys().next().value);
+    return value;
+  }
+
+  function inspectBrightImage(image) {
+    const url = image.currentSrc || image.src;
     if (brightImages.cache.has(url)) {
       const value = brightImages.cache.get(url);
       brightImages.cache.delete(url);
       brightImages.cache.set(url, value);
       return Promise.resolve(value);
     }
+    // 큰 원본은 분석용으로 다시 디코딩하지 않고 초기의 낮은 밝기를 유지합니다.
+    if (image.naturalWidth * image.naturalHeight > MAX_BRIGHT_IMAGE_PIXELS) {
+      return Promise.resolve(rememberImageBrightness(url, true));
+    }
     if (brightImages.requests.has(url)) return brightImages.requests.get(url).promise;
+    const sampled = sampleImageBrightness(image);
+    if (sampled !== null) return Promise.resolve(rememberImageBrightness(url, sampled));
     let resolve;
     const promise = new Promise(done => { resolve = done; });
     const job = { url, promise, resolve };
@@ -1256,7 +1292,6 @@
     brightImages.running = job;
     // 큰 원본을 분석용으로 동시에 여러 장 디코딩하지 않습니다.
     const probe = new Image();
-    let canvas;
     let finished = false;
     const finish = (value, remember = true) => {
       if (finished) return;
@@ -1264,38 +1299,20 @@
       window.clearTimeout(timeout);
       probe.onload = probe.onerror = null;
       probe.removeAttribute('src');
-      if (canvas) canvas.width = canvas.height = 0;
       brightImages.requests.delete(job.url);
-      if (remember) {
-        brightImages.cache.set(job.url, value);
-        while (brightImages.cache.size > 64) brightImages.cache.delete(brightImages.cache.keys().next().value);
-      }
+      if (remember) rememberImageBrightness(job.url, value);
       brightImages.running = null;
       job.resolve(value);
       queueMicrotask(pumpBrightImageQueue);
     };
-    const timeout = window.setTimeout(() => finish(false), 8000);
+    const timeout = window.setTimeout(() => finish(true), 8000);
     job.cancel = () => finish(false, false);
     probe.crossOrigin = 'anonymous';
     probe.decoding = 'async';
-    probe.onload = () => {
-      try {
-        canvas = document.createElement('canvas');
-        canvas.width = canvas.height = 32;
-        const context = canvas.getContext('2d', { willReadFrequently: true });
-        if (!context) return finish(false);
-        context.drawImage(probe, 0, 0, 32, 32);
-        const pixels = context.getImageData(0, 0, 32, 32).data;
-        let white = 0;
-        for (let i = 0; i < pixels.length; i += 4) {
-          const low = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
-          const high = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
-          if (pixels[i + 3] >= 230 && low >= 220 && high - low <= 30) white++;
-        }
-        finish(white / (32 * 32) >= .5);
-      } catch (error) { finish(false); }
-    };
-    probe.onerror = () => finish(false);
+    probe.onload = () => finish(
+      probe.naturalWidth * probe.naturalHeight > MAX_BRIGHT_IMAGE_PIXELS
+        ? true : sampleImageBrightness(probe) ?? true);
+    probe.onerror = () => finish(true);
     probe.src = job.url;
   }
 
@@ -1325,7 +1342,7 @@
     const current = () => brightImageModeActive() && image.isConnected &&
       brightImages.tokens.get(image) === token && brightImages.sources.get(image) === url &&
       (image.currentSrc || image.src) === url;
-    const result = image.naturalWidth < 64 || image.naturalHeight < 64 ? Promise.resolve(false) : inspectBrightImage(url);
+    const result = image.naturalWidth < 64 || image.naturalHeight < 64 ? Promise.resolve(false) : inspectBrightImage(image);
     result.then(bright => {
       if (!current()) return;
       image.toggleAttribute('data-fm-clean-bright-image', bright);
@@ -1463,7 +1480,7 @@
     }
     const width = Number(image.getAttribute('width'));
     const height = Number(image.getAttribute('height'));
-    return !(width > 0 && width <= 2 && height > 0 && height <= 2 &&
+    return !(!state.resources.has(image) && width > 0 && width <= 2 && height > 0 && height <= 2 &&
       !image.hasAttribute('data-original') && !image.hasAttribute('data-src') && !image.hasAttribute('srcset'));
   }
 
@@ -1522,7 +1539,7 @@
           event.stopPropagation();
           if (detailMedia.get(root) !== state || !button.isConnected) return;
           const sources = new Set(item.unit.sources);
-          sources.forEach(media => state.revealedItems.add(media));
+          sources.forEach(media => { state.revealedItems.add(media); restoreMediaResources(state, media); });
           prepareDetailImages(root, state, item.unit.sources);
           for (const [slot, frame] of state.frames) {
             if (!sources.has(frame)) continue;
@@ -1555,7 +1572,52 @@
     }
   }
 
+  function suspendMediaResources(media, state) {
+    const elements = [media];
+    if (media instanceof HTMLVideoElement) elements.push(...media.querySelectorAll('source'));
+    else if (media.parentElement?.matches('picture')) elements.push(...media.parentElement.querySelectorAll('source'));
+    let changed = false;
+    for (const element of elements) {
+      const attributes = element instanceof HTMLVideoElement
+        ? ['src', 'poster', 'data-src', 'data-original'] : ['src', 'srcset', 'sizes', 'data-original', 'data-src', 'data-srcset'];
+      let saved = state.resources.get(element);
+      if (!saved) { saved = new Map(); state.resources.set(element, saved); }
+      for (const attribute of attributes) {
+        const value = element.getAttribute(attribute);
+        if (value === null) continue;
+        saved.set(attribute, value);
+        element.removeAttribute(attribute);
+        changed = true;
+      }
+      if (element instanceof HTMLVideoElement) {
+        if (!saved.has('preload')) saved.set('preload', element.getAttribute('preload'));
+        if (element.preload !== 'none') { element.preload = 'none'; changed = true; }
+      }
+    }
+    if (changed && media instanceof HTMLVideoElement) {
+      try { media.pause(); media.load(); } catch (error) { /* 플레이어 초기화 중에도 숨김 유지 */ }
+    }
+  }
+
+  function restoreMediaResources(state, media = null) {
+    const elements = media ? new Set([media, ...media.querySelectorAll('source'),
+      ...(media.parentElement?.matches('picture') ? media.parentElement.querySelectorAll('source') : [])]) : null;
+    const videos = new Set();
+    for (const [element, saved] of state.resources) {
+      if (elements && !elements.has(element)) continue;
+      for (const [attribute, value] of saved) {
+        if (value === null) element.removeAttribute(attribute);
+        else element.setAttribute(attribute, value);
+      }
+      if (element instanceof HTMLVideoElement) videos.add(element);
+      else if (element.parentElement instanceof HTMLVideoElement) videos.add(element.parentElement);
+      state.resources.delete(element);
+    }
+    for (const video of videos) try { video.load(); } catch (error) { /* 이후 사이트 재생 동작에 맡깁니다. */ }
+  }
+
   function restoreDetailMedia(root, state) {
+    restoreMediaResources(state);
     prepareDetailImages(root, state, Array.from(root.querySelectorAll('img')));
     root.removeAttribute('data-fm-clean-media-collapsed');
     syncMediaHidden(root, state, new Set());
@@ -1594,10 +1656,11 @@
       }
       if (!state) {
         state = { id, revealed: false, revealedItems: new WeakSet(), notice: null,
-          frames: new Map(), videos: new Map(), hidden: new Map(), placeholders: new Map() };
+          frames: new Map(), videos: new Map(), hidden: new Map(), placeholders: new Map(), resources: new Map() };
         detailMedia.set(root, state);
       }
       if (state.revealed) continue;
+      for (const element of state.resources.keys()) if (!root.contains(element)) state.resources.delete(element);
 
       // 영상 iframe은 DOM에서 분리해 숨긴 상태의 소리와 자동 재생을 중단합니다.
       for (const [slot, frame] of state.frames) {
@@ -1644,6 +1707,7 @@
         else video.setAttribute('autoplay', saved.autoplay);
         state.videos.delete(video);
       }
+      contentImages.forEach(image => suspendMediaResources(image, state));
       videos.forEach(video => {
         if (!state.videos.has(video)) {
           const stop = () => { if (root.hasAttribute('data-fm-clean-media-collapsed')) video.pause(); };
@@ -1651,6 +1715,7 @@
           video.addEventListener('play', stop);
         }
         video.autoplay = false;
+        suspendMediaResources(video, state);
         // muted/volume 변경은 사이트의 저장된 음향 설정까지 덮으므로 일시정지만 합니다.
         try { if (!video.paused) video.pause(); } catch (error) { /* 로드 전 영상도 계속 숨깁니다. */ }
       });
@@ -2478,20 +2543,20 @@
     scheduleBottomSpace();
   }
 
-  function applySettings() {
-    for (const [key, value] of Object.entries(settings)) {
+  function applySettings(sections = null) {
+    const needs = section => !sections || sections.has(section);
+    if (!sections) for (const [key, value] of Object.entries(settings)) {
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
     }
-    document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
-    syncListImages();
-    syncDetailMedia();
-    syncReadHistory();
-    syncReadingHeader();
-    syncBrightImages();
-    syncCommentCounts();
-    syncCommentAuthors();
-    syncSwipeBack();
-    if (!launcher) return;
+    if (needs('layout')) document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
+    if (needs('list')) syncListImages();
+    if (needs('media')) syncDetailMedia();
+    if (needs('read')) syncReadHistory();
+    if (needs('layout')) syncReadingHeader();
+    if (needs('bright')) syncBrightImages();
+    if (needs('comments')) { syncCommentCounts(); syncCommentAuthors(); }
+    if (!sections) syncSwipeBack();
+    if (!launcher || (sections && !needs('layout'))) return;
     launcher.toggleAttribute('data-off', !settings.enabled);
     host.setAttribute('data-side', settings.launcherRight ? 'right' : 'left');
     host.toggleAttribute('data-night', Boolean(document.body?.classList.contains('night_mode')));
@@ -2729,7 +2794,6 @@
       const input = event.target;
       if (!Object.prototype.hasOwnProperty.call(defaults, input.name)) return;
       settings[input.name] = input.checked;
-      applySettings();
       saveSettings();
       refresh();
     });
@@ -2948,18 +3012,55 @@
     });
   }
 
+  function mutationSections(record) {
+    const target = record.target instanceof Element ? record.target : record.target.parentElement;
+    if (!target) return [];
+    if (record.type === 'attributes' && record.oldValue === target.getAttribute(record.attributeName)) return [];
+    // 자체 하단 여백과 스와이프 효과는 콘텐츠 재검사가 필요하지 않습니다.
+    if (target.matches('#fm-clean-swipe-back')) return [];
+    if (target === document.documentElement && record.attributeName === 'style') {
+      const withoutSpace = value => (value || '').replace(/--fm-clean-bottom-space\s*:[^;]*(;|$)/g, '').trim();
+      if (withoutSpace(record.oldValue) === withoutSpace(target.getAttribute('style'))) return [];
+    }
+    const sections = new Set();
+    // 동적 광고와 리소스 교체는 변경된 영역에서만 확인합니다.
+    const adSelector = currentAdSelectors.join(',');
+    if (target.closest(adSelector)) sections.add('shell');
+    if (target.matches('link, script, form, input') && target.closest('head, form')) sections.add('shell');
+    for (const node of [...record.addedNodes, ...record.removedNodes]) {
+      if (node instanceof Element && (node.matches(adSelector) || node.querySelector(adSelector) ||
+          node.matches('link, script, form') || node.querySelector('link, script, form'))) sections.add('shell');
+    }
+    if (target.closest('#fm_alert')) sections.add('alerts');
+    else if (target.closest('.fdb_itm, .fdb_lst_wrp, .fdb_lst, .cmt_editor')) sections.add('comments');
+    else if (target.closest('.rd_body article')) {
+      // 플레이어 시각 표시와 조작부 애니메이션에는 미디어를 재검사하지 않습니다.
+      if (!target.closest('.mejs__controls, .vjs-control-bar, .fluid_controls_container')) {
+        sections.add('media'); sections.add('bright');
+      }
+    } else if (target.closest('.fm_best_widget, .bd_m_lst, .bd_lst')) {
+      sections.add('list'); sections.add('read');
+    } else if (!sections.size) sections.add('all');
+    return sections;
+  }
+
+  const observerOptions = {
+    childList: true, subtree: true, characterData: true,
+    attributes: true, attributeOldValue: true,
+    attributeFilter: ['class', 'id', 'src', 'srcset', 'data-src', 'data-srcset', 'data-original', 'href', 'style', 'rel', 'media', 'disabled', 'hidden']
+  };
   const observer = new MutationObserver(records => {
-    // 같은 작업 안에서 링크가 삽입·교체·제거돼도 광고 클래스의 단서를 놓치지 않습니다.
+    const sections = new Set();
     for (const record of records) {
       if (record.type === 'attributes' && record.target.matches('link[href], script[src]')) {
         rememberAdResource(record.target.getAttribute('href') || record.target.getAttribute('src'));
         if (['href', 'src'].includes(record.attributeName) && record.oldValue) rememberAdResource(record.oldValue);
       }
-      for (const node of [...record.addedNodes, ...record.removedNodes]) {
-        rememberAdNode(node);
-      }
+      for (const node of [...record.addedNodes, ...record.removedNodes]) rememberAdNode(node);
+      if (document.hidden) { dirtySections.add('all'); continue; }
+      for (const section of mutationSections(record)) sections.add(section);
     }
-    scheduleRefresh();
+    if (sections.size) scheduleRefresh(sections);
   });
   let booting = document.readyState === 'loading';
 
@@ -2968,53 +3069,69 @@
     document.documentElement.removeAttribute('data-fm-clean-boot');
   }
 
-  function refresh() {
+  function refresh(scheduled = false) {
+    if (refreshFrame) window.cancelAnimationFrame(refreshFrame);
+    refreshFrame = 0;
     pending = false;
+    if (document.hidden) { dirtySections.add('all'); return; }
+    const sections = scheduled !== true || !dirtySections.size || dirtySections.has('all') ? null : new Set(dirtySections);
+    dirtySections.clear();
+    const needs = section => !sections || sections.has(section);
     observer.disconnect();
-    if (style.textContent !== styleText) style.textContent = styleText;
-    if (!style.isConnected) (document.head || document.documentElement).appendChild(style);
-    const mobile = isMobileView();
-    document.documentElement.setAttribute('data-fm-clean-mobile', String(mobile));
-    if (booting && mobile && settings.enabled) document.documentElement.setAttribute('data-fm-clean-boot', 'true');
-    else document.documentElement.removeAttribute('data-fm-clean-boot');
-    applySettings();
-    currentAdSelectors = discoverAdSelectors();
-    const adTargets = collectAdTargets();
-    const headerTargets = collectHeaderTargets(adTargets);
-    syncHiddenElements('header', mobile && settings.enabled && settings.header, headerTargets);
-    syncHiddenElements('ads', mobile && settings.enabled && settings.ads, adTargets);
-    updateBestAlerts(mobile && settings.enabled && settings.appearance);
-    updateCommentComposers(mobile && settings.enabled && settings.commentComposer);
-    if (mobile) {
-      mountControls();
-      if (host) host.hidden = false;
-      if (settings.enabled && settings.boardLabel) updateBoardLabels();
-      if (settings.enabled && settings.count) updateDetailCounts();
-    } else if (host) {
-      // host의 display: block !important에 가려지지 않게 모바일이 아니면 제거합니다.
-      host.remove();
-      window.clearTimeout(launcherClickTimer);
-      launcherClickTimer = null;
-    }
-    observer.observe(document.documentElement, {
-      childList: true, subtree: true, characterData: true,
-      attributes: true, attributeOldValue: true,
-      attributeFilter: ['class', 'id', 'src', 'href', 'style', 'rel', 'media', 'disabled', 'hidden']
-    });
+    try {
+      if (!sections) {
+        if (style.textContent !== styleText) style.textContent = styleText;
+        if (!style.isConnected) (document.head || document.documentElement).appendChild(style);
+        const mobileView = isMobileView();
+        document.documentElement.setAttribute('data-fm-clean-mobile', String(mobileView));
+        if (booting && mobileView && settings.enabled) document.documentElement.setAttribute('data-fm-clean-boot', 'true');
+        else document.documentElement.removeAttribute('data-fm-clean-boot');
+      }
+      const mobile = document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+      applySettings(sections);
+      if (needs('shell')) {
+        currentAdSelectors = discoverAdSelectors();
+        const adTargets = collectAdTargets();
+        const headerTargets = collectHeaderTargets(adTargets);
+        syncHiddenElements('header', mobile && settings.enabled && settings.header, headerTargets);
+        syncHiddenElements('ads', mobile && settings.enabled && settings.ads, adTargets);
+      }
+      if (needs('alerts')) updateBestAlerts(mobile && settings.enabled && settings.appearance);
+      if (needs('comments')) updateCommentComposers(mobile && settings.enabled && settings.commentComposer);
+      if (needs('layout')) {
+        if (mobile) {
+          mountControls();
+          if (host) host.hidden = false;
+          if (settings.enabled && settings.boardLabel) updateBoardLabels();
+          if (settings.enabled && settings.count) updateDetailCounts();
+        } else if (host) {
+          host.remove();
+          window.clearTimeout(launcherClickTimer);
+          launcherClickTimer = null;
+        }
+      }
+    } finally { observer.observe(document.documentElement, observerOptions); }
   }
 
-  function scheduleRefresh() {
-    if (pending) return;
-    pending = true;
-    // DOM 변경을 다음 화면이 그려지기 전에 정리해, 로딩 후 사라지는 깜빡임을 줄입니다.
-    queueMicrotask(refresh);
+  function scheduleRefresh(sections = null) {
+    if (!(sections instanceof Set)) dirtySections.add('all');
+    else for (const section of sections) dirtySections.add(section);
+    if (document.hidden) return;
+    const urgent = dirtySections.has('all') || dirtySections.has('shell') || dirtySections.has('media') || dirtySections.has('alerts');
+    if (urgent) {
+      if (refreshFrame) window.cancelAnimationFrame(refreshFrame);
+      refreshFrame = 0;
+      if (pending) return;
+      pending = true;
+      queueMicrotask(() => { if (pending) refresh(true); });
+    } else if (!pending && !refreshFrame) refreshFrame = window.requestAnimationFrame(() => refresh(true));
   }
 
   function start() {
     booting = document.readyState === 'loading';
     // 초기 정리에 오류가 나거나 외부 스크립트가 늦어도 빈 화면에 머물지 않습니다.
     if (booting) window.setTimeout(finishBoot, 1500);
-    applySettings();
+    observer.observe(document.documentElement, observerOptions);
     refresh();
     document.addEventListener('DOMContentLoaded', () => {
       try { refresh(); }
@@ -3024,7 +3141,11 @@
       if (event.target instanceof HTMLLinkElement && event.target.relList.contains('stylesheet')) scheduleRefresh();
     }, true);
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) scheduleRefresh();
+      if (document.hidden) {
+        dirtySections.add('all');
+        if (refreshFrame) window.cancelAnimationFrame(refreshFrame);
+        refreshFrame = 0;
+      } else scheduleRefresh();
     });
     window.addEventListener('pageshow', scheduleRefresh);
     window.addEventListener('resize', scheduleRefresh);

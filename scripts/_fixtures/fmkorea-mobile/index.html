@@ -918,6 +918,8 @@
           ['#media-image', '#media-picture', '#media-video', '#media-youtube'].every(selector =>
             !visiblyRendered(mediaDoc.querySelector(selector))) &&
           mediaRoot.querySelector('#media-video') === mediaVideo &&
+          mediaDoc.querySelector('#media-image').getAttribute('src') === null &&
+          mediaVideo.preload === 'none' &&
           !mediaVideo.autoplay && !mediaVideo.muted && mediaVideo.paused &&
           !youtubeFrame.isConnected &&
           Boolean(mediaRoot.querySelector('template[data-fm-clean-media-frame]')?.content
@@ -933,6 +935,8 @@
           !mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
           visiblyRendered(mediaDoc.querySelector('#media-image')) &&
           mediaRoot.querySelector('#media-video') === mediaVideo &&
+          mediaDoc.querySelector('#media-image').getAttribute('src') === IMAGE &&
+          mediaVideo.getAttribute('preload') === null &&
           mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay && mediaVideo.muted &&
           youtubeFrame.isConnected && visiblyRendered(youtubeFrame) &&
           mediaDoc.defaultView.__fmSettingsFixture.value.showMedia === false && !mediaInput.checked);
@@ -1327,9 +1331,9 @@
         probeDoc.querySelector('#probe-content').insertAdjacentHTML('beforeend',
           `<img src="${WHITE_IMAGE}" width="128" height="128" alt="재사용 이미지">`);
         await delay(250);
-        record('본문 이미지 분석은 한 번에 한 장이고 같은 URL은 결과를 공유',
-          probeStats.max === 1 && probesBeforeReuse === 2 && probeStats.count === 2 &&
-          probeStats.urls.includes(WHITE_IMAGE) && probeStats.urls.includes(DARK_IMAGE),
+        record('이미 표시된 본문 이미지와 같은 URL은 추가 분석 이미지 없이 판정 결과를 공유',
+          probeStats.max === 0 && probesBeforeReuse === 0 && probeStats.count === 0 &&
+          probeDoc.querySelector('img').hasAttribute('data-fm-clean-bright-image'),
           `count=${probeStats.count}, before=${probesBeforeReuse}, max=${probeStats.max}`);
 
         const listThumbDoc = await makeLayoutFrame(source, '야간 목록 작은 썸네일', `

@@ -1,0 +1,160 @@
+const { readFileSync } = require('node:fs');
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const source = readFileSync('p/hidden-memo/tampermonkey/userscripts/fmkorea-mobile.user.js', 'utf8');
+function between(start, end) { return source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start))); }
+
+class Element {
+  constructor(attributes = {}, tag = 'img') { this.attributes = new Map(Object.entries(attributes)); this.tag = tag; this.children = []; this.parentElement = null; }
+  getAttribute(key) { return this.attributes.get(key) ?? null; }
+  setAttribute(key, value) { this.attributes.set(key, String(value)); }
+  removeAttribute(key) { this.attributes.delete(key); }
+  querySelectorAll(selector) { return selector === 'source' ? this.children : []; }
+  querySelector() { return null; }
+  matches(selector) { return selector === 'picture' && this.tag === 'picture'; }
+  closest() { return null; }
+}
+class Video extends Element {
+  constructor(attributes) { super(attributes, 'video'); this.loads = 0; this.pauses = 0; this.muted = true; this.volume = .3; }
+  get preload() { return this.getAttribute('preload') || ''; }
+  set preload(value) { this.setAttribute('preload', value); }
+  load() { this.loads++; }
+  pause() { this.pauses++; }
+}
+const media = vm.createContext({ HTMLVideoElement: Video, Map, Set });
+vm.runInContext(between('  function suspendMediaResources(', '  function restoreDetailMedia('), media);
+test('hidden video releases sources once and restores preload, poster, source and sound preference', () => {
+  const video = new Video({ src: '/a.mp4', poster: '/poster.jpg', preload: 'auto' });
+  const child = new Element({ src: '/b.mp4', type: 'video/mp4' }, 'source');
+  child.parentElement = video; video.children.push(child);
+  const state = { resources: new Map() };
+  media.suspendMediaResources(video, state);
+  assert.equal(video.getAttribute('src'), null); assert.equal(child.getAttribute('src'), null);
+  assert.equal(video.preload, 'none'); assert.equal(video.loads, 1);
+  media.suspendMediaResources(video, state); assert.equal(video.loads, 1);
+  media.restoreMediaResources(state, video);
+  assert.equal(video.getAttribute('src'), '/a.mp4'); assert.equal(child.getAttribute('src'), '/b.mp4');
+  assert.equal(video.getAttribute('poster'), '/poster.jpg'); assert.equal(video.preload, 'auto');
+  assert.equal(video.loads, 2); assert.equal(video.muted, true); assert.equal(video.volume, .3);
+  assert.equal(state.resources.size, 0);
+});
+test('picture and lazy image sources stay suspended and restore only the selected item', () => {
+  const picture = new Element({}, 'picture');
+  const image = new Element({ src: '/photo.jpg', 'data-original': '/photo.jpg', srcset: '/photo2.jpg 2x' });
+  const child = new Element({ srcset: '/photo.webp 1x' }, 'source');
+  picture.children.push(child); image.parentElement = picture; child.parentElement = picture;
+  const other = new Element({ src: '/other.jpg' });
+  const state = { resources: new Map() };
+  media.suspendMediaResources(image, state); media.suspendMediaResources(other, state);
+  assert.equal(child.getAttribute('srcset'), null); assert.equal(image.getAttribute('data-original'), null);
+  // A site lazy loader rewrites the URL while the media is hidden.
+  image.setAttribute('src', '/updated.jpg'); media.suspendMediaResources(image, state);
+  media.restoreMediaResources(state, image);
+  assert.equal(image.getAttribute('src'), '/updated.jpg'); assert.equal(child.getAttribute('srcset'), '/photo.webp 1x');
+  assert.equal(other.getAttribute('src'), null);
+  media.restoreMediaResources(state); assert.equal(other.getAttribute('src'), '/other.jpg');
+});
+test('missing video preload restores as an absent attribute', () => {
+  const video = new Video({}); const state = { resources: new Map() };
+  media.suspendMediaResources(video, state); media.restoreMediaResources(state);
+  assert.equal(video.getAttribute('preload'), null);
+});
+
+function scheduler() {
+  const microtasks = [], frames = new Map(), calls = [];
+  const root = new Element(); let frameId = 0;
+  const context = vm.createContext({ Element, Set, Map,
+    document: { hidden: false, documentElement: root, head: { appendChild() {} } },
+    window: { requestAnimationFrame(fn) { frames.set(++frameId, fn); return frameId; }, cancelAnimationFrame(id) { frames.delete(id); }, clearTimeout() {} },
+    queueMicrotask(fn) { microtasks.push(fn); },
+    observer: { disconnect() {}, observe() {} }, observerOptions: {},
+    style: { textContent: '', isConnected: true }, styleText: '', booting: false,
+    isMobileView: () => true, settings: { enabled: true },
+    applySettings(sections) { calls.push(sections ? [...sections].sort() : ['all']); },
+    discoverAdSelectors: () => [], currentAdSelectors: [], collectAdTargets: () => [], collectHeaderTargets: () => [],
+    syncHiddenElements() {}, updateBestAlerts() {}, updateCommentComposers() {}, mountControls() {},
+    updateBoardLabels() {}, updateDetailCounts() {}, host: null, launcherClickTimer: null,
+  });
+  vm.runInContext('let pending=false, refreshFrame=0; const dirtySections=new Set();' +
+    between('  function refresh(scheduled', '  function start() {') +
+    between('  function mutationSections(', '  const observerOptions'), context);
+  return { context, microtasks, frames, calls, drain() { while (microtasks.length) microtasks.shift()(); }, frame() { const tasks = [...frames.values()]; frames.clear(); tasks.forEach(fn => fn()); } };
+}
+test('many ordinary changes coalesce into one frame and only run their sections', () => {
+  const s = scheduler();
+  for (let i = 0; i < 100; i++) s.context.scheduleRefresh(new Set(['comments']));
+  s.context.scheduleRefresh(new Set(['list', 'read']));
+  assert.equal(s.frames.size, 1); assert.equal(s.microtasks.length, 0);
+  s.frame(); assert.deepEqual(s.calls, [['comments', 'list', 'read']]);
+});
+test('new hidden media and alerts preempt the frame before painting', () => {
+  const s = scheduler(); s.context.scheduleRefresh(new Set(['comments']));
+  s.context.scheduleRefresh(new Set(['media'])); s.context.scheduleRefresh(new Set(['alerts']));
+  assert.equal(s.frames.size, 0); assert.equal(s.microtasks.length, 1);
+  s.drain(); assert.deepEqual(s.calls, [['alerts', 'comments', 'media']]);
+});
+test('background work is deferred and returning runs one full update', () => {
+  const s = scheduler(); s.context.document.hidden = true;
+  for (let i = 0; i < 100; i++) s.context.scheduleRefresh(new Set(['media']));
+  assert.equal(s.frames.size, 0); assert.equal(s.microtasks.length, 0); assert.equal(s.calls.length, 0);
+  s.context.document.hidden = false; s.context.scheduleRefresh(); s.drain();
+  assert.deepEqual(s.calls, [['all']]);
+});
+test('queued work does not run while hidden and explicit setting changes always refresh all sections', () => {
+  const s = scheduler(); s.context.scheduleRefresh(new Set(['comments']));
+  s.context.document.hidden = true; s.frame(); assert.equal(s.calls.length, 0);
+  s.context.document.hidden = false; s.context.refresh(); assert.deepEqual(s.calls, [['all']]);
+  s.context.scheduleRefresh(new Set(['comments'])); s.context.refresh(); s.frame();
+  assert.deepEqual(s.calls, [['all'], ['all']]);
+});
+test('playback control mutations are ignored, while content and alerts choose specific sections', () => {
+  const s = scheduler(); const target = new Element();
+  const record = { target, type: 'characterData', addedNodes: [], removedNodes: [] };
+  target.closest = selector => selector === '.rd_body article' || selector.includes('.mejs__controls') ? target : null;
+  assert.deepEqual([...s.context.mutationSections(record)], []);
+  target.closest = selector => selector === '#fm_alert' ? target : null;
+  assert.deepEqual([...s.context.mutationSections(record)], ['alerts']);
+  target.closest = selector => selector === '.rd_body article' ? target : null;
+  assert.deepEqual([...s.context.mutationSections(record)], ['media', 'bright']);
+});
+
+function brightness(sample) {
+  let probes = 0, samples = 0;
+  const context = vm.createContext({ Map, Promise,
+    brightImages: { cache: new Map(), requests: new Map(), queue: [] },
+    sampleImageBrightness() { samples++; return sample; }, pumpBrightImageQueue() { probes++; },
+  });
+  vm.runInContext('const MAX_BRIGHT_IMAGE_PIXELS=4_000_000;' +
+    between('  function rememberImageBrightness(', '  function pumpBrightImageQueue('), context);
+  return { context, probes: () => probes, samples: () => samples };
+}
+test('loaded readable images use no extra image probe and share cached results', async () => {
+  const b = brightness(false); const image = { src: '/dark.jpg', naturalWidth: 128, naturalHeight: 128 };
+  assert.equal(await b.context.inspectBrightImage(image), false);
+  assert.equal(await b.context.inspectBrightImage(image), false);
+  assert.equal(b.probes(), 0); assert.equal(b.samples(), 1);
+});
+test('large images remain dim without another decode; small CORS failures share a single queued probe', async () => {
+  const b = brightness(null);
+  assert.equal(await b.context.inspectBrightImage({ src: '/huge.jpg', naturalWidth: 5000, naturalHeight: 4000 }), true);
+  assert.equal(b.probes(), 0); assert.equal(b.samples(), 0);
+  const image = { src: '/cors.jpg', naturalWidth: 128, naturalHeight: 128 };
+  const first = b.context.inspectBrightImage(image), second = b.context.inspectBrightImage(image);
+  assert.equal(first, second); assert.equal(b.probes(), 1);
+  b.context.brightImages.queue[0].resolve(true); assert.equal(await first, true);
+});
+
+test('brightness sampling frees its canvas after readable and CORS-blocked results', () => {
+  const canvas = { width: 0, height: 0, getContext() { return { drawImage() {}, getImageData() {
+    if (blocked) throw new Error('SecurityError');
+    return { data: new Uint8ClampedArray(32 * 32 * 4).fill(255) };
+  } }; } };
+  let blocked = false;
+  const context = vm.createContext({ document: { createElement: () => canvas } });
+  vm.runInContext(between('  function sampleImageBrightness(', '  function rememberImageBrightness('), context);
+  assert.equal(context.sampleImageBrightness({}), true);
+  assert.equal(canvas.width, 0); assert.equal(canvas.height, 0);
+  blocked = true; assert.equal(context.sampleImageBrightness({}), null);
+  assert.equal(canvas.width, 0); assert.equal(canvas.height, 0);
+});
