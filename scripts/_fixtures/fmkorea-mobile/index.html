@@ -888,7 +888,9 @@
               <p id="media-text">글 본문 텍스트는 계속 읽을 수 있습니다.</p>
               <img id="media-image" src="${IMAGE}" width="24" height="24" alt="본문 이미지">
               <picture id="media-picture"><img src="${IMAGE}" width="24" height="24" alt="본문 사진"></picture>
-              <video id="media-video" autoplay="autoplay" width="80" height="40"></video>
+              <video id="media-video" autoplay="autoplay" poster="${IMAGE}" width="80" height="40">
+                <source src="/fixture-video.mp4" type="video/mp4">
+              </video>
               <iframe id="media-youtube" src="https://www.youtube.com/embed/fixture" width="80" height="40"></iframe>
               <iframe id="media-other" src="https://example.org/embed/fixture" width="80" height="40"></iframe>
             </div></article></div>
@@ -919,6 +921,8 @@
             !visiblyRendered(mediaDoc.querySelector(selector))) &&
           mediaRoot.querySelector('#media-video') === mediaVideo &&
           mediaDoc.querySelector('#media-image').getAttribute('src') === null &&
+          mediaVideo.querySelector('source').getAttribute('src') === '/fixture-video.mp4' &&
+          mediaVideo.getAttribute('poster') === IMAGE &&
           mediaVideo.preload === 'none' &&
           !mediaVideo.autoplay && !mediaVideo.muted && mediaVideo.paused &&
           !youtubeFrame.isConnected &&

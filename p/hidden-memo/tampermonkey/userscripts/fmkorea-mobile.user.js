@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.21
+// @version      1.6.22
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.21';
+  const SCRIPT_VERSION = '1.6.22';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1547,6 +1547,10 @@
             state.frames.delete(slot);
           }
           syncDetailMedia();
+          // iOS의 사용자 재생 권한이 유지되도록 클릭 작업 안에서 바로 요청합니다.
+          for (const media of sources) if (media instanceof HTMLVideoElement) {
+            try { media.play()?.catch(() => {}); } catch (error) { /* 원래 플레이어의 재생 버튼도 계속 사용할 수 있습니다. */ }
+          }
           scheduleRefresh();
         });
         state.placeholders.set(unit.key, item);
@@ -1573,47 +1577,40 @@
   }
 
   function suspendMediaResources(media, state) {
+    if (media instanceof HTMLVideoElement) {
+      // MediaElement는 초기화 때 source 주소와 poster를 읽습니다. 제거하거나
+      // load()로 초기화하면 source-not-found 오류 상태가 남을 수 있습니다.
+      let saved = state.resources.get(media);
+      if (!saved) { saved = new Map(); state.resources.set(media, saved); }
+      if (!saved.has('preload')) saved.set('preload', media.getAttribute('preload'));
+      if (media.preload !== 'none') media.preload = 'none';
+      return;
+    }
     const elements = [media];
-    if (media instanceof HTMLVideoElement) elements.push(...media.querySelectorAll('source'));
-    else if (media.parentElement?.matches('picture')) elements.push(...media.parentElement.querySelectorAll('source'));
-    let changed = false;
+    if (media.parentElement?.matches('picture')) elements.push(...media.parentElement.querySelectorAll('source'));
     for (const element of elements) {
-      const attributes = element instanceof HTMLVideoElement
-        ? ['src', 'poster', 'data-src', 'data-original'] : ['src', 'srcset', 'sizes', 'data-original', 'data-src', 'data-srcset'];
       let saved = state.resources.get(element);
       if (!saved) { saved = new Map(); state.resources.set(element, saved); }
-      for (const attribute of attributes) {
+      for (const attribute of ['src', 'srcset', 'sizes', 'data-original', 'data-src', 'data-srcset']) {
         const value = element.getAttribute(attribute);
         if (value === null) continue;
         saved.set(attribute, value);
         element.removeAttribute(attribute);
-        changed = true;
       }
-      if (element instanceof HTMLVideoElement) {
-        if (!saved.has('preload')) saved.set('preload', element.getAttribute('preload'));
-        if (element.preload !== 'none') { element.preload = 'none'; changed = true; }
-      }
-    }
-    if (changed && media instanceof HTMLVideoElement) {
-      try { media.pause(); media.load(); } catch (error) { /* 플레이어 초기화 중에도 숨김 유지 */ }
     }
   }
 
   function restoreMediaResources(state, media = null) {
     const elements = media ? new Set([media, ...media.querySelectorAll('source'),
       ...(media.parentElement?.matches('picture') ? media.parentElement.querySelectorAll('source') : [])]) : null;
-    const videos = new Set();
     for (const [element, saved] of state.resources) {
       if (elements && !elements.has(element)) continue;
       for (const [attribute, value] of saved) {
         if (value === null) element.removeAttribute(attribute);
         else element.setAttribute(attribute, value);
       }
-      if (element instanceof HTMLVideoElement) videos.add(element);
-      else if (element.parentElement instanceof HTMLVideoElement) videos.add(element.parentElement);
       state.resources.delete(element);
     }
-    for (const video of videos) try { video.load(); } catch (error) { /* 이후 사이트 재생 동작에 맡깁니다. */ }
   }
 
   function restoreDetailMedia(root, state) {

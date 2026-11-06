@@ -24,19 +24,20 @@ class Video extends Element {
 }
 const media = vm.createContext({ HTMLVideoElement: Video, Map, Set });
 vm.runInContext(between('  function suspendMediaResources(', '  function restoreDetailMedia('), media);
-test('hidden video releases sources once and restores preload, poster, source and sound preference', () => {
+test('hidden video keeps sources available to the site player and restores preload without resetting playback', () => {
   const video = new Video({ src: '/a.mp4', poster: '/poster.jpg', preload: 'auto' });
   const child = new Element({ src: '/b.mp4', type: 'video/mp4' }, 'source');
   child.parentElement = video; video.children.push(child);
   const state = { resources: new Map() };
   media.suspendMediaResources(video, state);
-  assert.equal(video.getAttribute('src'), null); assert.equal(child.getAttribute('src'), null);
-  assert.equal(video.preload, 'none'); assert.equal(video.loads, 1);
-  media.suspendMediaResources(video, state); assert.equal(video.loads, 1);
+  assert.equal(video.getAttribute('src'), '/a.mp4'); assert.equal(child.getAttribute('src'), '/b.mp4');
+  assert.equal(video.getAttribute('poster'), '/poster.jpg');
+  assert.equal(video.preload, 'none'); assert.equal(video.loads, 0);
+  media.suspendMediaResources(video, state); assert.equal(video.loads, 0);
   media.restoreMediaResources(state, video);
   assert.equal(video.getAttribute('src'), '/a.mp4'); assert.equal(child.getAttribute('src'), '/b.mp4');
   assert.equal(video.getAttribute('poster'), '/poster.jpg'); assert.equal(video.preload, 'auto');
-  assert.equal(video.loads, 2); assert.equal(video.muted, true); assert.equal(video.volume, .3);
+  assert.equal(video.loads, 0); assert.equal(video.muted, true); assert.equal(video.volume, .3);
   assert.equal(state.resources.size, 0);
 });
 test('picture and lazy image sources stay suspended and restore only the selected item', () => {
@@ -157,4 +158,36 @@ test('brightness sampling frees its canvas after readable and CORS-blocked resul
   assert.equal(canvas.width, 0); assert.equal(canvas.height, 0);
   blocked = true; assert.equal(context.sampleImageBrightness({}), null);
   assert.equal(canvas.width, 0); assert.equal(canvas.height, 0);
+});
+
+test('the actual reveal button requests video playback synchronously after showing it, without reloading', () => {
+  const video = new Video({ preload: 'none', poster: '/preview.webp' });
+  const source = new Element({ src: '/movie.mp4', type: 'video/mp4' }, 'source');
+  source.parentElement = video; video.children.push(source);
+  const root = { contains: () => true };
+  const state = { resources: new Map(), placeholders: new Map(), frames: new Map(), revealedItems: new WeakSet() };
+  let shown = false, plays = 0, refreshes = 0;
+  video.play = () => {
+    assert.equal(shown, true);
+    assert.equal(source.getAttribute('src'), '/movie.mp4');
+    assert.equal(video.muted, true);
+    plays++;
+    return Promise.resolve();
+  };
+  video.before = () => {};
+  const context = vm.createContext({ HTMLVideoElement: Video, Map, Set, Node: {},
+    document: { createElement() { return { isConnected: true, setAttribute() {},
+      addEventListener(name, callback) { this[name] = callback; }, remove() {} }; } },
+    detailMedia: new Map([[root, state]]), prepareDetailImages() {},
+    syncDetailMedia() { shown = true; }, scheduleRefresh() { refreshes++; }
+  });
+  vm.runInContext(between('  function syncMediaPlaceholders(', '  function restoreDetailMedia('), context);
+  context.suspendMediaResources(video, state);
+  // Mirrors the site's deferred initializer: the original source is present before reveal.
+  assert.equal(source.getAttribute('src'), '/movie.mp4');
+  context.syncMediaPlaceholders(root, state, [{ key: video, target: video, kind: 'video', sources: [video] }], new Set());
+  const button = state.placeholders.get(video).button;
+  button.click({ preventDefault() {}, stopPropagation() {} });
+  assert.equal(plays, 1); assert.equal(refreshes, 1); assert.equal(video.loads, 0);
+  assert.equal(state.revealedItems.has(video), true);
 });
