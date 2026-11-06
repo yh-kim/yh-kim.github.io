@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.22
+// @version      1.6.23
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.22';
+  const SCRIPT_VERSION = '1.6.23';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -62,6 +62,7 @@
   let recordedReadId = null;
   let readHistoryListening = false;
   const detailMedia = new Map();
+  const manualVideos = new Map();
   const hiddenElements = { header: new Map(), ads: new Map() };
   const knownAdTargets = new Set();
   const headerSelectors = [
@@ -1547,10 +1548,6 @@
             state.frames.delete(slot);
           }
           syncDetailMedia();
-          // iOS의 사용자 재생 권한이 유지되도록 클릭 작업 안에서 바로 요청합니다.
-          for (const media of sources) if (media instanceof HTMLVideoElement) {
-            try { media.play()?.catch(() => {}); } catch (error) { /* 원래 플레이어의 재생 버튼도 계속 사용할 수 있습니다. */ }
-          }
           scheduleRefresh();
         });
         state.placeholders.set(unit.key, item);
@@ -1626,13 +1623,34 @@
     state.frames.clear();
     for (const [video, saved] of state.videos) {
       video.removeEventListener('play', saved.stop);
-      if (saved.autoplay === null) video.removeAttribute('autoplay');
-      else video.setAttribute('autoplay', saved.autoplay);
     }
     state.videos.clear();
   }
 
+  function syncManualVideos() {
+    const active = settings.enabled && document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    const videos = new Set(active ? document.querySelectorAll('.rd:has(.rd_hd h1) .rd_body article video') : []);
+    for (const [video, saved] of manualVideos) {
+      if (videos.has(video)) continue;
+      for (const [attribute, value] of saved) {
+        if (value === null) video.removeAttribute(attribute);
+        else video.setAttribute(attribute, value);
+      }
+      manualVideos.delete(video);
+    }
+    for (const video of videos) {
+      if (!manualVideos.has(video)) {
+        manualVideos.set(video, new Map(['autoplay', 'data-autoplay'].map(attribute => [attribute, video.getAttribute(attribute)])));
+        try { if (!video.paused) video.pause(); } catch (error) { /* 초기 자동 재생만 중지합니다. */ }
+      }
+      video.removeAttribute('autoplay');
+      // 사이트의 IntersectionObserver 자동 재생도 막고 실제 재생 버튼은 그대로 사용합니다.
+      if (video.getAttribute('data-autoplay') !== 'false') video.setAttribute('data-autoplay', 'false');
+    }
+  }
+
   function syncDetailMedia() {
+    syncManualVideos();
     const active = settings.enabled && !settings.showMedia &&
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
     const roots = new Set(active ? Array.from(document.querySelectorAll('.rd:has(.rd_hd h1) .rd_body article'))
@@ -1700,15 +1718,13 @@
       for (const [video, saved] of state.videos) {
         if (root.contains(video) && hiddenVideos.has(video)) continue;
         video.removeEventListener('play', saved.stop);
-        if (saved.autoplay === null) video.removeAttribute('autoplay');
-        else video.setAttribute('autoplay', saved.autoplay);
         state.videos.delete(video);
       }
       contentImages.forEach(image => suspendMediaResources(image, state));
       videos.forEach(video => {
         if (!state.videos.has(video)) {
           const stop = () => { if (root.hasAttribute('data-fm-clean-media-collapsed')) video.pause(); };
-          state.videos.set(video, { autoplay: video.getAttribute('autoplay'), stop });
+          state.videos.set(video, { stop });
           video.addEventListener('play', stop);
         }
         video.autoplay = false;
@@ -3044,7 +3060,7 @@
   const observerOptions = {
     childList: true, subtree: true, characterData: true,
     attributes: true, attributeOldValue: true,
-    attributeFilter: ['class', 'id', 'src', 'srcset', 'data-src', 'data-srcset', 'data-original', 'href', 'style', 'rel', 'media', 'disabled', 'hidden']
+    attributeFilter: ['class', 'id', 'src', 'srcset', 'data-src', 'data-srcset', 'data-original', 'href', 'style', 'rel', 'media', 'disabled', 'hidden', 'autoplay', 'data-autoplay']
   };
   const observer = new MutationObserver(records => {
     const sections = new Set();

@@ -941,7 +941,7 @@
           mediaRoot.querySelector('#media-video') === mediaVideo &&
           mediaDoc.querySelector('#media-image').getAttribute('src') === IMAGE &&
           mediaVideo.getAttribute('preload') === null &&
-          mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay && mediaVideo.muted &&
+          !mediaVideo.autoplay && mediaVideo.getAttribute('data-autoplay') === 'false' && mediaVideo.muted &&
           youtubeFrame.isConnected && visiblyRendered(youtubeFrame) &&
           mediaDoc.defaultView.__fmSettingsFixture.value.showMedia === false && !mediaInput.checked);
         mediaInput.checked = true;
@@ -990,8 +990,8 @@
         await delay(70);
         const inlineVideo = inlineDoc.querySelector('#media-video');
         record('동영상 아이콘 하나는 원래 영상만 복원하고 음소거 선택·나머지 감춤을 유지',
-          visiblyRendered(inlineVideo) && inlineVideo.muted && inlineVideo.autoplay &&
-          inlineVideo.getAttribute('autoplay') === 'autoplay' &&
+          visiblyRendered(inlineVideo) && inlineVideo.muted && !inlineVideo.autoplay &&
+          inlineVideo.getAttribute('data-autoplay') === 'false' &&
           !inlineDoc.querySelector('#media-youtube') &&
           inlineButtons().length === 2 &&
           inlineNotice?.textContent.includes('이미지 1개 · 비디오 1개'));
