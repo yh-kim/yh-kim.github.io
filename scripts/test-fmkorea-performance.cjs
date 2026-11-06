@@ -215,3 +215,33 @@ test('native and site viewport autoplay are disabled, while manual playback surv
   assert.equal(video.getAttribute('autoplay'), ''); assert.equal(video.getAttribute('data-autoplay'), 'true');
   assert.equal(context.manualVideos.size, 0);
 });
+
+test('article photos missed by the site lazy loader resume near the viewport and keep night dimming', () => {
+  const listSelector = 'list-images', lazySelector = 'list-and-article-lazy-images';
+  const photo = new Element({ src: '/transparent.gif', 'data-original': '/fourth-photo.webp', 'data-fm-clean-bright-image': '' });
+  photo.complete = true; photo.naturalWidth = 1; photo.near = false; photo.isConnected = true;
+  photo.getClientRects = () => photo.hidden ? [] : [{}];
+  photo.getBoundingClientRect = () => ({ width: 390, height: 220, top: photo.near ? 10 : 3000, bottom: photo.near ? 230 : 3220, right: 390, left: 0 });
+  photo.matches = selector => selector === lazySelector;
+  let callback; const observed = new Set();
+  const context = vm.createContext({ LIST_IMAGE_SELECTOR: listSelector, LAZY_IMAGE_SELECTOR: lazySelector, AD_STATE_ATTRIBUTE: 'data-ad',
+    settings: { enabled: true }, listImages: { observer: null, tracked: new Set(), listening: false },
+    URL, location: { href: 'https://m.fmkorea.com/best/123' }, getComputedStyle: () => ({ visibility: 'visible' }),
+    document: { hidden: false, documentElement: { getAttribute: () => 'true' }, querySelectorAll: () => [photo] },
+    window: { innerWidth: 390, innerHeight: 800, addEventListener() {},
+      IntersectionObserver: true },
+    IntersectionObserver: class { constructor(fn) { callback = fn; } observe(img) { observed.add(img); } unobserve(img) { observed.delete(img); } }
+  });
+  vm.runInContext(between('  function imageNearViewport(', '  function brightImageModeActive('), context);
+  context.syncListImages();
+  assert.equal(photo.getAttribute('src'), '/transparent.gif'); assert.equal(observed.has(photo), true);
+  photo.near = true; callback([{ target: photo, isIntersecting: true }]);
+  assert.equal(photo.getAttribute('src'), '/fourth-photo.webp'); assert.equal(photo.loading, 'eager');
+  assert.equal(photo.getAttribute('data-fm-clean-bright-image'), ''); assert.equal(observed.has(photo), false);
+  // Hidden photos must not be loaded, even if their recorded position is close.
+  photo.setAttribute('src', '/transparent.gif'); photo.hidden = true;
+  context.syncListImages(); callback([{ target: photo, isIntersecting: true }]);
+  assert.equal(photo.getAttribute('src'), '/transparent.gif');
+  photo.hidden = false; context.syncListImages();
+  assert.equal(photo.getAttribute('src'), '/fourth-photo.webp');
+});

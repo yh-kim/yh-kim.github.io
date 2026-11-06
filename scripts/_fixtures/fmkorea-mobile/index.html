@@ -1340,6 +1340,23 @@
           probeDoc.querySelector('img').hasAttribute('data-fm-clean-bright-image'),
           `count=${probeStats.count}, before=${probesBeforeReuse}, max=${probeStats.max}`);
 
+        const restoredPhotosDoc = await makeLayoutFrame(source, '처음 3장 이후 지연 사진 복원', `
+          <div class="bd"><div class="rd" data-docsrl="10523777560"><div class="rd_hd"><h1>사진과 영상</h1></div>
+            <div class="rd_body"><article><div class="xe_content">
+              ${Array.from({ length: 9 }, (_, index) => `<p><img id="restored-photo-${index}" width="128" height="128"
+                src="${index < 3 ? DARK_IMAGE : IMAGE}" ${index < 3 ? '' : `data-original="${DARK_IMAGE}"`}></p>`).join('')}
+              <iframe src="https://www.youtube.com/embed/fixture"></iframe>
+            </div></article></div></div></div>`, '', { showMedia: false }, { bodyClass: 'night_mode' });
+        restoredPhotosDoc.defaultView.frameElement.style.height = '480px';
+        restoredPhotosDoc.querySelector('[data-fm-clean-media-notice]').click();
+        const fourthPhoto = restoredPhotosDoc.querySelector('#restored-photo-3');
+        fourthPhoto.scrollIntoView({ block: 'center' });
+        restoredPhotosDoc.defaultView.frameElement.scrollIntoView({ block: 'center' });
+        for (let attempt = 0; attempt < 30 && fourthPhoto.getAttribute('src') !== DARK_IMAGE; attempt++) await delay(50);
+        record('미디어를 펼친 뒤 사이트 로더가 놓친 네 번째 사진도 화면 가까이 오면 실제 주소로 로드',
+          fourthPhoto.getAttribute('src') === DARK_IMAGE && visiblyRendered(fourthPhoto) &&
+          !fourthPhoto.hasAttribute('data-fm-clean-media-hidden'));
+
         const listThumbDoc = await makeLayoutFrame(source, '야간 목록 작은 썸네일', `
           <div class="bd"><div class="rd"><div class="rd_hd"><h1>상세 아래 목록</h1></div>
             <div class="rd_body"><article><div class="xe_content"><p>본문</p></div></article></div></div>

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.24
+// @version      1.6.25
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.24';
+  const SCRIPT_VERSION = '1.6.25';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1165,6 +1165,7 @@
   const styleText = style.textContent;
 
   const LIST_IMAGE_SELECTOR = '.fm_best_widget img, .bd_m_lst img, .bd_lst img';
+  const LAZY_IMAGE_SELECTOR = `${LIST_IMAGE_SELECTOR}, .rd_body article .xe_content img[data-original], .rd_body article .xe_content img[data-src]`;
   const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst, .poll_table) img)';
   const MEDIA_PLAYER_SELECTOR = '.auto_media_wrapper, .mejs__container, .video-js, video-js, .fluid_video_wrapper';
   const listImages = { observer: null, tracked: new Set(), listening: false };
@@ -1211,14 +1212,16 @@
         listImages.tracked.clear();
       });
     }
-    for (const image of listImages.tracked) if (!image.isConnected || !image.matches(LIST_IMAGE_SELECTOR)) {
+    for (const image of listImages.tracked) if (!image.isConnected || !image.matches(LAZY_IMAGE_SELECTOR)) {
       listImages.observer?.unobserve(image);
       listImages.tracked.delete(image);
     }
-    document.querySelectorAll(LIST_IMAGE_SELECTOR).forEach(image => {
-      image.removeAttribute('data-fm-clean-bright-image');
-      image.removeAttribute('data-fm-clean-bright-pending');
-      image.removeAttribute('data-fm-clean-bright-normal');
+    document.querySelectorAll(LAZY_IMAGE_SELECTOR).forEach(image => {
+      if (image.matches(LIST_IMAGE_SELECTOR)) {
+        image.removeAttribute('data-fm-clean-bright-image');
+        image.removeAttribute('data-fm-clean-bright-pending');
+        image.removeAttribute('data-fm-clean-bright-normal');
+      }
       const source = image.getAttribute('data-original') || image.getAttribute('data-src');
       if (image.complete && image.naturalWidth > 0 && (!source || image.getAttribute('src') === source)) return;
       if (loadListImage(image)) return;
@@ -2570,8 +2573,9 @@
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
     }
     if (needs('layout')) document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
-    if (needs('list')) syncListImages();
     if (needs('media')) syncDetailMedia();
+    // 숨김 처리 후 검사해 감춘 사진은 로드하지 않고, 펼친 지연 사진은 다시 등록합니다.
+    if (needs('list') || needs('media')) syncListImages();
     if (needs('read')) syncReadHistory();
     if (needs('layout')) syncReadingHeader();
     if (needs('bright')) syncBrightImages();
