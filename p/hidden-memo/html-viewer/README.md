@@ -7,6 +7,7 @@ iPhone Safari의 파일 선택 UI로 `.html` 또는 `.htm` 파일을 골라 브�
 ## 사용과 개인정보
 
 - Viewer 코드는 선택한 파일을 `File API`로 읽고 메모리에만 보관합니다. 페이지를 닫거나 새로고침하면 선택한 파일은 사라집니다.
+- 초기 화면에 `.html` 또는 `.htm` 파일 한 개를 끌어다 놓아도 열 수 있습니다. 파일 선택과 동일하게 최대 10MB까지 지원합니다.
 - Viewer 자체에는 파일 업로드, 외부 API, 텔레메트리, 분석 도구가 없습니다.
 - 렌더링 문서는 `sandbox="allow-scripts allow-modals"` iframe의 별도 출처로 격리합니다. HTML 내부 JavaScript는 실행되지만 부모 페이지의 DOM, localStorage, 쿠키에는 접근할 수 없습니다.
 - 선택한 HTML 자체에 외부 이미지·CSS·JavaScript 또는 네트워크 요청 코드가 있으면 해당 원격 서버와 통신할 수 있습니다. 신뢰하기 어려운 HTML은 소스 보기를 먼저 사용하세요.

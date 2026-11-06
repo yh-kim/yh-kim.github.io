@@ -49,6 +49,7 @@
   var dismissNotice = document.getElementById('dismiss-notice');
   var copyButton = document.getElementById('copy-button');
   var pendingShortcutName = '';
+  var fileDragDepth = 0;
 
   var state = {
     source: '',
@@ -500,6 +501,44 @@
       showNotice('소스를 복사하지 못했습니다. 길게 눌러 직접 선택해 주세요.');
     }
   }
+
+  function isFileDrag(event) {
+    return event.dataTransfer && Array.from(event.dataTransfer.types).indexOf('Files') !== -1;
+  }
+
+  function resetFileDrag() {
+    fileDragDepth = 0;
+    emptyView.classList.remove('is-dragging');
+  }
+
+  emptyView.addEventListener('dragenter', function (event) {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    fileDragDepth += 1;
+    emptyView.classList.add('is-dragging');
+  });
+  emptyView.addEventListener('dragover', function (event) {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+  });
+  emptyView.addEventListener('dragleave', function () {
+    fileDragDepth = Math.max(0, fileDragDepth - 1);
+    if (!fileDragDepth) resetFileDrag();
+  });
+  emptyView.addEventListener('drop', function (event) {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    resetFileDrag();
+    var files = event.dataTransfer.files;
+    if (files.length !== 1) {
+      showEmptyError('HTML 또는 HTM 파일을 한 개씩 놓아 주세요.');
+      return;
+    }
+    handleFile(files[0]);
+  });
+  window.addEventListener('dragend', resetFileDrag);
+  window.addEventListener('blur', resetFileDrag);
 
   fileInput.addEventListener('change', function () {
     handleFile(fileInput.files && fileInput.files[0]);

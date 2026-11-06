@@ -104,6 +104,10 @@ h1 { margin: 0; font-size: clamp(36px, 11vw, 54px); letter-spacing: -.055em; lin
 .paste-panel textarea:focus { border-color: var(--accent); outline: 3px solid rgba(99, 91, 255, .14); }
 .paste-panel button { width: 100%; min-height: 42px; margin-top: 9px; border: 0; border-radius: 9px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 750; }
 .file-input { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.file-drop-zone { outline: 2px dashed #98a2b3; outline-offset: 5px; }
+.empty-view.is-dragging { background: #eeecff; outline: 3px dashed var(--accent); outline-offset: -12px; }
+.empty-view.is-dragging .file-drop-zone { background: var(--accent); outline-color: var(--accent); }
+.drop-hint { margin: 16px auto 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 
 .empty-error {
   width: min(100%, 360px);
