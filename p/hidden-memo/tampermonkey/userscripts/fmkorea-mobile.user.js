@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.25
+// @version      1.6.26
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.25';
+  const SCRIPT_VERSION = '1.6.26';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -2670,6 +2670,12 @@
           transform: translateY(-100%);
         }
         :host([data-side="right"]) .control-anchor { left: auto; right: var(--fm-control-edge, 132px); }
+        .control-anchor:has(.launcher[data-dragging])::after {
+          content: ''; position: absolute; left: 50%; top: 50%; z-index: 2;
+          width: 4px; height: 4px; border-radius: 50%; pointer-events: none;
+          transform: translate(-50%, -50%); background: var(--fm-control-accent);
+          box-shadow: 0 0 0 1px var(--fm-control-surface);
+        }
         .launcher {
           pointer-events: auto;
           display: grid; place-items: center; width: 48px; min-width: 48px; height: 48px; padding: 0;
