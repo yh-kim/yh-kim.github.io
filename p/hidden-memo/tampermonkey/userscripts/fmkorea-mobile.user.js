@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.26
+// @version      1.6.27
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.26';
+  const SCRIPT_VERSION = '1.6.27';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -2643,6 +2643,7 @@
           --fm-control-muted: var(--fm-clean-muted, #6b6862);
           --fm-control-line: var(--fm-clean-line, #e7e4de);
           --fm-control-accent: var(--fm-clean-accent, #9a4e26);
+          --fm-control-ready: #2f8068;
           --fm-control-soft: var(--fm-clean-soft, #fff0e7);
         }
         :host([data-night]) {
@@ -2654,6 +2655,7 @@
           --fm-control-muted: var(--fm-clean-muted, #b0ada6);
           --fm-control-line: var(--fm-clean-line, #2f2e2b);
           --fm-control-accent: var(--fm-clean-accent, #f0b58f);
+          --fm-control-ready: #82d1b2;
           --fm-control-soft: var(--fm-clean-soft, #3b2a23);
         }
         * { box-sizing: border-box; }
@@ -2676,6 +2678,7 @@
           transform: translate(-50%, -50%); background: var(--fm-control-accent);
           box-shadow: 0 0 0 1px var(--fm-control-surface);
         }
+        .control-anchor:has(.launcher[data-ready])::after { background: var(--fm-control-ready); }
         .launcher {
           pointer-events: auto;
           display: grid; place-items: center; width: 48px; min-width: 48px; height: 48px; padding: 0;
@@ -2686,7 +2689,7 @@
           transition: transform 180ms ease-out, opacity 120ms;
         }
         .launcher[data-dragging] { opacity: .75; transition: opacity 120ms; }
-        .launcher[data-ready] { opacity: .92; }
+        .launcher[data-ready] { color: var(--fm-control-ready); opacity: .92; }
         @media (prefers-reduced-motion: reduce) { .launcher { transition: none; } }
         :host([data-side="right"]) .launcher { margin-left: auto; }
         .launcher[data-off] { color: var(--fm-control-muted); opacity: .25; }
