@@ -119,31 +119,50 @@ test('playback control mutations are ignored, while content and alerts choose sp
   target.closest = selector => selector === '.rd_body article' ? target : null;
   assert.deepEqual([...s.context.mutationSections(record)], ['media', 'bright']);
 });
+test('keyword ticker animation does not trigger a full refresh', () => {
+  const s = scheduler();
+  const target = new Element({ class: 'keyword_rank_ticker', style: 'margin-top: -20px' });
+  const record = { target, type: 'attributes', attributeName: 'style', oldValue: '', addedNodes: [], removedNodes: [] };
+  assert.deepEqual([...s.context.mutationSections(record)], []);
+  assert.deepEqual([...s.context.mutationSections({ ...record, attributeName: 'class' })], ['all']);
+});
 
 function brightness(sample) {
-  let probes = 0, samples = 0;
-  const context = vm.createContext({ Map, Promise,
-    brightImages: { cache: new Map(), requests: new Map(), queue: [] },
-    sampleImageBrightness() { samples++; return sample; }, pumpBrightImageQueue() { probes++; },
+  let samples = 0;
+  const context = vm.createContext({
+    URL, location: new URL('https://m.fmkorea.com/best/123'),
+    brightImages: { cache: new Map() },
+    sampleImageBrightness() { samples++; return sample; },
   });
   vm.runInContext('const MAX_BRIGHT_IMAGE_PIXELS=4_000_000;' +
-    between('  function rememberImageBrightness(', '  function pumpBrightImageQueue('), context);
-  return { context, probes: () => probes, samples: () => samples };
+    between('  function rememberImageBrightness(', '  function classifyBrightImage('), context);
+  return { context, samples: () => samples };
 }
-test('loaded readable images use no extra image probe and share cached results', async () => {
-  const b = brightness(false); const image = { src: '/dark.jpg', naturalWidth: 128, naturalHeight: 128 };
-  assert.equal(await b.context.inspectBrightImage(image), false);
-  assert.equal(await b.context.inspectBrightImage(image), false);
-  assert.equal(b.probes(), 0); assert.equal(b.samples(), 1);
+test('loaded readable images share cached results', () => {
+  const b = brightness(false); const image = { naturalWidth: 128, naturalHeight: 128 };
+  assert.equal(b.context.inspectBrightImage(image, '/dark.jpg'), false);
+  assert.equal(b.context.inspectBrightImage(image, '/dark.jpg'), false);
+  assert.equal(b.samples(), 1);
 });
-test('large images remain dim without another decode; small CORS failures share a single queued probe', async () => {
+test('large and cross-origin images stay dim without another download or decode', () => {
   const b = brightness(null);
-  assert.equal(await b.context.inspectBrightImage({ src: '/huge.jpg', naturalWidth: 5000, naturalHeight: 4000 }), true);
-  assert.equal(b.probes(), 0); assert.equal(b.samples(), 0);
-  const image = { src: '/cors.jpg', naturalWidth: 128, naturalHeight: 128 };
-  const first = b.context.inspectBrightImage(image), second = b.context.inspectBrightImage(image);
-  assert.equal(first, second); assert.equal(b.probes(), 1);
-  b.context.brightImages.queue[0].resolve(true); assert.equal(await first, true);
+  assert.equal(b.context.inspectBrightImage({ naturalWidth: 5000, naturalHeight: 4000 }, '/huge.jpg'), true);
+  const image = { naturalWidth: 128, naturalHeight: 128 };
+  const url = 'https://image.fmkorea.com/photo.jpg';
+  assert.equal(b.context.inspectBrightImage({ ...image, crossOrigin: null }, url), true);
+  assert.equal(b.samples(), 0);
+  // A same-origin URL can still redirect to an unreadable image.
+  assert.equal(b.context.inspectBrightImage(image, '/redirect.jpg'), true);
+  assert.equal(b.context.inspectBrightImage(image, '/redirect.jpg'), true);
+  assert.equal(b.samples(), 1);
+});
+test('an image already loaded with CORS can be sampled without a second request', () => {
+  const b = brightness(false);
+  const image = { naturalWidth: 128, naturalHeight: 128, crossOrigin: 'anonymous' };
+  const url = 'https://image.fmkorea.com/photo.jpg';
+  assert.equal(b.context.inspectBrightImage({ ...image, crossOrigin: null }, url), true);
+  assert.equal(b.context.inspectBrightImage(image, url), false);
+  assert.equal(b.samples(), 1);
 });
 
 test('brightness sampling frees its canvas after readable and CORS-blocked results', () => {

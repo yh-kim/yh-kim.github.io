@@ -229,9 +229,9 @@
         const readHistoryKey = 'pimi.fmkorea.read-history.v1';
         const storedHistory = Object.hasOwn(gmOptions, 'history')
           ? JSON.stringify(gmOptions.history) : 'undefined';
-        const captureFilters = gmOptions.captureFilters
-          ? `<script>window.__fmInitialFilters=Object.fromEntries(${JSON.stringify(gmOptions.captureFilters)}
-              .map(id=>[id,getComputedStyle(document.getElementById(id)).filter]));<\/script>` : '';
+        const captureOpacity = gmOptions.captureOpacity
+          ? `<script>window.__fmInitialOpacity=Object.fromEntries(${JSON.stringify(gmOptions.captureOpacity)}
+              .map(id=>[id,Number(getComputedStyle(document.getElementById(id)).opacity)]));<\/script>` : '';
         const captureBoot = gmOptions.captureBoot
           ? `<script>window.__fmBootCapture={
               opacity:getComputedStyle(document.body).opacity,
@@ -283,7 +283,7 @@
           <style>body{margin:0;background:#fff;color:#111;font:15px system-ui}
             .hd{height:32px;background:#dde8f2}.bd{padding:10px;border-top:1px solid #ccc}
             ${css}</style>
-          </head><body class="${gmOptions.bodyClass || ''}">${body}${captureFilters}${captureBoot}</body></html>`;
+          </head><body class="${gmOptions.bodyClass || ''}">${body}${captureOpacity}${captureBoot}</body></html>`;
         box.append(heading, frame);
         frames.append(box);
         await Promise.race([
@@ -326,6 +326,32 @@
         record('일반 루트 CSS 단독은 숨기지 않음', Boolean(ordinarySlot &&
           ordinarySlot.getBoundingClientRect().height >= 150 &&
           !ordinarySlot.hasAttribute('data-fm-clean-ad-original') && contentVisible(ordinary)));
+
+        const pagerAdName = 'PagerAdModule';
+        const pagerDoc = await makeLayoutFrame(source, '페이저 아래 로더와 대체 광고', `
+          ${adProof(pagerAdName, 'pair')}
+          <div class="bd bd_mobile"><div class="bd_lst_wrp">게시글 목록</div>
+            <form class="fm_navi2"><input type="number" name="page" value="1"></form>
+            <div class="fm_navi"><a id="pager-next" href="?page=2">다음</a></div>
+            <iframe class="read_mobile_bottom_ad" id="pager-ad" src="about:blank" style="height:100px"></iframe>
+            <div class="b${pagerAdName}" id="pager-ad-fallback"></div>
+          </div>`, `.b${pagerAdName}:empty{display:none}.b${pagerAdName}{height:100px;position:relative}`);
+        const pagerAd = pagerDoc.querySelector('#pager-ad');
+        const pagerFallback = pagerDoc.querySelector('#pager-ad-fallback');
+        const pagerNext = pagerDoc.querySelector('#pager-next');
+        record('페이저 아래 로더 광고를 접고 페이지 이동 링크는 표시', isParked(pagerAd) &&
+          visiblyRendered(pagerNext));
+        pagerAd.remove();
+        pagerFallback.innerHTML = '<p><a href="/fixture-ad">대체 광고</a></p>';
+        await delay(60);
+        const fallbackHidden = isParked(pagerFallback) && visiblyRendered(pagerNext);
+        toggleAds(pagerDoc, false);
+        await delay(30);
+        const fallbackRestored = visiblyRendered(pagerFallback) && pagerFallback.getBoundingClientRect().height === 100;
+        toggleAds(pagerDoc, true);
+        await delay(30);
+        record('늦게 채워진 대체 광고를 접고 토글하면 표시·숨김 복원',
+          fallbackHidden && fallbackRestored && isParked(pagerFallback) && visiblyRendered(pagerNext));
 
         const cloneName = 'lCjAtSkuCmf';
         const cloneDoc = await makeFrame(source, '실제 목록 복제 광고', cloneName, 'pair', false);
@@ -959,7 +985,7 @@
         record('다시 숨기고 펼쳐도 사이트가 해제한 음소거 상태를 덮어쓰지 않음',
           unmutedWhileHidden && !mediaVideo.muted &&
           !mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
-          mediaVideo.getAttribute('autoplay') === 'autoplay' && mediaVideo.autoplay);
+          !mediaVideo.autoplay && mediaVideo.getAttribute('data-autoplay') === 'false');
 
         const inlineDoc = await makeLayoutFrame(source, '본문 속 이미지·동영상 개별 보기',
           mediaBody, '', { showMedia: false });
@@ -1252,8 +1278,7 @@
         const whiteWasHidden = !visiblyRendered(whiteImage);
         const whiteNotice = whiteDoc.querySelector('button[data-fm-clean-media-notice]');
         whiteNotice?.click();
-        const isDimmed = () => /brightness\((?:0?\.64)\)/.test(
-          whiteDoc.defaultView.getComputedStyle(whiteImage).filter);
+        const isDimmed = () => Number(whiteDoc.defaultView.getComputedStyle(whiteImage).opacity) === .64;
         const dimmedImmediately = isDimmed();
         for (let attempt = 0; attempt < 20 &&
           !whiteImage.hasAttribute('data-fm-clean-bright-image'); attempt++) await delay(50);
@@ -1268,39 +1293,37 @@
               <img id="bright-white" src="${WHITE_IMAGE}" width="128" height="128" alt="흰 이미지">
               <img id="bright-dark" src="${DARK_IMAGE}" width="128" height="128" alt="어두운 이미지">
             </div></article></div></div></div>`, '', { showMedia: true },
-          { bodyClass: 'night_mode', captureFilters: ['bright-white', 'bright-dark'] });
+          { bodyClass: 'night_mode', captureOpacity: ['bright-white', 'bright-dark'] });
         brightDoc.defaultView.frameElement.style.height = '480px';
         brightDoc.defaultView.frameElement.scrollIntoView({ block: 'center' });
         await delay(100);
         const brightWhite = brightDoc.querySelector('#bright-white');
         const brightDark = brightDoc.querySelector('#bright-dark');
-        const brightness = image => {
-          const value = brightDoc.defaultView.getComputedStyle(image).filter.match(/brightness\(([\d.]+)\)/);
-          return value ? Number(value[1]) : 1;
-        };
+        const opacity = image => Number(brightDoc.defaultView.getComputedStyle(image).opacity);
         for (let attempt = 0; attempt < 40 &&
           !brightDark.hasAttribute('data-fm-clean-bright-normal'); attempt++) await delay(50);
         const darkHasNormal = brightDark.hasAttribute('data-fm-clean-bright-normal');
         await delay(120);
-        const midwayBrightness = brightness(brightDark);
+        const midwayOpacity = opacity(brightDark);
         const fadeDuration = brightDoc.defaultView.getComputedStyle(brightDark).transitionDuration;
         await delay(850);
-        const brightEvidence = `initial=${JSON.stringify(brightDoc.defaultView.__fmInitialFilters)}, ` +
+        const brightEvidence = `initial=${JSON.stringify(brightDoc.defaultView.__fmInitialOpacity)}, ` +
           `natural=${brightWhite.naturalWidth}/${brightDark.naturalWidth}, ` +
           `attrs=${brightWhite.hasAttribute('data-fm-clean-bright-image')}/` +
           `${brightDark.hasAttribute('data-fm-clean-bright-normal')}, ` +
-          `filter=${brightness(brightWhite)}/${brightness(brightDark)}, ` +
-          `mid=${midwayBrightness}, duration=${fadeDuration}`;
+          `opacity=${opacity(brightWhite)}/${opacity(brightDark)}, ` +
+          `mid=${midwayOpacity}, duration=${fadeDuration}`;
         const firstBrightnessPass = brightWhite.naturalWidth === 128 && brightDark.naturalWidth === 128 &&
-          /brightness\(0?\.64\)/.test(brightDoc.defaultView.__fmInitialFilters?.['bright-white']) &&
-          /brightness\(0?\.64\)/.test(brightDoc.defaultView.__fmInitialFilters?.['bright-dark']) &&
+          brightDoc.defaultView.__fmInitialOpacity?.['bright-white'] === .64 &&
+          brightDoc.defaultView.__fmInitialOpacity?.['bright-dark'] === .64 &&
           brightWhite.hasAttribute('data-fm-clean-bright-image') &&
-          Math.abs(brightness(brightWhite) - .64) < .01;
+          opacity(brightWhite) === .64 &&
+          brightDoc.defaultView.getComputedStyle(brightWhite).filter === 'none';
         record('처음 표시된 흰·어두운 이미지 모두 첫 CSS 프레임 64%, 흰 이미지는 계속 64%',
           firstBrightnessPass, firstBrightnessPass ? '' : brightEvidence);
         const fadePass = darkHasNormal && /0\.8s/.test(fadeDuration) &&
-          midwayBrightness > .64 && midwayBrightness < 1 &&
-          Math.abs(brightness(brightDark) - 1) < .01;
+          midwayOpacity > .64 && midwayOpacity < 1 &&
+          opacity(brightDark) === 1;
         record('어두운 이미지는 800ms ease-out 중간 밝기를 거쳐 원래 100%로 복원',
           fadePass, fadePass ? '' : brightEvidence);
         const lateDark = brightDoc.createElement('img');
@@ -1308,16 +1331,15 @@
         lateDark.src = DARK_IMAGE;
         lateDark.width = lateDark.height = 128;
         brightDoc.querySelector('#bright-content').append(lateDark);
-        const dynamicStartsDim = Math.abs(brightness(lateDark) - .64) < .01;
+        const dynamicStartsDim = opacity(lateDark) === .64;
         brightDark.src = WHITE_IMAGE;
         await delay(30);
-        const changedSourceDim = Math.abs(brightness(brightDark) - .64) < .01;
+        const changedSourceDim = opacity(brightDark) === .64;
         const appearanceOff = detailOption(brightDoc, 'appearance', false);
         await delay(40);
-        record('동적 이미지·src 변경은 64%로 시작하고 밝기 기능 OFF는 원본 필터 복원',
+        record('동적 이미지·src 변경은 64%로 시작하고 밝기 기능 OFF는 원본 표시 복원',
           dynamicStartsDim && changedSourceDim && appearanceOff &&
-          brightDoc.defaultView.getComputedStyle(brightWhite).filter === 'none' &&
-          brightDoc.defaultView.getComputedStyle(brightDark).filter === 'none');
+          opacity(brightWhite) === 1 && opacity(brightDark) === 1);
 
         const probeDoc = await makeLayoutFrame(source, '이미지 밝기 분석 동시성·URL 공유', `
           <div class="bd"><div class="rd" data-docsrl="506"><div class="rd_hd"><h1>분석 검사</h1></div>
@@ -1339,6 +1361,19 @@
           probeStats.max === 0 && probesBeforeReuse === 0 && probeStats.count === 0 &&
           probeDoc.querySelector('img').hasAttribute('data-fm-clean-bright-image'),
           `count=${probeStats.count}, before=${probesBeforeReuse}, max=${probeStats.max}`);
+
+        const belowViewport = probeDoc.createElement('img');
+        belowViewport.src = WHITE_IMAGE;
+        belowViewport.width = belowViewport.height = 128;
+        belowViewport.style.marginTop = '700px';
+        probeDoc.querySelector('#probe-content').append(belowViewport);
+        await delay(120);
+        const analysisDeferred = !belowViewport.hasAttribute('data-fm-clean-bright-image');
+        belowViewport.scrollIntoView({ block: 'center' });
+        for (let attempt = 0; attempt < 20 &&
+          !belowViewport.hasAttribute('data-fm-clean-bright-image'); attempt++) await delay(50);
+        record('화면 밖 본문 사진의 밝기 판정은 스크롤로 화면에 들어올 때 실행',
+          analysisDeferred && belowViewport.hasAttribute('data-fm-clean-bright-image') && probeStats.count === 0);
 
         const restoredPhotosDoc = await makeLayoutFrame(source, '처음 3장 이후 지연 사진 복원', `
           <div class="bd"><div class="rd" data-docsrl="10523777560"><div class="rd_hd"><h1>사진과 영상</h1></div>
