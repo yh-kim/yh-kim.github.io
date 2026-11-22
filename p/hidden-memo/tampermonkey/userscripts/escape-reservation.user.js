@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.10
+// @version         3.11
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
 // @match           *://*.xn--2e0b040a4xj.com/*
 // @match           *://*.play33.kr/*
@@ -26,7 +26,7 @@
   const DEFAULT_AUTO_SUBMIT_ENABLED = false;
   const AUTO_SUBMIT_STORAGE_KEY = 'tm-escape-auto-submit';
   const LONG_PRESS_DURATION_MS = 650;
-  const TRIPLE_CLICK_WINDOW_MS = 900;
+  const DOUBLE_CLICK_WINDOW_MS = 500;
   const THEME_PEOPLE_OVERRIDES = {
     // '테마명': 4
   };
@@ -476,7 +476,7 @@
     const supported = supportsAutoSubmit(profile);
     const enabled = hasUser && getAutoSubmitEnabled(profile);
     const message = !hasUser ? '예약자 정보 없음' : enabled ? '자동 제출 켜짐' : '자동 제출 꺼짐';
-    const editHint = '빠르게 세 번 눌러 예약자 정보 편집';
+    const editHint = '빠르게 두 번 눌러 예약자 정보 편집';
     const pressHint = !hasUser ? '길게 눌러 예약자 정보 입력' : supported ? '길게 눌러 자동 제출 전환' : '자동 제출 미지원';
 
     label.textContent = message;
@@ -549,8 +549,7 @@
     let startX = 0;
     let startY = 0;
     let longPressTriggered = false;
-    let firstClickAt = 0;
-    let clickCount = 0;
+    let firstClickAt = null;
 
     const cancelPress = () => {
       if (pressTimer !== null) clearTimeout(pressTimer);
@@ -569,7 +568,7 @@
       pressTimer = setTimeout(() => {
         cancelPress();
         longPressTriggered = true;
-        clickCount = 0;
+        firstClickAt = null;
         if (!currentUser) {
           editUser();
           return;
@@ -613,14 +612,11 @@
       }
 
       const now = performance.now();
-      if (clickCount === 0 || now - firstClickAt > TRIPLE_CLICK_WINDOW_MS) {
-        firstClickAt = now;
-        clickCount = 0;
-      }
-      clickCount++;
-      if (clickCount === 3) {
-        clickCount = 0;
+      if (firstClickAt !== null && now - firstClickAt <= DOUBLE_CLICK_WINDOW_MS) {
+        firstClickAt = null;
         editUser();
+      } else {
+        firstClickAt = now;
       }
     });
 
