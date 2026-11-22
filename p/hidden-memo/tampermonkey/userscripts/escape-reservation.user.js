@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            방탈출 예약 자동 입력
 // @namespace       http://tampermonkey.net/
-// @version         3.9
+// @version         3.10
 // @description     지구별, play33, 클레버타운, 둠이스케이프, 키이스케이프, 나비잠, 서울이스케이프룸 예약 정보 자동 입력
 // @match           *://*.xn--2e0b040a4xj.com/*
 // @match           *://*.play33.kr/*
@@ -26,12 +26,14 @@
   const DEFAULT_AUTO_SUBMIT_ENABLED = false;
   const AUTO_SUBMIT_STORAGE_KEY = 'tm-escape-auto-submit';
   const LONG_PRESS_DURATION_MS = 650;
+  const TRIPLE_CLICK_WINDOW_MS = 900;
   const THEME_PEOPLE_OVERRIDES = {
     // '테마명': 4
   };
 
   let currentUser = loadUser();
   let activeRun = 0;
+  let userDialog = null;
 
   function createProfiles(USER = { name: '', phone: '' }) {
     const PHONE = splitPhone(USER.phone);
@@ -199,26 +201,79 @@
     }
   }
 
-  function requestUser() {
-    const name = window.prompt('예약자 이름을 입력하세요.', currentUser?.name || '');
-    if (name === null) return false;
-    const phone = window.prompt('예약자 전화번호를 입력하세요.', currentUser?.phone || '');
-    if (phone === null) return false;
+  function editUser() {
+    if (userDialog) return;
 
-    const user = normalizeUser({ name, phone });
-    if (!user) {
-      window.alert('이름과 숫자 10~11자리 전화번호를 입력하세요.');
-      return false;
-    }
+    const host = document.createElement('div');
+    const shadow = host.attachShadow({ mode: 'closed' });
+    shadow.innerHTML = `
+      <style>
+        dialog {
+          box-sizing: border-box; width: min(360px, calc(100% - 32px));
+          border: 0; border-radius: 16px; padding: 20px;
+          background: #fff; color: #1f2937; box-shadow: 0 12px 48px #0004;
+          font: 15px/1.5 system-ui, sans-serif;
+        }
+        dialog::backdrop { background: #0008; }
+        h2 { margin: 0 0 12px; font-size: 19px; }
+        label { display: grid; gap: 4px; margin-bottom: 12px; }
+        input, button { box-sizing: border-box; border: 1px solid #9ca3af; border-radius: 8px; font: inherit; }
+        input { width: 100%; padding: 8px 10px; font-size: 16px; }
+        p { margin: 0; color: #a11d1d; }
+        .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+        button { min-height: 40px; padding: 6px 14px; background: #fff; color: #1f2937; cursor: pointer; }
+        button[type="submit"] { border-color: #1f2937; background: #1f2937; color: #fff; }
+      </style>
+      <dialog aria-labelledby="title">
+        <form method="dialog" autocomplete="off">
+          <h2 id="title">예약자 정보</h2>
+          <label>이름<input id="name" type="text" required autofocus></label>
+          <label>전화번호<input id="phone" type="tel" required></label>
+          <p role="alert"></p>
+          <div class="actions">
+            <button type="button">취소</button>
+            <button type="submit">저장</button>
+          </div>
+        </form>
+      </dialog>`;
 
-    try {
-      GM_setValue(USER_STORAGE_KEY, user);
+    const dialog = shadow.querySelector('dialog');
+    const name = shadow.querySelector('#name');
+    const phone = shadow.querySelector('#phone');
+    const message = shadow.querySelector('[role="alert"]');
+    name.value = currentUser?.name || '';
+    phone.value = currentUser?.phone || '';
+
+    shadow.querySelector('button[type="button"]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', () => {
+      host.remove();
+      userDialog = null;
+    });
+
+    shadow.querySelector('form').addEventListener('submit', event => {
+      event.preventDefault();
+      const user = normalizeUser({ name: name.value, phone: phone.value });
+      if (!user) {
+        message.textContent = '이름과 숫자 10~11자리 전화번호를 입력하세요.';
+        (name.value.trim() ? phone : name).focus();
+        return;
+      }
+
+      try {
+        GM_setValue(USER_STORAGE_KEY, user);
+      } catch (error) {
+        message.textContent = '예약자 정보를 저장하지 못했습니다. 다시 시도해 주세요.';
+        return;
+      }
+
       currentUser = user;
-      return true;
-    } catch (error) {
-      window.alert('예약자 정보를 저장하지 못했습니다. 다시 시도해 주세요.');
-      return false;
-    }
+      dialog.close();
+      run({ autoSubmit: false });
+    });
+
+    userDialog = dialog;
+    document.documentElement.appendChild(host);
+    dialog.showModal();
   }
 
   function splitPhone(value) {
@@ -421,18 +476,13 @@
     const supported = supportsAutoSubmit(profile);
     const enabled = hasUser && getAutoSubmitEnabled(profile);
     const message = !hasUser ? '예약자 정보 없음' : enabled ? '자동 제출 켜짐' : '자동 제출 꺼짐';
+    const editHint = '빠르게 세 번 눌러 예약자 정보 편집';
+    const pressHint = !hasUser ? '길게 눌러 예약자 정보 입력' : supported ? '길게 눌러 자동 제출 전환' : '자동 제출 미지원';
 
     label.textContent = message;
-    status.disabled = hasUser && !supported;
     status.setAttribute('aria-pressed', String(enabled));
-    status.setAttribute(
-      'aria-label',
-      !hasUser ? message + '. 자동 입력 중지. 길게 눌러 입력' :
-        supported ? message + '. 길게 눌러 변경' : message + '. 이 사이트는 자동 제출을 지원하지 않음'
-    );
-    status.title = !hasUser ? message + ' · 길게 눌러 입력' :
-      supported ? message + ' · 길게 눌러 변경' : message + ' · 자동 제출 미지원';
-    status.style.cursor = !hasUser || supported ? 'pointer' : 'default';
+    status.setAttribute('aria-label', [message, editHint, pressHint].join('. '));
+    status.title = [message, editHint, pressHint].join(' · ');
     status.style.background = !hasUser ? '#92400e' : enabled
       ? 'linear-gradient(135deg, #ef4444, #c81e1e)'
       : 'linear-gradient(135deg, #30343a, #111315)';
@@ -482,6 +532,7 @@
       WebkitUserSelect: 'none',
       touchAction: 'manipulation',
       pointerEvents: 'auto',
+      cursor: 'pointer',
       transition: 'transform .14s ease, background .18s ease, box-shadow .18s ease'
     });
     Object.assign(dot.style, {
@@ -494,57 +545,84 @@
     status.append(dot, label);
     renderAutoSubmitStatus(status, dot, label, profile);
 
-    if (!currentUser || supported) {
-      let pressTimer = null;
-      let startX = 0;
-      let startY = 0;
+    let pressTimer = null;
+    let startX = 0;
+    let startY = 0;
+    let longPressTriggered = false;
+    let firstClickAt = 0;
+    let clickCount = 0;
 
-      const cancelPress = () => {
-        if (pressTimer !== null) clearTimeout(pressTimer);
-        pressTimer = null;
-        status.style.transform = 'scale(1)';
-      };
+    const cancelPress = () => {
+      if (pressTimer !== null) clearTimeout(pressTimer);
+      pressTimer = null;
+      status.style.transform = 'scale(1)';
+    };
 
-      const startPress = event => {
-        if (event.type === 'pointerdown' && event.button !== undefined && event.button !== 0) return;
-        event.preventDefault();
+    const startPress = event => {
+      cancelPress();
+      longPressTriggered = false;
+      if (currentUser && !supported) return;
+
+      startX = event.clientX || 0;
+      startY = event.clientY || 0;
+      status.style.transform = 'scale(.96)';
+      pressTimer = setTimeout(() => {
         cancelPress();
-        startX = event.clientX || 0;
-        startY = event.clientY || 0;
-        status.style.transform = 'scale(.96)';
-        pressTimer = setTimeout(() => {
-          pressTimer = null;
-          status.style.transform = 'scale(1)';
-          if (!currentUser) {
-            if (requestUser()) run({ autoSubmit: false });
-            return;
-          }
-          const nextEnabled = !getAutoSubmitEnabled(profile);
-          if (setAutoSubmitEnabled(profile, nextEnabled)) {
-            renderAutoSubmitStatus(status, dot, label, profile);
-            try { navigator.vibrate?.(30); } catch (error) { /* 진동 미지원 */ }
-          }
-        }, LONG_PRESS_DURATION_MS);
-      };
-
-      status.addEventListener('pointerdown', startPress);
-      status.addEventListener('pointermove', event => {
-        if (pressTimer === null) return;
-        if (Math.abs((event.clientX || 0) - startX) > 12 || Math.abs((event.clientY || 0) - startY) > 12) {
-          cancelPress();
+        longPressTriggered = true;
+        clickCount = 0;
+        if (!currentUser) {
+          editUser();
+          return;
         }
-      });
-      status.addEventListener('pointerup', cancelPress);
-      status.addEventListener('pointercancel', cancelPress);
-      status.addEventListener('keydown', event => {
-        if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) startPress(event);
-      });
-      status.addEventListener('keyup', event => {
-        if (event.key === 'Enter' || event.key === ' ') cancelPress();
-      });
-      status.addEventListener('contextmenu', event => event.preventDefault());
-      status.addEventListener('click', event => event.preventDefault());
-    }
+        const nextEnabled = !getAutoSubmitEnabled(profile);
+        if (setAutoSubmitEnabled(profile, nextEnabled)) {
+          renderAutoSubmitStatus(status, dot, label, profile);
+          try { navigator.vibrate?.(30); } catch (error) { /* 진동 미지원 */ }
+        }
+      }, LONG_PRESS_DURATION_MS);
+    };
+
+    status.addEventListener('pointerdown', event => {
+      if (event.isPrimary && event.button === 0) startPress(event);
+    });
+    status.addEventListener('pointermove', event => {
+      if (pressTimer === null || !event.isPrimary) return;
+      if (Math.abs(event.clientX - startX) > 12 || Math.abs(event.clientY - startY) > 12) cancelPress();
+    });
+    status.addEventListener('pointerup', cancelPress);
+    status.addEventListener('pointercancel', cancelPress);
+    status.addEventListener('pointerleave', cancelPress);
+    status.addEventListener('blur', cancelPress);
+    status.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      if (!event.repeat) startPress(event);
+    });
+    status.addEventListener('keyup', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      cancelPress();
+      status.click();
+    });
+    status.addEventListener('contextmenu', event => event.preventDefault());
+    status.addEventListener('click', event => {
+      event.preventDefault();
+      if (longPressTriggered) {
+        longPressTriggered = false;
+        return;
+      }
+
+      const now = performance.now();
+      if (clickCount === 0 || now - firstClickAt > TRIPLE_CLICK_WINDOW_MS) {
+        firstClickAt = now;
+        clickCount = 0;
+      }
+      clickCount++;
+      if (clickCount === 3) {
+        clickCount = 0;
+        editUser();
+      }
+    });
 
     document.documentElement.appendChild(status);
   }
@@ -666,7 +744,7 @@
       return;
     }
 
-    if (runId === activeRun && currentUser && getAutoSubmitEnabled(profile)) button.click();
+    if (runId === activeRun && currentUser && !userDialog?.open && getAutoSubmitEnabled(profile)) button.click();
   }
 
   async function run({ autoSubmit = true } = {}) {
@@ -706,9 +784,7 @@
   }
 
   if (typeof GM_registerMenuCommand === 'function') {
-    GM_registerMenuCommand('예약자 정보 변경', () => {
-      if (requestUser()) run({ autoSubmit: false });
-    });
+    GM_registerMenuCommand('예약자 정보 변경', editUser);
   }
 
   run();
