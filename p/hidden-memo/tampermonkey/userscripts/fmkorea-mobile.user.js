@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.28
-// @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
+// @version      1.6.29
+// @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리, Mac Control 스크롤 확대
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.28';
+  const SCRIPT_VERSION = '1.6.29';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -92,6 +92,41 @@
       /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
       (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent)) ||
       narrowScreen.matches;
+  }
+
+  function mountMacScrollZoom() {
+    if (!/^Mac/i.test(navigator.platform) || navigator.maxTouchPoints > 1) return;
+
+    const root = document.documentElement;
+    let controlDown = false;
+    let zoom = 1;
+    // 트랙패드 핀치도 ctrlKey를 보낼 수 있으므로 실제 키 상태를 함께 확인합니다.
+    const updateControl = event => {
+      if (event.key === 'Control') controlDown = event.ctrlKey;
+    };
+    window.addEventListener('keydown', updateControl, true);
+    window.addEventListener('keyup', updateControl, true);
+    window.addEventListener('blur', () => { controlDown = false; });
+    window.addEventListener('wheel', event => {
+      if (!settings.enabled || !controlDown || !event.ctrlKey || !event.cancelable) return;
+      const deltaMode = event.deltaMode;
+      if (!event.deltaY) return;
+      event.preventDefault();
+
+      const unit = deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
+        deltaMode === WheelEvent.DOM_DELTA_PAGE ? window.innerHeight : 1;
+      const step = Math.max(-.18, Math.min(.18, -event.deltaY * unit / 600));
+      const nextZoom = Math.max(1, Math.min(3, zoom * Math.exp(step)));
+      if (nextZoom === zoom) return;
+      const ratio = nextZoom / zoom;
+      const { scrollX, scrollY } = window;
+      zoom = nextZoom;
+      root.toggleAttribute('data-fm-clean-zoomed', zoom > 1);
+      if (zoom > 1) root.style.setProperty('--fm-clean-page-zoom', zoom);
+      else root.style.removeProperty('--fm-clean-page-zoom');
+      window.scrollTo({ left: scrollX * ratio, top: scrollY * ratio, behavior: 'instant' });
+      scheduleBottomSpace();
+    }, { capture: true, passive: false });
   }
 
   function rememberAdModule(name) {
@@ -1028,6 +1063,12 @@
     hideRule('siteFooter', ['body > footer .cr', 'body > footer .crhome', '#footer']),
     cleanAppearance(),
     `
+      html[data-fm-clean-enabled="true"][data-fm-clean-zoomed] {
+        zoom: var(--fm-clean-page-zoom) !important;
+      }
+      html[data-fm-clean-enabled="true"][data-fm-clean-zoomed] #${HOST_ID} {
+        zoom: calc(1 / var(--fm-clean-page-zoom)) !important;
+      }
       ${scope('appearance')}[data-fm-clean-boot="true"] { background: #fff !important; }
       @media (prefers-color-scheme: dark) {
         ${scope('appearance')}[data-fm-clean-boot="true"] { background: #1b1b1a !important; }
@@ -2460,12 +2501,13 @@
     const target = forms[forms.length - 1] || others[others.length - 1];
     let height = 0;
     if (target && document.scrollingElement) {
+      const zoom = Number(getComputedStyle(document.documentElement).zoom) || 1;
       const currentSpace = Number.parseFloat(getComputedStyle(document.body, '::after').height) || 0;
-      const naturalHeight = document.scrollingElement.scrollHeight - currentSpace;
+      const naturalHeight = document.scrollingElement.scrollHeight - currentSpace * zoom;
       const targetTop = window.scrollY + target.getBoundingClientRect().top;
       const anchorBottom = launcher.parentElement.getBoundingClientRect().bottom;
       // 최대 스크롤에서 다음 페이지가 둥근 버튼 바로 아래에 오도록 푸터 높이를 빼 줍니다.
-      height = Math.max(0, Math.round(window.innerHeight - anchorBottom - 8 - (naturalHeight - targetTop)));
+      height = Math.max(0, Math.round((window.innerHeight - anchorBottom - 8 - (naturalHeight - targetTop)) / zoom));
     }
     const value = `${height}px`;
     if (document.documentElement.style.getPropertyValue('--fm-clean-bottom-space') !== value) {
@@ -2985,11 +3027,11 @@
     if (record.type === 'attributes' && record.oldValue === target.getAttribute(record.attributeName)) return [];
     // 검색어 티커의 주기적 위치 보정은 본문·광고가 바뀐 것이 아닙니다.
     if (record.attributeName === 'style' && target.matches('.keyword_rank_ticker')) return [];
-    // 자체 하단 여백과 스와이프 효과는 콘텐츠 재검사가 필요하지 않습니다.
+    // 자체 하단 여백, 확대와 스와이프 효과는 콘텐츠 재검사가 필요하지 않습니다.
     if (target.matches('#fm-clean-swipe-back')) return [];
     if (target === document.documentElement && record.attributeName === 'style') {
-      const withoutSpace = value => (value || '').replace(/--fm-clean-bottom-space\s*:[^;]*(;|$)/g, '').trim();
-      if (withoutSpace(record.oldValue) === withoutSpace(target.getAttribute('style'))) return [];
+      const withoutOwnStyles = value => (value || '').replace(/--fm-clean-(?:bottom-space|page-zoom)\s*:[^;]*(;|$)/g, '').trim();
+      if (withoutOwnStyles(record.oldValue) === withoutOwnStyles(target.getAttribute('style'))) return [];
     }
     const sections = new Set();
     // 동적 광고와 리소스 교체는 변경된 영역에서만 확인합니다.
@@ -3102,6 +3144,7 @@
     if (booting) window.setTimeout(finishBoot, 1500);
     observer.observe(document.documentElement, observerOptions);
     refresh();
+    mountMacScrollZoom();
     document.addEventListener('DOMContentLoaded', () => {
       try { refresh(); }
       finally { finishBoot(); }
