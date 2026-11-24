@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.42
+// @version      1.6.43
 // @description  읽은 글 7일 기록, 이미지·동영상·X 게시물 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.42';
+  const SCRIPT_VERSION = '1.6.43';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1132,6 +1132,10 @@
       ${mobileUI} [data-fm-clean-comment-stats] button[data-fm-clean-vote-action][aria-pressed] {
         gap: 1px; font-weight: 400;
       }
+      ${mobileUI} [data-fm-clean-comment-stats] button[aria-pressed]:not([data-fm-clean-vote-counted]) {
+        --fm-vote-color: var(--fm-vote-neutral);
+        --fm-vote-tint: var(--fm-clean-raised, #80808022);
+      }
       ${mobileUI} button[data-fm-clean-vote-action="delete"] {
         --fm-vote-tint: var(--fm-vote-red-tint);
       }
@@ -1899,6 +1903,7 @@
     if (button.textContent !== text) button.textContent = text;
     button.setAttribute('aria-label', label);
     if (pressed !== null) button.setAttribute('aria-pressed', String(pressed));
+    return button;
   }
 
   function syncCommentActions() {
@@ -1929,8 +1934,10 @@
       }
       const upCount = readCount(votedCount) ?? '0';
       const downCount = readCount(blamedCount) ?? (blamedCount?.textContent.trim() === '-' ? '–' : '0');
-      syncVoteButton(stats, 'up', up, upCount, `댓글 추천 ${upCount}`, Boolean(vote?.classList.contains('my_vote_up')));
-      syncVoteButton(stats, 'down', down, downCount, `댓글 비추천 ${downCount}`, Boolean(vote?.classList.contains('my_vote_down')));
+      const upButton = syncVoteButton(stats, 'up', up, upCount, `댓글 추천 ${upCount}`, Boolean(vote?.classList.contains('my_vote_up')));
+      const downButton = syncVoteButton(stats, 'down', down, downCount, `댓글 비추천 ${downCount}`, Boolean(vote?.classList.contains('my_vote_down')));
+      upButton?.toggleAttribute('data-fm-clean-vote-counted', Number(upCount.replaceAll(',', '')) > 0);
+      downButton?.toggleAttribute('data-fm-clean-vote-counted', Number(downCount.replaceAll(',', '')) > 0);
       syncVoteButton(stats, 'delete', remove, '삭제', '내 댓글 삭제');
       if (!stats.firstChild) stats.remove();
     });
