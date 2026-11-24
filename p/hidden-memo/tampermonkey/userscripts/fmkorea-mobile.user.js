@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.37
-// @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
+// @version      1.6.38
+// @description  읽은 글 7일 기록, 이미지·동영상·X 게시물 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
 // @match        *://fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.37';
+  const SCRIPT_VERSION = '1.6.38';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1269,6 +1269,8 @@
   const LIST_IMAGE_SELECTOR = '.fm_best_widget img, .bd_m_lst img, .bd_lst img';
   const LAZY_IMAGE_SELECTOR = `${LIST_IMAGE_SELECTOR}, .rd_body article .xe_content img[data-original], .rd_body article .xe_content img[data-src]`;
   const MEDIA_PLAYER_SELECTOR = '.auto_media_wrapper, .mejs__container, .video-js, video-js, .fluid_video_wrapper';
+  const X_POST_SELECTOR = 'blockquote.twitter-tweet, .fm-twitter-tweet:not(a), .fm-twitter-oembed, .twitter-tweet-rendered, twitter-widget, iframe[id^="twitter-widget-"]';
+  const X_WIDGET_SCRIPT = 'script[src*="//platform.x.com/widgets.js"], script[src*="//platform.twitter.com/widgets.js"]';
   const listImages = { observer: null, tracked: new Set(), listening: false };
   const brightImages = {
     sources: new WeakMap(), cache: new Map(), visible: new WeakSet(), tracked: new Set(),
@@ -1468,6 +1470,33 @@
     });
   }
 
+  function isXPostFrame(frame) {
+    return ['src', 'data-src'].some(attribute => {
+      const source = frame.getAttribute(attribute);
+      if (!source) return false;
+      try {
+        const url = new URL(source, location.href);
+        return /^https?:$/.test(url.protocol) && /^platform\.(?:x|twitter)\.com$/i.test(url.hostname) &&
+          /^\/embed\/(?:tweet|index)\.html$/i.test(url.pathname);
+      } catch (error) { return false; }
+    });
+  }
+
+  function xPostTarget(embed, root) {
+    let target = embed;
+    for (let parent = embed.parentElement; parent && parent !== root; parent = parent.parentElement) {
+      if (parent.matches(X_POST_SELECTOR)) target = parent;
+    }
+    const wrapper = target.parentElement;
+    if (!wrapper || wrapper === root || wrapper.localName !== 'div') return target;
+    // 펨코가 만든 바깥 div는 X가 로딩용 노드를 위젯으로 바꾼 뒤에도 유지됩니다.
+    const standalone = Array.from(wrapper.childNodes).every(node => node === target ||
+      node.nodeType === Node.COMMENT_NODE ||
+      (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) ||
+      (node instanceof Element && node.matches(X_WIDGET_SCRIPT)));
+    return standalone ? wrapper : target;
+  }
+
   function detailMediaTarget(media, root) {
     let target = media;
     for (let parent = media.parentElement; parent && parent !== root; parent = parent.parentElement) {
@@ -1506,7 +1535,7 @@
 
   function isContentImage(image, root, state) {
     // 설문 막대·테두리는 본문 사진이 아닌 결과 표시용 UI입니다.
-    if (image.closest(`${MEDIA_PLAYER_SELECTOR}, .mejs__poster, .mejs__controls, .poll_table, noscript, template, [${AD_STATE_ATTRIBUTE}]`)) return false;
+    if (image.closest(`${MEDIA_PLAYER_SELECTOR}, ${X_POST_SELECTOR}, .mejs__poster, .mejs__controls, .poll_table, noscript, template, [${AD_STATE_ATTRIBUTE}]`)) return false;
     for (let node = image; node && node !== root; node = node.parentElement) {
       const display = state.hidden.get(node)?.value ?? node.style.getPropertyValue('display');
       if (node.hidden || display === 'none') return false;
@@ -1569,7 +1598,9 @@
         const shape = unit.kind === 'image'
           ? '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m4 17 5-5 4 4 3-3 5 5"/>'
           : '<rect x="3" y="3" width="18" height="18" rx="5"/><path d="m10 8 6 4-6 4Z"/>';
-        button.innerHTML = `<span data-fm-clean-media-icon aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${shape}</svg></span><span>${unit.kind === 'image' ? '이미지 보기' : '동영상 보기'}</span>`;
+        const icon = unit.kind === 'x' ? 'X' : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${shape}</svg>`;
+        const label = { image: '이미지 보기', video: '동영상 보기', x: 'X 게시물 보기' }[unit.kind];
+        button.innerHTML = `<span data-fm-clean-media-icon aria-hidden="true">${icon}</span><span>${label}</span>`;
         item = { button, unit };
         button.addEventListener('click', event => {
           event.preventDefault();
@@ -1687,8 +1718,10 @@
     }
   }
 
-  function syncMediaNotice(root, state, hasImages, hasVideos, hiddenImages = 0, hiddenVideos = 0) {
-    if (!hasImages && !hasVideos) {
+  function syncMediaNotice(root, state, available, hidden = {}) {
+    const labels = { image: '이미지', video: '동영상', x: 'X 게시물' };
+    const label = Object.keys(labels).filter(kind => available[kind]).map(kind => labels[kind]).join('·');
+    if (!label) {
       state.notice?.remove();
       state.notice = null;
       return;
@@ -1705,9 +1738,8 @@
       });
       state.notice = button;
     }
-    const label = [hasImages && '이미지', hasVideos && '동영상'].filter(Boolean).join('·');
-    const counts = [hiddenImages && `이미지 ${hiddenImages}개`, hiddenVideos && `비디오 ${hiddenVideos}개`]
-      .filter(Boolean).join(' · ');
+    const counts = Object.keys(labels).filter(kind => hidden[kind])
+      .map(kind => `${kind === 'video' ? '비디오' : labels[kind]} ${hidden[kind]}개`).join(' · ');
     const text = counts ? `${label} 전체 보기 (${counts})` : `${label} 전체 가리기`;
     if (state.notice.textContent !== text) state.notice.textContent = text;
     if (root.previousSibling !== state.notice) root.before(state.notice);
@@ -1756,11 +1788,17 @@
       }
       const imageNodes = Array.from(root.querySelectorAll('img'));
       const videoNodes = Array.from(root.querySelectorAll('video'));
-      const frameNodes = Array.from(root.querySelectorAll('iframe')).filter(isVideoFrame);
+      const xPosts = new Set(Array.from(root.querySelectorAll(X_POST_SELECTOR), embed => xPostTarget(embed, root)));
+      const frameNodes = Array.from(root.querySelectorAll('iframe')).filter(frame => {
+        if (!isXPostFrame(frame)) return isVideoFrame(frame);
+        xPosts.add(xPostTarget(frame, root));
+        return false;
+      });
       const hasVideos = Boolean(videoNodes.length || frameNodes.length || state.frames.size);
+      const hasX = xPosts.size > 0;
       const contentImage = image => isContentImage(image, root, state);
       if (expanded) {
-        syncMediaNotice(root, state, imageNodes.some(contentImage), hasVideos);
+        syncMediaNotice(root, state, { image: imageNodes.some(contentImage), video: hasVideos, x: hasX });
         continue;
       }
 
@@ -1786,13 +1824,14 @@
         const target = detailMediaTarget(slot, root);
         addVideo(target, frame, target === slot ? frame : target);
       }
-      const videoTargets = new Set(videoUnits.keys());
       const videoCount = videoUnits.size;
-      root.toggleAttribute('data-fm-clean-media-collapsed', images + videoCount > 0);
       const imageUnits = contentImages.map(image => ({ key: image,
         target: image.closest('picture') || image, kind: 'image', sources: [image] }));
-      const units = [...imageUnits, ...videoUnits.values()];
-      const spaces = mediaSpaceTargets(root, new Set([...contentImages, ...imageUnits.map(unit => unit.target), ...videoTargets]));
+      const xUnits = Array.from(xPosts).filter(post => !state.revealedItems.has(post))
+        .map(post => ({ key: post, target: post, kind: 'x', sources: [post] }));
+      const units = [...imageUnits, ...videoUnits.values(), ...xUnits];
+      root.toggleAttribute('data-fm-clean-media-collapsed', units.length > 0);
+      const spaces = mediaSpaceTargets(root, new Set([...contentImages, ...units.map(unit => unit.target)]));
       syncMediaPlaceholders(root, state, units, spaces);
       syncMediaHidden(root, state, new Set([...contentImages, ...videos, ...spaces]));
       const hiddenVideos = new Set(videos);
@@ -1813,7 +1852,8 @@
         // muted/volume 변경은 사이트의 저장된 음향 설정까지 덮으므로 일시정지만 합니다.
         try { if (!video.paused) video.pause(); } catch (error) { /* 로드 전 영상도 계속 숨깁니다. */ }
       });
-      syncMediaNotice(root, state, Boolean(allImages.length), hasVideos, images, videoCount);
+      syncMediaNotice(root, state, { image: allImages.length > 0, video: hasVideos, x: hasX },
+        { image: images, video: videoCount, x: xUnits.length });
     }
   }
 
@@ -2093,7 +2133,7 @@
           [hidden] { display: none !important; }
           .bar { background: var(--reader-surface); border-bottom: 1px solid var(--reader-line); }
           .row {
-            display: flex; align-items: center; gap: 12px; padding: 9px 12px 8px;
+            display: flex; align-items: center; gap: 6px; padding: 9px 10px 8px 12px;
             padding-top: calc(9px + env(safe-area-inset-top, 0px));
             font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
           }
@@ -2112,7 +2152,12 @@
           .vote-count::before { content: '★'; font-size: 9px; }
           .vote-count[data-fm-clean-vote-sign="up"] { color: var(--fm-vote-red); background: var(--fm-vote-red-tint); }
           .vote-count[data-fm-clean-vote-sign="down"] { color: var(--fm-vote-blue); background: var(--fm-vote-blue-tint); }
-          .percent { flex: none; color: var(--reader-muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+          .percent {
+            display: grid; justify-items: end; flex: none;
+            color: var(--reader-muted); font-size: 10px; font-variant-numeric: tabular-nums;
+          }
+          .percent::before, .percent-value { grid-area: 1 / 1; }
+          .percent::before { content: '100%'; visibility: hidden; }
           progress {
             position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; border: 0;
             overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%);
@@ -2130,7 +2175,7 @@
           <div class="row">
             <button class="title" type="button"></button>
             <span class="vote-count" role="img" hidden></span>
-            <span class="percent" aria-hidden="true">0%</span>
+            <span class="percent" aria-hidden="true"><span class="percent-value">0%</span></span>
           </div>
           <progress max="100" value="0" aria-label="화면 상단 기준 댓글 끝까지의 스크롤 진행률"></progress>
           <div class="track" aria-hidden="true"><span class="fill"></span></div>
@@ -2142,7 +2187,7 @@
       readingState.voteCount = shadow.querySelector('.vote-count');
       readingState.progress = shadow.querySelector('progress');
       readingState.fill = shadow.querySelector('.fill');
-      readingState.percent = shadow.querySelector('.percent');
+      readingState.percent = shadow.querySelector('.percent-value');
       readingState.title.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       });
@@ -2927,9 +2972,9 @@
             <button class="copy-link" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>링크 복사</button>
             <p data-copy-status role="status"></p>
           </div>
-          <div class="media-control" hidden><span>이미지 표시</span>
+          <div class="media-control" hidden><span>미디어 표시</span>
             <label class="position-toggle media-toggle">
-              <input type="checkbox" role="switch" name="showMedia" aria-label="이미지·비디오 기본 표시">
+              <input type="checkbox" role="switch" name="showMedia" aria-label="이미지·동영상·X 게시물 기본 표시">
             </label>
           </div></div>
           <div class="position-control"><span>버튼 위치</span>

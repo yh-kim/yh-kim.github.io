@@ -984,6 +984,18 @@
           visiblyRendered(readingBadge) && readingBadge.previousElementSibling.matches('.title') &&
           readingBadge.nextElementSibling.matches('.percent') && readingBadge.textContent === '-4' &&
           voteView.getComputedStyle(readingBadge).color === voteView.getComputedStyle(articleBadge).color);
+        const percentValue = readingHeader.querySelector('.percent-value');
+        const savedPercent = percentValue.textContent;
+        const voteAndPercentPosition = percent => {
+          percentValue.textContent = percent;
+          return [readingBadge.getBoundingClientRect().right, percentValue.parentElement.getBoundingClientRect().width];
+        };
+        const positions = ['9%', '99%', '100%'].map(voteAndPercentPosition);
+        const scoreGap = percentValue.parentElement.getBoundingClientRect().left - readingBadge.getBoundingClientRect().right;
+        percentValue.textContent = savedPercent;
+        record('스크롤 상단바는 추천수를 우측에 붙이고 진행률 100%에서도 제자리에 표시',
+          scoreGap > 0 && scoreGap <= 6 && positions.every(([right, width]) =>
+            right === positions[0][0] && width === positions[0][1]));
 
         const nativeVotes = [];
         let deleteConfirmed = false;
@@ -1293,6 +1305,51 @@
           visiblyRendered(noMediaDoc.querySelector('#plain-media-text')) &&
           !visiblyRendered(homeMediaDoc.querySelector('#fm-clean-controls')?.shadowRoot
             ?.querySelector('.media-control')));
+
+        const xDoc = await makeLayoutFrame(source, '본문 X 미리보기 접기', `
+          <div class="bd"><div class="rd" data-docsrl="508"><div class="rd_hd"><h1>X 게시물 있는 글</h1></div>
+            <div class="rd_body"><article><div class="xe_content" id="x-media-root">
+              <p>본문 <a id="x-plain-link" href="https://x.com/example/status/234">단순 X 링크</a></p>
+              <div id="x-widget-host"><blockquote class="fm-twitter-tweet twitter-tweet" id="x-loading">
+                <img src="${IMAGE}" width="16" height="16" alt="미리보기 장식">X 위젯 로딩 중
+              </blockquote><script type="application/json" src="https://platform.x.com/widgets.js"><\/script></div>
+              <iframe id="x-unrelated" src="https://example.org/frame" width="100" height="40"></iframe>
+            </div></article></div></div></div>`, '', { showMedia: false });
+        const xRoot = xDoc.querySelector('#x-media-root');
+        const xWidgetHost = xDoc.querySelector('#x-widget-host');
+        const xNotice = xDoc.querySelector('[data-fm-clean-media-notice]');
+        const xButtons = () => xRoot.querySelectorAll('[data-fm-clean-media-placeholder="x"]');
+        record('미디어 기본 표시 OFF에서 본문 X 미리보기만 접고 단순 링크와 다른 iframe은 유지',
+          xButtons().length === 1 && xButtons()[0].textContent.includes('X 게시물 보기') &&
+          !visiblyRendered(xWidgetHost) && !xRoot.querySelector('[data-fm-clean-media-placeholder="image"]') &&
+          visiblyRendered(xDoc.querySelector('#x-plain-link')) && visiblyRendered(xDoc.querySelector('#x-unrelated')) &&
+          xNotice?.textContent.includes('X 게시물 1개'));
+        xButtons()[0]?.click();
+        xDoc.querySelector('#x-loading').outerHTML = `<div class="twitter-tweet-rendered"><iframe
+          id="twitter-widget-0" src="https://platform.twitter.com/embed/Tweet.html?id=123" width="100" height="60"></iframe></div>`;
+        xWidgetHost.querySelector('script').remove();
+        await delay(75);
+        const renderedXPost = xDoc.querySelector('#twitter-widget-0');
+        record('개별로 펼친 X 게시물은 위젯으로 바뀐 뒤에도 같은 자리에서 표시',
+          visiblyRendered(renderedXPost) && xButtons().length === 0 && xNotice?.textContent === 'X 게시물 전체 가리기');
+        xRoot.insertAdjacentHTML('beforeend', `<div><p id="x-neighbor">미리보기 앞의 본문</p>
+          <iframe id="x-late-frame" src="https://platform.x.com/embed/Tweet.html?id=456" width="100" height="40"></iframe></div>
+          <img id="x-late-photo" src="${IMAGE}" width="24" height="24" alt="본문 사진">`);
+        await delay(75);
+        record('늦게 추가된 X iframe과 사진도 접히고 전체 버튼에서 종류별 개수를 표시',
+          xButtons().length === 1 && visiblyRendered(renderedXPost) && visiblyRendered(xDoc.querySelector('#x-neighbor')) &&
+          !visiblyRendered(xDoc.querySelector('#x-late-frame')) && !visiblyRendered(xDoc.querySelector('#x-late-photo')) &&
+          xNotice?.textContent.includes('이미지 1개 · X 게시물 1개'));
+        xNotice?.click();
+        const xAllVisible = ['#twitter-widget-0', '#x-late-frame', '#x-late-photo'].every(selector =>
+          visiblyRendered(xDoc.querySelector(selector)));
+        xNotice?.click();
+        const xAllHidden = !visiblyRendered(renderedXPost) && xButtons().length === 2 && xNotice?.textContent.includes('X 게시물 2개');
+        const xSettingOn = detailOption(xDoc, 'showMedia', true);
+        await delay(45);
+        record('전체 보기·가리기와 기본 표시 설정이 X에 적용되며 위젯 노드를 그대로 사용',
+          xAllVisible && xAllHidden && xSettingOn && xButtons().length === 0 &&
+          visiblyRendered(renderedXPost) && xDoc.querySelector('#twitter-widget-0') === renderedXPost);
 
         const playerDoc = await makeLayoutFrame(source, '실제 mejs 비디오 플레이어 두 개', `
           <div class="bd"><div class="rd" data-docsrl="503"><div class="rd_hd"><h1>영상 글</h1></div>
@@ -1945,14 +2002,14 @@
         const copyBounds = copyArea?.getBoundingClientRect();
         const mediaBounds = mediaControl?.getBoundingClientRect();
         const positionStyle = tapDoc.defaultView.getComputedStyle(positionControl);
-        record('상세 팝업은 링크 복사·이미지 표시를 같은 줄 반반 배치하고 URL 문구를 제거',
+        record('상세 팝업은 링크 복사·미디어 표시를 같은 줄 반반 배치하고 URL 문구를 제거',
           detailActions?.parentElement === menuPanel &&
           copyArea?.parentElement === detailActions && mediaControl?.parentElement === detailActions &&
           mediaControl.previousElementSibling === copyArea &&
           copyBounds && mediaBounds && Math.abs(copyBounds.top - mediaBounds.top) < 1 &&
           Math.abs(copyBounds.width - mediaBounds.width) <= 2 &&
           !menuPanel.querySelector('[data-copy-url]') &&
-          mediaControl.textContent.includes('이미지 표시'));
+          mediaControl.textContent.includes('미디어 표시'));
         record('낮은 상세 화면에서 압축된 위치 전환이 하단에 보이고 터치됨',
           positionControl?.parentElement === menuPanel &&
           positionControl.previousElementSibling === detailActions &&
