@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.33
+// @version      1.6.34
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.33';
+  const SCRIPT_VERSION = '1.6.34';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -40,7 +40,7 @@
     ['icons', '글·댓글 닉네임 아이콘 숨김'],
     ['votes', '본문 추천·비추천 버튼 작게 표시'],
     ['boardLabel', '상세 닉네임 왼쪽 현재 메뉴 표시'],
-    ['count', '상세 제목 오른쪽 추천 숫자'],
+    ['count', '상세 제목·스크롤 상단바 추천 수 표시'],
     ['readingHeader', '스크롤 시 제목·진행 바 표시'],
     ['readHistory', '읽은 글 일주일 표시'],
     ['swipeBack', '오른쪽 스와이프로 뒤로가기'],
@@ -348,6 +348,7 @@
     const commentItem = `${root}[data-fm-clean-commentactions="true"] .fdb_itm:has(> .fdb_nav)`;
     const commentNav = `${root}[data-fm-clean-commentactions="true"] .fdb_itm .fdb_nav`;
     const articleImage = `${root} body.night_mode ${BRIGHT_IMAGE_SELECTOR}`;
+    const toast = `${root} :is(#fm_alert .fm_alert, .notice-wrap .notice-item, #notify_point)`;
     // 본문 작성자 색상·영상·인용 형식은 유지하고 다크 모드 이미지 밝기만 낮춥니다.
     return `
       ${root} {
@@ -854,40 +855,46 @@
         color: var(--fm-clean-read) !important; font-weight: 400 !important;
       }
       ${root} #fm_alert {
-        position: fixed !important; right: 12px !important; bottom: 0 !important;
-        top: auto !important; transform: none !important; max-width: calc(100vw - 24px) !important;
-      }
-      ${root} #fm_alert:has(.fm_alert_wrap:is(.best, .pop)) {
+        position: fixed !important; right: 12px !important; top: auto !important; transform: none !important;
+        z-index: 10000 !important;
+        max-width: calc(100vw - 24px) !important;
         bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
         padding: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important;
       }
-      ${root} #fm_alert .fm_alert_wrap:is(.best, .pop) {
+      ${root} #fm_alert .fm_alert_wrap {
         width: min(280px, calc(100vw - 24px)) !important;
         padding: 0 !important; border: 0 !important; background: transparent !important;
         box-shadow: none !important;
       }
-      ${root} #fm_alert :is(.best, .pop) .fm_alert {
-        padding: 10px 12px !important; border: 1px solid var(--fm-clean-line) !important;
+      ${toast} {
+        box-sizing: border-box; border: 1px solid var(--fm-clean-line) !important;
         border-left: 2px solid var(--fm-clean-accent) !important; border-radius: 10px !important;
-        background: var(--fm-clean-surface) !important; background-image: none !important;
-        box-shadow: 0 4px 16px #0002 !important;
+        background-color: var(--fm-clean-surface) !important; color: var(--fm-clean-text) !important;
+        box-shadow: 0 4px 16px #0002 !important; text-shadow: none !important;
+        font: 500 13px/1.45 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
       }
-      ${root} #fm_alert :is(.best, .pop) .msg {
-        color: var(--fm-clean-text) !important; font-size: 13px !important; line-height: 1.45 !important;
+      ${root} #fm_alert .fm_alert {
+        padding: 10px 12px !important; background-image: none !important;
       }
-      ${root} #fm_alert :is(.best, .pop) .msg * {
+      ${root} #fm_alert .msg { font: inherit !important; white-space: normal !important; overflow-wrap: anywhere; }
+      ${root} .notice-wrap { max-width: calc(100vw - 40px); }
+      ${root} .notice-wrap .notice-item > p {
+        font: inherit !important; margin: 0 !important; padding: 0 !important; border: 0 !important;
+        overflow-wrap: anywhere;
+      }
+      ${toast} :is(.msg, p, strong), ${toast} :is(.msg, p) * {
         color: var(--fm-clean-text) !important; text-shadow: none !important;
       }
-      ${root} #fm_alert :is(.best, .pop) .msg[data-fm-clean-alert="linked"] { font-size: 0 !important; line-height: 0 !important; }
-      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-hidden] { display: none !important; }
-      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-path]:not([data-fm-clean-alert-title]) { display: contents !important; }
-      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-title] {
+      ${root} #fm_alert .msg[data-fm-clean-alert="linked"] { font-size: 0 !important; line-height: 0 !important; }
+      ${root} #fm_alert .msg [data-fm-clean-alert-hidden] { display: none !important; }
+      ${root} #fm_alert .msg [data-fm-clean-alert-path]:not([data-fm-clean-alert-title]) { display: contents !important; }
+      ${root} #fm_alert .msg [data-fm-clean-alert-title] {
         display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         overflow: hidden; white-space: normal !important; color: var(--fm-clean-text) !important;
         font: 500 13px/1.45 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
         text-decoration: none !important; text-shadow: none !important;
       }
-      ${root} #fm_alert :is(.best, .pop) .msg [data-fm-clean-alert-title] * { color: inherit !important; font: inherit !important; }
+      ${root} #fm_alert .msg [data-fm-clean-alert-title] * { color: inherit !important; font: inherit !important; }
       ${root} .bd_faq_srch {
         background: var(--fm-clean-surface) !important; border-color: var(--fm-clean-line) !important;
         color: var(--fm-clean-text) !important;
@@ -1093,33 +1100,41 @@
         display: flex; align-items: center; gap: 4px; flex: none;
       }
       ${mobileUI} [data-fm-clean-comment-stats] {
-        display: inline-flex; vertical-align: middle; white-space: nowrap;
+        display: inline-flex; gap: 2px; vertical-align: middle; white-space: nowrap;
       }
       ${mobileUI} [data-fm-clean-article-votes] {
         justify-content: flex-end; clear: both; margin: 0; padding: 8px 10px 10px;
       }
       ${mobileUI} button[data-fm-clean-vote-action] {
-        display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-        min-height: 30px; min-width: 32px; box-sizing: border-box; margin: 0; padding: 0 6px;
-        border: 1px solid var(--fm-clean-line, #8885); border-radius: 9px;
-        background: var(--fm-clean-raised, transparent); color: var(--fm-vote-color, var(--fm-vote-neutral));
+        display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+        min-height: 24px; min-width: 24px; box-sizing: border-box; margin: 0; padding: 0 3px;
+        border: 0; border-radius: 5px; background: transparent;
+        color: var(--fm-vote-color, var(--fm-vote-neutral));
         font: 600 11px/1 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         font-variant-numeric: tabular-nums; white-space: nowrap; cursor: pointer; touch-action: manipulation;
       }
       ${mobileUI} [data-fm-clean-article-votes] button {
-        min-height: 36px; padding: 0 10px; font-size: 12px;
+        min-height: 36px; padding: 0 10px; gap: 4px; font-size: 12px;
+        border: 1px solid var(--fm-clean-line, #8885); border-radius: 9px;
+        background: var(--fm-clean-raised, transparent);
       }
       ${mobileUI} button[data-fm-clean-vote-action="up"]::before { content: '↑'; font-size: 13px; }
       ${mobileUI} button[data-fm-clean-vote-action="down"]::before { content: '↓'; font-size: 13px; }
+      ${mobileUI} [data-fm-clean-comment-stats] button[data-fm-clean-vote-action]::before { font-size: 11px; }
       ${mobileUI} button[data-fm-clean-vote-action="delete"] {
-        border-color: transparent; background: transparent;
         --fm-vote-tint: var(--fm-vote-red-tint);
       }
       ${mobileUI} button[data-fm-clean-vote-action="delete"]:is(:hover, :focus-visible) { color: var(--fm-vote-red); }
-      ${mobileUI} button[data-fm-clean-vote-action]:is(:hover, :active, [aria-pressed="true"]) {
+      ${mobileUI} [data-fm-clean-article-votes] button[data-fm-clean-vote-action]:is(:hover, :active, [aria-pressed="true"]),
+      ${mobileUI} [data-fm-clean-comment-stats] button[data-fm-clean-vote-action]:active {
         background: var(--fm-vote-tint, var(--fm-clean-raised, transparent));
       }
-      ${mobileUI} button[data-fm-clean-vote-action][aria-pressed="true"] { border-color: var(--fm-vote-color); }
+      ${mobileUI} [data-fm-clean-comment-stats] button[aria-pressed="true"] {
+        font-weight: 700; text-decoration: underline; text-underline-offset: 2px;
+      }
+      ${mobileUI} [data-fm-clean-article-votes] button[data-fm-clean-vote-action][aria-pressed="true"] {
+        border-color: var(--fm-vote-color);
+      }
       ${mobileUI} button[data-fm-clean-vote-action]:focus-visible {
         outline: 2px solid var(--fm-vote-color, var(--fm-vote-neutral)) !important; outline-offset: 1px;
       }
@@ -2000,7 +2015,7 @@
   }
 
   const readingState = {
-    host: null, bar: null, title: null, progress: null, fill: null, percent: null,
+    host: null, bar: null, title: null, voteCount: null, progress: null, fill: null, percent: null,
     heading: null, end: null, frame: 0, resizeObserver: null, body: null
   };
 
@@ -2086,6 +2101,14 @@
             color: var(--reader-title); font-size: 12px; font-weight: 600; line-height: 1.5;
           }
           .title:focus-visible { outline: 2px solid var(--reader-accent); outline-offset: 2px; }
+          .vote-count {
+            display: inline-flex; align-items: center; flex: none; gap: 3px; padding: 2px 6px;
+            border-radius: 999px; color: var(--reader-muted); background: var(--fm-clean-raised, transparent);
+            font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+          }
+          .vote-count::before { content: '★'; font-size: 9px; }
+          .vote-count[data-fm-clean-vote-sign="up"] { color: var(--fm-vote-red); background: var(--fm-vote-red-tint); }
+          .vote-count[data-fm-clean-vote-sign="down"] { color: var(--fm-vote-blue); background: var(--fm-vote-blue-tint); }
           .percent { flex: none; color: var(--reader-muted); font-size: 10px; font-variant-numeric: tabular-nums; }
           progress {
             position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; border: 0;
@@ -2101,7 +2124,11 @@
           @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
         </style>
         <div class="bar" hidden>
-          <div class="row"><button class="title" type="button"></button><span class="percent" aria-hidden="true">0%</span></div>
+          <div class="row">
+            <button class="title" type="button"></button>
+            <span class="vote-count" role="img" hidden></span>
+            <span class="percent" aria-hidden="true">0%</span>
+          </div>
           <progress max="100" value="0" aria-label="화면 상단 기준 댓글 끝까지의 스크롤 진행률"></progress>
           <div class="track" aria-hidden="true"><span class="fill"></span></div>
         </div>
@@ -2109,6 +2136,7 @@
       readingState.host = host;
       readingState.bar = shadow.querySelector('.bar');
       readingState.title = shadow.querySelector('.title');
+      readingState.voteCount = shadow.querySelector('.vote-count');
       readingState.progress = shadow.querySelector('progress');
       readingState.fill = shadow.querySelector('.fill');
       readingState.percent = shadow.querySelector('.percent');
@@ -2141,6 +2169,17 @@
       readingState.body = document.body;
     }
     scheduleReadingProgress();
+  }
+
+  function syncReadingVoteCount() {
+    const { heading, voteCount } = readingState;
+    if (!voteCount) return;
+    const count = settings.count && heading?.querySelector('[data-fm-clean-badge]')?.textContent;
+    voteCount.hidden = !count;
+    if (!count) return;
+    if (voteCount.textContent !== count) voteCount.textContent = count;
+    voteCount.setAttribute('aria-label', `추천 수 ${count}`);
+    colorVoteCount(voteCount, count);
   }
 
   function mountLauncherNavigation() {
@@ -2677,6 +2716,7 @@
     }
     if (needs('read')) syncReadHistory();
     if (needs('layout')) syncReadingHeader();
+    if (needs('layout') || needs('votes')) syncReadingVoteCount();
     if (needs('bright')) syncBrightImages();
     if (needs('comments')) { syncCommentActions(); syncCommentAuthors(); }
     if (!sections) syncSwipeBack();

@@ -944,7 +944,7 @@
           </li>`;
         const voteDoc = await makeLayoutFrame(source, '목록 별과 게시글·댓글 추천', `
           <div class="bd bd_mobile"><div class="rd"><div id="bd_capture"><div class="rd_hd"><h1>추천 색과 버튼</h1></div>
-            <div class="rd_body"><article><p>게시글 본문</p></article></div></div>
+            <div class="rd_body"><article style="min-height:260px"><p>게시글 본문</p></article></div></div>
             <div class="rd_ft"><div class="fm_vote"><div class="use_new_voted_count"><span class="vote">
               <a class="vote_label" href="#" onclick="return fm_vote(501, this)">포텐</a>
               <span class="new_voted_count" id="fm_vote501">−4</span>
@@ -967,16 +967,23 @@
         const starColor = element => voteView.getComputedStyle(element.querySelector('.fa-star')).color;
         const lightColors = listVotes.map(starColor);
         const articleBadge = voteDoc.querySelector('.rd_hd h1 > [data-fm-clean-badge]');
+        const readingHeader = voteDoc.querySelector('#fm-clean-reading-header').shadowRoot;
+        const readingBadge = readingHeader.querySelector('.vote-count');
         record('목록 별은 양수만 빨강, 음수만 파랑이고 상세의 음수 배지도 같은 파랑을 사용',
           listVotes.map(voteSign).join(',') === 'up,down,' && new Set(lightColors).size === 3 &&
           voteSign(articleBadge) === 'down' && articleBadge.textContent === '-4' &&
           voteView.getComputedStyle(articleBadge).color === lightColors[1]);
         voteDoc.body.classList.add('night_mode');
         listVotes[2].querySelector('b').textContent = '-1';
-        await delay(60);
+        voteView.scrollTo({ top: 120, behavior: 'instant' });
+        for (let attempt = 0; attempt < 20 && readingHeader.querySelector('.bar').hidden; attempt++) await delay(30);
         record('야간 모드와 동적으로 바뀐 목록 추천 수에 맞춰 별 색을 갱신',
           starColor(listVotes[0]) !== lightColors[0] && starColor(listVotes[1]) !== lightColors[1] &&
           voteSign(listVotes[2]) === 'down' && starColor(listVotes[2]) === starColor(listVotes[1]));
+        record('스크롤 상단바 제목 오른쪽에 상세와 같은 추천 수와 색상을 표시',
+          visiblyRendered(readingBadge) && readingBadge.previousElementSibling.matches('.title') &&
+          readingBadge.nextElementSibling.matches('.percent') && readingBadge.textContent === '-4' &&
+          voteView.getComputedStyle(readingBadge).color === voteView.getComputedStyle(articleBadge).color);
 
         const nativeVotes = [];
         let deleteConfirmed = false;
@@ -1006,10 +1013,11 @@
         };
         const articleUp = voteButton(voteGroup, 'up');
         const articleDown = voteButton(voteGroup, 'down');
+        const commentUp = voteButton(otherComment, 'up');
+        const commentDown = voteButton(firstComment, 'down');
         articleUp.click();
         articleDown.click();
-        voteButton(otherComment, 'up').click();
-        const commentDown = voteButton(firstComment, 'down');
+        commentUp.click();
         commentDown.click();
         for (let attempt = 0; attempt < 20 && (articleBadge.textContent !== '+3' || commentDown.textContent !== '1'); attempt++) {
           await delay(30);
@@ -1020,13 +1028,20 @@
           voteRightInset >= 8 && voteRightInset <= 12 &&
           visiblyRendered(articleUp) && visiblyRendered(articleDown) && !visiblyRendered(voteDoc.querySelector('.vote_label')) &&
           nativeVotes.slice(0, 2).join(',') === 'post up/501/vote_label,post down/501' &&
-          articleBadge.textContent === '+3' && voteSign(articleBadge) === 'up' && articleUp.getAttribute('aria-pressed') === 'true',
+          articleBadge.textContent === '+3' && voteSign(articleBadge) === 'up' && articleUp.getAttribute('aria-pressed') === 'true' &&
+          readingBadge.textContent === '+3' && voteSign(readingBadge) === 'up',
           `우측 여백 ${voteRightInset}px / 제목 ${articleBadge.textContent}`);
         record('댓글 추천·비추천이 원본 링크에 전달되고 해당 댓글 수와 선택 상태가 갱신',
           nativeVotes.slice(2, 4).join(',') === 'comment up/1/511,comment down/1/510' &&
           voteButton(otherComment, 'up').textContent === '3' && commentDown.textContent === '1' &&
           commentDown.getAttribute('aria-pressed') === 'true',
           `호출 ${nativeVotes.slice(2, 4).join(', ')} / 비추천 ${commentDown.textContent} / 선택 ${commentDown.getAttribute('aria-pressed')}`);
+        record('댓글 추천·비추천 버튼은 테두리와 배경 없이 작게 표시',
+          [commentUp, commentDown].every(button => {
+            const style = voteView.getComputedStyle(button);
+            const { height } = button.getBoundingClientRect();
+            return style.borderTopWidth === '0px' && style.backgroundColor === 'rgba(0, 0, 0, 0)' && height >= 24 && height < 30;
+          }) && voteView.getComputedStyle(articleUp).borderTopWidth === '1px');
         const ownDelete = voteButton(firstComment, 'delete');
         ownDelete.click();
         const keptOnCancel = firstComment.isConnected;
@@ -1036,6 +1051,9 @@
           ownDelete.previousElementSibling === commentDown && !voteButton(otherComment, 'delete') &&
           keptOnCancel && !firstComment.isConnected && otherComment.isConnected &&
           nativeVotes.slice(-2).join(',') === 'delete confirm/510,delete confirm/510');
+        const readingCountOff = detailOption(voteDoc, 'count', false);
+        record('추천 수 표시 설정을 끄면 상세와 스크롤 상단바 추천 수가 함께 숨겨짐',
+          readingCountOff && readingBadge.hidden && !visiblyRendered(articleBadge));
         const oldArticleVotes = detailOption(voteDoc, 'footer', false) && detailOption(voteDoc, 'votes', false);
         const oldCommentVotes = detailOption(voteDoc, 'commentActions', false);
         await delay(50);
@@ -1702,40 +1720,48 @@
         }
         const themeAlertDoc = await makeLayoutFrame(source, '동적 알림 테마색', `
           <header class="hd">상단</header><div class="bd bd_mobile">본문</div>
-          <div id="fm_alert"></div>`, `
+          <div id="fm_alert"></div>
+          <div id="notify_point"><strong>+1</strong> 잉여력</div>
+          <div class="notice-wrap"><div class="notice-item-wrapper"><div class="notice-item notify_normal">
+            <div class="notice-item-close">x</div><p><a href="#message">실시간 알림</a></p>
+          </div></div></div>`, `
           #fm_alert .fm_alert_wrap { display:block }
           #fm_alert .best .fm_alert { background:#f6ecec; border:2px solid #c45353 }
           #fm_alert .best .fm_alert .msg, #fm_alert .best .fm_alert a { color:#a11d1d }
           #fm_alert .comment .fm_alert { background:#123456;color:#abcdef }
           #fm_alert .comment .msg { color:#abcdef }
+          #fm_alert .fm_alert.warning { background:#d45;color:#fff }
+          .notice-wrap .notice-item, #notify_point { background:#fac;color:#111 }
+          .notice-wrap .notice-item p a, #notify_point strong { color:#d45 !important }
         `);
         const themeAlertView = themeAlertDoc.defaultView;
         const themeAlertLayer = themeAlertDoc.querySelector('#fm_alert');
         const addThemeAlert = html => {
           themeAlertLayer.innerHTML = `<div class="fm_alert_wrap best"><div class="fm_alert"><span class="msg">${html}</span></div></div>
-            <div class="fm_alert_wrap comment"><div class="fm_alert"><span class="msg" id="theme-normal">일반 알림</span></div></div>`;
+            <div class="fm_alert_wrap comment"><div class="fm_alert"><span class="msg" id="theme-normal">댓글 알림</span></div></div>
+            <div class="fm_alert_wrap"><div class="fm_alert"><span class="msg" id="theme-vote">추천했습니다.</span></div></div>
+            <div class="fm_alert_wrap"><div class="fm_alert warning"><span class="msg" id="theme-warning">이미 추천하셨습니다.</span></div></div>`;
         };
         const themeColors = (text, surface, accent) => {
-          const card = themeAlertLayer.querySelector('.best .fm_alert');
-          const message = card.querySelector('.msg');
-          const colored = message.querySelector('[data-theme-colored]');
           const css = element => themeAlertView.getComputedStyle(element);
-          return css(card).backgroundColor === surface && css(card).borderLeftColor === accent &&
-            css(message).color === text && colored && css(colored).color === text &&
-            css(themeAlertLayer.querySelector('.comment .fm_alert')).backgroundColor === 'rgb(18, 52, 86)' &&
-            css(themeAlertLayer.querySelector('#theme-normal')).color === 'rgb(171, 205, 239)';
+          const cards = [...themeAlertDoc.querySelectorAll('#fm_alert .fm_alert, .notice-wrap .notice-item, #notify_point')];
+          const texts = [...themeAlertDoc.querySelectorAll('#fm_alert .msg, [data-theme-colored], .notice-item p a, #notify_point strong')];
+          return cards.length === 6 && cards.every(card => css(card).backgroundColor === surface && css(card).borderLeftColor === accent) &&
+            texts.every(element => css(element).color === text);
         };
         addThemeAlert('<span data-theme-colored style="color:#ff0000">링크 없는 인기글 제목</span>');
         await delay(60);
-        record('늦게 추가된 평문 인기글은 라이트 테마색을 사용하고 일반 알림은 유지',
-          themeColors('rgb(28, 27, 25)', 'rgb(255, 255, 255)', 'rgb(154, 78, 38)'));
+        record('일반 추천·경고·댓글·인기글·실시간·잉여력 알림에 공통 라이트 테마 적용',
+          themeColors('rgb(28, 27, 25)', 'rgb(255, 255, 255)', 'rgb(154, 78, 38)') &&
+          themeAlertDoc.querySelector('#theme-vote').textContent === '추천했습니다.' &&
+          themeAlertDoc.querySelector('#theme-warning').textContent === '이미 추천하셨습니다.');
         themeAlertDoc.body.classList.add('night_mode');
         await delay(60);
-        record('평문 인기글의 인라인 글자색도 야간 테마에 맞게 전환',
+        record('알림 공통 배경과 인라인 글자색도 야간 테마에 맞게 전환',
           themeColors('rgb(240, 239, 235)', 'rgb(27, 27, 26)', 'rgb(240, 181, 143)'));
         addThemeAlert('<b>포텐 터짐</b><br><a href="/best/123"><span data-theme-colored style="color:#ff0000">링크 인기글 제목</span></a>');
         await delay(60);
-        record('늦게 추가된 링크 인기글도 야간 테마색을 사용하고 일반 알림은 유지',
+        record('늦게 추가된 알림도 공통 야간 테마를 사용하고 인기글 제목 정리는 유지',
           themeColors('rgb(240, 239, 235)', 'rgb(27, 27, 26)', 'rgb(240, 181, 143)') &&
           themeAlertLayer.querySelector('.best a').hasAttribute('data-fm-clean-alert-title'));
         themeAlertDoc.body.classList.remove('night_mode');
@@ -1757,12 +1783,12 @@
         const boardPop = boardAlertLayer.querySelector('.pop .fm_alert');
         const boardPopLink = boardAlertDoc.querySelector('#board-pop-link');
         const boardStyle = element => boardAlertDoc.defaultView.getComputedStyle(element);
-        record('게시판 인기글 알림은 야간 테마와 아래 여백을 적용하고 일반 게시판 알림은 유지',
+        record('인기글과 일반 게시판 알림 모두 야간 테마와 아래 여백을 적용',
           boardStyle(boardPop).backgroundColor === 'rgb(27, 27, 26)' &&
           boardStyle(boardPopLink).color === 'rgb(240, 239, 235)' &&
           boardPopLink.hasAttribute('data-fm-clean-alert-title') &&
           Number.parseFloat(boardStyle(boardAlertLayer).bottom) >= 16 &&
-          boardStyle(boardAlertDoc.querySelector('#ordinary-mid')).backgroundColor === 'rgb(18, 52, 86)');
+          boardStyle(boardAlertDoc.querySelector('#ordinary-mid')).backgroundColor === 'rgb(27, 27, 26)');
         boardAlertDoc.body.classList.remove('night_mode');
         await delay(40);
         record('게시판 인기글 알림은 라이트 테마로 바뀔 때 색상도 갱신됨',
