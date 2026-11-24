@@ -1026,8 +1026,15 @@
         };
         const articleUp = voteButton(voteGroup, 'up');
         const articleDown = voteButton(voteGroup, 'down');
+        const footerScore = voteGroup.querySelector('[data-fm-clean-article-score]');
         const commentUp = voteButton(otherComment, 'up');
         const commentDown = voteButton(firstComment, 'down');
+        footerScore?.click();
+        record('본문 투표 버튼 왼쪽에 추천수를 표시하고 숫자를 눌러도 투표가 실행되지 않음',
+          visiblyRendered(footerScore) && footerScore.tagName === 'SPAN' && footerScore.tabIndex === -1 &&
+          footerScore.nextElementSibling === articleUp && footerScore.textContent === '-4' &&
+          footerScore.getAttribute('aria-label') === '추천 수 -4' &&
+          voteView.getComputedStyle(footerScore).color === voteView.getComputedStyle(articleBadge).color && nativeVotes.length === 0);
         articleUp.click();
         articleDown.click();
         commentUp.click();
@@ -1035,7 +1042,7 @@
         for (let attempt = 0; attempt < 20 && (articleBadge.textContent !== '+3' || commentDown.textContent !== '1'); attempt++) {
           await delay(30);
         }
-        const voteLeftInset = articleUp.getBoundingClientRect().left - voteGroup.getBoundingClientRect().left;
+        const voteLeftInset = footerScore?.getBoundingClientRect().left - voteGroup.getBoundingClientRect().left;
         const voteTopInset = articleUp.getBoundingClientRect().top - voteGroup.getBoundingClientRect().top;
         record('본문 왼쪽 하단 버튼이 원본 게시글 추천·비추천을 실행하고 badge와 선택 상태를 갱신',
           voteGroup.parentElement.matches('.rd_body') && voteGroup.parentElement.lastElementChild === voteGroup &&
@@ -1044,7 +1051,8 @@
           visiblyRendered(articleUp) && visiblyRendered(articleDown) && !visiblyRendered(voteDoc.querySelector('.vote_label')) &&
           nativeVotes.slice(0, 2).join(',') === 'post up/501/vote_label,post down/501' &&
           articleBadge.textContent === '+3' && voteSign(articleBadge) === 'up' && articleUp.getAttribute('aria-pressed') === 'true' &&
-          readingBadge.textContent === '+3' && voteSign(readingBadge) === 'up',
+          readingBadge.textContent === '+3' && voteSign(readingBadge) === 'up' &&
+          footerScore.textContent === '+3' && voteSign(footerScore) === 'up',
           `좌측 여백 ${voteLeftInset}px / 상단 여백 ${voteTopInset}px / 제목 ${articleBadge.textContent}`);
         record('댓글 추천·비추천이 원본 링크에 전달되고 해당 댓글 수와 선택 상태가 갱신',
           nativeVotes.slice(2, 4).join(',') === 'comment up/1/511,comment down/1/510' &&
@@ -1088,7 +1096,7 @@
           nativeVotes.slice(-2).join(',') === 'delete confirm/510,delete confirm/510');
         const readingCountOff = detailOption(voteDoc, 'count', false);
         record('추천 수 표시 설정을 끄면 상세와 스크롤 상단바 추천 수가 함께 숨겨짐',
-          readingCountOff && readingBadge.hidden && !visiblyRendered(articleBadge));
+          readingCountOff && readingBadge.hidden && !visiblyRendered(articleBadge) && visiblyRendered(footerScore));
         const oldArticleVotes = detailOption(voteDoc, 'footer', false) && detailOption(voteDoc, 'votes', false);
         const oldCommentVotes = detailOption(voteDoc, 'commentActions', false);
         await delay(50);

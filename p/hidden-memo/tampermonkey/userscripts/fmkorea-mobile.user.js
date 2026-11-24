@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.41
+// @version      1.6.42
 // @description  읽은 글 7일 기록, 이미지·동영상·X 게시물 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.41';
+  const SCRIPT_VERSION = '1.6.42';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1105,6 +1105,15 @@
       ${mobileUI} [data-fm-clean-article-votes] {
         justify-content: flex-start; clear: both; margin: 0; padding: 14px 10px 8px;
       }
+      ${mobileUI} [data-fm-clean-article-score] {
+        display: inline-flex; align-items: center; justify-content: center; flex: none; gap: 4px;
+        min-height: 22px; margin-inline-end: 3px; padding: 0 7px; border-radius: 999px;
+        color: var(--fm-vote-color, var(--fm-vote-neutral));
+        background: var(--fm-vote-tint, var(--fm-clean-raised, transparent));
+        font: 600 11px/1 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+        font-variant-numeric: tabular-nums; white-space: nowrap; cursor: default;
+      }
+      ${mobileUI} [data-fm-clean-article-score]::before { content: '★'; font-size: 9px; }
       ${mobileUI} button[data-fm-clean-vote-action] {
         display: inline-flex; align-items: center; justify-content: center; gap: 3px;
         min-height: 24px; min-width: 24px; box-sizing: border-box; margin: 0; padding: 0 3px;
@@ -1951,7 +1960,7 @@
       }
       syncVoteButton(group, 'up', up, '추천', '게시글 추천', vote.classList.contains('my_vote_up'));
       syncVoteButton(group, 'down', down, '비추천', '게시글 비추천', vote.classList.contains('my_vote_down'));
-      if (!group.firstChild) group.remove();
+      if (!group.querySelector('button')) group.remove();
     });
   }
 
@@ -2231,9 +2240,7 @@
     const count = settings.count && heading?.querySelector('[data-fm-clean-badge]')?.textContent;
     voteCount.hidden = !count;
     if (!count) return;
-    if (voteCount.textContent !== count) voteCount.textContent = count;
-    voteCount.setAttribute('aria-label', `추천 수 ${count}`);
-    colorVoteCount(voteCount, count);
+    updateVoteCountBadge(voteCount, count);
   }
 
   function mountLauncherNavigation() {
@@ -2766,7 +2773,7 @@
     if (needs('list')) syncListVoteColors();
     if (needs('votes')) {
       syncArticleVotes();
-      if (settings.enabled && settings.count && document.documentElement.dataset.fmCleanMobile === 'true') updateDetailCounts();
+      if (settings.enabled && document.documentElement.dataset.fmCleanMobile === 'true') updateDetailCounts();
     }
     if (needs('read')) syncReadHistory();
     if (needs('layout')) syncReadingHeader();
@@ -3051,6 +3058,12 @@
     else element.removeAttribute('data-fm-clean-vote-sign');
   }
 
+  function updateVoteCountBadge(badge, count) {
+    if (badge.textContent !== count) badge.textContent = count;
+    badge.setAttribute('aria-label', `추천 수 ${count}`);
+    colorVoteCount(badge, count);
+  }
+
   function syncListVoteColors() {
     if (!settings.enabled || document.documentElement.dataset.fmCleanMobile !== 'true') return;
     document.querySelectorAll(LIST_VOTE_SELECTOR).forEach(element => {
@@ -3120,11 +3133,26 @@
     // .rd는 글 상세에만 존재합니다. 목록 제목/댓글 추천수는 변경하지 않습니다.
     document.querySelectorAll('.rd').forEach(article => {
       const title = article.querySelector('.rd_hd h1.np_18px, .rd_hd h1');
-      if (!title) return;
+      const footer = article.querySelector('.rd_body > [data-fm-clean-article-votes]');
+      if (!footer && (!settings.count || !title)) return;
       const metadata = Array.from(article.querySelectorAll('.rd_hd .btm_area .side > span'))
         .find(item => /^\s*추천\s*수\s*/.test(item.textContent));
       const source = article.querySelector('.fm_vote .new_voted_count, .fm_vote .vote [id^="fm_vote"]:not([id^="fm_vote2"])');
       const count = readCount(source) ?? readCount(metadata?.querySelector('b'));
+      if (footer) {
+        let score = footer.querySelector('[data-fm-clean-article-score]');
+        if (count === null) score?.remove();
+        else {
+          if (!score) {
+            score = document.createElement('span');
+            score.setAttribute('data-fm-clean-article-score', '');
+            score.setAttribute('role', 'img');
+            footer.prepend(score);
+          }
+          updateVoteCountBadge(score, count);
+        }
+      }
+      if (!settings.count || !title) return;
       let badge = title.querySelector('[data-fm-clean-badge]');
       if (count === null) {
         badge?.remove();
@@ -3137,9 +3165,7 @@
         badge.setAttribute('data-fm-clean-badge', '');
         title.appendChild(badge);
       }
-      if (badge.textContent !== count) badge.textContent = count;
-      badge.setAttribute('aria-label', `추천 수 ${count}`);
-      colorVoteCount(badge, count);
+      updateVoteCountBadge(badge, count);
       syncDetailTitle(title);
       metadata?.setAttribute('data-fm-clean-original-count', '');
     });
