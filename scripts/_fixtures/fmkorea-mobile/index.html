@@ -866,9 +866,15 @@
           <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><h1>댓글 검사</h1></div>
             <div class="rd_body"><article>본문</article></div>
             <div class="fdb_lst_wrp"><div id="composer-slot"><div class="cmt_editor" id="original-composer">
-              <form id="original-comment-form"><textarea id="original-comment-text"></textarea>
-                <button type="submit">등록</button></form>
-            </div></div></div></div></div>`);
+              <form id="original-comment-form" class="cmt_wrt"><textarea id="original-comment-text"></textarea>
+                <button type="submit">작성</button></form>
+            </div></div><div id="re_cmt"><form class="simple_wrt"><textarea></textarea>
+              <button type="submit">답글 작성</button></form></div></div></div></div>`, `
+          .cmt_editor, #re_cmt, .fdb_lst_wrp form { height: 55px; overflow: hidden; }
+          .fdb_lst_wrp textarea { display: block; height: 44px; }
+          .fdb_lst_wrp button { float: right; height: 36px; }
+        `);
+        composerDoc.defaultView.frameElement.style.height = '480px';
         const originalComposer = composerDoc.querySelector('#original-composer');
         const originalCommentForm = composerDoc.querySelector('#original-comment-form');
         const originalCommentText = composerDoc.querySelector('#original-comment-text');
@@ -885,8 +891,17 @@
           composerDetails.contains(originalComposer) && originalComposer.contains(originalCommentForm));
         composerDetails?.querySelector('summary')?.click();
         await delay(30);
-        originalCommentForm.dispatchEvent(new composerDoc.defaultView.Event('submit',
-          { bubbles: true, cancelable: true }));
+        const submit = originalCommentForm.querySelector('button');
+        const reply = composerDoc.querySelector('#re_cmt button');
+        const hitBottom = button => {
+          const rect = button.getBoundingClientRect();
+          return composerDoc.elementFromPoint(rect.left + rect.width / 2, rect.bottom - 2);
+        };
+        record('댓글·답글 작성 버튼의 아래쪽까지 보이고 누를 수 있음',
+          hitBottom(submit) === submit && hitBottom(reply) === reply &&
+          originalComposer.getBoundingClientRect().bottom >= submit.getBoundingClientRect().bottom &&
+          reply.closest('#re_cmt').getBoundingClientRect().bottom >= reply.getBoundingClientRect().bottom);
+        hitBottom(submit)?.click();
         composerDetails?.querySelector('summary')?.click();
         await delay(30);
         record('댓글 입력은 기본 닫힘·열고 닫아도 입력값과 원본 제출 동작 유지',
@@ -930,14 +945,28 @@
         detailLauncher(mediaDoc).dispatchEvent(new mediaDoc.defaultView.KeyboardEvent('keydown',
           { key: 'ArrowDown', bubbles: true }));
         const mediaInput = mediaShadow.querySelector('.media-control input[name="showMedia"]');
+        const mediaNotice = mediaDoc.querySelector('button[data-fm-clean-media-notice]');
         record('상세 팝업의 미디어 토글은 기본 ON이며 본문 미디어가 보임',
           mediaInput?.checked && visiblyRendered(mediaDoc.querySelector('#media-image')) &&
           visiblyRendered(mediaDoc.querySelector('#media-video')) &&
+          mediaNotice?.textContent.trim() === '이미지·동영상 전체 가리기' &&
           !mediaRoot.hasAttribute('data-fm-clean-media-collapsed'));
+        mediaNotice?.focus();
+        mediaNotice?.click();
+        await delay(40);
+        const hiddenFromDefaultOn = mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          !visiblyRendered(mediaDoc.querySelector('#media-image')) && !youtubeFrame.isConnected &&
+          mediaNotice?.textContent.includes('전체 보기');
+        mediaNotice?.click();
+        await delay(40);
+        record('기본 ON에서 같은 버튼으로 가렸다 펼치면 설정·포커스가 유지됨',
+          hiddenFromDefaultOn && visiblyRendered(mediaDoc.querySelector('#media-image')) &&
+          youtubeFrame.isConnected && mediaNotice?.textContent.includes('전체 가리기') &&
+          mediaDoc.activeElement === mediaNotice && mediaInput?.checked &&
+          !mediaDoc.defaultView.__fmSettingsFixture.writes.length);
         mediaInput.checked = false;
         mediaInput.dispatchEvent(new mediaDoc.defaultView.Event('change', { bubbles: true }));
         await delay(60);
-        const mediaNotice = mediaDoc.querySelector('button[data-fm-clean-media-notice]');
         record('미디어 OFF는 본문 이미지 2개·비디오 2개만 숨기고 텍스트·댓글·목록을 보존',
           mediaRoot.hasAttribute('data-fm-clean-media-collapsed') &&
           mediaNotice?.nextElementSibling === mediaRoot &&
@@ -1042,14 +1071,20 @@
           inlineButtons().length === 1 &&
           inlineNotice?.textContent.includes('이미지 1개') &&
           !inlineNotice?.textContent.includes('비디오'));
-        inlineNotice?.click();
+        inlineButtons()[0]?.click();
         await delay(40);
-        record('상단 전체 보기로 나머지를 펼치면 본문 아이콘과 안내가 모두 사라짐',
+        record('개별로 모두 펼쳐도 전체 가리기 버튼이 유지됨',
           visiblyRendered(inlineDoc.querySelector('#media-picture')) &&
           visiblyRendered(inlineDoc.querySelector('#media-youtube')) &&
           !inlineRoot.hasAttribute('data-fm-clean-media-collapsed') &&
           inlineButtons().length === 0 &&
-          !inlineDoc.querySelector('button[data-fm-clean-media-notice]'));
+          inlineNotice?.textContent.includes('전체 가리기'));
+        inlineNotice?.click();
+        await delay(40);
+        record('전체 가리기는 개별로 펼친 사진·영상까지 다시 감춤',
+          inlineButtons().length === 4 && inlineRoot.hasAttribute('data-fm-clean-media-collapsed') &&
+          inlineNotice?.textContent.includes('전체 보기') && !visiblyRendered(inlineVideo) &&
+          !inlineDoc.querySelector('#media-youtube'));
 
         const nextMediaDoc = await makeLayoutFrame(source, '다음 상세는 미디어 다시 숨김',
           mediaBody, '', { showMedia: false });
@@ -1655,6 +1690,17 @@
         const memberHitView = memberHitDoc.defaultView;
         const memberHitPopup = memberHitDoc.querySelector('#popup_menu_area');
         const memberHitLinks = [...memberHitPopup.querySelectorAll('li > a')];
+        const lightMenuStyle = memberHitView.getComputedStyle(memberHitPopup);
+        record('회원 메뉴는 둥근 카드에 아이콘이 있는 원래 메뉴 행을 사용함',
+          lightMenuStyle.borderRadius === '14px' && lightMenuStyle.boxShadow !== 'none' &&
+          memberHitView.getComputedStyle(memberHitLinks[0].parentElement).backgroundImage !== 'none');
+        const lightMenuBackground = lightMenuStyle.backgroundColor;
+        memberHitDoc.body.classList.add('night_mode');
+        const darkMenuStyle = memberHitView.getComputedStyle(memberHitPopup);
+        record('야간 모드에서 회원 메뉴 배경과 링크가 테마 색상을 사용함',
+          darkMenuStyle.backgroundColor !== lightMenuBackground &&
+          darkMenuStyle.backgroundColor === memberHitView.getComputedStyle(memberHitDoc.body).backgroundColor &&
+          memberHitView.getComputedStyle(memberHitLinks[0]).color === 'rgb(240, 239, 235)');
         let memberHitOutsideCloses = 0;
         memberHitDoc.addEventListener('click', () => { memberHitPopup.style.display = 'none'; memberHitOutsideCloses++; });
         const memberHitRows = memberHitLinks.map(link => {

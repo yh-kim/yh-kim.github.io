@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.30
+// @version      1.6.31
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.30';
+  const SCRIPT_VERSION = '1.6.31';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1009,6 +1009,9 @@
     `;
   }
 
+  const mobileUI = 'html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"]';
+  const commentEditor = `${mobileUI} .bd :is(.cmt_editor, .cmt_wrt, .simple_wrt, #re_cmt)`;
+  const memberMenu = `${scope('appearance')} #popup_menu_area`;
   const style = document.createElement('style');
   style.id = 'fm-clean-style';
   style.textContent = [
@@ -1139,23 +1142,56 @@
       ${scope('commentComposer')} details[data-fm-clean-comment-composer] > .cmt_editor {
         margin: 0 !important; padding: 8px 10px !important;
       }
+      /* 작성기 높이에 하단 제출 영역을 포함하고 포커스 테두리도 잘리지 않게 합니다. */
+      ${commentEditor}, ${commentEditor} form {
+        box-sizing: border-box !important; max-width: 100%;
+        height: auto !important; max-height: none !important; overflow: visible !important;
+      }
+      ${commentEditor}::after, ${commentEditor} form::after {
+        content: ''; display: block; clear: both;
+      }
       html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] body::after {
         content: '' !important; display: block !important; clear: both;
         height: var(--fm-clean-bottom-space, 0px);
         pointer-events: none;
       }
-      /* 사이트의 회원 메뉴는 실제 링크 영역이 작아 모바일에서 누르기 어렵습니다. */
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] #popup_menu_area ul {
+      ${mobileUI} #popup_menu_area ul {
         padding: 4px 6px !important;
       }
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] #popup_menu_area li {
+      ${mobileUI} #popup_menu_area li {
         margin-bottom: 0 !important;
       }
-      html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] #popup_menu_area li a {
+      ${mobileUI} #popup_menu_area li a {
         display: flex !important; align-items: center; box-sizing: border-box;
         min-height: 44px; padding: 10px 12px 10px 25px !important;
         line-height: 1.4 !important; touch-action: manipulation;
       }
+      /* 메뉴 위치와 원본 링크는 사이트가 관리합니다. */
+      ${memberMenu} {
+        min-width: min(160px, calc(100vw - 24px)); max-width: min(240px, calc(100vw - 24px));
+        box-sizing: border-box; padding: 0 !important; border: 1px solid var(--fm-clean-line) !important;
+        border-radius: 14px !important; background: var(--fm-clean-surface) !important;
+        box-shadow: 0 2px 4px #0001, 0 10px 28px #0003 !important;
+      }
+      ${memberMenu} ul {
+        margin: 0 !important; padding: 5px !important;
+        border: 0 !important; background: transparent !important; list-style: none;
+      }
+      ${memberMenu} li {
+        padding: 0 !important; border: 0 !important; border-radius: 9px !important;
+        background-color: transparent !important; background-position: 10px center !important;
+        background-size: 16px !important; background-repeat: no-repeat !important; white-space: normal !important;
+      }
+      ${memberMenu} li + li { margin-top: 2px !important; }
+      ${memberMenu} li:is(:hover, :focus-within) { background-color: var(--fm-clean-soft) !important; }
+      ${memberMenu} li a {
+        padding: 9px 12px 9px 35px !important; border-radius: inherit;
+        color: var(--fm-clean-text) !important; background: transparent !important;
+        text-decoration: none !important; overflow-wrap: anywhere;
+        font: 500 13px/1.4 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif !important;
+      }
+      ${memberMenu} li a:is(:hover, :focus-visible) { color: var(--fm-clean-accent) !important; }
+      ${memberMenu} li a:focus-visible { outline-offset: -2px; }
       #${HOST_ID} {
         all: initial !important; display: block !important; position: fixed !important;
         --fm-control-edge: max(132px, env(safe-area-inset-left, 0px));
@@ -1555,14 +1591,13 @@
   }
 
   function restoreDetailMedia(root, state) {
+    const images = Array.from(state.resources.keys()).filter(media => media instanceof HTMLImageElement && root.contains(media));
     restoreMediaResources(state);
-    prepareDetailImages(root, state, Array.from(root.querySelectorAll('img')));
+    prepareDetailImages(root, state, images);
     root.removeAttribute('data-fm-clean-media-collapsed');
     syncMediaHidden(root, state, new Set());
     for (const { button } of state.placeholders.values()) button.remove();
     state.placeholders.clear();
-    state.notice?.remove();
-    state.notice = null;
     for (const [slot, frame] of state.frames) slot.replaceWith(frame);
     state.frames.clear();
     for (const [video, saved] of state.videos) {
@@ -1593,9 +1628,35 @@
     }
   }
 
+  function syncMediaNotice(root, state, hasImages, hasVideos, hiddenImages = 0, hiddenVideos = 0) {
+    if (!hasImages && !hasVideos) {
+      state.notice?.remove();
+      state.notice = null;
+      return;
+    }
+    if (!state.notice) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('data-fm-clean-media-notice', '');
+      button.addEventListener('click', () => {
+        state.expanded = root.hasAttribute('data-fm-clean-media-collapsed');
+        state.revealedItems = new WeakSet();
+        syncDetailMedia();
+        scheduleRefresh();
+      });
+      state.notice = button;
+    }
+    const label = [hasImages && '이미지', hasVideos && '동영상'].filter(Boolean).join('·');
+    const counts = [hiddenImages && `이미지 ${hiddenImages}개`, hiddenVideos && `비디오 ${hiddenVideos}개`]
+      .filter(Boolean).join(' · ');
+    const text = counts ? `${label} 전체 보기 (${counts})` : `${label} 전체 가리기`;
+    if (state.notice.textContent !== text) state.notice.textContent = text;
+    if (root.previousSibling !== state.notice) root.before(state.notice);
+  }
+
   function syncDetailMedia() {
     syncManualVideos();
-    const active = settings.enabled && !settings.showMedia &&
+    const active = settings.enabled &&
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
     const roots = new Set(active ? Array.from(document.querySelectorAll('.rd:has(.rd_hd h1) .rd_body article'))
       .filter(article => !article.parentElement.closest('article'))
@@ -1603,6 +1664,7 @@
     for (const [root, state] of detailMedia) {
       if (roots.has(root)) continue;
       restoreDetailMedia(root, state);
+      state.notice?.remove();
       detailMedia.delete(root);
     }
     for (const root of roots) {
@@ -1610,15 +1672,21 @@
       let state = detailMedia.get(root);
       if (state && state.id !== id) {
         restoreDetailMedia(root, state);
-        detailMedia.delete(root);
+        state.notice?.remove();
         state = null;
       }
       if (!state) {
-        state = { id, revealed: false, revealedItems: new WeakSet(), notice: null,
+        state = { id, showByDefault: settings.showMedia, expanded: null, revealedItems: new WeakSet(), notice: null,
           frames: new Map(), videos: new Map(), hidden: new Map(), placeholders: new Map(), resources: new Map() };
         detailMedia.set(root, state);
       }
-      if (state.revealed) continue;
+      if (state.showByDefault !== settings.showMedia) {
+        state.showByDefault = settings.showMedia;
+        state.expanded = null;
+        state.revealedItems = new WeakSet();
+      }
+      const expanded = state.expanded ?? state.showByDefault;
+      if (expanded && state.hidden.size) restoreDetailMedia(root, state);
       for (const element of state.resources.keys()) if (!root.contains(element)) state.resources.delete(element);
 
       // 영상 iframe은 DOM에서 분리해 숨긴 상태의 소리와 자동 재생을 중단합니다.
@@ -1627,18 +1695,28 @@
         slot.replaceWith(frame);
         state.frames.delete(slot);
       }
-      root.querySelectorAll('iframe').forEach(frame => {
-        if (!isVideoFrame(frame) || state.revealedItems.has(frame)) return;
+      const imageNodes = Array.from(root.querySelectorAll('img'));
+      const videoNodes = Array.from(root.querySelectorAll('video'));
+      const frameNodes = Array.from(root.querySelectorAll('iframe')).filter(isVideoFrame);
+      const hasVideos = Boolean(videoNodes.length || frameNodes.length || state.frames.size);
+      const contentImage = image => isContentImage(image, root, state);
+      if (expanded) {
+        syncMediaNotice(root, state, imageNodes.some(contentImage), hasVideos);
+        continue;
+      }
+
+      frameNodes.forEach(frame => {
+        if (state.revealedItems.has(frame)) return;
         const slot = document.createElement('template');
         slot.setAttribute('data-fm-clean-media-frame', '');
         frame.replaceWith(slot);
         slot.content.appendChild(frame);
         state.frames.set(slot, frame);
       });
-      const contentImages = Array.from(root.querySelectorAll('img')).filter(image =>
-        isContentImage(image, root, state) && !state.revealedItems.has(image));
+      const allImages = imageNodes.filter(contentImage);
+      const contentImages = allImages.filter(image => !state.revealedItems.has(image));
       const images = contentImages.length;
-      const videos = Array.from(root.querySelectorAll('video')).filter(video => !state.revealedItems.has(video));
+      const videos = videoNodes.filter(video => !state.revealedItems.has(video));
       const videoUnits = new Map();
       const addVideo = (target, media, key = target) => {
         if (!videoUnits.has(target)) videoUnits.set(target, { key, target, kind: 'video', sources: [] });
@@ -1676,25 +1754,7 @@
         // muted/volume 변경은 사이트의 저장된 음향 설정까지 덮으므로 일시정지만 합니다.
         try { if (!video.paused) video.pause(); } catch (error) { /* 로드 전 영상도 계속 숨깁니다. */ }
       });
-      if (!images && !videoCount) {
-        state.notice?.remove();
-        state.notice = null;
-        continue;
-      }
-      if (!state.notice) {
-        state.notice = document.createElement('button');
-        state.notice.type = 'button';
-        state.notice.setAttribute('data-fm-clean-media-notice', '');
-        state.notice.addEventListener('click', () => {
-          state.revealed = true;
-          restoreDetailMedia(root, state);
-          scheduleRefresh();
-        });
-      }
-      const text = [images && `이미지 ${images}개`, videoCount && `비디오 ${videoCount}개`]
-        .filter(Boolean).join(' · ') + '가 숨겨져 있습니다. 눌러서 모두 보기';
-      if (state.notice.textContent !== text) state.notice.textContent = text;
-      if (root.previousSibling !== state.notice) root.before(state.notice);
+      syncMediaNotice(root, state, Boolean(allImages.length), hasVideos, images, videoCount);
     }
   }
 
