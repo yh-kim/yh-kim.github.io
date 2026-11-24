@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.32
+// @version      1.6.33
 // @description  읽은 글 7일 기록, 이미지·비디오 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,10 +22,11 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.32';
+  const SCRIPT_VERSION = '1.6.33';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
+  const LIST_VOTE_SELECTOR = '.bd_m_lst .info > span:has(> .fa-star), .bd_lst td.voted, .fm_best_widget :is(.voted_count, .pc_voted_count)';
   const AD_STATE_ATTRIBUTE = 'data-fm-clean-ad-original';
   const BRIGHT_IMAGE_SELECTOR = '.rd_body article .xe_content img:not(table.invertl img):not([style*="filter" i], [style*="opacity" i]):not(:is(.fm_best_widget, .bd_m_lst, .bd_lst, .poll_table) img)';
   const defaults = {
@@ -37,14 +38,14 @@
     ['header', '상단 로고·알림 숨김'],
     ['ads', '광고 영역 숨김'],
     ['icons', '글·댓글 닉네임 아이콘 숨김'],
-    ['votes', '포텐·방출 버튼 숨김'],
+    ['votes', '본문 추천·비추천 버튼 작게 표시'],
     ['boardLabel', '상세 닉네임 왼쪽 현재 메뉴 표시'],
     ['count', '상세 제목 오른쪽 추천 숫자'],
     ['readingHeader', '스크롤 시 제목·진행 바 표시'],
     ['readHistory', '읽은 글 일주일 표시'],
     ['swipeBack', '오른쪽 스와이프로 뒤로가기'],
     ['footer', '상세 주소·하단 도구 숨김'],
-    ['commentActions', '댓글 추천 수만 표시·이동 버튼 정리'],
+    ['commentActions', '댓글 추천·비추천 버튼 작게 표시'],
     ['commentComposer', '댓글 쓰기 기본 접기'],
     ['siteFooter', '사이트 하단 문의·신고 숨김'],
     ['appearance', '깔끔한 화면 디자인']
@@ -667,15 +668,6 @@
         min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       }
       ${commentItem} > .meta .date { padding: 0 !important; font-size: 10px !important; }
-      ${commentItem} [data-fm-clean-comment-stats] {
-        display: inline-flex; align-items: center; gap: 7px; padding-left: 7px;
-        border-left: 1px solid var(--fm-clean-line); white-space: nowrap;
-        font-variant-numeric: tabular-nums; cursor: default;
-      }
-      ${commentItem} [data-fm-clean-comment-stats] span {
-        color: var(--fm-clean-muted) !important; font-size: 10px !important; font-weight: 500;
-      }
-      ${commentItem} [data-fm-clean-comment-stats] [data-stat="up"] { color: var(--fm-clean-comment) !important; }
       ${commentItem} > .comment-content { grid-row: 2; grid-column: 1 / -1; }
       ${commentNav} {
         grid-row: 1; grid-column: 2; position: static !important; float: none !important;
@@ -1070,11 +1062,68 @@
         display: inline-block !important; flex: 0 0 auto; align-self: flex-start;
         height: 22px; box-sizing: border-box; margin: 2px 0 0 auto; padding: 0 8px;
         border: 0; border-radius: 999px;
-        color: var(--fm-clean-accent, #9a4e26); background: var(--fm-clean-soft, #fff0e7); white-space: nowrap;
+        color: var(--fm-vote-color, var(--fm-vote-neutral));
+        background: var(--fm-vote-tint, var(--fm-clean-raised, #f6f5f2)); white-space: nowrap;
         font: 600 12px/22px Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
         letter-spacing: 0; text-indent: 0;
       }
+      ${scope('count')} [data-fm-clean-badge]::before { content: '★'; margin-right: 4px; font-size: 10px; }
       ${scope('count')} [data-fm-clean-original-count] { display: none !important; }
+      ${mobileUI} {
+        --fm-vote-red: #a54e59; --fm-vote-blue: #4e6b95; --fm-vote-neutral: #6b6862;
+        --fm-vote-red-tint: #f9edef; --fm-vote-blue-tint: #edf2f9;
+      }
+      ${mobileUI}:has(body.night_mode) {
+        --fm-vote-red: #d69ba2; --fm-vote-blue: #9ab3d8; --fm-vote-neutral: #b0ada6;
+        --fm-vote-red-tint: #35262a; --fm-vote-blue-tint: #252e3d;
+      }
+      ${mobileUI} :is([data-fm-clean-vote-sign="up"], [data-fm-clean-vote-action="up"]) {
+        --fm-vote-color: var(--fm-vote-red); --fm-vote-tint: var(--fm-vote-red-tint);
+      }
+      ${mobileUI} :is([data-fm-clean-vote-sign="down"], [data-fm-clean-vote-action="down"]) {
+        --fm-vote-color: var(--fm-vote-blue); --fm-vote-tint: var(--fm-vote-blue-tint);
+      }
+      ${mobileUI} .bd_m_lst .info [data-fm-clean-vote-sign] > .fa-star,
+      ${mobileUI} .bd_lst td.voted[data-fm-clean-vote-sign],
+      ${mobileUI} .fm_best_widget :is(.voted_count, .pc_voted_count)[data-fm-clean-vote-sign],
+      ${mobileUI} .fm_best_widget .pc_voted_count[data-fm-clean-vote-sign] > .count {
+        color: var(--fm-vote-color) !important;
+      }
+      ${mobileUI} :is([data-fm-clean-comment-stats], [data-fm-clean-article-votes]) {
+        display: flex; align-items: center; gap: 4px; flex: none;
+      }
+      ${mobileUI} [data-fm-clean-comment-stats] {
+        display: inline-flex; vertical-align: middle; white-space: nowrap;
+      }
+      ${mobileUI} [data-fm-clean-article-votes] {
+        justify-content: flex-end; clear: both; margin: 0; padding: 8px 10px 10px;
+      }
+      ${mobileUI} button[data-fm-clean-vote-action] {
+        display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+        min-height: 30px; min-width: 32px; box-sizing: border-box; margin: 0; padding: 0 6px;
+        border: 1px solid var(--fm-clean-line, #8885); border-radius: 9px;
+        background: var(--fm-clean-raised, transparent); color: var(--fm-vote-color, var(--fm-vote-neutral));
+        font: 600 11px/1 Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+        font-variant-numeric: tabular-nums; white-space: nowrap; cursor: pointer; touch-action: manipulation;
+      }
+      ${mobileUI} [data-fm-clean-article-votes] button {
+        min-height: 36px; padding: 0 10px; font-size: 12px;
+      }
+      ${mobileUI} button[data-fm-clean-vote-action="up"]::before { content: '↑'; font-size: 13px; }
+      ${mobileUI} button[data-fm-clean-vote-action="down"]::before { content: '↓'; font-size: 13px; }
+      ${mobileUI} button[data-fm-clean-vote-action="delete"] {
+        border-color: transparent; background: transparent;
+        --fm-vote-tint: var(--fm-vote-red-tint);
+      }
+      ${mobileUI} button[data-fm-clean-vote-action="delete"]:is(:hover, :focus-visible) { color: var(--fm-vote-red); }
+      ${mobileUI} button[data-fm-clean-vote-action]:is(:hover, :active, [aria-pressed="true"]) {
+        background: var(--fm-vote-tint, var(--fm-clean-raised, transparent));
+      }
+      ${mobileUI} button[data-fm-clean-vote-action][aria-pressed="true"] { border-color: var(--fm-vote-color); }
+      ${mobileUI} button[data-fm-clean-vote-action]:focus-visible {
+        outline: 2px solid var(--fm-vote-color, var(--fm-vote-neutral)) !important; outline-offset: 1px;
+      }
+      ${mobileUI} button[data-fm-clean-vote-action]:disabled { opacity: .55; cursor: default; }
       html[data-fm-clean-mobile="true"][data-fm-clean-enabled="true"] [data-fm-clean-media-collapsed] {
         height: auto !important; min-height: 0 !important;
       }
@@ -1750,35 +1799,95 @@
     }
   }
 
-  function syncCommentCounts() {
+  const voteButtonSources = new WeakMap();
+  const voteActionOrder = ['up', 'down', 'delete'];
+
+  function syncVoteButton(group, action, source, text, label, pressed = null) {
+    let button = group.querySelector(`[data-fm-clean-vote-action="${action}"]`);
+    if (!source || source.closest('[hidden], [aria-hidden="true"]')) {
+      button?.remove();
+      return;
+    }
+    if (!button) {
+      button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('data-fm-clean-vote-action', action);
+      button.addEventListener('click', () => {
+        const original = voteButtonSources.get(button);
+        if (original?.isConnected) original.click();
+      });
+      const order = voteActionOrder.indexOf(action);
+      const next = Array.from(group.children).find(item =>
+        voteActionOrder.indexOf(item.getAttribute('data-fm-clean-vote-action')) > order);
+      group.insertBefore(button, next || null);
+    }
+    voteButtonSources.set(button, source);
+    button.disabled = !source.matches('a, button, label') || source.matches(':disabled, [aria-disabled="true"]');
+    if (button.textContent !== text) button.textContent = text;
+    button.setAttribute('aria-label', label);
+    if (pressed !== null) button.setAttribute('aria-pressed', String(pressed));
+  }
+
+  function syncCommentActions() {
     const active = settings.enabled && settings.commentActions &&
       document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
-    document.querySelectorAll('[data-fm-clean-comment-stats]').forEach(stats => {
-      if (!active || !stats.closest('.fdb_itm')?.querySelector('.fdb_nav .vote')) stats.remove();
-    });
-    if (!active) return;
+    if (!active) {
+      document.querySelectorAll('[data-fm-clean-comment-stats]').forEach(stats => stats.remove());
+      return;
+    }
     document.querySelectorAll('.fdb_itm').forEach(item => {
       const meta = item.querySelector(':scope > .meta');
       const nav = item.querySelector(':scope > .fdb_nav');
-      if (!meta || !nav?.querySelector('.vote')) return;
-      let stats = meta.querySelector('[data-fm-clean-comment-stats]');
+      if (!meta) return;
+      const vote = nav?.querySelector('.vote');
+      const votedCount = vote?.querySelector('.voted_count');
+      const blamedCount = vote?.querySelector('.blamed_count');
+      const up = votedCount?.closest('a, button') || vote?.querySelector('a[title="추천"], a[onclick*="fm_vote_comment("]') || votedCount;
+      const down = blamedCount?.closest('a, button') || vote?.querySelector('a[title="비추천"], a[onclick*="fm_vote_comment2("]') || blamedCount;
+      const remove = nav?.querySelector(':is(a, button)[onclick*="deleteComment("], a[href*="act=dispBoardDeleteComment"], :is(a, button)[title="삭제"]');
+      let stats = meta.querySelector(':scope > [data-fm-clean-comment-stats]');
+      if (!up && !down && !remove) { stats?.remove(); return; }
       if (!stats) {
         stats = document.createElement('span');
         stats.setAttribute('data-fm-clean-comment-stats', '');
         stats.setAttribute('role', 'group');
-        stats.innerHTML = '<span data-stat="up" aria-hidden="true"></span> <span data-stat="down" aria-hidden="true"></span>';
+        stats.setAttribute('aria-label', '댓글 도구');
         meta.appendChild(stats);
       }
-      const up = readCount(nav.querySelector('.voted_count')) ?? '0';
-      const down = readCount(nav.querySelector('.blamed_count')) ?? '0';
-      const upLabel = `↑ ${up}`;
-      const downLabel = `↓ ${down}`;
-      const upText = stats.querySelector('[data-stat="up"]');
-      const downText = stats.querySelector('[data-stat="down"]');
-      if (upText.textContent !== upLabel) upText.textContent = upLabel;
-      if (downText.textContent !== downLabel) downText.textContent = downLabel;
-      const label = `추천 ${up}, 비추천 ${down}`;
-      if (stats.getAttribute('aria-label') !== label) stats.setAttribute('aria-label', label);
+      const upCount = readCount(votedCount) ?? '0';
+      const downCount = readCount(blamedCount) ?? (blamedCount?.textContent.trim() === '-' ? '–' : '0');
+      syncVoteButton(stats, 'up', up, upCount, `댓글 추천 ${upCount}`, Boolean(vote?.classList.contains('my_vote_up')));
+      syncVoteButton(stats, 'down', down, downCount, `댓글 비추천 ${downCount}`, Boolean(vote?.classList.contains('my_vote_down')));
+      syncVoteButton(stats, 'delete', remove, '삭제', '내 댓글 삭제');
+      if (!stats.firstChild) stats.remove();
+    });
+  }
+
+  function syncArticleVotes() {
+    const active = settings.enabled && (settings.votes || settings.footer) &&
+      document.documentElement.getAttribute('data-fm-clean-mobile') === 'true';
+    if (!active) {
+      document.querySelectorAll('[data-fm-clean-article-votes]').forEach(group => group.remove());
+      return;
+    }
+    document.querySelectorAll('.rd').forEach(article => {
+      const body = article.querySelector('.rd_body');
+      if (!body) return;
+      const vote = article.querySelector('.fm_vote');
+      const up = vote?.querySelector('a.vote_label, :is(a, button, label)[onclick*="fm_vote("]');
+      const down = vote?.querySelector('a.vote3, :is(a, button, label):is([onclick*="fm_vote2("], [onclick*="fm_vote3("])');
+      let group = body.querySelector(':scope > [data-fm-clean-article-votes]');
+      if (!up && !down) { group?.remove(); return; }
+      if (!group) {
+        group = document.createElement('div');
+        group.setAttribute('data-fm-clean-article-votes', '');
+        group.setAttribute('role', 'group');
+        group.setAttribute('aria-label', '게시글 추천·비추천');
+        body.appendChild(group);
+      }
+      syncVoteButton(group, 'up', up, '추천', '게시글 추천', vote.classList.contains('my_vote_up'));
+      syncVoteButton(group, 'down', down, '비추천', '게시글 비추천', vote.classList.contains('my_vote_down'));
+      if (!group.firstChild) group.remove();
     });
   }
 
@@ -2561,10 +2670,15 @@
     if (needs('media')) syncDetailMedia();
     // 숨김 처리 후 검사해 감춘 사진은 로드하지 않고, 펼친 지연 사진은 다시 등록합니다.
     if (needs('list') || needs('media')) syncListImages();
+    if (needs('list')) syncListVoteColors();
+    if (needs('votes')) {
+      syncArticleVotes();
+      if (settings.enabled && settings.count && document.documentElement.dataset.fmCleanMobile === 'true') updateDetailCounts();
+    }
     if (needs('read')) syncReadHistory();
     if (needs('layout')) syncReadingHeader();
     if (needs('bright')) syncBrightImages();
-    if (needs('comments')) { syncCommentCounts(); syncCommentAuthors(); }
+    if (needs('comments')) { syncCommentActions(); syncCommentAuthors(); }
     if (!sections) syncSwipeBack();
     if (!launcher || (sections && !needs('layout'))) return;
     launcher.toggleAttribute('data-off', !settings.enabled);
@@ -2832,8 +2946,22 @@
   function readCount(element) {
     if (!element) return null;
     const text = (element.querySelector('.voted_count') || element).textContent;
-    const match = text.match(/[+-]?\d[\d,]*/);
-    return match ? match[0] : null;
+    const match = text.match(/(?:[+−-]\s*)?\d[\d,]*(?:\.\d+)?/);
+    return match ? match[0].replace(/\s/g, '').replace('−', '-') : null;
+  }
+
+  function colorVoteCount(element, count) {
+    const number = Number(count?.replaceAll(',', ''));
+    if (number > 0) element.setAttribute('data-fm-clean-vote-sign', 'up');
+    else if (number < 0) element.setAttribute('data-fm-clean-vote-sign', 'down');
+    else element.removeAttribute('data-fm-clean-vote-sign');
+  }
+
+  function syncListVoteColors() {
+    if (!settings.enabled || document.documentElement.dataset.fmCleanMobile !== 'true') return;
+    document.querySelectorAll(LIST_VOTE_SELECTOR).forEach(element => {
+      colorVoteCount(element, readCount(element.querySelector('b, .count') || element));
+    });
   }
 
   function syncDetailTitle(title) {
@@ -2915,9 +3043,9 @@
         badge.setAttribute('data-fm-clean-badge', '');
         title.appendChild(badge);
       }
-      const text = count;
-      if (badge.textContent !== text) badge.textContent = text;
-      badge.setAttribute('aria-label', `포텐수 ${count}`);
+      if (badge.textContent !== count) badge.textContent = count;
+      badge.setAttribute('aria-label', `추천 수 ${count}`);
+      colorVoteCount(badge, count);
       syncDetailTitle(title);
       metadata?.setAttribute('data-fm-clean-original-count', '');
     });
@@ -3054,6 +3182,7 @@
     }
     if (target.closest('#fm_alert')) sections.add('alerts');
     else if (target.closest('.fdb_itm, .fdb_lst_wrp, .fdb_lst, .cmt_editor')) sections.add('comments');
+    else if (target.closest('.fm_vote')) sections.add('votes');
     else if (target.closest('.rd_body article')) {
       // 플레이어 시각 표시와 조작부 애니메이션에는 미디어를 재검사하지 않습니다.
       if (!target.closest('.mejs__controls, .vjs-control-bar, .fluid_controls_container')) {
@@ -3124,7 +3253,6 @@
           mountControls();
           if (host) host.hidden = false;
           if (settings.enabled && settings.boardLabel) updateBoardLabels();
-          if (settings.enabled && settings.count) updateDetailCounts();
         } else if (host) {
           host.remove();
           window.clearTimeout(launcherClickTimer);

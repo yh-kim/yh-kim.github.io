@@ -934,6 +934,116 @@
           !composerDoc.querySelector('details[data-fm-clean-comment-composer]') &&
           originalCommentText.value === '작성 중인 댓글');
 
+        const voteComment = (id, own = false) => `
+          <li id="comment_${id}" class="fdb_itm"><div class="meta"><a class="member_plate">댓글 작성자</a></div>
+            <div class="comment-content">댓글 본문</div>
+            <div class="fdb_nav"><span class="vote ui_font">
+              <a href="#" onclick="return fm_vote_comment(1, ${id}, this)" title="추천"><em><span class="voted_count">2</span></em></a>
+              <a href="#" onclick="return fm_vote_comment2(1, ${id}, this)" title="비추천"><span class="blamed_count"> </span></a>
+            </span>${own ? `<a href="#" onclick="return deleteComment(${id})" title="삭제">삭제</a>` : ''}</div>
+          </li>`;
+        const voteDoc = await makeLayoutFrame(source, '목록 별과 게시글·댓글 추천', `
+          <div class="bd bd_mobile"><div class="rd"><div id="bd_capture"><div class="rd_hd"><h1>추천 색과 버튼</h1></div>
+            <div class="rd_body"><article><p>게시글 본문</p></article></div></div>
+            <div class="rd_ft"><div class="fm_vote"><div class="use_new_voted_count"><span class="vote">
+              <a class="vote_label" href="#" onclick="return fm_vote(501, this)">포텐</a>
+              <span class="new_voted_count" id="fm_vote501">−4</span>
+              <a class="vote3" href="#" onclick="return fm_vote3(501)">방출</a>
+            </span></div></div></div>
+            <div class="fdb_lst_wrp"><ul class="fdb_lst_ul">${voteComment(510, true)}${voteComment(511)}</ul></div>
+          </div><ul class="bd_lst bd_m_lst"><li><div class="rt_area"><div class="info">
+            <span id="list-vote-plus"><i class="fa fa-star">★</i><span>추천</span><b>+1,024</b></span>
+            <span id="list-vote-minus"><i class="fa fa-star">★</i><span>추천</span><b>− 12</b></span>
+            <span id="list-vote-zero"><i class="fa fa-star">★</i><span>추천</span><b>0</b></span>
+          </div></div></li></ul></div>`);
+        const voteView = voteDoc.defaultView;
+        voteView.frameElement.scrollIntoView({ block: 'center' });
+        const voteGroup = voteDoc.querySelector('[data-fm-clean-article-votes]');
+        const firstComment = voteDoc.querySelector('#comment_510');
+        const otherComment = voteDoc.querySelector('#comment_511');
+        const voteButton = (scope, action) => scope.querySelector(`button[data-fm-clean-vote-action="${action}"]`);
+        const listVotes = ['plus', 'minus', 'zero'].map(sign => voteDoc.querySelector(`#list-vote-${sign}`));
+        const voteSign = element => element.getAttribute('data-fm-clean-vote-sign');
+        const starColor = element => voteView.getComputedStyle(element.querySelector('.fa-star')).color;
+        const lightColors = listVotes.map(starColor);
+        const articleBadge = voteDoc.querySelector('.rd_hd h1 > [data-fm-clean-badge]');
+        record('목록 별은 양수만 빨강, 음수만 파랑이고 상세의 음수 배지도 같은 파랑을 사용',
+          listVotes.map(voteSign).join(',') === 'up,down,' && new Set(lightColors).size === 3 &&
+          voteSign(articleBadge) === 'down' && articleBadge.textContent === '-4' &&
+          voteView.getComputedStyle(articleBadge).color === lightColors[1]);
+        voteDoc.body.classList.add('night_mode');
+        listVotes[2].querySelector('b').textContent = '-1';
+        await delay(60);
+        record('야간 모드와 동적으로 바뀐 목록 추천 수에 맞춰 별 색을 갱신',
+          starColor(listVotes[0]) !== lightColors[0] && starColor(listVotes[1]) !== lightColors[1] &&
+          voteSign(listVotes[2]) === 'down' && starColor(listVotes[2]) === starColor(listVotes[1]));
+
+        const nativeVotes = [];
+        let deleteConfirmed = false;
+        voteView.fm_vote = (id, original) => {
+          nativeVotes.push(`post up/${id}/${original.className}`);
+          voteDoc.querySelector('.new_voted_count').textContent = '+3';
+          original.closest('.fm_vote').classList.add('my_vote_up');
+          return false;
+        };
+        voteView.fm_vote3 = id => { nativeVotes.push(`post down/${id}`); return false; };
+        voteView.fm_vote_comment2 = (loggedIn, id, original) => {
+          nativeVotes.push(`comment down/${loggedIn}/${id}`);
+          original.querySelector('.blamed_count').textContent = '1';
+          original.closest('.vote').classList.add('my_vote_down');
+          return false;
+        };
+        voteView.fm_vote_comment = (loggedIn, id, original) => {
+          nativeVotes.push(`comment up/${loggedIn}/${id}`);
+          original.querySelector('.voted_count').textContent = '3';
+          return false;
+        };
+        voteView.confirm = () => deleteConfirmed;
+        voteView.deleteComment = id => {
+          nativeVotes.push(`delete confirm/${id}`);
+          if (voteView.confirm('삭제하시겠습니까?')) voteDoc.querySelector(`#comment_${id}`).remove();
+          return false;
+        };
+        const articleUp = voteButton(voteGroup, 'up');
+        const articleDown = voteButton(voteGroup, 'down');
+        articleUp.click();
+        articleDown.click();
+        voteButton(otherComment, 'up').click();
+        const commentDown = voteButton(firstComment, 'down');
+        commentDown.click();
+        for (let attempt = 0; attempt < 20 && (articleBadge.textContent !== '+3' || commentDown.textContent !== '1'); attempt++) {
+          await delay(30);
+        }
+        const voteRightInset = voteGroup.getBoundingClientRect().right - articleDown.getBoundingClientRect().right;
+        record('본문 우하단 버튼이 원본 게시글 추천·비추천을 실행하고 badge와 선택 상태를 갱신',
+          voteGroup.parentElement.matches('.rd_body') && voteGroup.parentElement.lastElementChild === voteGroup &&
+          voteRightInset >= 8 && voteRightInset <= 12 &&
+          visiblyRendered(articleUp) && visiblyRendered(articleDown) && !visiblyRendered(voteDoc.querySelector('.vote_label')) &&
+          nativeVotes.slice(0, 2).join(',') === 'post up/501/vote_label,post down/501' &&
+          articleBadge.textContent === '+3' && voteSign(articleBadge) === 'up' && articleUp.getAttribute('aria-pressed') === 'true',
+          `우측 여백 ${voteRightInset}px / 제목 ${articleBadge.textContent}`);
+        record('댓글 추천·비추천이 원본 링크에 전달되고 해당 댓글 수와 선택 상태가 갱신',
+          nativeVotes.slice(2, 4).join(',') === 'comment up/1/511,comment down/1/510' &&
+          voteButton(otherComment, 'up').textContent === '3' && commentDown.textContent === '1' &&
+          commentDown.getAttribute('aria-pressed') === 'true',
+          `호출 ${nativeVotes.slice(2, 4).join(', ')} / 비추천 ${commentDown.textContent} / 선택 ${commentDown.getAttribute('aria-pressed')}`);
+        const ownDelete = voteButton(firstComment, 'delete');
+        ownDelete.click();
+        const keptOnCancel = firstComment.isConnected;
+        deleteConfirmed = true;
+        ownDelete.click();
+        record('삭제는 권한이 있는 댓글의 비추천 오른쪽에 있고 원래 확인에서 취소할 수 있음',
+          ownDelete.previousElementSibling === commentDown && !voteButton(otherComment, 'delete') &&
+          keptOnCancel && !firstComment.isConnected && otherComment.isConnected &&
+          nativeVotes.slice(-2).join(',') === 'delete confirm/510,delete confirm/510');
+        const oldArticleVotes = detailOption(voteDoc, 'footer', false) && detailOption(voteDoc, 'votes', false);
+        const oldCommentVotes = detailOption(voteDoc, 'commentActions', false);
+        await delay(50);
+        record('간소화 설정을 끄면 원본 게시글 및 댓글 버튼이 복원됨',
+          oldArticleVotes && oldCommentVotes && !voteGroup.isConnected &&
+          visiblyRendered(voteDoc.querySelector('.vote_label')) &&
+          !otherComment.querySelector('[data-fm-clean-comment-stats]') && visiblyRendered(otherComment.querySelector('.vote a')));
+
         const mediaBody = `
           <div class="bd bd_mobile"><div class="rd" data-docsrl="501">
             <div class="rd_hd"><h1><span class="np_18px_span">미디어 있는 글</span></h1></div>
