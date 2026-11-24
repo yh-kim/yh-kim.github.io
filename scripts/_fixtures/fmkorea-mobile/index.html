@@ -865,14 +865,23 @@
           <header class="hd">상단 로고</header>
           <div class="bd bd_mobile"><div class="rd"><div class="rd_hd"><h1>댓글 검사</h1></div>
             <div class="rd_body"><article>본문</article></div>
-            <div class="fdb_lst_wrp"><div id="composer-slot"><div class="cmt_editor" id="original-composer">
-              <form id="original-comment-form" class="cmt_wrt"><textarea id="original-comment-text"></textarea>
-                <button type="submit">작성</button></form>
-            </div></div><div id="re_cmt"><form class="simple_wrt"><textarea></textarea>
-              <button type="submit">답글 작성</button></form></div></div></div></div>`, `
-          .cmt_editor, #re_cmt, .fdb_lst_wrp form { height: 55px; overflow: hidden; }
-          .fdb_lst_wrp textarea { display: block; height: 44px; }
-          .fdb_lst_wrp button { float: right; height: 36px; }
+            <div class="fdb_lst_wrp" id="composer-slot"><div class="cmt_editor" id="original-composer"
+                style="padding-left:6px;padding-right:6px">
+              <label for="original-comment-text">댓글 쓰기</label>
+              <form id="original-comment-form" class="bd_wrt clear"><div class="simple_wrt">
+                <textarea id="original-comment-text"></textarea>
+                <input class="bd_btn" type="submit" value="등록">
+              </div></form>
+            </div></div></div><div class="bd_lst_wrp" id="composer-following-list">게시판 글 목록</div></div>`, `
+          .bd .clear, .bd_mobile .simple_wrt:focus-within { position: relative; }
+          .cmt_editor { border: 1px solid #ddd; padding: 12px 16px 20px; }
+          .simple_wrt textarea { display: block; width: 95%; min-height: 48px; }
+          .bd_lst_wrp { position: relative; min-height: 100px; }
+          @media (max-width: 533px) {
+            .cmt_editor { padding-bottom: 60px !important; }
+            .simple_wrt .bd_btn { position: absolute; top: 100%; right: -1px;
+              width: 100%; height: 34px; margin-top: 12px; }
+          }
         `);
         composerDoc.defaultView.frameElement.style.height = '480px';
         const originalComposer = composerDoc.querySelector('#original-composer');
@@ -891,17 +900,20 @@
           composerDetails.contains(originalComposer) && originalComposer.contains(originalCommentForm));
         composerDetails?.querySelector('summary')?.click();
         await delay(30);
-        const submit = originalCommentForm.querySelector('button');
-        const reply = composerDoc.querySelector('#re_cmt button');
-        const hitBottom = button => {
-          const rect = button.getBoundingClientRect();
+        const submit = originalCommentForm.querySelector('[type="submit"]');
+        const followingList = composerDoc.querySelector('#composer-following-list');
+        const hitSubmitBottom = () => {
+          const rect = submit.getBoundingClientRect();
           return composerDoc.elementFromPoint(rect.left + rect.width / 2, rect.bottom - 2);
         };
-        record('댓글·답글 작성 버튼의 아래쪽까지 보이고 누를 수 있음',
-          hitBottom(submit) === submit && hitBottom(reply) === reply &&
-          originalComposer.getBoundingClientRect().bottom >= submit.getBoundingClientRect().bottom &&
-          reply.closest('#re_cmt').getBoundingClientRect().bottom >= reply.getBoundingClientRect().bottom);
-        hitBottom(submit)?.click();
+        const submitFits = () => hitSubmitBottom() === submit &&
+          submit.getBoundingClientRect().bottom <= originalComposer.getBoundingClientRect().bottom &&
+          submit.getBoundingClientRect().bottom <= followingList.getBoundingClientRect().top;
+        const fitsBeforeFocus = submitFits();
+        originalCommentText.focus({ preventScroll: true });
+        record('모바일 댓글 등록 버튼은 입력 전후에 원래 작성 영역과 글 목록 사이에 온전히 표시됨',
+          fitsBeforeFocus && submitFits() && composerDoc.activeElement === originalCommentText);
+        hitSubmitBottom()?.click();
         composerDetails?.querySelector('summary')?.click();
         await delay(30);
         record('댓글 입력은 기본 닫힘·열고 닫아도 입력값과 원본 제출 동작 유지',
