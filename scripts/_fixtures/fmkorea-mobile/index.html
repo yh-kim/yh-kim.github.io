@@ -1036,15 +1036,16 @@
           await delay(30);
         }
         const voteLeftInset = articleUp.getBoundingClientRect().left - voteGroup.getBoundingClientRect().left;
+        const voteTopInset = articleUp.getBoundingClientRect().top - voteGroup.getBoundingClientRect().top;
         record('본문 왼쪽 하단 버튼이 원본 게시글 추천·비추천을 실행하고 badge와 선택 상태를 갱신',
           voteGroup.parentElement.matches('.rd_body') && voteGroup.parentElement.lastElementChild === voteGroup &&
-          voteLeftInset >= 8 && voteLeftInset <= 12 &&
+          voteLeftInset >= 8 && voteLeftInset <= 12 && voteTopInset === 14 &&
           [articleUp, articleDown].every(button => button.getBoundingClientRect().height === 28) &&
           visiblyRendered(articleUp) && visiblyRendered(articleDown) && !visiblyRendered(voteDoc.querySelector('.vote_label')) &&
           nativeVotes.slice(0, 2).join(',') === 'post up/501/vote_label,post down/501' &&
           articleBadge.textContent === '+3' && voteSign(articleBadge) === 'up' && articleUp.getAttribute('aria-pressed') === 'true' &&
           readingBadge.textContent === '+3' && voteSign(readingBadge) === 'up',
-          `좌측 여백 ${voteLeftInset}px / 제목 ${articleBadge.textContent}`);
+          `좌측 여백 ${voteLeftInset}px / 상단 여백 ${voteTopInset}px / 제목 ${articleBadge.textContent}`);
         record('댓글 추천·비추천이 원본 링크에 전달되고 해당 댓글 수와 선택 상태가 갱신',
           nativeVotes.slice(2, 4).join(',') === 'comment up/1/511,comment down/1/510' &&
           commentUp.textContent === '3' && commentDown.textContent === '1' &&
@@ -1062,6 +1063,7 @@
             const style = voteView.getComputedStyle(button);
             const { height } = button.getBoundingClientRect();
             return style.borderTopWidth === '0px' && height >= 24 && height < 30 && style.fontWeight === '400' &&
+              style.columnGap === '1px' &&
               voteView.getComputedStyle(button, '::before').fontWeight === '400';
           }) && voteView.getComputedStyle(articleUp).borderTopWidth === '1px' &&
           marker(commentUp) === marker(unselectedUp) && marker(commentDown) === marker(unselectedDown) &&
