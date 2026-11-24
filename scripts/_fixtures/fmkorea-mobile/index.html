@@ -1003,6 +1003,7 @@
         voteView.fm_vote_comment = (loggedIn, id, original) => {
           nativeVotes.push(`comment up/${loggedIn}/${id}`);
           original.querySelector('.voted_count').textContent = '3';
+          original.closest('.vote').classList.add('my_vote_up');
           return false;
         };
         voteView.confirm = () => deleteConfirmed;
@@ -1033,15 +1034,30 @@
           `우측 여백 ${voteRightInset}px / 제목 ${articleBadge.textContent}`);
         record('댓글 추천·비추천이 원본 링크에 전달되고 해당 댓글 수와 선택 상태가 갱신',
           nativeVotes.slice(2, 4).join(',') === 'comment up/1/511,comment down/1/510' &&
-          voteButton(otherComment, 'up').textContent === '3' && commentDown.textContent === '1' &&
-          commentDown.getAttribute('aria-pressed') === 'true',
+          commentUp.textContent === '3' && commentDown.textContent === '1' &&
+          [commentUp, commentDown].every(button => button.getAttribute('aria-pressed') === 'true'),
           `호출 ${nativeVotes.slice(2, 4).join(', ')} / 비추천 ${commentDown.textContent} / 선택 ${commentDown.getAttribute('aria-pressed')}`);
-        record('댓글 추천·비추천 버튼은 테두리와 배경 없이 작게 표시',
-          [commentUp, commentDown].every(button => {
+        const unselectedUp = voteButton(firstComment, 'up');
+        const unselectedDown = voteButton(otherComment, 'down');
+        const transparent = 'rgba(0, 0, 0, 0)';
+        const marker = button => voteView.getComputedStyle(button, '::before').content;
+        const neutral = button => button.getAttribute('aria-pressed') === 'false' &&
+          voteView.getComputedStyle(button).backgroundColor === transparent;
+        const voteColors = [commentUp, commentDown, unselectedUp].map(button => voteView.getComputedStyle(button).color);
+        record('댓글 추천·비추천 선택은 채운 삼각형과 옅은 배경으로 구분하고 작은 크기를 유지',
+          [commentUp, commentDown, unselectedUp, unselectedDown].every(button => {
             const style = voteView.getComputedStyle(button);
             const { height } = button.getBoundingClientRect();
-            return style.borderTopWidth === '0px' && style.backgroundColor === 'rgba(0, 0, 0, 0)' && height >= 24 && height < 30;
-          }) && voteView.getComputedStyle(articleUp).borderTopWidth === '1px');
+            return style.borderTopWidth === '0px' && height >= 24 && height < 30;
+          }) && voteView.getComputedStyle(articleUp).borderTopWidth === '1px' &&
+          marker(commentUp).includes('▲') && marker(commentDown).includes('▼') &&
+          marker(unselectedUp).includes('↑') && marker(unselectedDown).includes('↓') &&
+          [commentUp, commentDown].every(button => voteView.getComputedStyle(button).backgroundColor !== transparent) &&
+          [unselectedUp, unselectedDown].every(neutral) && new Set(voteColors).size === 3);
+        firstComment.querySelector('.vote').classList.remove('my_vote_down');
+        for (let attempt = 0; attempt < 20 && !neutral(commentDown); attempt++) await delay(30);
+        record('댓글 추천 선택이 취소되면 채운 표시가 사라짐',
+          neutral(commentDown) && marker(commentDown).includes('↓') && commentDown.textContent === '1');
         const ownDelete = voteButton(firstComment, 'delete');
         ownDelete.click();
         const keptOnCancel = firstComment.isConnected;
