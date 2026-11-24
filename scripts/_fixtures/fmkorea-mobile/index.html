@@ -1324,12 +1324,18 @@
           !visiblyRendered(xWidgetHost) && !xRoot.querySelector('[data-fm-clean-media-placeholder="image"]') &&
           visiblyRendered(xDoc.querySelector('#x-plain-link')) && visiblyRendered(xDoc.querySelector('#x-unrelated')) &&
           xNotice?.textContent.includes('X 게시물 1개'));
-        xButtons()[0]?.click();
-        xDoc.querySelector('#x-loading').outerHTML = `<div class="twitter-tweet-rendered"><iframe
-          id="twitter-widget-0" src="https://platform.twitter.com/embed/Tweet.html?id=123" width="100" height="60"></iframe></div>`;
-        xWidgetHost.querySelector('script').remove();
+        const xLoading = xDoc.querySelector('#x-loading');
+        xLoading.insertAdjacentHTML('beforebegin', `<div class="twitter-tweet-rendered"><iframe
+          id="twitter-widget-0" src="https://platform.twitter.com/embed/Tweet.html?id=123" width="100" height="60"></iframe></div>`);
         await delay(75);
         const renderedXPost = xDoc.querySelector('#twitter-widget-0');
+        const singleXControl = xButtons().length === 1 && !visiblyRendered(renderedXPost);
+        xButtons()[0]?.click();
+        record('로딩용 X 인용과 iframe이 함께 있어도 버튼 하나를 한 번 눌러 표시',
+          singleXControl && visiblyRendered(renderedXPost) && xButtons().length === 0);
+        xLoading.remove();
+        xWidgetHost.querySelector('script').remove();
+        await delay(75);
         record('개별로 펼친 X 게시물은 위젯으로 바뀐 뒤에도 같은 자리에서 표시',
           visiblyRendered(renderedXPost) && xButtons().length === 0 && xNotice?.textContent === 'X 게시물 전체 가리기');
         xRoot.insertAdjacentHTML('beforeend', `<div><p id="x-neighbor">미리보기 앞의 본문</p>

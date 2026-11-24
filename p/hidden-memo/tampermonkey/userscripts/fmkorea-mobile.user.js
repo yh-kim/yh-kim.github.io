@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.38
+// @version      1.6.39
 // @description  읽은 글 7일 기록, 이미지·동영상·X 게시물 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.38';
+  const SCRIPT_VERSION = '1.6.39';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1269,7 +1269,9 @@
   const LIST_IMAGE_SELECTOR = '.fm_best_widget img, .bd_m_lst img, .bd_lst img';
   const LAZY_IMAGE_SELECTOR = `${LIST_IMAGE_SELECTOR}, .rd_body article .xe_content img[data-original], .rd_body article .xe_content img[data-src]`;
   const MEDIA_PLAYER_SELECTOR = '.auto_media_wrapper, .mejs__container, .video-js, video-js, .fluid_video_wrapper';
-  const X_POST_SELECTOR = 'blockquote.twitter-tweet, .fm-twitter-tweet:not(a), .fm-twitter-oembed, .twitter-tweet-rendered, twitter-widget, iframe[id^="twitter-widget-"]';
+  const X_POST_FALLBACK = 'blockquote:is(.twitter-tweet, .twitter-video), .fm-twitter-tweet:not(a), .fm-twitter-oembed';
+  const X_POST_WIDGET = '.twitter-tweet-rendered, .twitter-video-rendered, twitter-widget, iframe[id^="twitter-widget-"]';
+  const X_POST_SELECTOR = `${X_POST_FALLBACK}, ${X_POST_WIDGET}`;
   const X_WIDGET_SCRIPT = 'script[src*="//platform.x.com/widgets.js"], script[src*="//platform.twitter.com/widgets.js"]';
   const listImages = { observer: null, tracked: new Set(), listening: false };
   const brightImages = {
@@ -1489,8 +1491,13 @@
     }
     const wrapper = target.parentElement;
     if (!wrapper || wrapper === root || wrapper.localName !== 'div') return target;
-    // 펨코가 만든 바깥 div는 X가 로딩용 노드를 위젯으로 바꾼 뒤에도 유지됩니다.
-    const standalone = Array.from(wrapper.childNodes).every(node => node === target ||
+    // X는 로딩용 인용 바로 앞에 위젯을 먼저 삽입한 뒤 인용을 제거합니다.
+    const isFallback = target.matches(X_POST_FALLBACK);
+    const sibling = isFallback ? target.previousElementSibling : target.nextElementSibling;
+    const samePost = sibling && (isFallback
+      ? sibling.matches(X_POST_WIDGET) || (sibling.localName === 'iframe' && isXPostFrame(sibling))
+      : sibling.matches(X_POST_FALLBACK));
+    const standalone = Array.from(wrapper.childNodes).every(node => node === target || (samePost && node === sibling) ||
       node.nodeType === Node.COMMENT_NODE ||
       (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) ||
       (node instanceof Element && node.matches(X_WIDGET_SCRIPT)));
