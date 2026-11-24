@@ -1027,6 +1027,7 @@
         record('본문 우하단 버튼이 원본 게시글 추천·비추천을 실행하고 badge와 선택 상태를 갱신',
           voteGroup.parentElement.matches('.rd_body') && voteGroup.parentElement.lastElementChild === voteGroup &&
           voteRightInset >= 8 && voteRightInset <= 12 &&
+          [articleUp, articleDown].every(button => button.getBoundingClientRect().height === 28) &&
           visiblyRendered(articleUp) && visiblyRendered(articleDown) && !visiblyRendered(voteDoc.querySelector('.vote_label')) &&
           nativeVotes.slice(0, 2).join(',') === 'post up/501/vote_label,post down/501' &&
           articleBadge.textContent === '+3' && voteSign(articleBadge) === 'up' && articleUp.getAttribute('aria-pressed') === 'true' &&
@@ -1041,9 +1042,9 @@
         const unselectedDown = voteButton(otherComment, 'down');
         const transparent = 'rgba(0, 0, 0, 0)';
         const marker = button => voteView.getComputedStyle(button, '::before').content;
-        const neutral = button => button.getAttribute('aria-pressed') === 'false' &&
+        const isUnselected = button => button.getAttribute('aria-pressed') === 'false' &&
           voteView.getComputedStyle(button).backgroundColor === transparent;
-        const voteColors = [commentUp, commentDown, unselectedUp].map(button => voteView.getComputedStyle(button).color);
+        const voteColor = button => voteView.getComputedStyle(button).color;
         record('댓글 추천·비추천 선택은 채운 삼각형과 옅은 배경으로 구분하고 작은 크기를 유지',
           [commentUp, commentDown, unselectedUp, unselectedDown].every(button => {
             const style = voteView.getComputedStyle(button);
@@ -1053,11 +1054,14 @@
           marker(commentUp).includes('▲') && marker(commentDown).includes('▼') &&
           marker(unselectedUp).includes('↑') && marker(unselectedDown).includes('↓') &&
           [commentUp, commentDown].every(button => voteView.getComputedStyle(button).backgroundColor !== transparent) &&
-          [unselectedUp, unselectedDown].every(neutral) && new Set(voteColors).size === 3);
+          [unselectedUp, unselectedDown].every(isUnselected) &&
+          voteColor(unselectedUp) === voteColor(commentUp) && voteColor(unselectedDown) === voteColor(commentDown) &&
+          voteColor(unselectedUp) !== voteColor(unselectedDown));
         firstComment.querySelector('.vote').classList.remove('my_vote_down');
-        for (let attempt = 0; attempt < 20 && !neutral(commentDown); attempt++) await delay(30);
+        for (let attempt = 0; attempt < 20 && !isUnselected(commentDown); attempt++) await delay(30);
         record('댓글 추천 선택이 취소되면 채운 표시가 사라짐',
-          neutral(commentDown) && marker(commentDown).includes('↓') && commentDown.textContent === '1');
+          isUnselected(commentDown) && marker(commentDown).includes('↓') &&
+          voteColor(commentDown) === voteColor(unselectedDown) && commentDown.textContent === '1');
         const ownDelete = voteButton(firstComment, 'delete');
         ownDelete.click();
         const keptOnCancel = firstComment.isConnected;
