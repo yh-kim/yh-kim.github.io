@@ -1045,13 +1045,14 @@
         const isUnselected = button => button.getAttribute('aria-pressed') === 'false' &&
           voteView.getComputedStyle(button).backgroundColor === transparent;
         const voteColor = button => voteView.getComputedStyle(button).color;
-        record('댓글 추천·비추천 선택은 채운 삼각형과 옅은 배경으로 구분하고 작은 크기를 유지',
+        record('댓글 추천·비추천은 가벼운 화살표와 숫자를 사용하고 선택은 옅은 배경으로 구분',
           [commentUp, commentDown, unselectedUp, unselectedDown].every(button => {
             const style = voteView.getComputedStyle(button);
             const { height } = button.getBoundingClientRect();
-            return style.borderTopWidth === '0px' && height >= 24 && height < 30;
+            return style.borderTopWidth === '0px' && height >= 24 && height < 30 && style.fontWeight === '400' &&
+              voteView.getComputedStyle(button, '::before').fontWeight === '400';
           }) && voteView.getComputedStyle(articleUp).borderTopWidth === '1px' &&
-          marker(commentUp).includes('▲') && marker(commentDown).includes('▼') &&
+          marker(commentUp) === marker(unselectedUp) && marker(commentDown) === marker(unselectedDown) &&
           marker(unselectedUp).includes('↑') && marker(unselectedDown).includes('↓') &&
           [commentUp, commentDown].every(button => voteView.getComputedStyle(button).backgroundColor !== transparent) &&
           [unselectedUp, unselectedDown].every(isUnselected) &&
@@ -1059,7 +1060,7 @@
           voteColor(unselectedUp) !== voteColor(unselectedDown));
         firstComment.querySelector('.vote').classList.remove('my_vote_down');
         for (let attempt = 0; attempt < 20 && !isUnselected(commentDown); attempt++) await delay(30);
-        record('댓글 추천 선택이 취소되면 채운 표시가 사라짐',
+        record('댓글 추천 선택이 취소되면 같은 화살표에 배경만 사라짐',
           isUnselected(commentDown) && marker(commentDown).includes('↓') &&
           voteColor(commentDown) === voteColor(unselectedDown) && commentDown.textContent === '1');
         const ownDelete = voteButton(firstComment, 'delete');
