@@ -1117,6 +1117,35 @@
           visiblyRendered(voteDoc.querySelector('.vote_label')) &&
           !otherComment.querySelector('[data-fm-clean-comment-stats]') && visiblyRendered(otherComment.querySelector('.vote a')));
 
+        const captureWarning = '[퍼가기가 금지된 글입니다 - 캡처 방지 위해 글 열람 사용자 아이디/아이피가 자동으로 표기됩니다]';
+        const captureDoc = await makeLayoutFrame(source, '보호 글 본문', `
+          <div class="bd"><div class="rd"><div id="bd_capture">
+            <div class="rd_hd"><h1>보호 글</h1></div>
+            <div class="rd_body"><article><div class="xe_content">
+              <strong id="author-quote">${captureWarning}</strong>
+              <img id="capture-body-image" src="${IMAGE}" width="24" height="24" alt="본문 이미지">
+            </div></article>
+            <strong id="capture-notice"><br>${captureWarning}</strong>
+            <strong id="ordinary-note">본문 강조 문구</strong></div>
+          </div></div></div>`, `#bd_capture{background:#e2e6ea url('${IMAGE}');}`);
+        const captureNotice = captureDoc.querySelector('#capture-notice');
+        const captureBackground = () => captureDoc.defaultView.getComputedStyle(captureDoc.querySelector('#bd_capture'));
+        record('보호 글의 퍼가기 안내와 캡처 배경만 숨기고 본문은 표시',
+          !visiblyRendered(captureNotice) && captureBackground().backgroundImage === 'none' &&
+          captureBackground().backgroundColor === 'rgb(226, 230, 234)' &&
+          ['#author-quote', '#capture-body-image', '#ordinary-note'].every(selector =>
+            visiblyRendered(captureDoc.querySelector(selector))));
+        captureNotice.textContent = '본문에 추가된 강조 문구';
+        await delay(80);
+        const captureRestored = visiblyRendered(captureNotice) && captureBackground().backgroundImage.includes(IMAGE);
+        captureNotice.textContent = captureWarning;
+        await delay(80);
+        const captureHiddenAgain = !visiblyRendered(captureNotice) && captureBackground().backgroundImage === 'none';
+        const captureDisabled = detailOption(captureDoc, 'enabled', false);
+        record('안내문이 바뀌거나 전체 기능을 끄면 사이트의 안내와 배경이 복원됨',
+          captureRestored && captureHiddenAgain && captureDisabled && visiblyRendered(captureNotice) &&
+          captureBackground().backgroundImage.includes(IMAGE));
+
         const mediaBody = `
           <div class="bd bd_mobile"><div class="rd" data-docsrl="501">
             <div class="rd_hd"><h1><span class="np_18px_span">미디어 있는 글</span></h1></div>

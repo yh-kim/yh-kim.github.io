@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FM코리아 모바일 정리
 // @namespace    https://blog.pickth.com/
-// @version      1.6.43
+// @version      1.6.44
 // @description  읽은 글 7일 기록, 이미지·동영상·X 게시물 표시 설정, 홈 버튼 드래그 이동, 저장·최근 방문 메뉴, 짧은 링크 복사, 본문·댓글 진행률, 광고·상단·댓글 정리
 // @match        *://m.fmkorea.com/*
 // @match        *://www.fmkorea.com/*
@@ -22,7 +22,7 @@
   const HOST_ID = 'fm-clean-controls';
   const MAIN_URL = 'https://www.fmkorea.com/';
   const DOUBLE_TAP_MS = 400;
-  const SCRIPT_VERSION = '1.6.43';
+  const SCRIPT_VERSION = '1.6.44';
   const READ_HISTORY_KEY = 'pimi.fmkorea.read-history.v1';
   const READ_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
   const READ_LINK_SELECTOR = '.fm_best_widget .title > a[href], .bd_m_lst > li .rt_area h3 > a[href], .bd_lst td.title a[href]';
@@ -1076,6 +1076,10 @@
       }
       ${scope('count')} [data-fm-clean-badge]::before { content: '★'; margin-right: 4px; font-size: 10px; }
       ${scope('count')} [data-fm-clean-original-count] { display: none !important; }
+      ${mobileUI} .rd_body > [data-fm-clean-capture-notice] { display: none !important; }
+      ${mobileUI} #bd_capture:has(> .rd_body > [data-fm-clean-capture-notice]) {
+        background-image: none !important;
+      }
       ${mobileUI} {
         --fm-vote-red: #a54e59; --fm-vote-blue: #4e6b95; --fm-vote-neutral: #6b6862;
         --fm-vote-red-tint: #f9edef; --fm-vote-blue-tint: #edf2f9;
@@ -2773,7 +2777,10 @@
     if (!sections) for (const [key, value] of Object.entries(settings)) {
       document.documentElement.setAttribute(`data-fm-clean-${key}`, String(value));
     }
-    if (needs('layout')) document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
+    if (needs('layout')) {
+      document.querySelectorAll('.rd .rd_hd h1').forEach(syncDetailTitle);
+      syncCaptureNotices();
+    }
     if (needs('media')) syncDetailMedia();
     // 숨김 처리 후 검사해 감춘 사진은 로드하지 않고, 펼친 지연 사진은 다시 등록합니다.
     if (needs('list') || needs('media')) syncListImages();
@@ -3081,6 +3088,13 @@
   function syncDetailTitle(title) {
     const active = settings.enabled && settings.count && title.querySelector('[data-fm-clean-badge]');
     title.toggleAttribute('data-fm-clean-title', Boolean(active));
+  }
+
+  function syncCaptureNotices() {
+    document.querySelectorAll('.rd #bd_capture > .rd_body > strong').forEach(notice => {
+      const captureNotice = /^\s*\[?\s*퍼가기가\s*금지된\s*글입니다[\s.\-–—]*캡처\s*방지/.test(notice.textContent);
+      notice.toggleAttribute('data-fm-clean-capture-notice', captureNotice);
+    });
   }
 
   function updateBoardLabels() {
